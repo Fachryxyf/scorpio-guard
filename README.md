@@ -2,7 +2,7 @@
 
 [![CI](https://img.shields.io/github/actions/workflow/status/Fachryxyf/scorpio-guard/ci.yml?branch=main&style=flat-square&label=ci)](https://github.com/Fachryxyf/scorpio-guard/actions/workflows/ci.yml)
 [![Status](https://img.shields.io/badge/status-pre--alpha-orange?style=flat-square)](https://github.com/Fachryxyf/scorpio-guard)
-[![Stage](https://img.shields.io/badge/stage-design-blue?style=flat-square)](https://github.com/Fachryxyf/scorpio-guard)
+[![Stage](https://img.shields.io/badge/stage-implementation-blue?style=flat-square)](https://github.com/Fachryxyf/scorpio-guard)
 [![Model](https://img.shields.io/badge/model-open%20core-6f42c1?style=flat-square)](https://github.com/Fachryxyf/scorpio-guard)
 [![Issues](https://img.shields.io/github/issues/Fachryxyf/scorpio-guard?style=flat-square)](https://github.com/Fachryxyf/scorpio-guard/issues)
 [![Last commit](https://img.shields.io/github/last-commit/Fachryxyf/scorpio-guard?style=flat-square)](https://github.com/Fachryxyf/scorpio-guard/commits)
@@ -11,7 +11,7 @@
 
 > **Trust is a spectrum, not a verdict.** Adaptive trust evaluation for web interactions — a local library, not a centralized gatekeeper.
 
-**Status: design phase.** A skeleton exists; the models do not. What follows is the design the implementation is being built against.
+**Status: pre-alpha, implementation phase.** The core model is built and tested; nothing is calibrated against real traffic, and no server or protocol exists yet. What follows is the design, and where the code has caught up to it.
 
 ---
 
@@ -115,9 +115,83 @@ alternatives were considered and rejected there for reasons worth knowing.
 
 Settled so far: the entity as reference unit, trust as a Beta distribution,
 half-life decay over real elapsed time, evidence weights, decision bands with an
-uncertainty ceiling, retention, and the hard-constraint model. Still open: the
-anomaly feature space, entity relationships, and which real application the proof
-of concept runs against.
+uncertainty ceiling, retention, the hard-constraint model, the epistemic stage over
+evidence mass, and the anomaly feature space. Still open: the anomaly *algorithm*
+over that space, entity relationships, and a target that can validate the thesis
+rather than smoke-test it.
+
+## Install
+
+Not on npm yet: `@fachryxyf/scorpio-guard` is reserved but unpublished until the
+evaluation API stops moving (D25). Install the repository directly — it builds
+itself on install.
+
+```
+npm install github:Fachryxyf/scorpio-guard
+```
+
+Node 22.6 or newer, ESM only, no runtime dependencies. Two entry points: `.` for
+the model, `./collect` for the browser collector, on one version number so they
+cannot be installed mismatched.
+
+## Usage
+
+Start observational. The guard advises; it never acts. Record what it would have
+said next to what your existing defences actually did, and only wire the advice to
+behavior once you believe it.
+
+```js
+import { createGuard, transitionGraph } from '@fachryxyf/scorpio-guard';
+
+// Declaring `hard` asserts this edge set is *complete* for the scope.
+// If you cannot enumerate it honestly, declare `soft`: evidence, not proof.
+const checkoutOrder = transitionGraph({
+  id: 'checkout-order',
+  scope: 'checkout',
+  strength: 'hard',
+  allowed: [
+    { from: 'cart', to: 'address' },
+    { from: 'address', to: 'payment' },
+  ],
+});
+
+// Once per process, not per request: the default store lives inside the guard.
+const guard = createGuard({ invariants: [checkoutOrder] });
+
+const result = await guard.evaluate({
+  entity: sessionId, // any stable reference; SG never interprets it
+  observation: { scope: 'checkout', data: { from: 'cart', to: 'payment' } },
+  context: { endpoint: '/pay' },
+});
+
+result.decision;     // 'RESTRICT' — advice, never enforcement
+result.trust.stage;  // 'unknown' | 'developing' | 'established'
+result.hardViolated; // true when a proof, not a probability, decided it
+result.coldStart;    // true when no retained state existed
+result.trace;        // why, in the order that decided it
+```
+
+Log `trace` from the first day. Four independent dimensions feed one outcome, so an
+unexplained decision cannot be debugged after the fact — which is why the trace is
+part of the return value rather than a debug flag.
+
+A first-time entity is advised `ALLOW` at stage `unknown`: lack of evidence is not
+negative evidence. A brand-new entity that breaks a `hard` invariant is still
+restricted.
+
+Deleting an entity's history is one call, and it is the same code path retention
+uses with the horizon forced to zero:
+
+```js
+await guard.forget(entity);
+```
+
+Every tunable number lives in `src/core/policy.ts` and is overridable per guard —
+half-life, retention, evidence weights, the epistemic stage thresholds, what a
+proven violation advises, the diversity thresholds. All of them are reasoned
+guesses set leniently, so being wrong withholds escalation rather than
+manufacturing a false positive. The [documentation site](https://scorpio-guard.fachryxyf.com)
+tabulates each one with what changing it means.
 
 ## Development
 
@@ -167,39 +241,10 @@ column breaks decay, dropping the observation window disables anomaly detection,
 and trimming a key merges two entities. The kit caught the reference in-memory
 store handing back a mutable object on its first run.
 
-```js
-import { createGuard, transitionGraph } from '@fachryxyf/scorpio-guard';
-
-const guard = createGuard({
-  invariants: [
-    transitionGraph({
-      id: 'checkout-order',
-      scope: 'checkout',
-      strength: 'hard', // asserts this edge set is complete for this scope
-      allowed: [
-        { from: 'cart', to: 'address' },
-        { from: 'address', to: 'payment' },
-      ],
-    }),
-  ],
-});
-
-const result = await guard.evaluate({
-  entity: sessionId, // any stable reference; SG never interprets it
-  observation: { scope: 'checkout', data: { from: 'cart', to: 'payment' } },
-  context: { endpoint: '/pay' },
-});
-
-result.decision; // 'RESTRICT' — advice, never enforcement
-result.trust.stage; // 'unknown' | 'developing' | 'established'
-result.diversity; // was the volume varied, or mechanical?
-result.trace; // why, in the order that decided it
-```
-
-A first-time visitor is advised `ALLOW`. Trust is read through an epistemic stage
-over evidence mass `n = alpha + beta`, so an unknown entity contributes nothing to
-the decision — while a hard-constraint violation still decides on its own
-authority. See D39 and D40 in the design record for how that was arrived at.
+Trust is read through an epistemic stage over evidence mass `n = alpha + beta`, so
+an unknown entity contributes nothing to the decision — while a hard-constraint
+violation still decides on its own authority. See D39 and D40 in the design record
+for how that was arrived at.
 
 ### What does not exist
 
@@ -251,15 +296,24 @@ scraping, and a real adversary. See D34 in the design record.
 
 ## Roadmap
 
-1. Smallest possible proof-of-concept — library only, hard constraints only, no server.
+Done: the core model, the pluggable store with its conformance kit, the browser
+collector, and one observational integration against a real flow. Next, in order:
+
+1. An integration target that can exercise the statistical layer — unauthenticated traffic, data worth scraping, a real adversary. Little below this is worth much before it.
 2. Enumerate hard constraints exhaustively.
 3. Enumerate weak signals and their combination into observe / restrict / block tiers.
-4. Draft the two-tier symptom vocabulary as a v0.1 spec.
-5. Only then: investigate encoding schemes for symptom transmission.
+4. Choose an anomaly algorithm over the settled feature space, once there is traffic to choose it against.
+5. Draft the two-tier symptom vocabulary as a v0.1 spec.
+6. Only then: investigate encoding schemes for symptom transmission.
 
 ## Contributing
 
-The library and protocol are the community surface: hard-constraint discoveries, pattern reports, false-positive cases. Open an issue — at this stage, discussion is worth more than code.
+The library and protocol are the community surface: hard-constraint discoveries,
+pattern reports, false-positive cases. At this stage discussion is worth more than
+code — the most valuable contribution is evidence that a number is wrong, not a
+patch that changes it. See [CONTRIBUTING.md](CONTRIBUTING.md) for what helps most
+and the house rules, and [SECURITY.md](SECURITY.md) for what the guard does and
+does not claim, plus private vulnerability reporting.
 
 ## Links
 
