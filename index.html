@@ -308,10 +308,22 @@
         <li><a href="#opencore"><span data-lang="en">Open core</span><span data-lang="id">Open core</span></a></li>
       </ol>
     </details>
+    <details class="grp" data-grp="usage">
+      <summary><span data-lang="en">Using it</span><span data-lang="id">Cara pakai</span></summary>
+      <ol>
+        <li><a href="#install"><span data-lang="en">Install</span><span data-lang="id">Pasang</span></a></li>
+        <li><a href="#quickstart"><span data-lang="en">Quickstart</span><span data-lang="id">Mulai cepat</span></a></li>
+        <li><a href="#api"><span data-lang="en">API surface</span><span data-lang="id">Permukaan API</span></a></li>
+        <li><a href="#policy"><span data-lang="en">Policy defaults</span><span data-lang="id">Default policy</span></a></li>
+        <li><a href="#recipes"><span data-lang="en">Recipes</span><span data-lang="id">Resep</span></a></li>
+      </ol>
+    </details>
+
     <details class="grp" data-grp="build">
       <summary><span data-lang="en">Implementation</span><span data-lang="id">Implementasi</span></summary>
       <ol>
         <li><a href="#library"><span data-lang="en">The library</span><span data-lang="id">Library-nya</span></a></li>
+        <li><a href="#stores"><span data-lang="en">State store</span><span data-lang="id">Penyimpanan state</span></a></li>
         <li><a href="#firstrun"><span data-lang="en">First integration</span><span data-lang="id">Integrasi pertama</span></a></li>
       </ol>
     </details>
@@ -338,10 +350,33 @@
     <p data-lang="id">Scorpio Guard adalah library evaluasi trust yang berjalan lokal dan bersifat advisory untuk interaksi web, di atas protokol symptom/prescription yang terbuka. Ia tidak menjawab <em>manusia atau bot</em>. Ia memperkirakan seberapa besar trust yang layak diberikan pada sebuah interaksi, lalu menyerahkan penilaian itu ke pemilik aplikasi.</p>
     <p>
       <span class="tag" data-lang="en">Status · pre-alpha</span><span class="tag" data-lang="id">Status · pra-alfa</span>
-      <span class="tag" data-lang="en">Stage · design</span><span class="tag" data-lang="id">Tahap · desain</span>
+      <span class="tag" data-lang="en">Stage · implementation</span><span class="tag" data-lang="id">Tahap · implementasi</span>
       <span class="tag" data-lang="en">Model · open core</span><span class="tag" data-lang="id">Model · open core</span>
-      <span class="tag" data-lang="en">Library · in progress</span><span class="tag" data-lang="id">Library · berjalan</span>
+      <span class="tag" data-lang="en">Core · tested, uncalibrated</span><span class="tag" data-lang="id">Core · teruji, belum terkalibrasi</span>
     </p>
+    <pre>npm install github:Fachryxyf/scorpio-guard</pre>
+    <div class="cards">
+      <div class="card">
+        <h3><a href="#quickstart" data-lang="en">Quickstart &rarr;</a><a href="#quickstart" data-lang="id">Mulai cepat &rarr;</a></h3>
+        <p data-lang="en">Declare what is impossible in your flow, create one guard, read the advice and its trace. Four steps.</p>
+        <p data-lang="id">Deklarasikan apa yang mustahil di alur kamu, buat satu guard, baca sarannya dan jejaknya. Empat langkah.</p>
+      </div>
+      <div class="card">
+        <h3><a href="#api" data-lang="en">API surface &rarr;</a><a href="#api" data-lang="id">Permukaan API &rarr;</a></h3>
+        <p data-lang="en">Every export, and what it does. Most adopters need three of them.</p>
+        <p data-lang="id">Setiap export, dan fungsinya. Sebagian besar pemakai butuh tiga saja.</p>
+      </div>
+      <div class="card">
+        <h3><a href="#policy" data-lang="en">Policy defaults &rarr;</a><a href="#policy" data-lang="id">Default policy &rarr;</a></h3>
+        <p data-lang="en">Every tunable number, and what changing it means. None is calibrated yet.</p>
+        <p data-lang="id">Setiap angka yang bisa disetel, dan arti mengubahnya. Belum ada yang terkalibrasi.</p>
+      </div>
+      <div class="card">
+        <h3><a href="#status" data-lang="en">Honest status &rarr;</a><a href="#status" data-lang="id">Status jujur &rarr;</a></h3>
+        <p data-lang="en">What is built, what is deliberately deferred, and what has never met real traffic.</p>
+        <p data-lang="id">Apa yang sudah dibangun, apa yang sengaja ditunda, dan apa yang belum pernah bertemu trafik nyata.</p>
+      </div>
+    </div>
   </div>
 
   <section id="premise">
@@ -775,12 +810,262 @@ guard:     observe -> learn -> adapt -> release</pre>
     <p class="muted" data-lang="id">Model server yang bisa diganti di bagian sebelumnya adalah yang membuat mode kegagalan pertama — satu maintainer sebagai satu-satunya otak ekosistem — tidak jadi fatal.</p>
   </section>
 
+  <section id="install">
+    <p class="num"><span data-lang="en">Install</span><span data-lang="id">Pasang</span></p>
+    <h2 data-lang="en">Not on npm yet — install from git</h2>
+    <h2 data-lang="id">Belum di npm — pasang dari git</h2>
+    <p data-lang="en">The package name <code>@fachryxyf/scorpio-guard</code> is reserved but unpublished: publishing waits until the evaluation API stops moving. Until then, install the repository directly. It builds itself on install.</p>
+    <p data-lang="id">Nama paket <code>@fachryxyf/scorpio-guard</code> sudah dipesan tapi belum dipublikasikan: publikasi menunggu API evaluasi berhenti berubah. Sampai itu, pasang repositorinya langsung. Ia membangun dirinya sendiri saat dipasang.</p>
+    <pre>npm install github:Fachryxyf/scorpio-guard</pre>
+    <table>
+      <thead>
+        <tr>
+          <th data-lang="en">Requirement</th><th data-lang="id">Kebutuhan</th>
+          <th data-lang="en">Why</th><th data-lang="id">Alasan</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>node &gt;=22.6</code></td>
+          <td data-lang="en">Tests run TypeScript directly, so no build step and no extra dependency</td><td data-lang="id">Test menjalankan TypeScript langsung, jadi tanpa build step dan tanpa dependensi tambahan</td>
+        </tr>
+        <tr>
+          <td data-lang="en">ESM only</td><td data-lang="id">Hanya ESM</td>
+          <td data-lang="en"><code>"type": "module"</code>. No CommonJS build is planned</td><td data-lang="id"><code>"type": "module"</code>. Build CommonJS tidak direncanakan</td>
+        </tr>
+        <tr>
+          <td data-lang="en">Runtime dependencies</td><td data-lang="id">Dependensi runtime</td>
+          <td data-lang="en">None. The core imports nothing platform-specific, so it runs in Node, Deno, Bun, a worker, or a browser</td><td data-lang="id">Tidak ada. Core tidak mengimpor apa pun yang spesifik platform, jadi ia jalan di Node, Deno, Bun, worker, atau browser</td>
+        </tr>
+        <tr>
+          <td data-lang="en">Entry points</td><td data-lang="id">Titik masuk</td>
+          <td><code>.</code> <span data-lang="en">for the model,</span><span data-lang="id">untuk modelnya,</span> <code>./collect</code> <span data-lang="en">for the browser collector</span><span data-lang="id">untuk collector browser</span></td>
+        </tr>
+      </tbody>
+    </table>
+    <p class="muted" data-lang="en">One version number covers both entry points, so the collector and the core cannot be installed at mismatched versions.</p>
+    <p class="muted" data-lang="id">Satu nomor versi mencakup kedua titik masuk, jadi collector dan core tidak bisa terpasang di versi yang berbeda.</p>
+  </section>
+
+  <section id="quickstart">
+    <p class="num"><span data-lang="en">Quickstart</span><span data-lang="id">Mulai cepat</span></p>
+    <h2 data-lang="en">First evaluation in four steps</h2>
+    <h2 data-lang="id">Evaluasi pertama dalam empat langkah</h2>
+    <p data-lang="en">Start observational. The guard advises; it never acts. Record what it would have said next to what your existing defences actually did, and only then consider wiring the advice to behavior.</p>
+    <p data-lang="id">Mulai dari observasi. Guard menyarankan; ia tidak pernah bertindak. Catat apa yang akan disarankannya di samping apa yang benar-benar dilakukan pertahanan yang sudah ada, baru setelah itu pertimbangkan menyambungkan sarannya ke perilaku.</p>
+    <h3 data-lang="en">1 · Declare what is impossible in your flow</h3>
+    <h3 data-lang="id">1 · Deklarasikan apa yang mustahil di alur kamu</h3>
+    <p data-lang="en">Declaring <code>hard</code> asserts the edge set is <em>complete</em> for that scope. If you cannot enumerate it honestly, declare <code>soft</code> and it contributes evidence instead of proof.</p>
+    <p data-lang="id">Mendeklarasikan <code>hard</code> berarti menyatakan himpunan edge-nya <em>lengkap</em> untuk scope itu. Kalau tidak bisa didaftar dengan jujur, deklarasikan <code>soft</code> supaya ia menyumbang evidence, bukan bukti.</p>
+    <pre>import { createGuard, transitionGraph } from '@fachryxyf/scorpio-guard';
+
+const checkoutOrder = transitionGraph({
+  id: 'checkout-order',
+  scope: 'checkout',
+  strength: 'hard',
+  allowed: [
+    { from: 'cart', to: 'address' },
+    { from: 'address', to: 'payment' },
+  ],
+});</pre>
+    <h3 data-lang="en">2 · Create one guard, once</h3>
+    <h3 data-lang="id">2 · Buat satu guard, sekali saja</h3>
+    <p data-lang="en">Create it at module scope, not per request: the default store lives in the guard, so a new guard per request is a new empty history per request.</p>
+    <p data-lang="id">Buat di scope modul, bukan per request: store default hidup di dalam guard, jadi guard baru tiap request berarti riwayat kosong baru tiap request.</p>
+    <pre>const guard = createGuard({ invariants: [checkoutOrder] });</pre>
+    <h3 data-lang="en">3 · Evaluate an interaction</h3>
+    <h3 data-lang="id">3 · Evaluasi sebuah interaksi</h3>
+    <p data-lang="en"><code>entity</code> is any stable reference you already have — a session id, an account id, a signed cookie. The guard never interprets it and never treats it as proof of identity.</p>
+    <p data-lang="id"><code>entity</code> adalah referensi stabil apa pun yang sudah kamu punya — id sesi, id akun, cookie bertanda tangan. Guard tidak pernah menafsirkannya dan tidak pernah menganggapnya bukti identitas.</p>
+    <pre>const result = await guard.evaluate({
+  entity: sessionId,
+  observation: {
+    scope: 'checkout',
+    data: { from: 'cart', to: 'payment' },
+    evidence: { positive: 'weak' },
+  },
+  context: { endpoint: '/pay' },
+});</pre>
+    <h3 data-lang="en">4 · Read the advice, and log the trace</h3>
+    <h3 data-lang="id">4 · Baca sarannya, dan catat jejaknya</h3>
+    <pre>result.decision        // 'RESTRICT'
+result.trust.stage     // 'unknown' | 'developing' | 'established'
+result.hardViolated    // true when a proof, not a probability, decided this
+result.coldStart       // true when no retained state existed
+result.trace           // why, in the order that decided it</pre>
+    <p data-lang="en">Log <code>trace</code> from the first day. With four independent dimensions feeding one outcome, an unexplained decision cannot be debugged after the fact — which is why the trace is part of the return value rather than a debug flag.</p>
+    <p data-lang="id">Catat <code>trace</code> sejak hari pertama. Dengan empat dimensi independen menyatu jadi satu hasil, keputusan tanpa penjelasan tidak bisa didebug belakangan — karena itu jejaknya bagian dari nilai kembalian, bukan flag debug.</p>
+    <p class="muted" data-lang="en">A first-time entity is advised <code>ALLOW</code> with stage <code>unknown</code>. That is deliberate: lack of evidence is not negative evidence. A brand-new entity that breaks a <code>hard</code> invariant is still restricted.</p>
+    <p class="muted" data-lang="id">Entity yang pertama kali datang disarankan <code>ALLOW</code> dengan tahap <code>unknown</code>. Itu disengaja: tidak adanya evidence bukan evidence negatif. Entity yang benar-benar baru tapi melanggar invariant <code>hard</code> tetap dibatasi.</p>
+  </section>
+
+  <section id="api">
+    <p class="num"><span data-lang="en">API surface</span><span data-lang="id">Permukaan API</span></p>
+    <h2 data-lang="en">Everything that is exported</h2>
+    <h2 data-lang="id">Semua yang diekspor</h2>
+    <p data-lang="en">Small on purpose. Most adopters need only the first three rows; the rest is exported because the model's internals are the thing worth inspecting, and because a store you write needs its own way to prove it works.</p>
+    <p data-lang="id">Sengaja kecil. Sebagian besar pemakai hanya butuh tiga baris pertama; sisanya diekspor karena isi modelnya justru yang layak diperiksa, dan karena store yang kamu tulis perlu cara sendiri untuk membuktikan dirinya benar.</p>
+    <table>
+      <thead>
+        <tr>
+          <th data-lang="en">Export</th><th data-lang="id">Export</th>
+          <th data-lang="en">Does</th><th data-lang="id">Fungsi</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>createGuard(options)</code></td>
+          <td data-lang="en">The entry point. Returns <code>evaluate()</code> and <code>forget()</code></td><td data-lang="id">Titik masuknya. Mengembalikan <code>evaluate()</code> dan <code>forget()</code></td>
+        </tr>
+        <tr>
+          <td><code>transitionGraph(options)</code></td>
+          <td data-lang="en">Build an invariant from an explicit allowed-edge set</td><td data-lang="id">Membuat invariant dari himpunan edge yang diizinkan secara eksplisit</td>
+        </tr>
+        <tr>
+          <td><code>memoryStore(options)</code></td>
+          <td data-lang="en">The default store. Sweeps expired entries, freezes on write</td><td data-lang="id">Store default. Menyapu entri kedaluwarsa, membekukan saat menulis</td>
+        </tr>
+        <tr>
+          <td><code>checkStoreConformance</code>, <code>assertConformant</code></td>
+          <td data-lang="en">Prove a store you wrote satisfies the contract — eleven checks</td><td data-lang="id">Membuktikan store buatanmu memenuhi kontrak — sebelas pemeriksaan</td>
+        </tr>
+        <tr>
+          <td><code>checkInvariants</code>, <code>hardViolations</code>, <code>softViolations</code></td>
+          <td data-lang="en">The invariant layer on its own, for hosts that want it without the trust model</td><td data-lang="id">Lapis invariant tersendiri, untuk host yang mau memakainya tanpa model trust</td>
+        </tr>
+        <tr>
+          <td><code>assessTrust</code>, <code>epistemicStage</code>, <code>trustBand</code></td>
+          <td data-lang="en">Read a decision out of trust, uncertainty and evidence mass</td><td data-lang="id">Membaca keputusan dari trust, uncertainty, dan massa evidence</td>
+        </tr>
+        <tr>
+          <td><code>applyEvidence</code>, <code>expectedTrust</code>, <code>uncertainty</code>, <code>decayFactor</code></td>
+          <td data-lang="en">The Beta-Bernoulli state and its decay, usable directly</td><td data-lang="id">State Beta-Bernoulli dan decay-nya, bisa dipakai langsung</td>
+        </tr>
+        <tr>
+          <td><code>behaviorFeatures</code>, <code>diversityConcurs</code></td>
+          <td data-lang="en">The anomaly feature space, and the diversity verdict over it</td><td data-lang="id">Ruang fitur anomali, dan putusan diversity di atasnya</td>
+        </tr>
+        <tr>
+          <td><code>DECISIONS</code>, <code>severity</code>, <code>strongest</code></td>
+          <td data-lang="en">The five rungs, their order, and the strongest-wins combination</td><td data-lang="id">Lima tingkatnya, urutannya, dan kombinasi yang-terkuat-menang</td>
+        </tr>
+        <tr>
+          <td><code>DEFAULT_POLICY</code> <span data-lang="en">and every default it is built from</span><span data-lang="id">dan setiap default penyusunnya</span></td>
+          <td data-lang="en">Every tunable number, in one place, overridable per guard</td><td data-lang="id">Setiap angka yang bisa disetel, di satu tempat, bisa ditimpa per guard</td>
+        </tr>
+        <tr>
+          <td><code>watchInteraction</code>, <code>toObservation</code> <span class="muted">./collect</span></td>
+          <td data-lang="en">Count interaction on one element. Never records content</td><td data-lang="id">Menghitung interaksi pada satu elemen. Tidak pernah mencatat isinya</td>
+        </tr>
+      </tbody>
+    </table>
+    <p class="muted" data-lang="en">Not exported: the symptom vocabulary. It exists in the source as a flat v1 list, and stays unexported because nothing transmits yet — exporting it would imply a wire format that has not been designed.</p>
+    <p class="muted" data-lang="id">Tidak diekspor: kosakata symptom. Ia ada di source sebagai daftar v1 yang flat, dan tetap tidak diekspor karena belum ada yang dikirim — mengekspornya akan menyiratkan format wire yang belum dirancang.</p>
+  </section>
+
+  <section id="policy">
+    <p class="num"><span data-lang="en">Policy defaults</span><span data-lang="id">Default policy</span></p>
+    <h2 data-lang="en">Every tunable number, and how much to trust it</h2>
+    <h2 data-lang="id">Setiap angka yang bisa disetel, dan seberapa boleh dipercaya</h2>
+    <p data-lang="en">These are policy, not law. The design record fixes the <em>shape</em> of the model; the values below are defaults chosen to be revised once the model meets real traffic. None of them is calibrated against a real population yet — they are set leniently, so being wrong withholds escalation rather than manufacturing a false positive.</p>
+    <p data-lang="id">Ini policy, bukan hukum. Catatan desain memaku <em>bentuk</em> modelnya; nilai di bawah adalah default yang memang disiapkan untuk direvisi begitu modelnya bertemu trafik nyata. Belum ada satu pun yang terkalibrasi terhadap populasi nyata — semuanya disetel longgar, jadi kalau salah ia menahan eskalasi, bukan memproduksi false positive.</p>
+    <table>
+      <thead>
+        <tr>
+          <th data-lang="en">Value</th><th data-lang="id">Nilai</th>
+          <th data-lang="en">Default</th><th data-lang="id">Default</th>
+          <th data-lang="en">Changing it means</th><th data-lang="id">Mengubahnya berarti</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>halfLifeHours</code></td><td><code>24</code></td>
+          <td data-lang="en">How fast the past stops counting. Shorter forgives faster and forgets earned trust faster</td><td data-lang="id">Seberapa cepat masa lalu berhenti dihitung. Lebih pendek berarti lebih cepat memaafkan dan lebih cepat melupakan trust yang sudah didapat</td>
+        </tr>
+        <tr>
+          <td><code>retentionHours</code></td><td><code>168</code></td>
+          <td data-lang="en">When state is deleted outright. Also the purge path, with the horizon forced to zero</td><td data-lang="id">Kapan state dihapus sama sekali. Ini juga jalur purge, dengan horizon dipaksa nol</td>
+        </tr>
+        <tr>
+          <td><code>weights.weak</code> / <code>.strong</code></td><td><code>0.5</code> / <code>2</code></td>
+          <td data-lang="en">How much one observation moves the distribution</td><td data-lang="id">Seberapa jauh satu observasi menggeser distribusinya</td>
+        </tr>
+        <tr>
+          <td><code>softViolationWeight</code></td><td><code>2</code></td>
+          <td data-lang="en">Strong, not weak: the host declared this should not happen. Unprovable is not the same as faint</td><td data-lang="id">Kuat, bukan lemah: host sudah menyatakan ini seharusnya tidak terjadi. Tak terbukti bukan berarti samar</td>
+        </tr>
+        <tr>
+          <td><code>hardViolationDecision</code></td><td><code>RESTRICT</code></td>
+          <td data-lang="en">What a proof advises. Not <code>BLOCK</code> — the final escalation stays with the host</td><td data-lang="id">Apa yang disarankan sebuah bukti. Bukan <code>BLOCK</code> — eskalasi terakhir tetap milik host</td>
+        </tr>
+        <tr>
+          <td><code>developingAt</code> / <code>establishedAt</code></td><td><code>3</code> / <code>7</code></td>
+          <td data-lang="en">Evidence mass before trust may influence, then fully drive, the treatment</td><td data-lang="id">Massa evidence sebelum trust boleh mempengaruhi, lalu sepenuhnya menentukan, treatment</td>
+        </tr>
+        <tr>
+          <td><code>windowSize</code></td><td><code>20</code></td>
+          <td data-lang="en">Observations retained per entity for the anomaly features. Bounded on purpose</td><td data-lang="id">Observasi yang disimpan per entity untuk fitur anomali. Dibatasi dengan sengaja</td>
+        </tr>
+        <tr>
+          <td><code>diversity.minObservations</code></td><td><code>8</code></td>
+          <td data-lang="en">Below this the diversity verdict is <code>undefined</code> — undetermined, not negative</td><td data-lang="id">Di bawah ini putusan diversity adalah <code>undefined</code> — belum tentu, bukan negatif</td>
+        </tr>
+        <tr>
+          <td><code>allowEscalationWithoutAnomaly</code></td><td><code>false</code></td>
+          <td data-lang="en">Whether low variance alone may escalate. Off, so mechanical volume cannot earn confidence by itself</td><td data-lang="id">Apakah variance rendah saja boleh mengeskalasi. Mati, jadi volume mekanis tidak bisa mendapat kepercayaan dengan sendirinya</td>
+        </tr>
+      </tbody>
+    </table>
+    <pre>const guard = createGuard({
+  policy: { halfLifeHours: 12, hardViolationDecision: 'BLOCK' },
+  diversity: { minObservations: 12, minDistinctScopes: 2, minScopeEntropy: 0.35, minInterArrivalCv: 0.25 },
+});</pre>
+    <p class="muted" data-lang="en">Each default is locked by a test that names the decision behind it, so revising one is a visible change rather than a silent drift.</p>
+    <p class="muted" data-lang="id">Setiap default dipaku oleh test yang menyebut keputusan di belakangnya, jadi merevisi satu nilai jadi perubahan yang terlihat, bukan pergeseran diam-diam.</p>
+  </section>
+
+  <section id="recipes">
+    <p class="num"><span data-lang="en">Recipes</span><span data-lang="id">Resep</span></p>
+    <h2 data-lang="en">The four things adopters actually need</h2>
+    <h2 data-lang="id">Empat hal yang benar-benar dibutuhkan pemakai</h2>
+    <h3 data-lang="en">Run observationally, change nothing</h3>
+    <h3 data-lang="id">Jalankan sebagai observasi, jangan ubah apa pun</h3>
+    <p data-lang="en">The honest first integration. Keep your existing defences, record the disagreement, and decide later whether the guard was right.</p>
+    <p data-lang="id">Integrasi pertama yang jujur. Pertahankan pertahanan yang sudah ada, catat ketidaksepakatannya, dan putuskan nanti apakah guard-nya benar.</p>
+    <pre>const advice = await guard.evaluate({ entity: sessionId, observation });
+log.info({ advised: advice.decision, actual: whatWeDid, trace: advice.trace });</pre>
+    <h3 data-lang="en">Honour a deletion request</h3>
+    <h3 data-lang="id">Penuhi permintaan penghapusan</h3>
+    <p data-lang="en">Behavioral history is personal data under GDPR and Indonesia&#8217;s UU PDP. The purge primitive exists from the start; consent and the legal basis remain the host&#8217;s responsibility.</p>
+    <p data-lang="id">Riwayat perilaku adalah data pribadi menurut GDPR dan UU PDP. Primitif purge ada sejak awal; consent dan dasar hukumnya tetap tanggung jawab host.</p>
+    <pre>await guard.forget(entity); // same code path retention uses, horizon forced to zero</pre>
+    <h3 data-lang="en">Collect interaction in the browser</h3>
+    <h3 data-lang="id">Kumpulkan interaksi di browser</h3>
+    <p data-lang="en">Counts pointer events, keystrokes, injected input and time-to-submit. Never which keys, never the value. Call <code>stop()</code> on unmount — a collector that outlives its element is a leak.</p>
+    <p data-lang="id">Menghitung event pointer, ketukan tombol, input yang disuntikkan, dan waktu sampai submit. Tidak pernah tombol apa, tidak pernah isinya. Panggil <code>stop()</code> saat unmount — collector yang hidup lebih lama dari elemennya adalah kebocoran.</p>
+    <pre>import { watchInteraction, toObservation } from '@fachryxyf/scorpio-guard/collect';
+
+const watch = watchInteraction(input, { hasValue: () =&gt; input.value.length &gt; 0 });
+form.addEventListener('submit', () =&gt; {
+  send(toObservation(watch.counts())); // { fieldPopulated, interactions, injected, durationMs }
+  watch.stop();
+});</pre>
+    <p class="muted" data-lang="en">A populated field with zero interactions is the impossible-idle-action pattern. Declare it <code>soft</code>, not <code>hard</code>: password managers and autofill produce the same shape.</p>
+    <p class="muted" data-lang="id">Field terisi dengan nol interaksi adalah pola impossible-idle-action. Deklarasikan <code>soft</code>, bukan <code>hard</code>: password manager dan autofill menghasilkan bentuk yang sama.</p>
+    <h3 data-lang="en">Survive more than one process</h3>
+    <h3 data-lang="id">Bertahan lebih dari satu proses</h3>
+    <p data-lang="en">The default store is process-local, so it resets on restart and is not shared across instances. On serverless that means every cold start is a cold start for trust too — which the guard reports rather than hides, as <code>coldStart: true</code>. Move to a shared store, and prove it against the contract before trusting it.</p>
+    <p data-lang="id">Store default bersifat process-local, jadi ia reset saat restart dan tidak dibagi antar instance. Di serverless itu berarti setiap cold start juga cold start bagi trust — yang dilaporkan guard, bukan disembunyikan, sebagai <code>coldStart: true</code>. Pindah ke store bersama, dan buktikan terhadap kontraknya sebelum dipercaya.</p>
+    <p class="muted" data-lang="en">Hit a false positive? <a href="https://github.com/Fachryxyf/scorpio-guard/issues/new?template=false-positive.yml">Report it with the trace</a> — a decision without its trace cannot be diagnosed. Found something exploitable? <a href="https://github.com/Fachryxyf/scorpio-guard/security/advisories/new">Report it privately</a> instead.</p>
+    <p class="muted" data-lang="id">Kena false positive? <a href="https://github.com/Fachryxyf/scorpio-guard/issues/new?template=false-positive.yml">Laporkan beserta jejaknya</a> — keputusan tanpa jejak tidak bisa didiagnosis. Menemukan yang bisa dieksploitasi? <a href="https://github.com/Fachryxyf/scorpio-guard/security/advisories/new">Laporkan secara privat</a> saja.</p>
+  </section>
+
   <section id="library">
     <p class="num"><span data-lang="en">The library</span><span data-lang="id">Library-nya</span></p>
     <h2 data-lang="en">What is actually built</h2>
     <h2 data-lang="id">Apa yang benar-benar sudah dibangun</h2>
-    <p data-lang="en">The model exists as TypeScript with no platform dependencies: Beta-Bernoulli trust, half-life decay over real elapsed time, retention, the decision bands with their ceilings, declared invariants, and the anomaly feature space. Ninety-eight tests, most of which exist to pin a number the design argues for.</p>
-    <p data-lang="id">Modelnya sudah ada sebagai TypeScript tanpa ketergantungan platform: trust Beta-Bernoulli, decay half-life atas waktu nyata, retensi, band keputusan beserta batasnya, invariant terdeklarasi, dan ruang fitur anomali. Sembilan puluh delapan test, sebagian besar ada untuk memaku angka yang didebatkan desain ini.</p>
+    <p data-lang="en">The model exists as TypeScript with no platform dependencies: Beta-Bernoulli trust, half-life decay over real elapsed time, retention, the decision bands with their ceilings, declared invariants, and the anomaly feature space. One hundred and five tests, most of which exist to pin a number the design argues for.</p>
+    <p data-lang="id">Modelnya sudah ada sebagai TypeScript tanpa ketergantungan platform: trust Beta-Bernoulli, decay half-life atas waktu nyata, retensi, band keputusan beserta batasnya, invariant terdeklarasi, dan ruang fitur anomali. Seratus lima test, sebagian besar ada untuk memaku angka yang didebatkan desain ini.</p>
     <pre>const guard = createGuard({ invariants: [checkoutOrder] });
 
 const result = await guard.evaluate({
@@ -793,8 +1078,39 @@ result.trust.stage    // 'unknown' | 'developing' | 'established'
 result.trace          // why, in the order that decided it</pre>
     <p data-lang="en">Every evaluation returns its own reasoning. With four independent dimensions feeding one treatment, an unexplained outcome cannot be debugged by whoever adopted it — so the trace is part of the contract, not a debug flag.</p>
     <p data-lang="id">Setiap evaluasi mengembalikan alasannya sendiri. Dengan empat dimensi independen menyatu jadi satu treatment, hasil tanpa penjelasan tidak bisa didebug oleh yang memasangnya — jadi jejaknya bagian dari kontrak, bukan flag debug.</p>
+    <p data-lang="en">Alongside the core there is a browser-side collector, imported separately as <code>@fachryxyf/scorpio-guard/collect</code>. It counts interaction — pointer events, keystrokes, injected input, time to submit — and records nothing about content, because the impossible-idle-action constraint needs to know <em>whether</em> interaction happened, not what it contained.</p>
+    <p data-lang="id">Di samping core ada collector sisi browser, diimpor terpisah sebagai <code>@fachryxyf/scorpio-guard/collect</code>. Ia menghitung interaksi — event pointer, ketukan tombol, input yang disuntikkan, waktu sampai submit — dan tidak mencatat apa pun soal isinya, karena constraint impossible-idle-action perlu tahu <em>apakah</em> interaksi terjadi, bukan isinya apa.</p>
     <p class="muted" data-lang="en">Not built: an anomaly classifier over the feature space, and the prescription client. Both wait on decisions recorded in the design log rather than on effort.</p>
     <p class="muted" data-lang="id">Belum dibangun: classifier anomali di atas ruang fitur, dan prescription client. Keduanya menunggu keputusan yang tercatat di log desain, bukan menunggu tenaga.</p>
+  </section>
+
+  <section id="stores">
+    <p class="num"><span data-lang="en">State store</span><span data-lang="id">Penyimpanan state</span></p>
+    <h2 data-lang="en">The store contract ships as runnable checks</h2>
+    <h2 data-lang="id">Kontrak store dikirim sebagai pemeriksaan yang bisa dijalankan</h2>
+    <p data-lang="en">Trust state lives behind a small pluggable interface — read, write, delete for one opaque entity key — with an in-memory implementation as the default and the reference. Anyone can put it in Redis, Postgres, or a durable object instead.</p>
+    <p data-lang="id">State trust berada di belakang interface kecil yang bisa diganti — baca, tulis, hapus untuk satu kunci entity yang opaque — dengan implementasi in-memory sebagai default sekaligus rujukan. Siapa pun bisa memindahkannya ke Redis, Postgres, atau durable object.</p>
+    <pre>import { checkStoreConformance, assertConformant } from '@fachryxyf/scorpio-guard';
+
+assertConformant(await checkStoreConformance(() =&gt; myRedisStore()));</pre>
+    <p data-lang="en">Eleven assertions, no framework, because a store that is subtly wrong produces a guard that is subtly wrong and silent. Three of the checks exist because the mistakes are ordinary, not hypothetical:</p>
+    <p data-lang="id">Sebelas asersi, tanpa framework, karena store yang salah sedikit menghasilkan guard yang salah sedikit dan diam. Tiga pemeriksaan ada karena kesalahannya biasa terjadi, bukan hipotetis:</p>
+    <dl>
+      <dt data-lang="en">Millisecond precision</dt>
+      <dt data-lang="id">Presisi milidetik</dt>
+      <dd data-lang="en">A second-resolution timestamp column is an ordinary schema choice, and it corrupts both half-life decay and retention invisibly.</dd>
+      <dd data-lang="id">Kolom timestamp beresolusi detik adalah pilihan skema yang biasa, dan ia merusak decay half-life sekaligus retensi tanpa terlihat.</dd>
+      <dt data-lang="en">The observation window</dt>
+      <dt data-lang="id">Jendela observasi</dt>
+      <dd data-lang="en">Persisting only the scalar columns is an easy omission, and it disables the entire anomaly dimension with no error raised.</dd>
+      <dd data-lang="id">Menyimpan hanya kolom skalar adalah kelalaian yang mudah terjadi, dan ia mematikan seluruh dimensi anomali tanpa error apa pun.</dd>
+      <dt data-lang="en">Opaque keys</dt>
+      <dt data-lang="id">Kunci opaque</dt>
+      <dd data-lang="en">Trimming or lower-casing a key looks harmless and silently merges two distinct entities into one history.</dd>
+      <dd data-lang="id">Memangkas atau meng-lowercase kunci terlihat tidak berbahaya, tapi diam-diam menggabungkan dua entity berbeda jadi satu riwayat.</dd>
+    </dl>
+    <p data-lang="en">Each failure mode is covered by a deliberately broken store in the test suite, so the kit is shown to catch the mistake rather than merely to describe it. It earned that on its first run: the reference in-memory store handed back the live stored object, so a caller could mutate trust state without going through a write. Frozen now.</p>
+    <p data-lang="id">Setiap mode kegagalan diuji dengan store yang sengaja dibuat salah di test suite, jadi kit ini terbukti menangkap kesalahannya, bukan cuma menjelaskannya. Ia membuktikan diri pada jalan pertama: store in-memory rujukan mengembalikan objek tersimpan yang hidup, sehingga pemanggil bisa memutasi state trust tanpa lewat penulisan. Sekarang dibekukan.</p>
   </section>
 
   <section id="firstrun">
@@ -936,8 +1252,28 @@ result.trace          // why, in the order that decided it</pre>
           <td data-lang="en"><strong>Not started</strong> — research, not design</td><td data-lang="id"><strong>Belum dimulai</strong> — riset, bukan desain</td>
         </tr>
         <tr>
+          <td data-lang="en">Core model in TypeScript</td><td data-lang="id">Model core dalam TypeScript</td>
+          <td data-lang="en">Built and tested — 105 tests, no threshold calibrated</td><td data-lang="id">Sudah dibangun dan diuji — 105 test, belum ada threshold terkalibrasi</td>
+        </tr>
+        <tr>
+          <td data-lang="en">State store and its conformance kit</td><td data-lang="id">State store dan kit conformance-nya</td>
+          <td data-lang="en">Shippable — interface, in-memory default, eleven contract checks</td><td data-lang="id">Siap dipakai — interface, default in-memory, sebelas pemeriksaan kontrak</td>
+        </tr>
+        <tr>
+          <td data-lang="en">Browser collector</td><td data-lang="id">Collector browser</td>
+          <td data-lang="en">Built — counts interaction only, records no content</td><td data-lang="id">Sudah dibangun — hanya menghitung interaksi, tak mencatat isi</td>
+        </tr>
+        <tr>
+          <td data-lang="en">Anomaly classifier over the feature space</td><td data-lang="id">Classifier anomali di atas ruang fitur</td>
+          <td data-lang="en"><strong>Not built</strong> — feature space settled, algorithm deliberately deferred</td><td data-lang="id"><strong>Belum dibangun</strong> — ruang fiturnya sudah, algoritmanya sengaja ditunda</td>
+        </tr>
+        <tr>
           <td data-lang="en">Proof of concept</td><td data-lang="id">Proof of concept</td>
-          <td data-lang="en"><strong>None yet</strong> — no code exists</td><td data-lang="id"><strong>Belum ada</strong> — belum ada kode</td>
+          <td data-lang="en">Runs against one real flow — a smoke test, not a validated thesis</td><td data-lang="id">Berjalan pada satu alur nyata — smoke test, bukan tesis tervalidasi</td>
+        </tr>
+        <tr>
+          <td data-lang="en">Calibration against real traffic</td><td data-lang="id">Kalibrasi terhadap trafik nyata</td>
+          <td data-lang="en"><strong>None</strong> — every number is still a reasoned guess</td><td data-lang="id"><strong>Belum ada</strong> — tiap angka masih dugaan beralasan</td>
         </tr>
       </tbody>
     </table>
@@ -947,18 +1283,22 @@ result.trace          // why, in the order that decided it</pre>
     <p class="num"><span data-lang="en">Roadmap</span><span data-lang="id">Roadmap</span></p>
     <h2 data-lang="en">What happens next, in order</h2>
     <h2 data-lang="id">Yang berikutnya, berurutan</h2>
+    <p class="muted" data-lang="en">The first three items are done: the core model, the store contract, and one observational integration against a real flow. What remains, in order:</p>
+    <p class="muted" data-lang="id">Tiga hal pertama sudah selesai: model core, kontrak store, dan satu integrasi observasional pada alur nyata. Yang tersisa, berurutan:</p>
     <ol class="road" data-lang="en">
-      <li>Draft the two-tier symptom vocabulary as a concrete v0.1 spec.</li>
+      <li>Find an integration target that can actually exercise the statistical layer — unauthenticated traffic, data worth scraping, a real adversary. Nothing below is worth much before this.</li>
       <li>Enumerate the known hard constraints exhaustively — the current list is a starting set, not a complete one.</li>
       <li>Enumerate known weak signals and how they combine into observe / restrict / block tiers.</li>
-      <li>Build the smallest possible proof of concept: library only, hard constraints only, no server.</li>
+      <li>Pick an anomaly algorithm over the settled feature space, once there is traffic to choose it against.</li>
+      <li>Draft the two-tier symptom vocabulary as a concrete v0.1 spec.</li>
       <li>Only then investigate encoding schemes for symptom transmission.</li>
     </ol>
     <ol class="road" data-lang="id">
-      <li>Susun kosakata gejala dua lapis sebagai spesifikasi v0.1 yang konkret.</li>
+      <li>Cari target integrasi yang benar-benar bisa menggerakkan lapis statistiknya — trafik tanpa autentikasi, data yang layak di-scrape, penyerang nyata. Tanpa ini, semua di bawah tak banyak berarti.</li>
       <li>Daftar hard constraint yang sudah diketahui secara lengkap — daftar sekarang baru titik awal, belum utuh.</li>
       <li>Daftar weak signal yang diketahui dan bagaimana kombinasinya jadi tingkat observe / restrict / block.</li>
-      <li>Bangun proof of concept sekecil mungkin: library saja, hard constraint saja, tanpa server.</li>
+      <li>Pilih algoritma anomali di atas ruang fitur yang sudah disepakati, begitu ada trafik untuk memilihnya.</li>
+      <li>Susun kosakata gejala dua lapis sebagai spesifikasi v0.1 yang konkret.</li>
       <li>Baru setelah itu, teliti skema encoding untuk pengiriman symptom.</li>
     </ol>
   </section>
@@ -984,8 +1324,8 @@ The prescription travels; the patient does not.</pre>
   <span>Scorpio Guard</span>
   <a href="https://github.com/Fachryxyf/scorpio-guard">GitHub</a>
   <a href="https://github.com/Fachryxyf">@Fachryxyf</a>
-  <span data-lang="en">Design phase · 2026</span>
-  <span data-lang="id">Tahap desain · 2026</span>
+  <span data-lang="en">Implementation phase · 2026</span>
+  <span data-lang="id">Tahap implementasi · 2026</span>
 </footer>
 
 <script>
