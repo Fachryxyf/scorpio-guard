@@ -1,5 +1,29 @@
-export { DECISIONS, severity, strongest } from './decision.ts';
-export type { Decision } from './decision.ts';
+export { DECISIONS, severity, strongest } from './core/decision.ts';
+export type { Decision } from './core/decision.ts';
 
-export { SYMPTOMS, SYMPTOM_SCHEMA_VERSION, isSymptom } from './symptoms.ts';
-export type { Symptom } from './symptoms.ts';
+export { SYMPTOMS, SYMPTOM_SCHEMA_VERSION, isSymptom } from './core/symptoms.ts';
+export type { Symptom } from './core/symptoms.ts';
+
+export { systemClock } from './core/clock.ts';
+export type { Clock } from './core/clock.ts';
+
+export {
+  DEFAULT_POLICY,
+  DEFAULT_HALF_LIFE_HOURS,
+  DEFAULT_RETENTION_HOURS,
+  DEFAULT_WEIGHTS,
+  DEFAULT_TRUST_BANDS,
+  DEFAULT_UNCERTAINTY_BANDS,
+} from './core/policy.ts';
+export type { Policy, TrustBand, UncertaintyLevel } from './core/policy.ts';
+
+export {
+  freshState,
+  decayFactor,
+  decayedMass,
+  applyEvidence,
+  expectedTrust,
+  uncertainty,
+  isExpired,
+} from './core/trust.ts';
+export type { EntityState } from './core/trust.ts';

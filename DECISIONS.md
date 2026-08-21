@@ -12,11 +12,14 @@ the answer given, and what that answer commits the implementation to.
   than answers given directly.
 - Anything under [Open questions](#open-questions) is **not** decided and must not
   be assumed in code.
-- Where a decision was checked numerically, the finding is included. The scratch
-  scripts are not kept in the repository.
+- Where a decision was checked numerically, the finding is included and the
+  property is locked as a test in `src/core/trust.test.ts`. Values here are
+  policy; the tests are what make a policy change visible.
 
-Status: all thirty original questions are answered. Six questions remain open,
-all of them raised by those answers.
+Status: all thirty original questions are answered, plus D33 and D37 arising from
+review. Five questions remain open. D34 — choosing the proof-of-concept target —
+is the highest priority among them, since several decisions cannot be validated
+without one.
 
 Last updated: 2026-08-21
 
@@ -41,6 +44,7 @@ Last updated: 2026-08-21
 **Part III — Decision layer**
 
 - [D5 — Decision is a function of trust and uncertainty](#d5--decision-is-a-function-of-trust-and-uncertainty)
+- [D37 — Saturation guard belongs in the decision layer, not the trust model](#d37--saturation-guard-belongs-in-the-decision-layer-not-the-trust-model)
 
 **Part IV — Hard constraints**
 
@@ -147,14 +151,25 @@ Trust        : E -> [0,1]
 Anomaly      : E x I -> R
 Uncertainty  : E -> R>=0
 Memory       : E -> M
-Relationship : E x E -> R
 ```
+
+A fifth signature, `Relationship : E x E -> R`, was stated with these. It is
+withheld from the formal model until D31 defines what it means — a signature
+without semantics would be implemented by guesswork. See D31; out of scope for
+the PoC.
 
 ### Naming
 
 The formal name of the unit is **SG Reference Unit (SGRU)**. One entity is one
-SGRU. It is not a quantitative unit like a metre or a second; it is the
-fundamental reference against which SG state and measurement are defined.
+SGRU.
+
+SGRU is not a unit that measures a magnitude, the way a metre measures distance.
+It is a unit of **continuity**: it guarantees that two observations refer to the
+same reference point over time, not that any quantity attached to it is
+comparable across different entities.
+
+That distinction carries D1.1 without restating it — continuity is not identity,
+so the root of trust necessarily sits outside SG.
 
 > Entity is the fundamental reference unit of Scorpio Guard.
 
@@ -319,11 +334,31 @@ option, so it is read as: decay acts on mass, and any movement in `E[p]` is a
 consequence of mass shrinking toward the prior, not a direct edit to the trust
 value.
 
+### Write-time rule, stated explicitly
+
+Every write decays the stored mass to *now* before adding new evidence, then
+advances `last_seen`:
+
+```
+dt    = now - last_seen
+a_new = a_old * lambda(dt) + w+
+b_new = b_old * lambda(dt) + w-
+last_seen = now
+```
+
+Reads apply `lambda(now - last_seen)` without mutating anything.
+
+This is written out because two readings of "decay lazily" are otherwise both
+defensible — decay-then-add, or add-then-decay-at-read — and they do not agree.
+Only decay-then-add produces the mass ceiling `m* = w / (1 - lambda(T))` that D4
+depends on; the other lets mass grow without bound. Composability from D3 is what
+makes the single-step decay exact rather than an approximation.
+
 ### What this commits the code to
 
 - State is `(a, b, last_seen)`. Fresh entity is `(0, 0, now)`, which reads as
   exactly `Beta(1,1)`.
-- Decay is computed on read from `last_seen`, never by a background task.
+- Writes follow decay-then-add, above. Reads decay a copy and mutate nothing.
 - `H` is policy, injected as configuration, not a hardcoded constant.
 - Needs an injected clock to be testable — see question 11, now effectively
   settled in favour of injection.
@@ -407,10 +442,14 @@ m* = w / (1 - lambda(T))
 
 Two things follow. Mass is self-limiting, so no artificial clamp is required for
 ordinary traffic. But a high-frequency entity does saturate near `E[p] = 1` and
-becomes hard to move with negative evidence — a slow-poisoning path worth
-noting, and the same open problem already recorded in the design notes.
+becomes hard to move with negative evidence — a farmable slow-poisoning path.
 
-Numbers verified with a scratch script; not kept in the repo.
+That is not addressed here. Clamping mass would contradict the finding above, so
+it is handled one layer up, in the decision layer: see D37.
+
+Locked as tests in `src/core/trust.test.ts`, not verified once and discarded —
+these values are policy and will be revised, so a change has to surface as a
+failing test rather than as silent drift.
 
 ### What this commits the code to
 
@@ -504,7 +543,9 @@ Whether an anomaly observation with no trust evidence counts as meaningful is
 not decided — it depends on the anomaly model, which is still open under
 question 18.
 
-Numbers verified with a scratch script; not kept in the repo.
+Locked as tests in `src/core/trust.test.ts`, not verified once and discarded —
+these values are policy and will be revised, so a change has to surface as a
+failing test rather than as silent drift.
 
 ### What this commits the code to
 
@@ -619,19 +660,27 @@ So `deny` is only ever reachable with real accumulated negative mass, and the
 construction, which matches the stated priority that false positives are the
 central constraint. Recorded so it is not later mistaken for a bug.
 
-### Open sub-question
+### Vocabulary: `CHALLENGE` and `deceive` are not new rungs
 
-The bands name `CHALLENGE` and `deceive`, which are not in the D-spectrum
-(`ALLOW`, `OBSERVE`, `INCREASE_FRICTION`, `RESTRICT`, `BLOCK`) already
-implemented in `src/decision.ts`. Two readings:
+**Decided (D33).** The bands name `CHALLENGE` and `deceive`, which are absent from
+the five-rung spectrum in `src/decision.ts`. They are aliases, not additional
+severity levels:
 
-- `CHALLENGE` is a synonym for `INCREASE_FRICTION`, and `deceive` is a host-side
-  variant of `BLOCK` (tarpit, decoy data, silent failure).
-- They are genuinely new rungs, and the spectrum needs to grow to seven.
+```
+CHALLENGE  =  INCREASE_FRICTION
+deceive    =  host-side variant of BLOCK   (tarpit, silent failure, decoy data)
+```
 
-Not resolved. The current code keeps five rungs until this is settled.
+Both describe *how a host executes* a treatment, not a new degree of severity.
+This follows D14's own logic: severity and the manner of enforcement are separate
+concerns, and SG names severity only. Growing to seven rungs would enlarge the
+policy table without adding expressiveness.
 
-Numbers verified with a scratch script; not kept in the repo.
+The spectrum stays at five.
+
+Locked as tests in `src/core/trust.test.ts`, not verified once and discarded —
+these values are policy and will be revised, so a change has to surface as a
+failing test rather than as silent drift.
 
 ### What this commits the code to
 
@@ -642,6 +691,79 @@ Numbers verified with a scratch script; not kept in the repo.
   supports.
 - A hard constraint bypasses the clamp; explicit host policy may too. Both are
   parameters, not exceptions buried in code.
+
+## D37 — Saturation guard belongs in the decision layer, not the trust model
+
+**Decided.**
+
+D4 recorded a gap as a passing note: an entity interacting at high frequency
+converges on a large mass ceiling, drives `Var[p]` low, and unlocks the full
+decision space under D5 — while becoming nearly immovable by negative evidence.
+A patient attacker can farm exactly that state.
+
+### Why the fix does not go in the trust model
+
+Clamping mass in D4 would invalidate D4's own finding that mass is self-limiting
+and needs no artificial clamp. The mathematics is internally consistent and not
+what is wrong.
+
+What is wrong is a premise sitting *underneath* the mathematics: that homogeneous
+volume is evidence sufficient to reduce uncertainty. That premise holds for
+legitimate traffic and fails for a patient attacker. So the formula does not
+change — what changes is the condition under which its output may be trusted
+completely.
+
+### The fix
+
+The D5 cap is currently a function of `Var[p]` alone, which is the trust
+dimension talking to itself. D15 already established that
+
+```
+D = pi(Trust, Anomaly, HardConstraints, Context)
+```
+
+has four independent dimensions. Use them: **the uncertainty cap may lift only
+when the Anomaly dimension concurs.** Concurrence is expressed as a diversity
+signal — not how many interactions were observed, but how varied they were in
+kind, timing, and pattern.
+
+An entity farming thousands of uniform interactions fails the diversity condition
+even though its `Var[p]` is mathematically small. A legitimate entity with varied
+real usage passes it.
+
+```
+low Var[p]  AND  diverse behavior   ->  cap lifts
+low Var[p]  AND  monotonous behavior ->  cap holds
+```
+
+### Why this is not a new mechanism
+
+Diversity versus monotony is one of the features the anomaly feature space would
+contain anyway, and D18 already fixed the order: feature space first, algorithm
+later. So this adds no machinery — it connects two decisions that were standing
+apart, and makes them check each other.
+
+It is also consistent with the notes' own instruction that hard constraints and
+weak signals must not be blended into one score: the dimensions stay separate and
+one gates the other, rather than being averaged.
+
+### Status and dependencies
+
+- Blocking on D18 more strongly than previously recorded. Without a diversity
+  feature the gap cannot be closed at all, so D18 is not merely deferred work.
+- Raises the priority of D34. A farming pattern can only be validated against
+  real traffic; a synthetic fixture would be built from the same assumption the
+  guard is trying to test.
+- Until D18 lands, the cap behaves as specified in D5. The gap is open and
+  recorded, not silently mitigated.
+
+### What this commits the code to
+
+- The cap is computed from trust *and* anomaly, so its signature takes both
+  dimensions from the outset even while the anomaly input is absent.
+- Absent anomaly data, the conservative reading applies: no diversity evidence
+  means no concurrence, so a fully lifted cap must be an explicit host policy
+  choice rather than a silent default. Pending D18.
 
 ---
 
@@ -776,6 +898,8 @@ A transition that is merely statistically unlikely is not impossible.
 - Constraint classes need a shared result type carrying which class fired, which
   invariant, and what was observed — required for D23-style explainability, since
   a violation claim must be inspectable to be trustworthy.
+
+---
 
 ---
 
@@ -1050,13 +1174,17 @@ answers:
 
 | Ref | Question | Blocks |
 |---|---|---|
-| D31 | What is `Relationship : E x E -> R` — correlation, shared origin, or a coordination graph? In the PoC or deferred? | Storage shape (reopens D8 if it needs a graph) |
+| D31 | What is `Relationship : E x E -> R` — correlation, shared origin, or a coordination graph? | Nothing — declared out of scope for the PoC, and its signature is withheld from D1 until defined |
 | D32 | With a partially declared flow, are undeclared edges forbidden (strict) or unknown and passed to the probabilistic path (permissive)? Which is the default? | Hard-constraint API |
-| D33 | Are `CHALLENGE` and `deceive` synonyms within the five-rung spectrum, or two new rungs making seven? | `src/core/decision.ts` |
-| D34 | Which real application is the PoC target? | Validating D13 classes |
+| D34 | **Which real application is the PoC target?** Highest priority — not a closing task | D13 classes, D16 invariants, D30, and validating D37 against real traffic |
 | D35 | Does an anomaly observation with no trust evidence count as a meaningful update for retention? | D6 retention, blocked by D18 |
-| D36 | Which numeric features make up the anomaly feature space? | Anomaly model |
+| D36 | Which numeric features make up the anomaly feature space, including the diversity signal D37 requires? | Anomaly model, and closing the D37 saturation gap |
 
 Recommendation on D32: permissive by default, strict as opt-in. A wrong default
 here manufactures false positives, and false positives are the stated central
 constraint.
+
+D34 is listed first deliberately. It was originally treated as a closing task,
+but D16 declares invariants from a real application model and D37 can only be
+validated against real traffic, so roughly half of this document cannot be
+confirmed until a target exists.
