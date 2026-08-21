@@ -26,3 +26,6 @@ jobs:
       - run: npm test
 
       - run: npm run build
+
+      - name: Verify the built package imports and runs
+        run: node scripts/smoke.mjs

@@ -1,9 +1,6 @@
 export { DECISIONS, severity, strongest } from './core/decision.ts';
 export type { Decision } from './core/decision.ts';
 
-export { SYMPTOMS, SYMPTOM_SCHEMA_VERSION, isSymptom } from './core/symptoms.ts';
-export type { Symptom } from './core/symptoms.ts';
-
 export { systemClock } from './core/clock.ts';
 export type { Clock } from './core/clock.ts';
 

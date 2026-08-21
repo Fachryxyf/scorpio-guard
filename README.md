@@ -1,5 +1,6 @@
 # Scorpio Guard
 
+[![CI](https://img.shields.io/github/actions/workflow/status/Fachryxyf/scorpio-guard/ci.yml?branch=main&style=flat-square&label=ci)](https://github.com/Fachryxyf/scorpio-guard/actions/workflows/ci.yml)
 [![Status](https://img.shields.io/badge/status-pre--alpha-orange?style=flat-square)](https://github.com/Fachryxyf/scorpio-guard)
 [![Stage](https://img.shields.io/badge/stage-design-blue?style=flat-square)](https://github.com/Fachryxyf/scorpio-guard)
 [![Model](https://img.shields.io/badge/model-open%20core-6f42c1?style=flat-square)](https://github.com/Fachryxyf/scorpio-guard)
@@ -136,14 +137,17 @@ npm run build     # emits dist/
 - `trust.ts` — Beta-Bernoulli state, half-life decay over real elapsed time, retention.
 - `assess.ts` — trust and uncertainty bands, and the ceiling that caps escalation.
 - `decision.ts` — the five-rung decision spectrum.
-- `symptoms.ts` — the v1 symptom vocabulary and its boundary check.
+- `symptoms.ts` — the v1 symptom vocabulary. Not exported: nothing transmits yet.
 - `behavior.ts` — the anomaly feature space, and the diversity signal it feeds.
 - `constraints.ts`, `transitions.ts` — declared invariants, and what a violation means.
 - `store.ts` — the `StateStore` interface and an in-memory implementation.
 - `guard.ts` — `createGuard()` and `evaluate()`, composing the above.
 - `policy.ts`, `clock.ts` — tunable values in one place, and an injectable clock.
 
-Seventy-one tests, which double as the record of every numeric and semantic
+`examples/healthme/` — the first integration target (D34), declared invariants and
+an observational harness that records advice without acting on it.
+
+Eighty-five tests, which double as the record of every numeric and semantic
 property the design depends on.
 
 ```js
@@ -185,10 +189,32 @@ authority. See D39 and D40 in the design record for how that was arrived at.
 Browser-side signal collection, an anomaly *classifier* over the feature space,
 and the prescription client.
 
-More importantly: nothing has met real traffic. Every threshold in the model is a
-reasoned guess. D34 names the first integration target, and the plan there is
-observational — run alongside the existing defences, change nothing, record what
-the guard would have advised.
+More importantly: nothing has met real production traffic. Every threshold in the
+model is a reasoned guess. The HealthMe harness replays its real flow, which is
+enough to catch a contradiction but not enough to calibrate a threshold.
+
+## What the First Integration Found
+
+Replaying HealthMe's actual unlock and API flow (`examples/healthme/`), against
+its existing hand-rolled defences:
+
+| Scenario | HealthMe does | The guard advises |
+|---|---|---|
+| Normal daily unlock, one week | allows | `ALLOW` / `OBSERVE` — never friction |
+| Three mistyped PINs | 5-minute lockout | `OBSERVE`, stage `developing` |
+| `POST /api/chat` with no unlock in session | **allows** | `RESTRICT` — provable violation |
+| Session restore from `sessionStorage` | allows | `ALLOW` — not mistaken for replay |
+| 20 scripted attempts | rejects, counter resets on cold start | `INCREASE_FRICTION`, stage `established` |
+
+Two disagreements are the point of the exercise. A forged API call passes
+HealthMe's origin check and its cold-start-porous IP limit, while the guard sees
+that `js/core.js` — the only caller — could not have been loaded. And three
+mistyped PINs cost a real user five minutes under a 3-strike rule, where the guard
+reads `n = 3.5` as *developing*: not enough evidence to act on.
+
+The scripted-attempt row is D37 behaving as designed rather than a shortfall.
+Mechanical timing fails the diversity condition, so escalation stops at friction
+instead of reaching `BLOCK`.
 
 ## Roadmap
 

@@ -1685,6 +1685,47 @@ what it would have advised, change no behavior. The existing defences are what S
 is being compared against, so removing them before there is evidence would destroy
 the comparison and the app's protection at once.
 
+### First replay: what it found
+
+`examples/healthme/` declares the invariants and replays the real flow. Two
+disagreements, which is what the exercise was for:
+
+| Scenario | HealthMe does | Guard advises |
+|---|---|---|
+| Normal daily unlock, one week | allows | `ALLOW` / `OBSERVE`, never friction |
+| Three mistyped PINs | 5-minute lockout | `OBSERVE`, stage `developing` |
+| `POST /api/chat` with no session unlock | **allows** | `RESTRICT`, hard violation |
+| Session restore from `sessionStorage` | allows | `ALLOW`, not read as replay |
+| 20 scripted attempts | rejects, counter resets on cold start | `INCREASE_FRICTION`, `established` |
+
+The forged API call is the substantive finding: it satisfies HealthMe's origin
+check and its IP limit, while `apiRequiresUnlock` sees that `js/core.js` — the
+only caller — could not have been loaded. The three-mistyped-PIN row is the
+converse: a 3-strike rule charges a real user five minutes where `n = 3.5` reads
+as *developing*, which is not enough evidence to act on.
+
+Confirmed on the claim most at risk: across a week of normal daily unlocks, no
+observation was advised friction or worse.
+
+### Scope choices worth recording
+
+`attemptRequiresInteraction` is declared **soft**, not hard, despite the design
+notes listing "form field filled with zero interaction" as a hard constraint.
+Assistive technology, password managers and paste all produce a populated field
+with few or no interaction events. Under D32 a `hard` declaration asserts
+completeness, and that is a claim this scope cannot honestly make — so it
+contributes evidence instead of proof.
+
+Navigation inside the unlocked app is not declared at all. It is too large to
+enumerate honestly, and D32 makes silence the correct answer there rather than a
+guess.
+
+### Still not validated by this
+
+Single-user replay. It can falsify a contradiction — and did not find one in the
+zero-friction claim — but it cannot calibrate a threshold, and it cannot exercise
+D37 against a real adversary.
+
 ---
 
 ## D30 — PoC must run against a real application flow
