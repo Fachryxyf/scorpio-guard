@@ -195,10 +195,12 @@ More importantly: nothing has met real production traffic. Every threshold in th
 model is a reasoned guess. The HealthMe harness replays its real flow, which is
 enough to catch a contradiction but not enough to calibrate a threshold.
 
-## What the First Integration Found
+## What the First Integration Shows
 
-Replaying HealthMe's actual unlock and API flow (`examples/healthme/`), against
-its existing hand-rolled defences:
+The first integration target is HealthMe, an existing PIN-gated personal health
+app (`examples/healthme/`). Its flow is replayed against its own hand-rolled
+defences: a three-strike lockout in `localStorage`, and IP rate limiting in a map
+that resets whenever the serverless function cold-starts.
 
 | Scenario | HealthMe does | The guard advises |
 |---|---|---|
@@ -208,15 +210,29 @@ its existing hand-rolled defences:
 | Session restore from `sessionStorage` | allows | `ALLOW` — not mistaken for replay |
 | 20 scripted attempts | rejects, counter resets on cold start | `INCREASE_FRICTION`, stage `established` |
 
-Two disagreements are the point of the exercise. A forged API call passes
-HealthMe's origin check and its cold-start-porous IP limit, while the guard sees
-that `js/core.js` — the only caller — could not have been loaded. And three
-mistyped PINs cost a real user five minutes under a 3-strike rule, where the guard
-reads `n = 3.5` as *developing*: not enough evidence to act on.
+Two disagreements. A forged API call passes HealthMe's origin check and its
+cold-start-porous IP limit, while the guard sees that `js/core.js` — the only
+caller — could not have been loaded. And three mistyped PINs cost a real user five
+minutes under a 3-strike rule, where the guard reads `n = 3.5` as *developing*:
+not enough evidence to act on.
 
-The scripted-attempt row is D37 behaving as designed rather than a shortfall.
-Mechanical timing fails the diversity condition, so escalation stops at friction
-instead of reaching `BLOCK`.
+### What it does not show
+
+Stated plainly, because the temptation is to read more into this than it carries:
+
+- **The library works against a real flow. That is a smoke test, not a validated
+  thesis.** HealthMe has one user, so there is no sustained abuse for asymmetric
+  cost to act against.
+- **The interesting finding came from the hard-constraint layer**, which is the
+  least novel part of the design — set membership, expressible as one `if`. The
+  parts that are actually new (Beta trust, half-life decay, the epistemic stage,
+  the diversity signal) were never exercised, because no traffic here can exercise
+  them.
+- **No threshold is calibrated by this.** Every number in the model remains a
+  reasoned guess.
+
+A target that can validate the thesis needs unauthenticated traffic, data worth
+scraping, and a real adversary. See D34 in the design record.
 
 ## Roadmap
 

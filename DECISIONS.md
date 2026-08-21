@@ -90,7 +90,7 @@ Last updated: 2026-08-21
 - [D27 — CI now: typecheck and test](#d27--ci-now-typecheck-and-test)
 - [D28 — Site stays where it is](#d28--site-stays-where-it-is)
 - [D29 — No empty repositories](#d29--no-empty-repositories)
-- [D34 — PoC target: HealthMe](#d34--poc-target-healthme)
+- [D34 — PoC target: HealthMe, with its limits stated](#d34--poc-target-healthme-with-its-limits-stated)
 - [D30 — PoC must run against a real application flow](#d30--poc-must-run-against-a-real-application-flow)
 
 **[Open questions](#open-questions)**
@@ -1617,12 +1617,19 @@ to `docs/` later if needed.
 until they have real content and lifecycle. `REPOSITORIES.md` holds the plan
 meanwhile.
 
-## D34 — PoC target: HealthMe
+## D34 — PoC target: HealthMe, with its limits stated
 
-**Decided.**
+**Decided, and narrowed after the first replay.**
 
 The proof of concept runs against **HealthMe** (`myhealth`), an existing personal
 health PWA, before any greenfield fixture.
+
+> **What this target can and cannot settle.** HealthMe validates that the library
+> works against a real flow, and it did find a real defect. It cannot validate the
+> thesis: it has one user, so there is no sustained abuse for asymmetric cost to
+> act against. The parts of the design that are genuinely novel are untouched by
+> it. Recorded here rather than discovered later by an adopter — see *What the
+> replay could not reach* below.
 
 ### Why it fits the D30 requirements
 
@@ -1720,11 +1727,49 @@ Navigation inside the unlocked app is not declared at all. It is too large to
 enumerate honestly, and D32 makes silence the correct answer there rather than a
 guess.
 
-### Still not validated by this
+### What the replay could not reach
 
-Single-user replay. It can falsify a contradiction — and did not find one in the
-zero-friction claim — but it cannot calibrate a threshold, and it cannot exercise
-D37 against a real adversary.
+The honest accounting, since the replay result reads better than it is:
+
+- **The finding came from the least novel layer.** `apiRequiresUnlock` is set
+  membership — one `if` statement, and any competent developer would write it
+  unaided. It is a good demonstration that declared invariants are worth having,
+  and no evidence at all for the probabilistic model.
+- **The novel parts were never exercised.** Beta trust (D2a), half-life decay
+  (D3), the epistemic stage (D40) and the diversity signal (D36) all describe
+  behavior over populations and over time. One user generating a handful of
+  unlocks per day cannot move any of them into a regime where they matter.
+- **No threshold is calibrated.** `H = 24h`, the weights, the stage boundaries and
+  the diversity thresholds are exactly as unvalidated as before.
+- **D37 is untestable here.** Farming requires a patient adversary. There is none,
+  and a synthetic one would be built from the same assumption the guard is trying
+  to test.
+
+What it *did* establish, and this is not nothing: the API is usable against a real
+flow rather than a fixture shaped to fit it, the zero-friction claim survived a
+week of normal use, and a genuine authorization defect surfaced that is worth
+fixing regardless of SG.
+
+### What a thesis-validating target needs
+
+Unauthenticated public traffic, data worth scraping, a public search or lookup
+endpoint whose legitimate order can be declared, and ideally a history of real
+automation against it. That profile matches the author's own scraping experience
+recorded in the design notes — *submitting a form without ever having loaded it,
+with no case ID known in advance* — which is a public lookup system, not a
+PIN-gated personal app.
+
+Candidate under consideration: **Pusaka** (`github.com/Fachryxyf/pusaka`), a public
+catalogue of Indonesian data APIs. It has unauthenticated traffic, a public search
+over 215,373 school records, and a declarable endpoint-selection rule. Its own
+`SPEC.md` already states the obligation — *don't hammer other people's APIs on
+every render* — which reframes the guard usefully: the party needing protection is
+the **upstream API**, not the site.
+
+Blocked on an architectural fact rather than on effort: Pusaka is `output:
+'export'` on GitHub Pages, so a guard there runs client-side only and is removable
+by an attacker. Its `SPEC.md` §10 designs a server-side proxy but records it as
+closed. Whether to open it is a decision about Pusaka, not about SG.
 
 ---
 
@@ -1761,6 +1806,9 @@ until the proof of concept meets real traffic.
 | D3, D4 | `H = 24h`, weights `0.5` and `2.0` | Policy defaults. Locked as tests, so a revision is visible rather than silent. |
 | D31 | `Relationship : E x E -> R` | Deferred out of the PoC. The coordination reading is where the value and the privacy cost both sit, and that tension is a decision for later. |
 
-The next step is not another decision. It is D34: run the guard alongside
-HealthMe's existing defences, change nothing, and record what it would have
-advised.
+D34 has been run and is recorded with its limits: HealthMe establishes that the
+library works against a real flow, and establishes nothing about the probabilistic
+model, because one user cannot exercise it. Choosing a target that *can* is the
+open work — the requirements are written out in D34, and Pusaka is the candidate
+under consideration, blocked on whether it gains a server side rather than on
+effort.
