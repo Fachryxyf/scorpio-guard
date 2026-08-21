@@ -141,6 +141,22 @@
   nav.side a:hover { color: var(--ink); border-left-color: var(--ink-2); }
   nav.side a[aria-current="true"] { color: var(--accent); border-left-color: var(--accent); }
 
+  /* search over the sidebar */
+  .find { margin: 0 0 1.25rem; }
+  .find input {
+    width: 100%; background: var(--bg-2); color: var(--ink);
+    border: 1px solid var(--line); border-radius: 2px;
+    padding: .5rem .6rem; font: .8125rem/1.4 var(--mono);
+  }
+  .find input:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .find input::placeholder { color: var(--ink-2); }
+  .find .count {
+    display: block; margin-top: .4rem;
+    font: .6875rem/1.4 var(--mono); letter-spacing: .06em; color: var(--ink-2);
+  }
+  nav.side[data-finding] details.grp > summary::after { content: ""; }
+  li[hidden], details.grp[hidden] { display: none; }
+
   main { padding: 0 2rem 5rem; max-width: 52rem; counter-reset: sec; }
   main section { counter-increment: sec; }
   section > .num::before { content: counter(sec, decimal-leading-zero) " / "; }
@@ -211,6 +227,31 @@
     border: 1px solid var(--line); border-radius: 2px; padding: .45rem .55rem; color: var(--ink-2);
   }
   .spectrum span:first-child { color: var(--accent); border-color: var(--accent); }
+
+  /* cross-references, the wiki habit worth keeping */
+  .seealso {
+    margin: 1.5rem 0 0; padding-top: .875rem; border-top: 1px dashed var(--line);
+    font: .8125rem/1.7 var(--mono); color: var(--ink-2);
+  }
+  .seealso b {
+    font: 600 .6875rem/1.4 var(--mono); letter-spacing: .12em; text-transform: uppercase;
+    display: block; margin-bottom: .25rem;
+  }
+  .seealso a + a::before { content: " · "; color: var(--line); }
+
+  /* glossary: a definition list that can be linked into */
+  dl.gloss dt { scroll-margin-top: 4.5rem; color: var(--ink); }
+  dl.gloss dt a.hash { color: var(--line); border: 0; margin-left: .4rem; font-weight: 400; }
+  dl.gloss dt a.hash:hover { color: var(--accent); border: 0; }
+  dl.gloss dd + dt { margin-top: 1.25rem; }
+
+  /* decision index */
+  table.dindex { font-size: .875rem; }
+  table.dindex td:first-child { white-space: nowrap; font-family: var(--mono); }
+  table.dindex tbody tr.grouprow td {
+    font: 600 .6875rem/1.4 var(--mono); letter-spacing: .12em; text-transform: uppercase;
+    color: var(--ink-2); padding-top: 1.25rem; border-bottom-color: var(--ink-2);
+  }
   footer {
     border-top: 1px solid var(--line); padding: 1.5rem 2rem;
     font: .8125rem/1.6 var(--mono); color: var(--ink-2);
@@ -257,6 +298,13 @@
 
 <div class="shell">
 <nav class="side" aria-label="Documentation">
+ <div class="find">
+   <label class="skip" for="find" data-lang="en">Filter sections</label>
+   <label class="skip" for="find" data-lang="id">Filter bagian</label>
+   <input id="find" type="search" autocomplete="off" spellcheck="false"
+          placeholder="Filter sections…" data-ph-en="Filter sections…" data-ph-id="Filter bagian…">
+   <span class="count" id="findcount" role="status" aria-live="polite"></span>
+ </div>
  <details class="toc" id="toc" open>
   <summary><span data-lang="en">Contents</span><span data-lang="id">Daftar isi</span></summary>
     <details class="grp" data-grp="foundations" open>
@@ -335,6 +383,14 @@
         <li><a href="#status"><span data-lang="en">Where it stands</span><span data-lang="id">Posisi saat ini</span></a></li>
         <li><a href="#roadmap"><span data-lang="en">Roadmap</span><span data-lang="id">Roadmap</span></a></li>
         <li><a href="#principles"><span data-lang="en">Principles</span><span data-lang="id">Prinsip</span></a></li>
+      </ol>
+    </details>
+
+    <details class="grp" data-grp="reference">
+      <summary><span data-lang="en">Reference</span><span data-lang="id">Rujukan</span></summary>
+      <ol>
+        <li><a href="#glossary"><span data-lang="en">Glossary</span><span data-lang="id">Glosarium</span></a></li>
+        <li><a href="#decisions"><span data-lang="en">Decision index</span><span data-lang="id">Indeks keputusan</span></a></li>
       </ol>
     </details>
  </details>
@@ -468,6 +524,12 @@ Var[p] = (alpha * beta) / ((alpha+beta)^2 * (alpha+beta+1))
 new entity -> Beta(1, 1)  ==  unknown, not untrusted</pre>
     <p data-lang="en">Carrying the variance matters as much as the mean: <strong>trust = confidence + uncertainty</strong>. Evidence is weighted, so a strong negative and a weak negative do not move the distribution equally.</p>
     <p data-lang="id">Membawa variance sama pentingnya dengan mean: <strong>trust = confidence + uncertainty</strong>. Evidence punya bobot, jadi negatif kuat dan negatif lemah tidak menggeser distribusi sama besar.</p>
+    <p class="seealso">
+      <b data-lang="en">See also</b><b data-lang="id">Lihat juga</b>
+      <a href="#epistemic" data-lang="en">Epistemic stage</a><a href="#epistemic" data-lang="id">Tahap epistemik</a>
+      <a href="#g-evidence" data-lang="en">Evidence mass</a><a href="#g-evidence" data-lang="id">Massa evidence</a>
+      <a href="#decisions" data-lang="en">D2a, D3, D4</a><a href="#decisions" data-lang="id">D2a, D3, D4</a>
+    </p>
   </section>
 
   <section id="memory">
@@ -483,6 +545,12 @@ beta_t  = lambda * beta_(t-1)  + negative_evidence
 
 lambda -> 1   long memory
 lambda -> 0   forgets fast</pre>
+    <p class="seealso">
+      <b data-lang="en">See also</b><b data-lang="id">Lihat juga</b>
+      <a href="#g-decay" data-lang="en">Decay and retention</a><a href="#g-decay" data-lang="id">Decay dan retensi</a>
+      <a href="#recipes" data-lang="en">Honouring a deletion request</a><a href="#recipes" data-lang="id">Memenuhi permintaan hapus</a>
+      <a href="#policy" data-lang="en">halfLifeHours, retentionHours</a><a href="#policy" data-lang="id">halfLifeHours, retentionHours</a>
+    </p>
   </section>
 
   <section id="anomaly">
@@ -532,6 +600,12 @@ decision = f(trust, uncertainty, anomaly, context,
     </div>
     <p data-lang="en">When uncertainty is high, observation beats punishment. Each step to the right demands strictly stronger evidence than the one before it, and the final call always belongs to the host application.</p>
     <p data-lang="id">Saat uncertainty tinggi, mengamati lebih baik daripada menghukum. Tiap langkah ke kanan menuntut evidence yang lebih kuat dari sebelumnya, dan keputusan akhir tetap milik aplikasi yang memasang.</p>
+    <p class="seealso">
+      <b data-lang="en">See also</b><b data-lang="id">Lihat juga</b>
+      <a href="#g-decision" data-lang="en">Decision, defined</a><a href="#g-decision" data-lang="id">Definisi keputusan</a>
+      <a href="#epistemic" data-lang="en">Epistemic stage</a><a href="#epistemic" data-lang="id">Tahap epistemik</a>
+      <a href="#g-advisory" data-lang="en">Why advisory</a><a href="#g-advisory" data-lang="id">Kenapa advisory</a>
+    </p>
   </section>
 
   <section id="epistemic">
@@ -551,6 +625,12 @@ ESTABLISHED   n &gt;= 7   the full decision model applies</pre>
     <p data-lang="id">Pengunjung pertama kali adalah <code>n = 2</code> — prior dan tidak ada yang lain — jadi dimensi trust tidak punya dasar untuk meminta apa pun, dan sarannya adalah izinkan. Ini bukan lantai yang memaksa hasil: pelanggaran constraint yang terbukti tetap sampai ke lapis keputusan atas otoritasnya sendiri, dan entity yang benar-benar baru tapi melanggar invariant tetap dibatasi.</p>
     <p data-lang="en">Three ceilings apply and the lowest binds — epistemic stage, uncertainty, and whether the anomaly dimension agrees that low variance was earned by varied behavior rather than by volume. Mass decays like everything else, so an entity that goes quiet drifts back to unknown.</p>
     <p data-lang="id">Tiga batas berlaku dan yang terendah mengikat — tahap epistemik, uncertainty, dan apakah dimensi anomali setuju bahwa variance rendah didapat dari perilaku beragam, bukan dari volume. Massa ikut meluruh, jadi entity yang diam bergerak kembali ke unknown.</p>
+    <p class="seealso">
+      <b data-lang="en">See also</b><b data-lang="id">Lihat juga</b>
+      <a href="#g-evidence" data-lang="en">Evidence mass</a><a href="#g-evidence" data-lang="id">Massa evidence</a>
+      <a href="#g-diversity" data-lang="en">Diversity</a><a href="#g-diversity" data-lang="id">Diversity</a>
+      <a href="#policy" data-lang="en">The thresholds</a><a href="#policy" data-lang="id">Ambangnya</a>
+    </p>
   </section>
 
   <section id="signals">
@@ -599,6 +679,13 @@ ESTABLISHED   n &gt;= 7   the full decision model applies</pre>
     </div>
     <p data-lang="en">Weak signals reinforce <em>around</em> the hard constraints instead of firing on their own. That relieves them of carrying full-precision weight, which is where false positives usually come from.</p>
     <p data-lang="id">Weak signal memperkuat <em>di sekitar</em> hard constraint, bukan memicu sendiri. Itu melepaskan beban presisi penuh dari mereka, sumber utama false positive.</p>
+    <p class="seealso">
+      <b data-lang="en">See also</b><b data-lang="id">Lihat juga</b>
+      <a href="#g-hard" data-lang="en">Hard constraint</a><a href="#g-hard" data-lang="id">Hard constraint</a>
+      <a href="#g-soft" data-lang="en">Soft constraint</a><a href="#g-soft" data-lang="id">Soft constraint</a>
+      <a href="#g-weak" data-lang="en">Weak signal</a><a href="#g-weak" data-lang="id">Weak signal</a>
+      <a href="#quickstart" data-lang="en">Declaring one</a><a href="#quickstart" data-lang="id">Cara mendeklarasikan</a>
+    </p>
   </section>
 
   <section id="pipeline">
@@ -655,6 +742,12 @@ prescription server
     <blockquote data-lang="id">The prescription travels. The patient does not.</blockquote>
     <p data-lang="en">Three things fall out of this at once: privacy by architecture rather than by policy, cross-ecosystem learning at pattern level without touching anyone's raw data, and local speed — the round trip only happens for genuinely uncertain cases.</p>
     <p data-lang="id">Tiga hal langsung didapat sekaligus: privasi lewat arsitektur bukan lewat kebijakan, pembelajaran lintas ekosistem di level pola tanpa menyentuh data mentah siapa pun, dan kecepatan lokal — round trip hanya terjadi untuk kasus yang benar-benar tidak pasti.</p>
+    <p class="seealso">
+      <b data-lang="en">See also</b><b data-lang="id">Lihat juga</b>
+      <a href="#vocabulary" data-lang="en">The vocabulary</a><a href="#vocabulary" data-lang="id">Kosakatanya</a>
+      <a href="#g-symptom" data-lang="en">Symptom, defined</a><a href="#g-symptom" data-lang="id">Definisi symptom</a>
+      <a href="#unresolved" data-lang="en">Why it is unresolved</a><a href="#unresolved" data-lang="id">Kenapa belum selesai</a>
+    </p>
   </section>
 
   <section id="vocabulary">
@@ -709,6 +802,12 @@ prescription server
     </ul>
     <p data-lang="en">Installing a library does not entitle it to the behavioral data of someone else's users. Privacy is best realized through architecture, not through a privacy policy.</p>
     <p data-lang="id">Memasang sebuah library tidak memberinya hak atas data perilaku pengguna orang lain. Privasi sebaiknya diwujudkan lewat arsitektur, bukan lewat privacy policy.</p>
+    <p class="seealso">
+      <b data-lang="en">See also</b><b data-lang="id">Lihat juga</b>
+      <a href="#g-symptom" data-lang="en">Symptom and prescription</a><a href="#g-symptom" data-lang="id">Symptom dan prescription</a>
+      <a href="#recipes" data-lang="en">Deletion, in practice</a><a href="#recipes" data-lang="id">Penghapusan, dalam praktik</a>
+      <a href="#economics" data-lang="en">Asymmetric cost</a><a href="#economics" data-lang="id">Asymmetric cost</a>
+    </p>
   </section>
 
   <section id="economics">
@@ -845,6 +944,11 @@ guard:     observe -> learn -> adapt -> release</pre>
     </table>
     <p class="muted" data-lang="en">One version number covers both entry points, so the collector and the core cannot be installed at mismatched versions.</p>
     <p class="muted" data-lang="id">Satu nomor versi mencakup kedua titik masuk, jadi collector dan core tidak bisa terpasang di versi yang berbeda.</p>
+    <p class="seealso">
+      <b data-lang="en">See also</b><b data-lang="id">Lihat juga</b>
+      <a href="#quickstart" data-lang="en">Quickstart</a><a href="#quickstart" data-lang="id">Mulai cepat</a>
+      <a href="#decisions" data-lang="en">D7, D25, D26</a><a href="#decisions" data-lang="id">D7, D25, D26</a>
+    </p>
   </section>
 
   <section id="quickstart">
@@ -897,6 +1001,13 @@ result.trace           // why, in the order that decided it</pre>
     <p data-lang="id">Catat <code>trace</code> sejak hari pertama. Dengan empat dimensi independen menyatu jadi satu hasil, keputusan tanpa penjelasan tidak bisa didebug belakangan — karena itu jejaknya bagian dari nilai kembalian, bukan flag debug.</p>
     <p class="muted" data-lang="en">A first-time entity is advised <code>ALLOW</code> with stage <code>unknown</code>. That is deliberate: lack of evidence is not negative evidence. A brand-new entity that breaks a <code>hard</code> invariant is still restricted.</p>
     <p class="muted" data-lang="id">Entity yang pertama kali datang disarankan <code>ALLOW</code> dengan tahap <code>unknown</code>. Itu disengaja: tidak adanya evidence bukan evidence negatif. Entity yang benar-benar baru tapi melanggar invariant <code>hard</code> tetap dibatasi.</p>
+    <p class="seealso">
+      <b data-lang="en">See also</b><b data-lang="id">Lihat juga</b>
+      <a href="#api" data-lang="en">API surface</a><a href="#api" data-lang="id">Permukaan API</a>
+      <a href="#policy" data-lang="en">Policy defaults</a><a href="#policy" data-lang="id">Default policy</a>
+      <a href="#recipes" data-lang="en">Recipes</a><a href="#recipes" data-lang="id">Resep</a>
+      <a href="#glossary" data-lang="en">Glossary</a><a href="#glossary" data-lang="id">Glosarium</a>
+    </p>
   </section>
 
   <section id="api">
@@ -961,6 +1072,12 @@ result.trace           // why, in the order that decided it</pre>
     </table>
     <p class="muted" data-lang="en">Not exported: the symptom vocabulary. It exists in the source as a flat v1 list, and stays unexported because nothing transmits yet — exporting it would imply a wire format that has not been designed.</p>
     <p class="muted" data-lang="id">Tidak diekspor: kosakata symptom. Ia ada di source sebagai daftar v1 yang flat, dan tetap tidak diekspor karena belum ada yang dikirim — mengekspornya akan menyiratkan format wire yang belum dirancang.</p>
+    <p class="seealso">
+      <b data-lang="en">See also</b><b data-lang="id">Lihat juga</b>
+      <a href="#policy" data-lang="en">Policy defaults</a><a href="#policy" data-lang="id">Default policy</a>
+      <a href="#glossary" data-lang="en">Glossary</a><a href="#glossary" data-lang="id">Glosarium</a>
+      <a href="#recipes" data-lang="en">Recipes</a><a href="#recipes" data-lang="id">Resep</a>
+    </p>
   </section>
 
   <section id="policy">
@@ -1022,6 +1139,12 @@ result.trace           // why, in the order that decided it</pre>
 });</pre>
     <p class="muted" data-lang="en">Each default is locked by a test that names the decision behind it, so revising one is a visible change rather than a silent drift.</p>
     <p class="muted" data-lang="id">Setiap default dipaku oleh test yang menyebut keputusan di belakangnya, jadi merevisi satu nilai jadi perubahan yang terlihat, bukan pergeseran diam-diam.</p>
+    <p class="seealso">
+      <b data-lang="en">See also</b><b data-lang="id">Lihat juga</b>
+      <a href="#glossary" data-lang="en">What each term means</a><a href="#glossary" data-lang="id">Arti tiap istilah</a>
+      <a href="#decisions" data-lang="en">D3, D4, D5, D40</a><a href="#decisions" data-lang="id">D3, D4, D5, D40</a>
+      <a href="#status" data-lang="en">How much to trust these</a><a href="#status" data-lang="id">Seberapa boleh dipercaya</a>
+    </p>
   </section>
 
   <section id="recipes">
@@ -1058,6 +1181,12 @@ form.addEventListener('submit', () =&gt; {
     <p data-lang="id">Store default bersifat process-local, jadi ia reset saat restart dan tidak dibagi antar instance. Di serverless itu berarti setiap cold start juga cold start bagi trust — yang dilaporkan guard, bukan disembunyikan, sebagai <code>coldStart: true</code>. Pindah ke store bersama, dan buktikan terhadap kontraknya sebelum dipercaya.</p>
     <p class="muted" data-lang="en">Hit a false positive? <a href="https://github.com/Fachryxyf/scorpio-guard/issues/new?template=false-positive.yml">Report it with the trace</a> — a decision without its trace cannot be diagnosed. Found something exploitable? <a href="https://github.com/Fachryxyf/scorpio-guard/security/advisories/new">Report it privately</a> instead.</p>
     <p class="muted" data-lang="id">Kena false positive? <a href="https://github.com/Fachryxyf/scorpio-guard/issues/new?template=false-positive.yml">Laporkan beserta jejaknya</a> — keputusan tanpa jejak tidak bisa didiagnosis. Menemukan yang bisa dieksploitasi? <a href="https://github.com/Fachryxyf/scorpio-guard/security/advisories/new">Laporkan secara privat</a> saja.</p>
+    <p class="seealso">
+      <b data-lang="en">See also</b><b data-lang="id">Lihat juga</b>
+      <a href="#api" data-lang="en">API surface</a><a href="#api" data-lang="id">Permukaan API</a>
+      <a href="#stores" data-lang="en">The store contract</a><a href="#stores" data-lang="id">Kontrak store</a>
+      <a href="#firstrun" data-lang="en">A real integration</a><a href="#firstrun" data-lang="id">Integrasi nyata</a>
+    </p>
   </section>
 
   <section id="library">
@@ -1082,6 +1211,12 @@ result.trace          // why, in the order that decided it</pre>
     <p data-lang="id">Di samping core ada collector sisi browser, diimpor terpisah sebagai <code>@fachryxyf/scorpio-guard/collect</code>. Ia menghitung interaksi — event pointer, ketukan tombol, input yang disuntikkan, waktu sampai submit — dan tidak mencatat apa pun soal isinya, karena constraint impossible-idle-action perlu tahu <em>apakah</em> interaksi terjadi, bukan isinya apa.</p>
     <p class="muted" data-lang="en">Not built: an anomaly classifier over the feature space, and the prescription client. Both wait on decisions recorded in the design log rather than on effort.</p>
     <p class="muted" data-lang="id">Belum dibangun: classifier anomali di atas ruang fitur, dan prescription client. Keduanya menunggu keputusan yang tercatat di log desain, bukan menunggu tenaga.</p>
+    <p class="seealso">
+      <b data-lang="en">See also</b><b data-lang="id">Lihat juga</b>
+      <a href="#api" data-lang="en">Every export</a><a href="#api" data-lang="id">Semua export</a>
+      <a href="#quickstart" data-lang="en">Quickstart</a><a href="#quickstart" data-lang="id">Mulai cepat</a>
+      <a href="#decisions" data-lang="en">Decision index</a><a href="#decisions" data-lang="id">Indeks keputusan</a>
+    </p>
   </section>
 
   <section id="stores">
@@ -1111,6 +1246,12 @@ assertConformant(await checkStoreConformance(() =&gt; myRedisStore()));</pre>
     </dl>
     <p data-lang="en">Each failure mode is covered by a deliberately broken store in the test suite, so the kit is shown to catch the mistake rather than merely to describe it. It earned that on its first run: the reference in-memory store handed back the live stored object, so a caller could mutate trust state without going through a write. Frozen now.</p>
     <p data-lang="id">Setiap mode kegagalan diuji dengan store yang sengaja dibuat salah di test suite, jadi kit ini terbukti menangkap kesalahannya, bukan cuma menjelaskannya. Ia membuktikan diri pada jalan pertama: store in-memory rujukan mengembalikan objek tersimpan yang hidup, sehingga pemanggil bisa memutasi state trust tanpa lewat penulisan. Sekarang dibekukan.</p>
+    <p class="seealso">
+      <b data-lang="en">See also</b><b data-lang="id">Lihat juga</b>
+      <a href="#policy" data-lang="en">Policy defaults</a><a href="#policy" data-lang="id">Default policy</a>
+      <a href="#recipes" data-lang="en">Surviving more than one process</a><a href="#recipes" data-lang="id">Bertahan lebih dari satu proses</a>
+      <a href="#decisions" data-lang="en">D8</a><a href="#decisions" data-lang="id">D8</a>
+    </p>
   </section>
 
   <section id="firstrun">
@@ -1160,6 +1301,12 @@ assertConformant(await checkStoreConformance(() =&gt; myRedisStore()));</pre>
     <p data-lang="id">Temuan di atas datang dari lapis invariant terdeklarasi, bagian yang paling tidak baru dari desain ini — keanggotaan himpunan, bisa ditulis satu <code>if</code>. Bagian yang benar-benar baru menggambarkan perilaku lintas populasi dan lintas waktu: trust sebagai distribusi, decay half-life, tahap epistemik, sinyal diversity. Satu orang membuka aplikasi beberapa kali sehari tidak bisa menggerakkan satu pun dari itu ke wilayah di mana mereka berarti.</p>
     <p class="muted" data-lang="en">So this is a smoke test, not a validated thesis. No threshold is calibrated by it, and the saturation guard cannot be tested without a patient adversary. A target that could settle the question needs unauthenticated traffic, data worth scraping, and a public lookup whose legitimate order can be declared.</p>
     <p class="muted" data-lang="id">Jadi ini smoke test, bukan tesis yang tervalidasi. Tidak ada ambang yang terkalibrasi darinya, dan saturation guard tidak bisa diuji tanpa penyerang yang sabar. Target yang bisa menuntaskan pertanyaannya butuh trafik tanpa autentikasi, data yang layak diambil, dan pencarian publik yang urutan sahnya bisa dideklarasikan.</p>
+    <p class="seealso">
+      <b data-lang="en">See also</b><b data-lang="id">Lihat juga</b>
+      <a href="#status" data-lang="en">Where it stands</a><a href="#status" data-lang="id">Posisi saat ini</a>
+      <a href="#roadmap" data-lang="en">What happens next</a><a href="#roadmap" data-lang="id">Yang berikutnya</a>
+      <a href="#g-trace" data-lang="en">Trace</a><a href="#g-trace" data-lang="id">Jejak</a>
+    </p>
   </section>
 
   <section id="unresolved">
@@ -1277,6 +1424,12 @@ assertConformant(await checkStoreConformance(() =&gt; myRedisStore()));</pre>
         </tr>
       </tbody>
     </table>
+    <p class="seealso">
+      <b data-lang="en">See also</b><b data-lang="id">Lihat juga</b>
+      <a href="#unresolved" data-lang="en">Open problems</a><a href="#unresolved" data-lang="id">Masalah terbuka</a>
+      <a href="#roadmap" data-lang="en">Roadmap</a><a href="#roadmap" data-lang="id">Roadmap</a>
+      <a href="#decisions" data-lang="en">Decision index</a><a href="#decisions" data-lang="id">Indeks keputusan</a>
+    </p>
   </section>
 
   <section id="roadmap">
@@ -1317,6 +1470,236 @@ The Guard owns the interpretation.
 The API distributes the prescription.
 The prescription travels; the patient does not.</pre>
   </section>
+
+  <section id="glossary">
+    <p class="num"><span data-lang="en">Glossary</span><span data-lang="id">Glosarium</span></p>
+    <h2 data-lang="en">The words, defined once</h2>
+    <h2 data-lang="id">Istilahnya, didefinisikan sekali</h2>
+    <p data-lang="en">Several of these are ordinary words used in a narrow sense. Where the narrow sense is the whole point, it is stated here rather than inferred from context.</p>
+    <p data-lang="id">Beberapa di antaranya kata biasa yang dipakai dalam arti sempit. Di mana arti sempit itu justru intinya, ia dinyatakan di sini, bukan disimpulkan dari konteks.</p>
+    <dl class="gloss">
+      <dt id="g-entity">Entity</dt>
+      <dd data-lang="en">The unit trust is measured against: an opaque string the host supplies, such as a session id or an account id. SG never interprets it, and never treats it as proof of identity. If it is cheap to discard, every history-based defence is cheap to discard with it. <a href="#g-root">Root of trust</a>.</dd>
+      <dd data-lang="id">Satuan yang diukur trust-nya: string opaque yang diberikan host, misalnya id sesi atau id akun. SG tidak pernah menafsirkannya, dan tidak pernah menganggapnya bukti identitas. Kalau ia murah untuk dibuang, setiap pertahanan berbasis riwayat juga murah untuk dibuang. <a href="#g-root">Root of trust</a>.</dd>
+
+      <dt id="g-root">Root of trust</dt>
+      <dd data-lang="en">Whatever makes an entity reference expensive to obtain or replace. Explicitly outside the library: SG accepts a reference as a basis for measurement, never as proof. Supplying a strong one is the host&#8217;s responsibility.</dd>
+      <dd data-lang="id">Apa pun yang membuat referensi entity mahal untuk didapat atau diganti. Secara eksplisit di luar library: SG menerima referensi sebagai dasar pengukuran, bukan sebagai bukti. Menyediakan yang kuat adalah tanggung jawab host.</dd>
+
+      <dt id="g-observation">Observation</dt>
+      <dd data-lang="en">One interaction handed to <code>evaluate()</code>: a scope, whatever <code>data</code> the host&#8217;s invariants know how to read, and optionally the evidence the host attributes to it. SG never inspects <code>data</code> itself.</dd>
+      <dd data-lang="id">Satu interaksi yang diberikan ke <code>evaluate()</code>: sebuah scope, <code>data</code> apa pun yang bisa dibaca invariant host, dan opsional evidence yang host kaitkan padanya. SG sendiri tidak pernah memeriksa <code>data</code>.</dd>
+
+      <dt id="g-scope">Scope</dt>
+      <dd data-lang="en">The area a declaration covers. It exists so a partial declaration is not silently global: a host may be certain about checkout ordering and unsure about navigation, and say so per area. An observation in a scope nobody declared yields no violations — unknown, not forbidden.</dd>
+      <dd data-lang="id">Area yang dicakup sebuah deklarasi. Ia ada supaya deklarasi sebagian tidak diam-diam jadi global: host bisa yakin soal urutan checkout dan tidak yakin soal navigasi, lalu menyatakannya per area. Observasi di scope yang tak dideklarasikan siapa pun tidak menghasilkan pelanggaran — belum diketahui, bukan dilarang.</dd>
+
+      <dt id="g-evidence">Evidence, and evidence mass</dt>
+      <dd data-lang="en">Evidence is what the host attributes to an interaction: <code>weak</code> or <code>strong</code>, positive or negative. Mass is how much of it has accumulated, <code>n = alpha + beta</code>, after decay. Mass is the amount of belief; trust is its direction. Reading them separately is the difference between &#8220;nothing is known&#8221; and &#8220;a lot is known and it balances&#8221;.</dd>
+      <dd data-lang="id">Evidence adalah apa yang host kaitkan pada sebuah interaksi: <code>weak</code> atau <code>strong</code>, positif atau negatif. Massa adalah seberapa banyak yang sudah terkumpul, <code>n = alpha + beta</code>, setelah decay. Massa adalah banyaknya keyakinan; trust adalah arahnya. Membacanya terpisah adalah bedanya &#8220;belum ada yang diketahui&#8221; dan &#8220;banyak yang diketahui dan hasilnya berimbang&#8221;.</dd>
+
+      <dt id="g-stage">Epistemic stage</dt>
+      <dd data-lang="en"><code>unknown</code>, <code>developing</code>, or <code>established</code>, read from evidence mass before trust is consulted at all. It answers &#8220;how much do I know?&#8221; so that trust can answer &#8220;what do I believe?&#8221; without the two being confused. <a href="#epistemic">Epistemic stage</a>.</dd>
+      <dd data-lang="id"><code>unknown</code>, <code>developing</code>, atau <code>established</code>, dibaca dari massa evidence sebelum trust dipertimbangkan sama sekali. Ia menjawab &#8220;seberapa banyak yang saya tahu?&#8221; supaya trust bisa menjawab &#8220;apa yang saya yakini?&#8221; tanpa keduanya tertukar. <a href="#epistemic">Tahap epistemik</a>.</dd>
+
+      <dt id="g-decay">Decay, and retention</dt>
+      <dd data-lang="en">Two different things. Decay is a half-life over real elapsed time: old evidence keeps counting, less. Retention is a boundary: past it, state is deleted outright. Decay alone never reaches zero, which is why deletion has to be its own rule rather than a consequence of forgetting.</dd>
+      <dd data-lang="id">Dua hal berbeda. Decay adalah half-life atas waktu nyata yang berjalan: evidence lama tetap dihitung, lebih kecil. Retensi adalah batas: melewatinya, state dihapus sama sekali. Decay sendiri tidak pernah mencapai nol, karena itu penghapusan harus jadi aturan sendiri, bukan akibat dari melupakan.</dd>
+
+      <dt id="g-hard">Hard constraint</dt>
+      <dd data-lang="en">A declared invariant whose violation is a proof, not a probability. Declaring one <code>hard</code> makes two claims at once: violations are deterministic, <em>and</em> the declaration is complete over its scope. &#8220;Hard&#8221; describes the certainty of the violation, never the severity of the response.</dd>
+      <dd data-lang="id">Invariant terdeklarasi yang pelanggarannya adalah bukti, bukan probabilitas. Mendeklarasikan sesuatu <code>hard</code> berarti dua klaim sekaligus: pelanggarannya deterministik, <em>dan</em> deklarasinya lengkap atas scope-nya. &#8220;Hard&#8221; menggambarkan kepastian pelanggarannya, bukan beratnya respons.</dd>
+
+      <dt id="g-soft">Soft constraint</dt>
+      <dd data-lang="en">The same shape, claiming only determinism and not completeness. It contributes strong negative evidence rather than proof — the honest choice whenever the legitimate set cannot be enumerated. A filled field with no keystrokes belongs here: password managers produce the same shape.</dd>
+      <dd data-lang="id">Bentuk yang sama, tapi hanya mengklaim determinisme, bukan kelengkapan. Ia menyumbang evidence negatif yang kuat, bukan bukti — pilihan jujur setiap kali himpunan yang sah tidak bisa didaftar habis. Field terisi tanpa ketukan tombol masuk sini: password manager menghasilkan bentuk yang sama.</dd>
+
+      <dt id="g-weak">Weak signal</dt>
+      <dd data-lang="en">Something unusual but not impossible, meaningful only in combination. Weak signals operate <em>around</em> the hard constraints, which is what relieves them of carrying full-precision weight alone — and is why statistical signals can be used here without inheriting a false-positive problem.</dd>
+      <dd data-lang="id">Sesuatu yang tidak biasa tapi bukan mustahil, dan hanya berarti dalam kombinasi. Weak signal bekerja <em>di sekitar</em> hard constraint, itu yang membebaskannya dari harus menanggung presisi penuh sendirian — dan itu sebabnya sinyal statistik bisa dipakai di sini tanpa mewarisi masalah false positive.</dd>
+
+      <dt id="g-diversity">Diversity</dt>
+      <dd data-lang="en">Whether an entity&#8217;s recent behavior was varied enough for low variance to mean anything. Volume alone can manufacture confidence; varied behavior earns it. Below the minimum observation count the verdict is <code>undefined</code> — undetermined, not negative.</dd>
+      <dd data-lang="id">Apakah perilaku terkini sebuah entity cukup beragam sehingga variance rendah berarti sesuatu. Volume saja bisa memproduksi kepercayaan; perilaku beragam mendapatkannya. Di bawah jumlah observasi minimum, putusannya <code>undefined</code> — belum tentu, bukan negatif.</dd>
+
+      <dt id="g-decision">Decision</dt>
+      <dd data-lang="en">One of five rungs — <code>ALLOW</code>, <code>OBSERVE</code>, <code>INCREASE_FRICTION</code>, <code>RESTRICT</code>, <code>BLOCK</code> — returned as advice. Each step right demands strictly stronger evidence than the one before. When several layers each advise, the strongest wins: a plain maximum, never a blend, because hard and weak signals are typed differently precisely so they are not averaged.</dd>
+      <dd data-lang="id">Satu dari lima tingkat — <code>ALLOW</code>, <code>OBSERVE</code>, <code>INCREASE_FRICTION</code>, <code>RESTRICT</code>, <code>BLOCK</code> — dikembalikan sebagai saran. Tiap langkah ke kanan menuntut evidence yang lebih kuat dari sebelumnya. Kalau beberapa lapis menyarankan sekaligus, yang terkuat menang: maksimum biasa, bukan campuran, karena sinyal hard dan weak memang dibedakan tipenya supaya tidak dirata-rata.</dd>
+
+      <dt id="g-advisory">Advisory</dt>
+      <dd data-lang="en">The guard returns a decision and never performs one. Not a limitation to be lifted later: the host owns the consequences, so the host owns the action. A proven violation advises <code>RESTRICT</code> rather than <code>BLOCK</code> for the same reason.</dd>
+      <dd data-lang="id">Guard mengembalikan keputusan dan tidak pernah menjalankannya. Bukan keterbatasan yang nanti dicabut: host yang menanggung akibatnya, jadi host yang memiliki tindakannya. Pelanggaran terbukti menyarankan <code>RESTRICT</code>, bukan <code>BLOCK</code>, dengan alasan yang sama.</dd>
+
+      <dt id="g-trace">Trace</dt>
+      <dd data-lang="en">The ordered reasoning behind one decision, returned with it. Part of the contract, not a debug flag: with four independent dimensions feeding one outcome, an unexplained decision cannot be debugged by whoever adopted it.</dd>
+      <dd data-lang="id">Penalaran berurutan di balik satu keputusan, dikembalikan bersamanya. Bagian dari kontrak, bukan flag debug: dengan empat dimensi independen menyatu jadi satu hasil, keputusan tanpa penjelasan tidak bisa didebug oleh yang memasangnya.</dd>
+
+      <dt id="g-coldstart">Cold start</dt>
+      <dd data-lang="en">No retained state for this entity — absent, or past its retention horizon. Reported as <code>coldStart: true</code> rather than hidden, because on serverless it is the normal case and an adopter needs to know when trust had nothing to work from.</dd>
+      <dd data-lang="id">Tidak ada state tersimpan untuk entity ini — tidak ada, atau sudah melewati horizon retensinya. Dilaporkan sebagai <code>coldStart: true</code>, tidak disembunyikan, karena di serverless ini justru kasus normal dan pemakai perlu tahu kapan trust tidak punya bahan apa pun.</dd>
+
+      <dt id="g-symptom">Symptom, and prescription</dt>
+      <dd data-lang="en">A symptom is an abstracted description of a pattern class — a category of complaint, a few bytes, no raw data and no identity. A prescription is a general strategy for handling that class. The prescription travels; the patient does not. Neither is implemented: the vocabulary is the open problem the rest waits on.</dd>
+      <dd data-lang="id">Symptom adalah deskripsi abstrak sebuah kelas pola — kategori keluhan, beberapa byte, tanpa data mentah dan tanpa identitas. Prescription adalah strategi umum untuk menangani kelas itu. Yang berjalan adalah resepnya; pasiennya tidak. Keduanya belum diimplementasikan: kosakatanya adalah masalah terbuka yang ditunggu sisanya.</dd>
+    </dl>
+    <p class="seealso">
+      <b data-lang="en">See also</b><b data-lang="id">Lihat juga</b>
+      <a href="#trust" data-lang="en">Trust as a distribution</a><a href="#trust" data-lang="id">Trust sebagai distribusi</a>
+      <a href="#signals" data-lang="en">Signals</a><a href="#signals" data-lang="id">Sinyal</a>
+      <a href="#decisions" data-lang="en">Decision index</a><a href="#decisions" data-lang="id">Indeks keputusan</a>
+    </p>
+  </section>
+
+  <section id="decisions">
+    <p class="num"><span data-lang="en">Decision index</span><span data-lang="id">Indeks keputusan</span></p>
+    <h2 data-lang="en">Every decision, and where it lives in the code</h2>
+    <h2 data-lang="id">Setiap keputusan, dan di mana ia hidup di kode</h2>
+    <p data-lang="en">The design record holds the reasoning; this is the index into it, with the file each decision turned into. Read the entry before proposing a change to the model — several obvious-looking alternatives were considered and rejected there for reasons worth knowing.</p>
+    <p data-lang="id">Catatan desain menyimpan penalarannya; ini indeksnya, beserta file tempat tiap keputusan menjelma. Baca entri-nya sebelum mengusulkan perubahan pada modelnya — beberapa alternatif yang tampak jelas sudah dipertimbangkan dan ditolak di sana dengan alasan yang layak diketahui.</p>
+    <table class="dindex">
+      <thead>
+        <tr>
+          <th data-lang="en">Ref</th><th data-lang="id">Ref</th>
+          <th data-lang="en">Decided</th><th data-lang="id">Diputuskan</th>
+          <th data-lang="en">Lives in</th><th data-lang="id">Ada di</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="grouprow"><td colspan="3" data-lang="en">The entity, and what may be known about it</td><td colspan="3" data-lang="id">Entity, dan apa yang boleh diketahui tentangnya</td></tr>
+        <tr><td><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md#d1--entity-is-the-fundamental-reference-unit">D1</a></td>
+          <td data-lang="en">The entity is the reference unit, and its key is opaque</td><td data-lang="id">Entity adalah satuan rujukan, dan kuncinya opaque</td>
+          <td><code>trust.ts</code>, <code>store.ts</code></td></tr>
+        <tr><td><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md#d11--root-of-trust-is-outside-sg">D1.1</a></td>
+          <td data-lang="en">The root of trust is outside SG — a basis for measurement, never proof</td><td data-lang="id">Root of trust ada di luar SG — dasar pengukuran, bukan bukti</td>
+          <td data-lang="en">the host&#8217;s responsibility</td><td data-lang="id">tanggung jawab host</td></tr>
+        <tr><td><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md#d12--data-deletion-is-a-requirement">D1.2</a>, <a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md#d22--purge-primitive-from-the-start-consent-belongs-to-the-host">D22</a></td>
+          <td data-lang="en">Deletion is a requirement, and a purge primitive exists from the start</td><td data-lang="id">Penghapusan adalah kebutuhan, dan primitif purge ada sejak awal</td>
+          <td><code>guard.forget()</code>, <code>store.ts</code></td></tr>
+        <tr><td><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md#d2--one-trust-state-per-entity-not-per-entity-endpoint">D2</a></td>
+          <td data-lang="en">One trust state per entity, not per entity-endpoint</td><td data-lang="id">Satu state trust per entity, bukan per entity-endpoint</td>
+          <td><code>guard.ts</code></td></tr>
+
+        <tr class="grouprow"><td colspan="3" data-lang="en">Trust, and its arithmetic</td><td colspan="3" data-lang="id">Trust, dan aritmetikanya</td></tr>
+        <tr><td><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md#d2a--trust-is-stored-as-a-distribution-read-as-a-number">D2a</a></td>
+          <td data-lang="en">Trust is stored as a Beta distribution, read as a number</td><td data-lang="id">Trust disimpan sebagai distribusi Beta, dibaca sebagai angka</td>
+          <td><code>trust.ts</code></td></tr>
+        <tr><td><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md#d3--decay-is-a-half-life-over-real-elapsed-time">D3</a></td>
+          <td data-lang="en">Decay is a half-life over real elapsed time, computed on read</td><td data-lang="id">Decay adalah half-life atas waktu nyata, dihitung saat dibaca</td>
+          <td><code>trust.ts</code>, <code>policy.ts</code></td></tr>
+        <tr><td><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md#d4--evidence-weights-symmetric-41-strong-to-weak">D4</a></td>
+          <td data-lang="en">Evidence weights, symmetric, 4:1 strong to weak</td><td data-lang="id">Bobot evidence, simetris, 4:1 strong ke weak</td>
+          <td><code>policy.ts</code></td></tr>
+        <tr><td><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md#d6--expiration-is-a-retention-boundary-separate-from-decay">D6</a></td>
+          <td data-lang="en">Expiry is a retention boundary, separate from decay, because decay never reaches zero</td><td data-lang="id">Kedaluwarsa adalah batas retensi, terpisah dari decay, karena decay tak pernah mencapai nol</td>
+          <td><code>trust.ts</code>, <code>store.ts</code></td></tr>
+        <tr><td><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md#d35--an-observation-without-evidence-is-not-a-meaningful-update">D35</a></td>
+          <td data-lang="en">An observation carrying no evidence is not a meaningful update</td><td data-lang="id">Observasi tanpa evidence bukan pembaruan yang berarti</td>
+          <td><code>trust.ts</code></td></tr>
+
+        <tr class="grouprow"><td colspan="3" data-lang="en">Reading a decision out of it</td><td colspan="3" data-lang="id">Membaca keputusan darinya</td></tr>
+        <tr><td><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md#d5--decision-is-a-function-of-trust-and-uncertainty">D5</a></td>
+          <td data-lang="en">Decision is a function of trust and uncertainty, with an uncertainty ceiling</td><td data-lang="id">Keputusan adalah fungsi trust dan uncertainty, dengan batas uncertainty</td>
+          <td><code>assess.ts</code></td></tr>
+        <tr><td><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md#d40--an-epistemic-stage-precedes-trust-and-uncertainty">D40</a></td>
+          <td data-lang="en">An epistemic stage over evidence mass precedes trust and uncertainty</td><td data-lang="id">Tahap epistemik atas massa evidence mendahului trust dan uncertainty</td>
+          <td><code>assess.ts</code>, <code>policy.ts</code></td></tr>
+        <tr><td><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md#d39--the-cold-start-band-contradicted-the-zero-friction-goal">D39</a></td>
+          <td data-lang="en">The cold-start band contradicted zero friction, and was removed</td><td data-lang="id">Band cold-start bertentangan dengan tanpa-friksi, dan dihapus</td>
+          <td><code>assess.test.ts</code></td></tr>
+        <tr><td><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md#d37--saturation-guard-belongs-in-the-decision-layer-not-the-trust-model">D37</a></td>
+          <td data-lang="en">The saturation guard belongs in the decision layer, not the trust model</td><td data-lang="id">Saturation guard ada di lapis keputusan, bukan di model trust</td>
+          <td><code>assess.ts</code>, <code>behavior.ts</code></td></tr>
+        <tr><td><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md#vocabulary-challenge-and-deceive-are-not-new-rungs">D33</a></td>
+          <td data-lang="en">Five rungs. <code>CHALLENGE</code> is an alias and <code>deceive</code> is host-side: SG names severity only</td><td data-lang="id">Lima tingkat. <code>CHALLENGE</code> alias dan <code>deceive</code> urusan host: SG hanya menamai tingkat keparahan</td>
+          <td><code>decision.ts</code></td></tr>
+        <tr><td><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md#d23--decision-trace-is-mandatory">D23</a></td>
+          <td data-lang="en">The decision trace is mandatory, not a debug flag</td><td data-lang="id">Jejak keputusan wajib, bukan flag debug</td>
+          <td><code>guard.ts</code></td></tr>
+
+        <tr class="grouprow"><td colspan="3" data-lang="en">What is provable, and what is merely unusual</td><td colspan="3" data-lang="id">Yang bisa dibuktikan, dan yang cuma tidak biasa</td></tr>
+        <tr><td><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md#d13--hard-constraints-are-violated-invariants-in-five-classes">D13</a></td>
+          <td data-lang="en">Hard constraints are violated invariants, in five classes</td><td data-lang="id">Hard constraint adalah invariant yang dilanggar, dalam lima kelas</td>
+          <td><code>constraints.ts</code></td></tr>
+        <tr><td><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md#d14--hard-describes-certainty-not-severity">D14</a></td>
+          <td data-lang="en">&#8220;Hard&#8221; describes certainty, not severity — hence <code>RESTRICT</code>, not <code>BLOCK</code></td><td data-lang="id">&#8220;Hard&#8221; soal kepastian, bukan keparahan — karena itu <code>RESTRICT</code>, bukan <code>BLOCK</code></td>
+          <td><code>policy.ts</code></td></tr>
+        <tr><td><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md#d15--hard-constraints-stay-outside-the-beta-model">D15</a></td>
+          <td data-lang="en">Hard constraints stay outside the Beta model, so proof is never averaged into a score</td><td data-lang="id">Hard constraint tetap di luar model Beta, jadi bukti tak pernah dirata-rata jadi skor</td>
+          <td><code>guard.ts</code></td></tr>
+        <tr><td><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md#d16--invariants-are-declared-never-learned">D16</a></td>
+          <td data-lang="en">Invariants are declared by the host, never learned from rarity</td><td data-lang="id">Invariant dideklarasikan host, tidak pernah dipelajari dari kelangkaan</td>
+          <td><code>transitions.ts</code></td></tr>
+        <tr><td><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md#d32--declaring-hard-is-itself-a-claim-of-completeness">D32</a></td>
+          <td data-lang="en">Declaring <code>hard</code> is itself a claim of completeness over a scope</td><td data-lang="id">Mendeklarasikan <code>hard</code> itu sendiri klaim kelengkapan atas sebuah scope</td>
+          <td><code>constraints.ts</code></td></tr>
+        <tr><td><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md#d38--a-violated-soft-invariant-is-strong-negative-trust-evidence">D38</a></td>
+          <td data-lang="en">A violated <code>soft</code> invariant is strong negative evidence — unprovable is not faint</td><td data-lang="id">Invariant <code>soft</code> yang dilanggar adalah evidence negatif kuat — tak terbukti bukan berarti samar</td>
+          <td><code>constraints.ts</code>, <code>policy.ts</code></td></tr>
+        <tr><td><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md#d18--anomaly-feature-space-first-algorithm-later">D18</a>, <a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md#d36--the-anomaly-feature-space">D36</a></td>
+          <td data-lang="en">Anomaly: settle the feature space first, choose the algorithm later</td><td data-lang="id">Anomali: sepakati ruang fiturnya dulu, pilih algoritmanya nanti</td>
+          <td><code>behavior.ts</code></td></tr>
+
+        <tr class="grouprow"><td colspan="3" data-lang="en">Shape of the software</td><td colspan="3" data-lang="id">Bentuk software-nya</td></tr>
+        <tr><td><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md#d7--one-package-multiple-entry-points">D7</a></td>
+          <td data-lang="en">One package, multiple entry points, one version number</td><td data-lang="id">Satu paket, beberapa titik masuk, satu nomor versi</td>
+          <td><code>package.json</code>, <code>src/collect/</code></td></tr>
+        <tr><td><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md#d8--pluggable-statestore-in-memory-default-async">D8</a></td>
+          <td data-lang="en">Pluggable <code>StateStore</code>, in-memory default, and a contract that ships as runnable checks</td><td data-lang="id"><code>StateStore</code> yang bisa diganti, default in-memory, dan kontrak yang dikirim sebagai pemeriksaan</td>
+          <td><code>store.ts</code>, <code>conformance.ts</code></td></tr>
+        <tr><td><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md#d9--guardevaluate-entity-observation-context">D9</a></td>
+          <td data-lang="en"><code>evaluate({ entity, observation, context })</code> — the formal model with the names filled in</td><td data-lang="id"><code>evaluate({ entity, observation, context })</code> — model formalnya dengan nama-nama terisi</td>
+          <td><code>guard.ts</code></td></tr>
+        <tr><td><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md#d10--all-public-evaluation-and-storage-apis-are-async">D10</a></td>
+          <td data-lang="en">Every public evaluation and storage API is async</td><td data-lang="id">Setiap API evaluasi dan penyimpanan publik bersifat async</td>
+          <td><code>guard.ts</code>, <code>store.ts</code></td></tr>
+        <tr><td><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md#d11--time-is-injected-through-a-clock-interface">D11</a></td>
+          <td data-lang="en">Time is injected through a <code>Clock</code>, never read directly in the core</td><td data-lang="id">Waktu disuntikkan lewat <code>Clock</code>, tidak pernah dibaca langsung di core</td>
+          <td><code>clock.ts</code></td></tr>
+        <tr><td><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md#d12--core-is-framework-agnostic">D12</a></td>
+          <td data-lang="en">The core is framework-agnostic; middleware is an adapter over it, never the reverse</td><td data-lang="id">Core tidak terikat framework; middleware adalah adapter di atasnya, tidak sebaliknya</td>
+          <td><code>src/core/</code></td></tr>
+        <tr><td><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md#d26--node-floor-226">D26</a>, <a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md#d27--ci-now-typecheck-and-test">D27</a></td>
+          <td data-lang="en">Node <code>&gt;=22.6</code> so tests run TypeScript directly; CI is typecheck, test, build, smoke</td><td data-lang="id">Node <code>&gt;=22.6</code> supaya test menjalankan TypeScript langsung; CI: typecheck, test, build, smoke</td>
+          <td><code>ci.yml</code></td></tr>
+        <tr><td><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md#d24--licence-mit">D24</a>, <a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md#d25--npm-fachryxyfscorpio-guard">D25</a></td>
+          <td data-lang="en">MIT, scoped npm name, published once the API stops moving — installable from git until then</td><td data-lang="id">MIT, nama npm bertingkat, dipublikasikan setelah API berhenti berubah — sampai itu, pasang dari git</td>
+          <td><code>package.json</code></td></tr>
+
+        <tr class="grouprow"><td colspan="3" data-lang="en">Locality and the protocol</td><td colspan="3" data-lang="id">Lokalitas dan protokolnya</td></tr>
+        <tr><td><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md#d17--no-api-key-in-the-local-core">D17</a></td>
+          <td data-lang="en">No API key in the local core. There is nothing to authenticate to</td><td data-lang="id">Tidak ada API key di core lokal. Tidak ada yang perlu diautentikasi</td>
+          <td><code>symptoms.ts</code></td></tr>
+        <tr><td><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md#d19--symptoms-are-local-first-never-per-request">D19</a></td>
+          <td data-lang="en">Symptoms are local-first, never sent per request</td><td data-lang="id">Symptom bersifat local-first, tidak pernah dikirim per request</td>
+          <td data-lang="en">not implemented</td><td data-lang="id">belum diimplementasikan</td></tr>
+        <tr><td><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md#d20--a-serverless-guard-is-fully-functional">D20</a>, <a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md#d21--cold-start-restated">D21</a></td>
+          <td data-lang="en">A serverless guard is fully functional, and cold start is reported rather than hidden</td><td data-lang="id">Guard serverless berfungsi penuh, dan cold start dilaporkan, bukan disembunyikan</td>
+          <td><code>guard.ts</code></td></tr>
+        <tr><td><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md#d31--relationship--e-x-e---r-is-deferred-out-of-the-poc">D31</a></td>
+          <td data-lang="en">Entity relationships are deferred out of the PoC — the value and the privacy cost sit in the same place</td><td data-lang="id">Relasi antar entity ditunda keluar PoC — nilainya dan biaya privasinya ada di tempat yang sama</td>
+          <td data-lang="en">deferred</td><td data-lang="id">ditunda</td></tr>
+
+        <tr class="grouprow"><td colspan="3" data-lang="en">Proving any of it</td><td colspan="3" data-lang="id">Membuktikan semuanya</td></tr>
+        <tr><td><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md#d30--poc-must-run-against-a-real-application-flow">D30</a></td>
+          <td data-lang="en">The PoC must run against a real application flow, not a synthetic fixture</td><td data-lang="id">PoC harus jalan pada alur aplikasi nyata, bukan fixture sintetis</td>
+          <td><code>examples/healthme/</code></td></tr>
+        <tr><td><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md#d34--poc-target-healthme-with-its-limits-stated">D34</a></td>
+          <td data-lang="en">HealthMe is the first target, with its limits stated: one user, so a smoke test</td><td data-lang="id">HealthMe target pertama, dengan batasnya dinyatakan: satu pengguna, jadi smoke test</td>
+          <td><code>examples/healthme/</code></td></tr>
+        <tr><td><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md#d28--site-stays-where-it-is">D28</a>, <a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md#d281--the-site-indexes-the-record-it-does-not-restate-it">D28.1</a>, <a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md#d29--no-empty-repositories">D29</a></td>
+          <td data-lang="en">The site stays at the repository root, indexes this record rather than restating it, and no empty repositories are created ahead of content</td><td data-lang="id">Situs tetap di root repositori, mengindeks catatan ini alih-alih mengulanginya, dan tidak ada repositori kosong dibuat sebelum ada isinya</td>
+          <td><code>index.html</code></td></tr>
+      </tbody>
+    </table>
+    <p class="muted" data-lang="en">Forty-three entries, and the ones still unvalidated are listed as such at the end of the record rather than quietly folded in with the rest.</p>
+    <p class="muted" data-lang="id">Empat puluh tiga entri, dan yang belum tervalidasi didaftar apa adanya di akhir catatan, bukan diselipkan diam-diam bersama sisanya.</p>
+    <p class="seealso">
+      <b data-lang="en">See also</b><b data-lang="id">Lihat juga</b>
+      <a href="#glossary" data-lang="en">Glossary</a><a href="#glossary" data-lang="id">Glosarium</a>
+      <a href="#status" data-lang="en">Where it stands</a><a href="#status" data-lang="id">Posisi saat ini</a>
+      <a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md" data-lang="en">The full design record</a><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md" data-lang="id">Catatan desain lengkap</a>
+    </p>
+  </section>
 </main>
 </div>
 
@@ -1334,9 +1717,16 @@ The prescription travels; the patient does not.</pre>
     var themeBtn = document.getElementById('theme');
     var langBtn = document.getElementById('lang');
 
+    var findBox = document.getElementById('find');
+    var findReady = false;
+
     function paint() {
       themeBtn.textContent = root.dataset.theme === 'dark' ? 'LIGHT' : 'DARK';
       langBtn.textContent = root.lang === 'en' ? 'ID' : 'EN';
+      findBox.placeholder = findBox.getAttribute('data-ph-' + root.lang) || '';
+      // Relabel the match count in the new language. Skipped during init, when
+      // the filter's own state does not exist yet.
+      if (findReady && findBox.value) filter(findBox.value);
       themeBtn.setAttribute('aria-pressed', root.dataset.theme === 'dark');
     }
     function store(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
@@ -1419,6 +1809,78 @@ The prescription travels; the patient does not.</pre>
       hash.textContent = '#';
       hash.setAttribute('aria-label', 'Permalink: ' + s.id);
       num.appendChild(hash);
+    });
+
+    // Every glossary term is linkable, the way a wiki entry should be.
+    document.querySelectorAll('dl.gloss dt[id]').forEach(function (dt) {
+      var hash = document.createElement('a');
+      hash.className = 'hash';
+      hash.href = '#' + dt.id;
+      hash.textContent = '#';
+      hash.setAttribute('aria-label', 'Permalink: ' + dt.textContent.trim());
+      dt.appendChild(hash);
+    });
+
+    // ponytail: substring match over the link text already in the DOM. No index,
+    // no fuzzy ranking. Upgrade path: a real index if this grows past one page.
+    var count = document.getElementById('findcount');
+    var openBeforeFilter = null;
+
+    function filter(query) {
+      var q = query.trim().toLowerCase();
+
+      if (!q) {
+        side.removeAttribute('data-finding');
+        groups.forEach(function (group) {
+          group.hidden = false;
+          group.querySelectorAll('li').forEach(function (li) { li.hidden = false; });
+          if (openBeforeFilter) group.open = openBeforeFilter.indexOf(group) !== -1;
+        });
+        openBeforeFilter = null;
+        count.textContent = '';
+        return;
+      }
+
+      if (!openBeforeFilter) {
+        openBeforeFilter = groups.filter(function (group) { return group.open; });
+      }
+      side.setAttribute('data-finding', '');
+
+      var hits = 0;
+      groups.forEach(function (group) {
+        var shown = 0;
+        group.querySelectorAll('li').forEach(function (li) {
+          // Both languages are in the DOM; the hidden one should still match.
+          var match = li.textContent.toLowerCase().indexOf(q) !== -1;
+          li.hidden = !match;
+          if (match) shown += 1;
+        });
+        group.hidden = shown === 0;
+        group.open = shown > 0;
+        hits += shown;
+      });
+
+      count.textContent = root.lang === 'id'
+        ? (hits === 0 ? 'tidak ada yang cocok' : hits + ' bagian')
+        : (hits === 0 ? 'no matches' : hits + (hits === 1 ? ' section' : ' sections'));
+    }
+
+    findReady = true;
+    findBox.addEventListener('input', function () { filter(findBox.value); });
+    findBox.addEventListener('keydown', function (e) {
+      if (e.key !== 'Escape') return;
+      findBox.value = '';
+      filter('');
+    });
+
+    // "/" focuses the filter, as it does in every docs site worth using.
+    document.addEventListener('keydown', function (e) {
+      if (e.key !== '/' || e.metaKey || e.ctrlKey || e.altKey) return;
+      var tag = (e.target.tagName || '').toLowerCase();
+      if (tag === 'input' || tag === 'textarea' || e.target.isContentEditable) return;
+      e.preventDefault();
+      findBox.focus();
+      findBox.select();
     });
   })();
 </script>
