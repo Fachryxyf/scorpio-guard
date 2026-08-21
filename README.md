@@ -10,7 +10,7 @@
 
 > **Trust is a spectrum, not a verdict.** Adaptive trust evaluation for web interactions — a local library, not a centralized gatekeeper.
 
-**Status: design phase.** No code yet. What follows is the design the implementation will be built against.
+**Status: design phase.** A skeleton exists; the models do not. What follows is the design the implementation is being built against.
 
 ---
 
@@ -94,6 +94,29 @@ Named honestly, not hidden.
 - **Poisoning resistance** — gradual baseline shifts where every individual step looks legitimate.
 - **Privacy/legal basis** — behavioral history is personal data under GDPR and Indonesia's UU PDP.
 - **Sequencing** — is a durable public protocol worth designing *before* a proof-of-concept exists?
+
+## Repositories
+
+Three repositories, not a monorepo — see [REPOSITORIES.md](REPOSITORIES.md) for the reasoning and the planned scope of each.
+
+| Repository | Visibility | Contains |
+|---|---|---|
+| `scorpio-guard` | Public | The TypeScript library. This repo. |
+| `scorpio-guard-protocol` | Public | Symptom vocabulary and wire format. Spec only. Not started. |
+| `scorpio-guard-server` | Private | Rust reference server. Rule content. Not started. |
+
+## Development
+
+Requires Node 22.6 or newer — tests run TypeScript directly, with no build step.
+
+```
+npm install
+npm test          # node:test, no framework
+npm run typecheck
+npm run build     # emits dist/
+```
+
+What exists so far is the decision spectrum and the v1 symptom vocabulary. The trust model, signal collection, the anomaly model, and the prescription client are not implemented.
 
 ## Roadmap
 

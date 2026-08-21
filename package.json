@@ -1,0 +1,31 @@
+{
+  "name": "scorpio-guard",
+  "version": "0.0.0",
+  "description": "Adaptive trust evaluation for web interactions — a local, advisory library.",
+  "license": "MIT",
+  "author": "Fachryxyf",
+  "repository": "github:Fachryxyf/scorpio-guard",
+  "homepage": "https://scorpio-guard.fachryxyf.com",
+  "type": "module",
+  "private": true,
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "test": "node --experimental-strip-types --test \"src/**/*.test.ts\""
+  },
+  "devDependencies": {
+    "typescript": "5.9.3"
+  },
+  "engines": {
+    "node": ">=22.6"
+  }
+}

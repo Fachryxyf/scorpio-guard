@@ -1,3 +1,6 @@
 adaptive-trust-guard-design-notes.md
 adaptive-trust-guard-part2-protocol-and-governance.md
 adaptive-trust-guard-pre-plan.md
+node_modules/
+dist/
+*.tsbuildinfo
