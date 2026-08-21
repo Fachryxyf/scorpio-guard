@@ -285,6 +285,7 @@
       <summary><span data-lang="en">Decision</span><span data-lang="id">Keputusan</span></summary>
       <ol>
         <li><a href="#decision"><span data-lang="en">Decision layer</span><span data-lang="id">Lapis keputusan</span></a></li>
+        <li><a href="#epistemic"><span data-lang="en">Epistemic stage</span><span data-lang="id">Tahap epistemik</span></a></li>
         <li><a href="#signals"><span data-lang="en">Signals</span><span data-lang="id">Sinyal</span></a></li>
         <li><a href="#pipeline"><span data-lang="en">Mental model</span><span data-lang="id">Model mental</span></a></li>
       </ol>
@@ -307,6 +308,14 @@
         <li><a href="#opencore"><span data-lang="en">Open core</span><span data-lang="id">Open core</span></a></li>
       </ol>
     </details>
+    <details class="grp" data-grp="build">
+      <summary><span data-lang="en">Implementation</span><span data-lang="id">Implementasi</span></summary>
+      <ol>
+        <li><a href="#library"><span data-lang="en">The library</span><span data-lang="id">Library-nya</span></a></li>
+        <li><a href="#firstrun"><span data-lang="en">First integration</span><span data-lang="id">Integrasi pertama</span></a></li>
+      </ol>
+    </details>
+
     <details class="grp" data-grp="honest">
       <summary><span data-lang="en">Honest status</span><span data-lang="id">Status jujur</span></summary>
       <ol>
@@ -321,8 +330,8 @@
 
 <main id="doc">
   <div class="lede">
-    <p class="num" data-lang="en">Design notes · v0 · 2026</p>
-    <p class="num" data-lang="id">Catatan desain · v0 · 2026</p>
+    <p class="num" data-lang="en">Design notes &amp; implementation · v0 · 2026</p>
+    <p class="num" data-lang="id">Catatan desain &amp; implementasi · v0 · 2026</p>
     <h1 data-lang="en">Trust is a spectrum, not a verdict.</h1>
     <h1 data-lang="id">Trust itu spektrum, bukan putusan.</h1>
     <p data-lang="en">Scorpio Guard is a local, advisory trust-evaluation library for web interactions, sitting on top of an open symptom/prescription protocol. It does not answer <em>human or bot</em>. It estimates how much trust an interaction currently deserves, and hands that judgement back to whoever owns the application.</p>
@@ -331,7 +340,7 @@
       <span class="tag" data-lang="en">Status · pre-alpha</span><span class="tag" data-lang="id">Status · pra-alfa</span>
       <span class="tag" data-lang="en">Stage · design</span><span class="tag" data-lang="id">Tahap · desain</span>
       <span class="tag" data-lang="en">Model · open core</span><span class="tag" data-lang="id">Model · open core</span>
-      <span class="tag">No code yet</span>
+      <span class="tag" data-lang="en">Library · in progress</span><span class="tag" data-lang="id">Library · berjalan</span>
     </p>
   </div>
 
@@ -488,6 +497,25 @@ decision = f(trust, uncertainty, anomaly, context,
     </div>
     <p data-lang="en">When uncertainty is high, observation beats punishment. Each step to the right demands strictly stronger evidence than the one before it, and the final call always belongs to the host application.</p>
     <p data-lang="id">Saat uncertainty tinggi, mengamati lebih baik daripada menghukum. Tiap langkah ke kanan menuntut evidence yang lebih kuat dari sebelumnya, dan keputusan akhir tetap milik aplikasi yang memasang.</p>
+  </section>
+
+  <section id="epistemic">
+    <p class="num"><span data-lang="en">Epistemic stage</span><span data-lang="id">Tahap epistemik</span></p>
+    <h2 data-lang="en">Lack of evidence is not evidence of distrust</h2>
+    <h2 data-lang="id">Tidak adanya evidence bukan bukti ketidakpercayaan</h2>
+    <p data-lang="en">A mean of 0.5 has two entirely different causes: nothing has been observed yet, or a great deal has been observed and it genuinely balances. Variance does not separate them, because for a Beta distribution <code>Var[p] = p(1-p)/(n+1)</code> — it already mixes the mean with the amount of evidence.</p>
+    <p data-lang="id">Nilai tengah 0.5 punya dua sebab yang sama sekali berbeda: belum ada yang diamati, atau sudah banyak diamati dan memang berimbang. Variance tidak memisahkan keduanya, karena untuk distribusi Beta <code>Var[p] = p(1-p)/(n+1)</code> — ia sudah mencampur nilai tengah dengan banyaknya evidence.</p>
+    <p data-lang="en">So evidence mass is read as its own stage, ahead of trust and uncertainty.</p>
+    <p data-lang="id">Karena itu massa evidence dibaca sebagai tahap tersendiri, sebelum trust dan uncertainty.</p>
+    <pre>n = alpha + beta
+
+UNKNOWN       n &lt; 3    the trust dimension asks for nothing
+DEVELOPING    n &lt; 7    trust begins to influence treatment
+ESTABLISHED   n &gt;= 7   the full decision model applies</pre>
+    <p data-lang="en">A first-time visitor is <code>n = 2</code> — the prior and nothing else — so the trust dimension has no standing to ask for anything, and the advice is to allow. That is not a floor forcing the outcome: a proven constraint violation still reaches the decision layer on its own authority, and a brand-new entity that breaks a declared invariant is still restricted.</p>
+    <p data-lang="id">Pengunjung pertama kali adalah <code>n = 2</code> — prior dan tidak ada yang lain — jadi dimensi trust tidak punya dasar untuk meminta apa pun, dan sarannya adalah izinkan. Ini bukan lantai yang memaksa hasil: pelanggaran constraint yang terbukti tetap sampai ke lapis keputusan atas otoritasnya sendiri, dan entity yang benar-benar baru tapi melanggar invariant tetap dibatasi.</p>
+    <p data-lang="en">Three ceilings apply and the lowest binds — epistemic stage, uncertainty, and whether the anomaly dimension agrees that low variance was earned by varied behavior rather than by volume. Mass decays like everything else, so an entity that goes quiet drifts back to unknown.</p>
+    <p data-lang="id">Tiga batas berlaku dan yang terendah mengikat — tahap epistemik, uncertainty, dan apakah dimensi anomali setuju bahwa variance rendah didapat dari perilaku beragam, bukan dari volume. Massa ikut meluruh, jadi entity yang diam bergerak kembali ke unknown.</p>
   </section>
 
   <section id="signals">
@@ -745,6 +773,73 @@ guard:     observe -> learn -> adapt -> release</pre>
     </dl>
     <p class="muted" data-lang="en">The replaceable-server model in the previous section is what keeps the first failure mode — a single maintainer as the ecosystem's only brain — from being fatal.</p>
     <p class="muted" data-lang="id">Model server yang bisa diganti di bagian sebelumnya adalah yang membuat mode kegagalan pertama — satu maintainer sebagai satu-satunya otak ekosistem — tidak jadi fatal.</p>
+  </section>
+
+  <section id="library">
+    <p class="num"><span data-lang="en">The library</span><span data-lang="id">Library-nya</span></p>
+    <h2 data-lang="en">What is actually built</h2>
+    <h2 data-lang="id">Apa yang benar-benar sudah dibangun</h2>
+    <p data-lang="en">The model exists as TypeScript with no platform dependencies: Beta-Bernoulli trust, half-life decay over real elapsed time, retention, the decision bands with their ceilings, declared invariants, and the anomaly feature space. Ninety-eight tests, most of which exist to pin a number the design argues for.</p>
+    <p data-lang="id">Modelnya sudah ada sebagai TypeScript tanpa ketergantungan platform: trust Beta-Bernoulli, decay half-life atas waktu nyata, retensi, band keputusan beserta batasnya, invariant terdeklarasi, dan ruang fitur anomali. Sembilan puluh delapan test, sebagian besar ada untuk memaku angka yang didebatkan desain ini.</p>
+    <pre>const guard = createGuard({ invariants: [checkoutOrder] });
+
+const result = await guard.evaluate({
+  entity: sessionId,
+  observation: { scope: 'checkout', data: { from: 'cart', to: 'payment' } },
+});
+
+result.decision       // 'RESTRICT' - advice, never enforcement
+result.trust.stage    // 'unknown' | 'developing' | 'established'
+result.trace          // why, in the order that decided it</pre>
+    <p data-lang="en">Every evaluation returns its own reasoning. With four independent dimensions feeding one treatment, an unexplained outcome cannot be debugged by whoever adopted it — so the trace is part of the contract, not a debug flag.</p>
+    <p data-lang="id">Setiap evaluasi mengembalikan alasannya sendiri. Dengan empat dimensi independen menyatu jadi satu treatment, hasil tanpa penjelasan tidak bisa didebug oleh yang memasangnya — jadi jejaknya bagian dari kontrak, bukan flag debug.</p>
+    <p class="muted" data-lang="en">Not built: an anomaly classifier over the feature space, and the prescription client. Both wait on decisions recorded in the design log rather than on effort.</p>
+    <p class="muted" data-lang="id">Belum dibangun: classifier anomali di atas ruang fitur, dan prescription client. Keduanya menunggu keputusan yang tercatat di log desain, bukan menunggu tenaga.</p>
+  </section>
+
+  <section id="firstrun">
+    <p class="num"><span data-lang="en">First integration</span><span data-lang="id">Integrasi pertama</span></p>
+    <h2 data-lang="en">Run against a real flow, changing nothing</h2>
+    <h2 data-lang="id">Dijalankan pada alur nyata, tanpa mengubah apa pun</h2>
+    <p data-lang="en">The first target is an existing personal health app with a PIN-gated vault, chosen because it already carries hand-rolled defences: a three-strike lockout kept in <code>localStorage</code>, and IP rate limiting in a map that resets whenever the serverless function cold-starts. The comparison is against what a competent developer actually ships under time pressure.</p>
+    <p data-lang="id">Target pertamanya adalah aplikasi kesehatan pribadi dengan vault berpagar PIN, dipilih karena sudah punya pertahanan buatan tangan: lockout tiga kali salah yang disimpan di <code>localStorage</code>, dan rate limit IP di map yang reset setiap fungsi serverless cold start. Pembandingnya adalah apa yang developer kompeten benar-benar kirim di bawah tekanan waktu.</p>
+    <p data-lang="en">The guard observes and records; it changes no behavior. Removing the existing defences before there is evidence would destroy both the comparison and the app's protection at once.</p>
+    <p data-lang="id">Guard mengamati dan mencatat; ia tidak mengubah perilaku. Mencabut pertahanan yang ada sebelum ada bukti akan menghancurkan pembandingnya sekaligus proteksi aplikasinya.</p>
+    <table>
+      <thead>
+        <tr>
+          <th data-lang="en">Scenario</th><th data-lang="id">Skenario</th>
+          <th data-lang="en">The app does</th><th data-lang="id">Aplikasinya</th>
+          <th data-lang="en">The guard advises</th><th data-lang="id">Guard menyarankan</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td data-lang="en">Normal daily unlock, one week</td><td data-lang="id">Unlock harian normal, sepekan</td>
+          <td data-lang="en">allows</td><td data-lang="id">izinkan</td>
+          <td data-lang="en">allow — never friction</td><td data-lang="id">izinkan — tidak pernah friksi</td>
+        </tr>
+        <tr>
+          <td data-lang="en">Three mistyped PINs</td><td data-lang="id">Tiga kali PIN salah ketik</td>
+          <td data-lang="en">five-minute lockout</td><td data-lang="id">lockout lima menit</td>
+          <td data-lang="en">observe — <code>n = 3.5</code>, still developing</td><td data-lang="id">amati — <code>n = 3.5</code>, masih developing</td>
+        </tr>
+        <tr>
+          <td data-lang="en">AI endpoint called with no unlock in the session</td><td data-lang="id">Endpoint AI dipanggil tanpa unlock di sesi itu</td>
+          <td data-lang="en"><strong>allows</strong></td><td data-lang="id"><strong>izinkan</strong></td>
+          <td data-lang="en">restrict — provable violation</td><td data-lang="id">batasi — pelanggaran terbukti</td>
+        </tr>
+        <tr>
+          <td data-lang="en">Session restore after a reload</td><td data-lang="id">Session restore setelah reload</td>
+          <td data-lang="en">allows</td><td data-lang="id">izinkan</td>
+          <td data-lang="en">allow — not mistaken for a replay</td><td data-lang="id">izinkan — tidak dikira replay</td>
+        </tr>
+      </tbody>
+    </table>
+    <p data-lang="en">Two disagreements are the whole point. The forged endpoint call satisfies the origin check and the porous IP limit, while the guard sees that the only file able to make that call could not have been loaded yet. And three mistyped digits cost a real person five minutes under a three-strike rule, where <code>n = 3.5</code> is simply not enough evidence to act on.</p>
+    <p data-lang="id">Dua ketidaksepakatan itulah intinya. Panggilan endpoint palsu lolos pemeriksaan origin dan rate limit yang bocor, sementara guard melihat bahwa satu-satunya file yang bisa melakukan panggilan itu belum mungkin dimuat. Dan tiga digit salah ketik menagih orang sungguhan lima menit di bawah aturan tiga kali salah, padahal <code>n = 3.5</code> jelas belum cukup evidence untuk ditindak.</p>
+    <p class="muted" data-lang="en">What this does not establish: single-user replay can falsify a contradiction, and it found none in the zero-friction claim. It cannot calibrate a threshold, and it cannot test the saturation guard against a real adversary. Every number in the model remains a reasoned guess.</p>
+    <p class="muted" data-lang="id">Yang belum dibuktikan: replay satu pengguna bisa menggugurkan kontradiksi, dan tidak menemukan satu pun pada klaim tanpa friksi. Ia tidak bisa mengkalibrasi ambang, dan tidak bisa menguji saturation guard lawan penyerang nyata. Setiap angka dalam model masih tebakan beralasan.</p>
   </section>
 
   <section id="unresolved">

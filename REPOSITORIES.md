@@ -30,13 +30,14 @@ Layout, per D7 in the design record — one package, several entry points, with
 `src/core/` free of platform APIs so the same model serves both sides:
 
 ```
-src/core/     the model: trust, decay, decision, symptoms, storage contract
-src/collect/  browser-side observation (not started)
-src/server/   host-side evaluation (not started)
+src/core/     the model: trust, decay, decision, constraints, storage contract
+src/collect/  browser-side observation, exported as ./collect
+examples/     the first integration target, observational only
 ```
 
-Not built yet: signal collection, the anomaly model, hard-constraint checking,
-and the prescription client.
+Not built yet: an anomaly classifier over the feature space, and the prescription
+client. There is no `src/server/`: the core is framework-agnostic and needs no
+host-specific layer until an adapter is written.
 
 ---
 

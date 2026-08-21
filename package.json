@@ -15,6 +15,10 @@
     ".": {
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
+    },
+    "./collect": {
+      "types": "./dist/collect/index.d.ts",
+      "default": "./dist/collect/index.js"
     }
   },
   "scripts": {

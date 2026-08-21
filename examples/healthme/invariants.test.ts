@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import { checkInvariants, hardViolations, softViolations } from '../../src/core/constraints.ts';
+import { toObservation } from '../../src/collect/interaction.ts';
 import { API_SCOPE, UNLOCK_SCOPE, healthmeInvariants } from './invariants.ts';
 
 const unlock = (data: unknown) => checkInvariants(data, UNLOCK_SCOPE, healthmeInvariants);
@@ -78,4 +79,35 @@ test('an undeclared scope yields nothing, per D32', () => {
   );
   assert.equal(elsewhere.declared, false);
   assert.equal(elsewhere.violations.length, 0);
+});
+
+test('the collector output feeds the idle-action invariant directly', () => {
+  // What a scripted unlock produces: value assigned, no keystrokes.
+  const scripted = toObservation({
+    pointer: 0,
+    keyboard: 0,
+    injected: 1,
+    durationMs: 0,
+    populated: true,
+  });
+
+  const result = unlock({ state: 'attempting', unlockedThisSession: false, ...scripted });
+  assert.equal(softViolations(result.violations).length, 1);
+
+  // What a human produces.
+  const typed = toObservation({
+    pointer: 1,
+    keyboard: 6,
+    injected: 0,
+    durationMs: 900,
+    populated: true,
+  });
+
+  const clean = unlock({
+    state: 'attempting',
+    unlockedThisSession: false,
+    lockScreenRendered: true,
+    ...typed,
+  });
+  assert.equal(clean.violations.length, 0);
 });

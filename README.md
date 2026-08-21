@@ -144,10 +144,12 @@ npm run build     # emits dist/
 - `guard.ts` — `createGuard()` and `evaluate()`, composing the above.
 - `policy.ts`, `clock.ts` — tunable values in one place, and an injectable clock.
 
+`src/collect/` — browser-side observation, imported from `@fachryxyf/scorpio-guard/collect`. Counts interaction; records nothing about content.
+
 `examples/healthme/` — the first integration target (D34), declared invariants and
 an observational harness that records advice without acting on it.
 
-Eighty-five tests, which double as the record of every numeric and semantic
+Ninety-eight tests, which double as the record of every numeric and semantic
 property the design depends on.
 
 ```js
@@ -186,8 +188,8 @@ authority. See D39 and D40 in the design record for how that was arrived at.
 
 ### What does not exist
 
-Browser-side signal collection, an anomaly *classifier* over the feature space,
-and the prescription client.
+An anomaly *classifier* over the feature space, and the prescription client. Both
+wait on decisions in the design record rather than on effort.
 
 More importantly: nothing has met real production traffic. Every threshold in the
 model is a reasoned guess. The HealthMe harness replays its real flow, which is
