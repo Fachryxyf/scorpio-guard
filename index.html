@@ -34,7 +34,7 @@
     --accent: #d9a05b;
     --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
     --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
-    --measure: 68ch;
+    --side: 16.5rem;
   }
   html[data-theme="light"] {
     --bg: #f5f2ec;
@@ -45,7 +45,8 @@
     --accent: #a35c14;
   }
   * { box-sizing: border-box; }
-  html { -webkit-text-size-adjust: 100%; }
+  html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+  html[lang="en"] [data-lang="id"], html[lang="id"] [data-lang="en"] { display: none; }
   body {
     margin: 0;
     background: var(--bg);
@@ -53,23 +54,22 @@
     font: 1rem/1.65 var(--sans);
     font-size: clamp(0.975rem, 0.94rem + 0.2vw, 1.0625rem);
   }
-  .wrap { max-width: 46rem; margin: 0 auto; padding: 0 1.5rem; }
   a { color: var(--accent); text-decoration: none; border-bottom: 1px solid transparent; }
   a:hover { border-bottom-color: var(--accent); }
   :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 2px; }
+  code, pre, kbd { font-family: var(--mono); }
   .skip {
     position: absolute; left: -9999px; top: 0; background: var(--bg-2);
-    padding: .6rem 1rem; font: .8125rem var(--mono); z-index: 10;
+    padding: .6rem 1rem; font: .8125rem var(--mono); z-index: 30;
   }
   .skip:focus { left: 1rem; top: 1rem; }
 
+  /* top bar */
   header.bar {
-    border-bottom: 1px solid var(--line);
-    position: sticky; top: 0; background: var(--bg); z-index: 5;
-  }
-  .bar .wrap {
+    position: sticky; top: 0; z-index: 20;
+    background: var(--bg); border-bottom: 1px solid var(--line);
     display: flex; align-items: center; gap: 1rem;
-    min-height: 3.5rem; flex-wrap: wrap;
+    min-height: 3.25rem; padding: 0 1.25rem;
   }
   .brand {
     font: 600 .8125rem/1 var(--mono);
@@ -88,387 +88,759 @@
   }
   button.ctl:hover { color: var(--ink); border-color: var(--ink-2); }
 
-  main > section { border-bottom: 1px solid var(--line); padding: 3.25rem 0; }
-  main > section:last-of-type { border-bottom: 0; }
+  /* docs shell */
+  .shell { display: grid; grid-template-columns: var(--side) minmax(0, 1fr); }
+  nav.side {
+    counter-reset: nav;
+    border-right: 1px solid var(--line);
+    padding: 1.75rem 1.25rem 3rem;
+    position: sticky; top: 3.25rem; align-self: start;
+    max-height: calc(100vh - 3.25rem); overflow-y: auto;
+  }
+  nav.side .group {
+    font: .6875rem/1 var(--mono); letter-spacing: .18em; text-transform: uppercase;
+    color: var(--ink-2); margin: 1.5rem 0 .625rem;
+  }
+  nav.side .group:first-child { margin-top: 0; }
+  nav.side ol { list-style: none; margin: 0; padding: 0; }
+  nav.side li { counter-increment: nav; }
+  nav.side ol a::before { content: counter(nav, decimal-leading-zero) " · "; }
+  nav.side summary { display: none; }
+  nav.side a {
+    display: block; padding: .3rem 0 .3rem .75rem;
+    border: 0; border-left: 2px solid var(--line);
+    font: .8125rem/1.45 var(--mono); color: var(--ink-2);
+  }
+  nav.side a:hover { color: var(--ink); border-left-color: var(--ink-2); }
+  nav.side a[aria-current="true"] { color: var(--accent); border-left-color: var(--accent); }
+
+  main { padding: 0 2rem 5rem; max-width: 52rem; counter-reset: sec; }
+  main section { counter-increment: sec; }
+  section > .num::before { content: counter(sec, decimal-leading-zero) " / "; }
+  .num a.hash { color: var(--line); border: 0; margin-left: .5rem; }
+  .num a.hash:hover { color: var(--accent); border: 0; }
+  .lede { padding: 3rem 0 0; }
+  section { padding: 2.75rem 0 0; scroll-margin-top: 4.25rem; }
+  section + section { border-top: 1px solid var(--line); margin-top: 2.75rem; }
   .num {
     font: .6875rem/1 var(--mono); letter-spacing: .18em;
-    color: var(--ink-2); text-transform: uppercase; margin: 0 0 .875rem;
+    color: var(--ink-2); text-transform: uppercase; margin: 0 0 .75rem;
   }
   h1 {
-    font: 400 clamp(1.75rem, 1.2rem + 2.4vw, 2.75rem)/1.15 var(--mono);
-    letter-spacing: -.02em; margin: 0 0 1.25rem; max-width: 30ch;
+    font: 400 clamp(1.75rem, 1.2rem + 2.2vw, 2.5rem)/1.15 var(--mono);
+    letter-spacing: -.02em; margin: 0 0 1rem; max-width: 32ch;
   }
   h2 {
-    font: 500 clamp(1.1875rem, 1.1rem + .5vw, 1.4375rem)/1.25 var(--mono);
-    letter-spacing: -.01em; margin: 0 0 1rem;
+    font: 400 clamp(1.25rem, 1.05rem + .7vw, 1.5rem)/1.25 var(--mono);
+    letter-spacing: -.01em; margin: 0 0 .875rem;
   }
   h3 {
-    font: 600 .8125rem/1.4 var(--mono); letter-spacing: .08em;
-    text-transform: uppercase; color: var(--ink-2); margin: 2rem 0 .625rem;
+    font: 600 .8125rem/1.4 var(--mono); letter-spacing: .1em;
+    text-transform: uppercase; color: var(--ink-2); margin: 1.75rem 0 .625rem;
   }
-  p, li { max-width: var(--measure); }
-  p { margin: 0 0 1.05rem; }
-  .lede { color: var(--ink); font-size: 1.0625em; }
+  p, li { max-width: 68ch; }
+  p { margin: 0 0 1rem; }
+  ul, ol { padding-left: 1.25rem; margin: 0 0 1rem; }
+  li { margin-bottom: .4rem; }
+  strong { font-weight: 600; }
   .muted { color: var(--ink-2); }
-  strong { font-weight: 650; color: var(--ink); }
-  em { font-style: normal; color: var(--accent); }
-  code {
-    font: .875em var(--mono); background: var(--bg-2);
-    border: 1px solid var(--line); border-radius: 2px; padding: .1em .35em;
-  }
-  ul { margin: 0 0 1.05rem; padding-left: 1.1rem; }
-  li { margin-bottom: .5rem; }
-  li::marker { color: var(--ink-2); }
-
   .tag {
-    display: inline-block; font: .6875rem/1 var(--mono);
-    letter-spacing: .12em; text-transform: uppercase;
-    color: var(--accent); border: 1px solid var(--accent);
-    border-radius: 2px; padding: .3rem .5rem; margin-bottom: 1.5rem;
+    display: inline-block; font: .6875rem/1 var(--mono); letter-spacing: .1em;
+    text-transform: uppercase; color: var(--ink-2);
+    border: 1px solid var(--line); border-radius: 2px; padding: .35rem .5rem;
+    margin: 0 .375rem .375rem 0;
   }
-  .cta { display: flex; flex-wrap: wrap; gap: .75rem; margin-top: 1.75rem; }
-  .cta a {
-    font: .8125rem/1 var(--mono); letter-spacing: .04em;
-    border: 1px solid var(--line); border-radius: 2px;
-    padding: .7rem 1rem; color: var(--ink);
+  blockquote {
+    margin: 1.25rem 0; padding: .25rem 0 .25rem 1rem;
+    border-left: 2px solid var(--accent); color: var(--ink);
+    font: 1.0625rem/1.55 var(--mono);
   }
-  .cta a:hover { border-color: var(--accent); color: var(--accent); }
-  .cta a.primary { border-color: var(--accent); color: var(--accent); }
-  .cta a.primary:hover { background: var(--accent); color: var(--bg); }
-
   pre {
-    font: .8125rem/1.7 var(--mono); color: var(--ink-2);
     background: var(--bg-2); border: 1px solid var(--line); border-radius: 3px;
-    padding: 1.125rem 1.25rem; margin: 0 0 1.05rem;
-    overflow-x: auto; white-space: pre;
+    padding: 1rem 1.125rem; overflow-x: auto;
+    font-size: .8125rem; line-height: 1.5; color: var(--ink-2);
+    margin: 0 0 1.25rem;
   }
-  pre b { color: var(--accent); font-weight: 400; }
-
-  .cols { display: grid; gap: 1.25rem; margin-bottom: 1.05rem; }
-  @media (min-width: 40rem) { .cols { grid-template-columns: 1fr 1fr; } }
-  .card {
-    border: 1px solid var(--line); border-radius: 3px;
-    padding: 1.125rem 1.25rem; background: var(--bg-2);
-  }
-  .card h3 { margin-top: 0; color: var(--accent); }
+  table { border-collapse: collapse; width: 100%; margin: 0 0 1.25rem; font-size: .9375rem; }
+  th, td { text-align: left; vertical-align: top; padding: .55rem .75rem; border-bottom: 1px solid var(--line); }
+  th { font: 600 .6875rem/1.3 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--ink-2); }
+  .cards { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); margin-bottom: 1.25rem; }
+  .card { border: 1px solid var(--line); border-radius: 3px; padding: 1.125rem 1.25rem; background: var(--bg-2); }
+  .card h3 { margin-top: 0; }
   .card p:last-child, .card ul:last-child { margin-bottom: 0; }
-  .card ul { padding-left: 1rem; font-size: .9375em; }
-
-  dl { margin: 0; }
-  dt {
-    font: 600 .8125rem/1.4 var(--mono); letter-spacing: .04em;
-    color: var(--ink); margin-top: 1.125rem;
-  }
-  dd { margin: .25rem 0 0; color: var(--ink-2); max-width: var(--measure); }
-
-  ol.road { counter-reset: r; list-style: none; padding: 0; margin: 0; }
-  ol.road li {
-    counter-increment: r; padding-left: 2.5rem; position: relative;
-    margin-bottom: .875rem;
-  }
+  dl { margin: 0 0 1rem; }
+  dt { font: 600 .8125rem/1.4 var(--mono); letter-spacing: .04em; margin-top: 1rem; }
+  dd { margin: .25rem 0 0; max-width: 68ch; color: var(--ink-2); }
+  ol.road { list-style: none; counter-reset: r; padding-left: 0; }
+  ol.road li { counter-increment: r; padding-left: 2.5rem; position: relative; margin-bottom: .875rem; }
   ol.road li::before {
     content: counter(r, decimal-leading-zero);
-    position: absolute; left: 0; top: .1em;
+    position: absolute; left: 0; top: .1rem;
     font: .75rem/1.6 var(--mono); color: var(--accent);
   }
-
-  footer {
-    border-top: 1px solid var(--line); padding: 2.25rem 0 3rem;
-    font: .8125rem/1.7 var(--mono); color: var(--ink-2);
+  .spectrum { display: flex; flex-wrap: wrap; gap: .375rem; margin: 0 0 1.25rem; }
+  .spectrum span {
+    font: .6875rem/1 var(--mono); letter-spacing: .1em;
+    border: 1px solid var(--line); border-radius: 2px; padding: .45rem .55rem; color: var(--ink-2);
   }
-  footer a { color: var(--ink-2); }
-  footer a:hover { color: var(--accent); border-bottom-color: var(--accent); }
-  .foot-row { display: flex; flex-wrap: wrap; gap: 1.25rem; }
-
-  html[lang="en"] [data-lang="id"], html[lang="id"] [data-lang="en"] { display: none; }
-  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+  .spectrum span:first-child { color: var(--accent); border-color: var(--accent); }
+  footer {
+    border-top: 1px solid var(--line); padding: 1.5rem 2rem;
+    font: .8125rem/1.6 var(--mono); color: var(--ink-2);
+    display: flex; flex-wrap: wrap; gap: 1.25rem; align-items: center;
+  }
+  @media (max-width: 60rem) {
+    .shell { grid-template-columns: 1fr; }
+    nav.side {
+      position: static; max-height: none; border-right: 0;
+      border-bottom: 1px solid var(--line); padding: 1.25rem;
+    }
+    nav.side summary {
+      display: block; cursor: pointer; list-style: none;
+      font: .75rem/1 var(--mono); letter-spacing: .16em; text-transform: uppercase;
+      color: var(--ink-2); padding: .35rem 0;
+    }
+    nav.side summary::-webkit-details-marker { display: none; }
+    nav.side summary::after { content: " [+]"; color: var(--accent); }
+    nav.side details[open] > summary::after { content: " [-]"; }
+    nav.side details[open] { max-height: 60vh; overflow-y: auto; }
+    main { padding: 0 1.25rem 4rem; }
+    footer { padding: 1.5rem 1.25rem; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    * { animation: none !important; transition: none !important; }
+  }
 </style>
 </head>
 <body>
-<a class="skip" href="#main"><span data-lang="en">Skip to content</span><span data-lang="id">Lewati ke konten</span></a>
+<a class="skip" href="#doc" data-lang="en">Skip to content</a>
+<a class="skip" href="#doc" data-lang="id">Lompat ke konten</a>
 
 <header class="bar">
-  <div class="wrap">
-    <a class="brand" href="/"><span class="caret">&gt;</span> Scorpio Guard</a>
-    <div class="controls">
-      <button class="ctl" id="lang" type="button" aria-label="Switch language / Ganti bahasa"></button>
-      <button class="ctl" id="theme" type="button" aria-label="Switch theme / Ganti tema"></button>
-    </div>
+  <a class="brand" href="/"><span class="caret">&gt;</span> Scorpio Guard</a>
+  <div class="controls">
+    <button class="ctl" id="lang" type="button" aria-label="Switch language / Ganti bahasa"></button>
+    <button class="ctl" id="theme" type="button" aria-label="Switch theme / Ganti tema"></button>
   </div>
 </header>
 
-<main id="main">
+<div class="shell">
+<nav class="side" aria-label="Documentation">
+ <details class="toc" id="toc" open>
+  <summary><span data-lang="en">Contents</span><span data-lang="id">Daftar isi</span></summary>
+  <p class="group" data-lang="en">Foundations</p>
+  <p class="group" data-lang="id">Fondasi</p>
+  <ol>
+    <li><a href="#premise"><span data-lang="en">Premise</span><span data-lang="id">Premis</span></a></li>
+    <li><a href="#shape"><span data-lang="en">Product shape</span><span data-lang="id">Bentuk produk</span></a></li>
+    <li><a href="#friction"><span data-lang="en">Zero friction</span><span data-lang="id">Tanpa friksi</span></a></li>
+  </ol>
 
-<section>
-  <div class="wrap">
-    <span class="tag" data-lang="en">Design phase — no code yet</span>
-    <span class="tag" data-lang="id">Tahap desain — belum ada kode</span>
+  <p class="group" data-lang="en">Model</p>
+  <p class="group" data-lang="id">Model</p>
+  <ol>
+    <li><a href="#trust"><span data-lang="en">Trust model</span><span data-lang="id">Model trust</span></a></li>
+    <li><a href="#memory"><span data-lang="en">Memory &amp; decay</span><span data-lang="id">Memori &amp; decay</span></a></li>
+    <li><a href="#anomaly"><span data-lang="en">Anomaly</span><span data-lang="id">Anomali</span></a></li>
+    <li><a href="#context"><span data-lang="en">Context</span><span data-lang="id">Konteks</span></a></li>
+    <li><a href="#decision"><span data-lang="en">Decision layer</span><span data-lang="id">Lapis keputusan</span></a></li>
+    <li><a href="#signals"><span data-lang="en">Signals</span><span data-lang="id">Sinyal</span></a></li>
+    <li><a href="#pipeline"><span data-lang="en">Mental model</span><span data-lang="id">Model mental</span></a></li>
+  </ol>
 
+  <p class="group" data-lang="en">Protocol</p>
+  <p class="group" data-lang="id">Protokol</p>
+  <ol>
+    <li><a href="#protocol"><span data-lang="en">Symptom flow</span><span data-lang="id">Alur gejala</span></a></li>
+    <li><a href="#vocabulary"><span data-lang="en">Vocabulary</span><span data-lang="id">Kosakata</span></a></li>
+    <li><a href="#encoding"><span data-lang="en">Encoding</span><span data-lang="id">Encoding</span></a></li>
+    <li><a href="#local"><span data-lang="en">Local-first</span><span data-lang="id">Local-first</span></a></li>
+  </ol>
+
+  <p class="group" data-lang="en">Project</p>
+  <p class="group" data-lang="id">Proyek</p>
+  <ol>
+    <li><a href="#economics"><span data-lang="en">Economics</span><span data-lang="id">Ekonomi</span></a></li>
+    <li><a href="#adaptive"><span data-lang="en">Adaptation</span><span data-lang="id">Adaptasi</span></a></li>
+    <li><a href="#governance"><span data-lang="en">Governance</span><span data-lang="id">Tata kelola</span></a></li>
+    <li><a href="#opencore"><span data-lang="en">Open core</span><span data-lang="id">Open core</span></a></li>
+    <li><a href="#unresolved"><span data-lang="en">Unresolved</span><span data-lang="id">Belum selesai</span></a></li>
+    <li><a href="#status"><span data-lang="en">Status</span><span data-lang="id">Status</span></a></li>
+    <li><a href="#roadmap"><span data-lang="en">Roadmap</span><span data-lang="id">Roadmap</span></a></li>
+    <li><a href="#principles"><span data-lang="en">Principles</span><span data-lang="id">Prinsip</span></a></li>
+  </ol>
+ </details>
+</nav>
+
+<main id="doc">
+  <div class="lede">
+    <p class="num" data-lang="en">Design notes · v0 · 2026</p>
+    <p class="num" data-lang="id">Catatan desain · v0 · 2026</p>
     <h1 data-lang="en">Trust is a spectrum, not a verdict.</h1>
     <h1 data-lang="id">Trust itu spektrum, bukan putusan.</h1>
-
-    <div data-lang="en">
-      <p class="lede">No web behavior is inherently human. Mouse movement, timing, DOM interaction, navigation patterns — all of it can be recorded, learned, and replayed.</p>
-      <p>So Scorpio Guard does not ask <em>&ldquo;is this a bot?&rdquo;</em> It continuously estimates how much trust an interaction currently deserves, from many weak signals evaluated together over time.</p>
-      <p class="muted">The goal is not perfect detection. It is <strong>asymmetric cost</strong> — near-zero friction for legitimate users, increasingly expensive for sustained abuse.</p>
-    </div>
-    <div data-lang="id">
-      <p class="lede">Tidak ada perilaku web yang secara absolut hanya bisa dilakukan manusia. Mouse movement, timing, interaksi DOM, pola navigasi — semuanya bisa direkam, dipelajari, dan direplikasi.</p>
-      <p>Karena itu Scorpio Guard tidak bertanya <em>&ldquo;ini bot atau bukan?&rdquo;</em> Ia terus-menerus memperkirakan seberapa besar trust yang layak diberikan pada sebuah interaksi, dari banyak weak signal yang dinilai bersama sepanjang waktu.</p>
-      <p class="muted">Tujuannya bukan deteksi yang sempurna, melainkan <strong>biaya yang asimetris</strong> — nyaris tanpa friksi bagi pengguna sah, makin mahal bagi penyalahgunaan yang berkelanjutan.</p>
-    </div>
-
-    <div class="cta">
-      <a class="primary" href="https://github.com/Fachryxyf/scorpio-guard">
-        <span data-lang="en">Repository →</span><span data-lang="id">Repositori →</span>
-      </a>
-      <a href="https://github.com/Fachryxyf/scorpio-guard/issues">
-        <span data-lang="en">Open problems</span><span data-lang="id">Masalah terbuka</span>
-      </a>
-    </div>
+    <p data-lang="en">Scorpio Guard is a local, advisory trust-evaluation library for web interactions, sitting on top of an open symptom/prescription protocol. It does not answer <em>human or bot</em>. It estimates how much trust an interaction currently deserves, and hands that judgement back to whoever owns the application.</p>
+    <p data-lang="id">Scorpio Guard adalah library evaluasi trust yang berjalan lokal dan bersifat advisory untuk interaksi web, di atas protokol symptom/prescription yang terbuka. Ia tidak menjawab <em>manusia atau bot</em>. Ia memperkirakan seberapa besar trust yang layak diberikan pada sebuah interaksi, lalu menyerahkan penilaian itu ke pemilik aplikasi.</p>
+    <p>
+      <span class="tag" data-lang="en">Status · pre-alpha</span><span class="tag" data-lang="id">Status · pra-alfa</span>
+      <span class="tag" data-lang="en">Stage · design</span><span class="tag" data-lang="id">Tahap · desain</span>
+      <span class="tag" data-lang="en">Model · open core</span><span class="tag" data-lang="id">Model · open core</span>
+      <span class="tag">No code yet</span>
+    </p>
   </div>
-</section>
 
-<section>
-  <div class="wrap">
-    <p class="num">01 / <span data-lang="en">Premise</span><span data-lang="id">Premis</span></p>
+  <section id="premise">
+    <p class="num"><span data-lang="en">Premise</span><span data-lang="id">Premis</span></p>
+    <h2 data-lang="en">No web behavior is inherently human</h2>
+    <h2 data-lang="id">Tidak ada perilaku web yang inheren manusiawi</h2>
+    <p data-lang="en">Mouse movement, timing, DOM interaction, navigation order, request intervals — all of it can be recorded, studied and replayed. So chasing a signal that is impossible to forge is chasing something that does not exist.</p>
+    <p data-lang="id">Gerak mouse, timing, interaksi DOM, urutan navigasi, interval request — semuanya bisa direkam, dipelajari, dan direplikasi. Jadi mencari sinyal yang mustahil dipalsukan sama dengan mencari sesuatu yang tidak ada.</p>
+    <blockquote data-lang="en">Don't look for the unforgeable signal. Combine weak signals into evidence that is expensive to fake consistently.</blockquote>
+    <blockquote data-lang="id">Jangan mencari signal yang mustahil dipalsukan. Gabungkan signal lemah menjadi evidence yang mahal untuk dipalsukan secara konsisten.</blockquote>
+    <h3 data-lang="en">What follows from that</h3>
+    <h3 data-lang="id">Konsekuensinya</h3>
+    <ul data-lang="en">
+      <li>Identity is a history, not a fingerprint.</li>
+      <li>Trust accumulates and decays; it is never permanently fixed by old behavior.</li>
+      <li>Unusual behavior is evidence, not guilt.</li>
+      <li>A new entity is <strong>unknown</strong>, not <strong>untrusted</strong>.</li>
+      <li>The goal is asymmetric cost, not perfect detection.</li>
+    </ul>
+    <ul data-lang="id">
+      <li>Identitas adalah riwayat, bukan sidik jari.</li>
+      <li>Trust bertambah dan meluruh; tidak pernah dipaku permanen oleh perilaku lama.</li>
+      <li>Perilaku tak biasa itu evidence, bukan kesalahan.</li>
+      <li>Entity baru itu <strong>unknown</strong>, bukan <strong>untrusted</strong>.</li>
+      <li>Tujuannya asymmetric cost, bukan deteksi sempurna.</li>
+    </ul>
+  </section>
+
+  <section id="shape">
+    <p class="num"><span data-lang="en">Product shape</span><span data-lang="id">Bentuk produk</span></p>
+    <h2 data-lang="en">A library you install, not a service you call</h2>
+    <h2 data-lang="id">Library yang dipasang, bukan layanan yang dipanggil</h2>
+    <p data-lang="en">This is not a centralized verification service. There is no client → central service → token → origin round trip on every request. Scorpio Guard is an open-source library installed inside your own ecosystem.</p>
+    <p data-lang="id">Ini bukan layanan verifikasi terpusat. Tidak ada alur client → layanan pusat → token → origin di setiap request. Scorpio Guard adalah library open source yang dipasang di ekosistem kamu sendiri.</p>
+    <table>
+      <thead>
+        <tr>
+          <th data-lang="en">It does</th><th data-lang="id">Yang dilakukan</th>
+          <th data-lang="en">It does not</th><th data-lang="id">Yang tidak dilakukan</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td data-lang="en">Observe, score and advise locally</td><td data-lang="id">Mengamati, menilai, dan menyarankan secara lokal</td>
+          <td data-lang="en">Block or reject on its own authority</td><td data-lang="id">Memblokir atau menolak atas keputusan sendiri</td>
+        </tr>
+        <tr>
+          <td data-lang="en">Keep history in your environment</td><td data-lang="id">Menyimpan riwayat di lingkungan kamu</td>
+          <td data-lang="en">Phone home per request</td><td data-lang="id">Menghubungi server tiap request</td>
+        </tr>
+        <tr>
+          <td data-lang="en">Run offline once provisioned</td><td data-lang="id">Berjalan offline setelah provisioning</td>
+          <td data-lang="en">Forward raw payloads, IPs or sessions</td><td data-lang="id">Meneruskan payload mentah, IP, atau sesi</td>
+        </tr>
+      </tbody>
+    </table>
+    <blockquote data-lang="en">However small the act, it belongs to the owner of the program.</blockquote>
+    <blockquote data-lang="id">Sekecil apa pun act, itu milik pemilik program.</blockquote>
+    <p data-lang="en">This resolves the apparent tension between "the system must learn" and "the system doesn't report home": learning happens at <strong>project level</strong> — slow, human-mediated, through issues and reports — not at <strong>instance level</strong>, fast and automatic per request.</p>
+    <p data-lang="id">Ini menyelesaikan ketegangan antara "sistem harus belajar" dan "sistem tidak melapor ke pusat": pembelajaran terjadi di <strong>level proyek</strong> — lambat, lewat manusia, via issue dan laporan — bukan di <strong>level instance</strong> yang cepat dan otomatis per request.</p>
+  </section>
+
+  <section id="friction">
+    <p class="num"><span data-lang="en">Zero friction</span><span data-lang="id">Tanpa friksi</span></p>
     <h2 data-lang="en">Volume is evidence, not guilt</h2>
-    <h2 data-lang="id">Volume itu bukti, bukan kesalahan</h2>
+    <h2 data-lang="id">Volume adalah evidence, bukan guilt</h2>
+    <p data-lang="en">A legitimate user must stay free to search repeatedly, run batch operations, fire large request counts, repeat a workflow, or change habits entirely — without being reclassified as malicious for it.</p>
+    <p data-lang="id">User legitimate harus tetap bebas melakukan pencarian berulang, operasi batch, request dalam jumlah besar, workflow repetitif, atau berubah kebiasaan total — tanpa otomatis dianggap malicious.</p>
+    <pre>500 requests  !=  bot
+500 requests  ==  evidence
 
-    <div data-lang="en">
-      <p>A legitimate user runs 500 requests in a batch. A naive system concludes <code>500 requests = bot</code>. Scorpio Guard concludes <code>500 requests = evidence</code> — and lets context, history, and behavioral consistency decide what it means.</p>
-      <ul>
-        <li><strong>Identity is a history</strong>, not a fingerprint.</li>
-        <li><strong>Trust has memory</strong> — it accumulates and decays, never permanently fixed by old behavior.</li>
-        <li><strong>Anomaly is evidence</strong>, not proof of intent.</li>
-        <li>A new entity starts as <strong>unknown</strong>, not untrusted.</li>
-      </ul>
-    </div>
-    <div data-lang="id">
-      <p>Pengguna sah menjalankan 500 request sekaligus. Sistem naif menyimpulkan <code>500 request = bot</code>. Scorpio Guard menyimpulkan <code>500 request = bukti</code> — lalu membiarkan konteks, riwayat, dan konsistensi perilaku yang menentukan maknanya.</p>
-      <ul>
-        <li><strong>Identitas adalah riwayat</strong>, bukan fingerprint.</li>
-        <li><strong>Trust punya memori</strong> — menumpuk dan meluruh, tidak pernah dipatok permanen oleh perilaku lama.</li>
-        <li><strong>Anomali itu bukti</strong>, bukan pembuktian niat.</li>
-        <li>Entitas baru dimulai sebagai <strong>unknown</strong>, bukan untrusted.</li>
-      </ul>
-    </div>
-  </div>
-</section>
+context + trust + history + behavioral model
+        -> what it actually means</pre>
+    <p data-lang="en">Target: legitimate traffic experiences <em>nothing</em>. Sustained abuse experiences steadily rising operational cost.</p>
+    <p data-lang="id">Target: trafik legitimate merasakan <em>tidak ada apa-apa</em>. Abuse yang terus-menerus merasakan biaya operasional yang naik terus.</p>
+  </section>
 
-<section>
-  <div class="wrap">
-    <p class="num">02 / <span data-lang="en">Shape</span><span data-lang="id">Bentuk</span></p>
-    <h2 data-lang="en">A local library, not a gatekeeper</h2>
-    <h2 data-lang="id">Library lokal, bukan penjaga gerbang</h2>
+  <section id="trust">
+    <p class="num"><span data-lang="en">Trust model</span><span data-lang="id">Model trust</span></p>
+    <h2 data-lang="en">Trust as a distribution, not a number</h2>
+    <h2 data-lang="id">Trust sebagai distribusi, bukan angka</h2>
+    <p data-lang="en">Trust is held as a Beta distribution. Positive evidence adds to α, negative evidence adds to β. A brand-new entity starts at Beta(1,1) — flat, uninformative, honest about knowing nothing.</p>
+    <p data-lang="id">Trust disimpan sebagai distribusi Beta. Evidence positif menambah α, evidence negatif menambah β. Entity yang benar-benar baru mulai di Beta(1,1) — rata, tanpa informasi, jujur bahwa belum tahu apa-apa.</p>
+    <pre>p ~ Beta(alpha, beta)
 
-    <div data-lang="en">
-      <p>Scorpio Guard is not Turnstile or reCAPTCHA. There is no round trip to a central service that issues a verdict token.</p>
-      <ul>
-        <li>An <strong>open-source library</strong> installed inside your own ecosystem.</li>
-        <li><strong>One-way flow</strong> — it evaluates and advises <em>within</em> your environment.</li>
-        <li><strong>Advisory only</strong> — it never blocks. Every action belongs to the operator.</li>
-        <li><strong>No phoning home</strong> per request. Raw traffic and history stay local.</li>
-      </ul>
-      <p class="muted">Learning happens at the project level — slow, human-mediated, through issues and review. Not at the instance level, per request.</p>
-    </div>
-    <div data-lang="id">
-      <p>Scorpio Guard bukan Turnstile atau reCAPTCHA. Tidak ada bolak-balik ke layanan pusat yang menerbitkan token putusan.</p>
-      <ul>
-        <li><strong>Library open source</strong> yang dipasang di ekosistem kamu sendiri.</li>
-        <li><strong>Alur satu arah</strong> — menilai dan memberi saran <em>di dalam</em> lingkunganmu.</li>
-        <li><strong>Sifatnya saran</strong> — tidak pernah memblokir. Setiap tindakan milik operator.</li>
-        <li><strong>Tidak lapor ke pusat</strong> tiap request. Trafik dan riwayat mentah tetap lokal.</li>
-      </ul>
-      <p class="muted">Pembelajaran terjadi di level proyek — lambat, lewat perantara manusia, melalui issue dan review. Bukan di level instance, per request.</p>
-    </div>
-  </div>
-</section>
+E[p]   = alpha / (alpha + beta)
+Var[p] = (alpha * beta) / ((alpha+beta)^2 * (alpha+beta+1))
 
-<section>
-  <div class="wrap">
-    <p class="num">03 / <span data-lang="en">Protocol</span><span data-lang="id">Protokol</span></p>
+new entity -> Beta(1, 1)  ==  unknown, not untrusted</pre>
+    <p data-lang="en">Carrying the variance matters as much as the mean: <strong>trust = confidence + uncertainty</strong>. Evidence is weighted, so a strong negative and a weak negative do not move the distribution equally.</p>
+    <p data-lang="id">Membawa variance sama pentingnya dengan mean: <strong>trust = confidence + uncertainty</strong>. Evidence punya bobot, jadi negatif kuat dan negatif lemah tidak menggeser distribusi sama besar.</p>
+  </section>
+
+  <section id="memory">
+    <p class="num"><span data-lang="en">Memory &amp; decay</span><span data-lang="id">Memori &amp; decay</span></p>
+    <h2 data-lang="en">Remember without becoming dogmatic</h2>
+    <h2 data-lang="id">Mengingat tanpa jadi dogmatis</h2>
+    <p data-lang="en">Human behavior changes. Trust must not become a permanent sentence based on the past, so both parameters decay before new evidence lands.</p>
+    <p data-lang="id">Perilaku manusia berubah. Trust tidak boleh menjadi hukuman permanen berdasarkan masa lalu, jadi kedua parameter meluruh sebelum evidence baru masuk.</p>
+    <pre>alpha_t = lambda * alpha_(t-1) + positive_evidence
+beta_t  = lambda * beta_(t-1)  + negative_evidence
+
+0 &lt; lambda &lt; 1
+
+lambda -> 1   long memory
+lambda -> 0   forgets fast</pre>
+  </section>
+
+  <section id="anomaly">
+    <p class="num"><span data-lang="en">Anomaly</span><span data-lang="id">Anomali</span></p>
+    <h2 data-lang="en">Trust and anomaly are two different questions</h2>
+    <h2 data-lang="id">Trust dan anomali itu dua pertanyaan berbeda</h2>
+    <div class="cards">
+      <div class="card">
+        <h3>Trust</h3>
+        <p data-lang="en">How much do we believe this entity, given its accumulated history?</p>
+        <p data-lang="id">Seberapa besar kita percaya entity ini, berdasar riwayat yang terkumpul?</p>
+      </div>
+      <div class="card">
+        <h3 data-lang="en">Anomaly</h3>
+        <h3 data-lang="id">Anomali</h3>
+        <p data-lang="en">How strange is this behavior compared to behavior observed so far?</p>
+        <p data-lang="id">Seberapa aneh perilaku ini dibanding perilaku yang sudah diamati?</p>
+      </div>
+    </div>
+    <p data-lang="en">Anomaly is a continuous score, not a binary classifier — density estimation, isolation forest, or a Gaussian mixture are all plausible. What it must never do is read <code>anomaly</code> as <code>malicious</code>.</p>
+    <p data-lang="id">Anomali adalah skor kontinu, bukan classifier biner — density estimation, isolation forest, atau Gaussian mixture semuanya masuk akal. Yang tidak boleh: membaca <code>anomaly</code> sebagai <code>malicious</code>.</p>
+    <pre>trust   = 0.97
+anomaly = 0.91
+verdict = still plausibly a legitimate batch workflow</pre>
+  </section>
+
+  <section id="context">
+    <p class="num"><span data-lang="en">Context</span><span data-lang="id">Konteks</span></p>
+    <h2 data-lang="en">The same behavior means different things</h2>
+    <h2 data-lang="id">Perilaku yang sama bisa berarti berbeda</h2>
+    <p data-lang="en">Fifty requests can be a known legitimate batch, or a new identity with low trust hitting a sensitive endpoint in an unusual sequence. The number is identical; the meaning is not.</p>
+    <p data-lang="id">Lima puluh request bisa berarti batch legitimate yang sudah dikenal, atau identitas baru dengan trust rendah menyerang endpoint sensitif dalam urutan tak biasa. Angkanya sama; artinya tidak.</p>
+    <pre>decision != anomaly_score
+decision != trust_score
+
+decision = f(trust, uncertainty, anomaly, context,
+             history, velocity, endpoint_sensitivity,
+             behavioral_consistency)</pre>
+  </section>
+
+  <section id="decision">
+    <p class="num"><span data-lang="en">Decision layer</span><span data-lang="id">Lapis keputusan</span></p>
+    <h2 data-lang="en">A spectrum, not a switch</h2>
+    <h2 data-lang="id">Spektrum, bukan saklar</h2>
+    <div class="spectrum">
+      <span>ALLOW</span><span>OBSERVE</span><span>INCREASE_FRICTION</span><span>RESTRICT</span><span>BLOCK</span>
+    </div>
+    <p data-lang="en">When uncertainty is high, observation beats punishment. Each step to the right demands strictly stronger evidence than the one before it, and the final call always belongs to the host application.</p>
+    <p data-lang="id">Saat uncertainty tinggi, mengamati lebih baik daripada menghukum. Tiap langkah ke kanan menuntut evidence yang lebih kuat dari sebelumnya, dan keputusan akhir tetap milik aplikasi yang memasang.</p>
+  </section>
+
+  <section id="signals">
+    <p class="num"><span data-lang="en">Signals</span><span data-lang="id">Sinyal</span></p>
+    <h2 data-lang="en">Hard constraints vs weak signals</h2>
+    <h2 data-lang="id">Hard constraint vs weak signal</h2>
+    <p data-lang="en">These two are not blended into one score. They are typed differently because they fail differently.</p>
+    <p data-lang="id">Keduanya tidak dilebur jadi satu skor. Keduanya dibedakan tipenya karena cara gagalnya berbeda.</p>
+    <div class="cards">
+      <div class="card">
+        <h3 data-lang="en">Hard constraints — the skeleton</h3>
+        <h3 data-lang="id">Hard constraint — kerangka</h3>
+        <p class="muted" data-lang="en">Physically impossible, not merely unusual. Always on, precise, never learned, never goes stale.</p>
+        <p class="muted" data-lang="id">Mustahil secara fisik, bukan cuma tak biasa. Selalu aktif, presisi, tidak dipelajari, tidak pernah kedaluwarsa.</p>
+        <ul data-lang="en">
+          <li>A form field filled with zero corresponding interaction</li>
+          <li>Input consistent with direct JS injection, no pointer events at all</li>
+          <li>Event sequences that cannot physically occur in that order</li>
+        </ul>
+        <ul data-lang="id">
+          <li>Field form terisi tanpa interaksi apa pun</li>
+          <li>Input yang konsisten dengan injeksi JS langsung, tanpa pointer event</li>
+          <li>Urutan event yang secara fisik tidak mungkin terjadi</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3 data-lang="en">Weak signals — the flora</h3>
+        <h3 data-lang="id">Weak signal — flora</h3>
+        <p class="muted" data-lang="en">Unusual, not impossible. Individually inconclusive, meaningful only in combination.</p>
+        <p class="muted" data-lang="id">Tak biasa, bukan mustahil. Sendirian tidak menyimpulkan apa pun, hanya berarti kalau digabung.</p>
+        <ul data-lang="en">
+          <li>Actions under ~70ms — a calibrated threshold, not a law</li>
+          <li>Identical patterns repeating over time</li>
+          <li>Randomized delays that are <em>too</em> uniformly random — the tell is the shape of the randomness, not the delay</li>
+          <li>Access windows inconsistent with normal usage</li>
+          <li>Which resource is being requested, and idle actions that should require interaction</li>
+        </ul>
+        <ul data-lang="id">
+          <li>Aksi di bawah ~70ms — ambang hasil kalibrasi, bukan hukum</li>
+          <li>Pola identik yang berulang terus</li>
+          <li>Delay acak yang <em>terlalu</em> seragam acaknya — tandanya ada di bentuk keacakannya, bukan di delay-nya</li>
+          <li>Jendela akses yang tidak wajar untuk pemakaian normal</li>
+          <li>Resource apa yang diminta, dan aksi idle yang seharusnya butuh interaksi</li>
+        </ul>
+      </div>
+    </div>
+    <p data-lang="en">Weak signals reinforce <em>around</em> the hard constraints instead of firing on their own. That relieves them of carrying full-precision weight, which is where false positives usually come from.</p>
+    <p data-lang="id">Weak signal memperkuat <em>di sekitar</em> hard constraint, bukan memicu sendiri. Itu melepaskan beban presisi penuh dari mereka, sumber utama false positive.</p>
+  </section>
+
+  <section id="pipeline">
+    <p class="num"><span data-lang="en">Mental model</span><span data-lang="id">Model mental</span></p>
+    <h2 data-lang="en">How one request moves through the guard</h2>
+    <h2 data-lang="id">Bagaimana satu request bergerak di dalam guard</h2>
+    <p data-lang="en">Nothing above is a standalone module. A single request passes through every layer in a fixed order, and only the last layer produces something the host application can act on.</p>
+    <p data-lang="id">Tidak ada satu pun bagian di atas yang berdiri sendiri. Satu request melewati semua lapis dalam urutan tetap, dan hanya lapis terakhir yang menghasilkan sesuatu yang bisa ditindak aplikasi.</p>
+    <pre>                    REQUEST
+                       |
+                       v
+                  Weak signals
+                       |
+            +----------+----------+
+            v                     v
+     Behavioral model        Trust model
+        anomaly              Beta(alpha, beta)
+            |                     |
+            +----------+----------+
+                       v
+                    Context
+                       |
+                       v
+                Decision engine
+                       |
+       +---------------+---------------+
+       v               v               v
+     ALLOW         OBSERVE         FRICTION
+                                       |
+                                   RESTRICT
+                                       |
+                                     BLOCK</pre>
+    <p data-lang="en">The server sits outside this loop entirely. It hands down prescriptions and models; the evaluation, the decision, and the enforcement all happen on the left side of the wire.</p>
+    <p data-lang="id">Server berada sepenuhnya di luar loop ini. Ia menurunkan prescription dan model; evaluasi, keputusan, dan enforcement semuanya terjadi di sisi lokal.</p>
+    <pre>prescription API -> prescription / model -> local guard -> ACT HERE</pre>
+  </section>
+
+  <section id="protocol">
+    <p class="num"><span data-lang="en">Symptom flow</span><span data-lang="id">Alur gejala</span></p>
     <h2 data-lang="en">Prescription, not diagnosis</h2>
     <h2 data-lang="id">Resep, bukan diagnosis</h2>
+    <p data-lang="en">A patient says "I have a headache." That is a category of complaint — a few bytes of information — not a transfer of the headache itself. The library works the same way: when it meets a case it cannot resolve confidently, it sends an abstract <strong>symptom</strong>; the server returns a <strong>prescription</strong>; the library acts locally against its own data.</p>
+    <p data-lang="id">Pasien bilang "saya sakit kepala." Itu kategori keluhan — informasi beberapa byte — bukan pengiriman sakit kepalanya. Library bekerja sama: kalau menemui kasus yang tidak bisa diselesaikan dengan yakin, ia mengirim <strong>symptom</strong> abstrak; server membalas <strong>prescription</strong>; library bertindak lokal dengan datanya sendiri.</p>
+    <pre>local application
+      |
+      |  abstract symptom
+      v
+prescription server
+      |
+      |  prescription
+      v
+  local guard  --  compute / evaluate / decide / act</pre>
+    <blockquote data-lang="en">The prescription travels. The patient does not.</blockquote>
+    <blockquote data-lang="id">The prescription travels. The patient does not.</blockquote>
+    <p data-lang="en">Three things fall out of this at once: privacy by architecture rather than by policy, cross-ecosystem learning at pattern level without touching anyone's raw data, and local speed — the round trip only happens for genuinely uncertain cases.</p>
+    <p data-lang="id">Tiga hal langsung didapat sekaligus: privasi lewat arsitektur bukan lewat kebijakan, pembelajaran lintas ekosistem di level pola tanpa menyentuh data mentah siapa pun, dan kecepatan lokal — round trip hanya terjadi untuk kasus yang benar-benar tidak pasti.</p>
+  </section>
 
-    <div data-lang="en">
-      <p>A patient says <em>&ldquo;I have a headache.&rdquo;</em> That is a category of complaint — a few bytes of information, not a transfer of the headache itself.</p>
-    </div>
-    <div data-lang="id">
-      <p>Seorang pasien berkata <em>&ldquo;kepala saya sakit.&rdquo;</em> Itu kategori keluhan — informasi beberapa byte, bukan pemindahan sakit kepalanya.</p>
-    </div>
+  <section id="vocabulary">
+    <p class="num"><span data-lang="en">Vocabulary</span><span data-lang="id">Kosakata</span></p>
+    <h2 data-lang="en">The symptom vocabulary</h2>
+    <h2 data-lang="id">Kosakata gejala</h2>
+    <p data-lang="en">Raw behavior is reduced to a standardized token before anything leaves the machine. An instance may not invent symptom names the ecosystem does not know.</p>
+    <p data-lang="id">Perilaku mentah direduksi jadi token standar sebelum apa pun keluar dari mesin. Sebuah instance tidak boleh mengarang nama symptom yang tidak dikenal ekosistem.</p>
+    <pre>raw behavior -> feature extraction -> symptom abstraction -> standardized symptom
 
-<pre>  library  ──  <b>symptom</b>  ─────▶  server
-             abstract pattern shape
-             no raw data · no identity · no PII
+47 requests / 2.3s   ->   SYM_REQUEST_BURST</pre>
+    <p>
+      <span class="tag">SYM_REQUEST_BURST</span><span class="tag">SYM_NEW_BEHAVIOR</span><span class="tag">SYM_IDENTITY_DRIFT</span><span class="tag">SYM_UNUSUAL_SEQUENCE</span><span class="tag">SYM_HIGH_VELOCITY</span><span class="tag">SYM_UNKNOWN_PATTERN</span>
+    </p>
+    <p data-lang="en">The vocabulary is versioned (<code>schema v1</code>, <code>v2</code>, …) and structured in two tiers: stable skeleton categories that rarely change, and flexible technical detail underneath. Because the protocol is public, this is now load-bearing infrastructure — it needs the discipline of designing DNS record types or HTTP status codes, not the freedom of an internal enum.</p>
+    <p data-lang="id">Kosakatanya diberi versi (<code>schema v1</code>, <code>v2</code>, …) dan disusun dua lapis: kategori kerangka yang stabil dan jarang berubah, serta detail teknis yang fleksibel di bawahnya. Karena protokolnya publik, ini jadi infrastruktur penopang — butuh disiplin seperti merancang tipe record DNS atau status code HTTP, bukan kebebasan enum internal.</p>
+  </section>
 
-  library  ◀─────  <b>prescription</b>  ──  server
-             handling strategy for that class
+  <section id="encoding">
+    <p class="num"><span data-lang="en">Encoding</span><span data-lang="id">Encoding</span></p>
+    <h2 data-lang="en">Why explicit feature values can't be sent</h2>
+    <h2 data-lang="id">Kenapa nilai fitur eksplisit tidak bisa dikirim</h2>
+    <p data-lang="en">The library is open source, so anything human-readable in its wire format is also readable by the people it defends against. Shipping <code>click_interval=220ms</code> hands an attacker an exact target to route around.</p>
+    <p data-lang="id">Library-nya open source, jadi apa pun yang bisa dibaca manusia di format wire-nya juga bisa dibaca oleh pihak yang mau dihadapi. Mengirim <code>click_interval=220ms</code> berarti memberi penyerang target persis untuk dihindari.</p>
+    <p data-lang="en">The direction — explicitly a research direction, not a solved design — is a representation decodable only by the server: not merely encrypted in transit, but structured so that no third party, including someone who has read the whole library source, can interpret what it encodes. The library itself may not understand what it is sending.</p>
+    <p data-lang="id">Arahnya — dan ini eksplisit arah riset, bukan desain yang sudah selesai — adalah representasi yang hanya bisa dibaca server: bukan sekadar terenkripsi saat transit, tapi terstruktur sedemikian sehingga tidak ada pihak ketiga, termasuk yang sudah membaca seluruh source library, bisa menafsirkan isinya. Library-nya sendiri mungkin tidak paham apa yang ia kirim.</p>
+    <p class="muted" data-lang="en">Noted for future reference, not evaluated in depth: one-way hashing and embeddings, server-issued transformation recipes distributed at setup, private/unlabeled model embeddings as used in some fraud-detection systems.</p>
+    <p class="muted" data-lang="id">Dicatat untuk nanti, belum dievaluasi dalam: hashing dan embedding satu arah, "resep" transformasi terbitan server yang dibagikan saat setup, embedding model privat/tak berlabel seperti di beberapa sistem deteksi fraud.</p>
+  </section>
 
-  library  ──▶  <b>acts locally</b>, on local data only</pre>
+  <section id="local">
+    <p class="num"><span data-lang="en">Local-first</span><span data-lang="id">Local-first</span></p>
+    <h2 data-lang="en">Data stays where the decision happens</h2>
+    <h2 data-lang="id">Data tetap di tempat keputusan dibuat</h2>
+    <pre>application -> local guard -> local observation -> local inference
+                                    -> local decision -> local enforcement</pre>
+    <p data-lang="en">After install and provisioning, the guard needs no runtime conversation with any server. It holds its own observations, trust state, behavioral model and context. The server is a source of prescriptions and model distribution — not a brain that validates every request.</p>
+    <p data-lang="id">Setelah dipasang dan diprovision, guard tidak butuh komunikasi runtime dengan server mana pun. Ia punya observasi, state trust, model perilaku, dan konteksnya sendiri. Server adalah sumber prescription dan distribusi model — bukan otak yang memvalidasi tiap request.</p>
+    <h3 data-lang="en">Explicit non-goals</h3>
+    <h3 data-lang="id">Non-goal eksplisit</h3>
+    <ul data-lang="en">
+      <li>No mandatory central telemetry</li>
+      <li>No centralized user profiling</li>
+      <li>No runtime request forwarding</li>
+      <li>No hidden behavioral collection</li>
+    </ul>
+    <ul data-lang="id">
+      <li>Tidak ada telemetri pusat yang wajib</li>
+      <li>Tidak ada profiling user terpusat</li>
+      <li>Tidak ada penerusan request saat runtime</li>
+      <li>Tidak ada pengumpulan perilaku yang disembunyikan</li>
+    </ul>
+    <p data-lang="en">Installing a library does not entitle it to the behavioral data of someone else's users. Privacy is best realized through architecture, not through a privacy policy.</p>
+    <p data-lang="id">Memasang sebuah library tidak memberinya hak atas data perilaku pengguna orang lain. Privasi sebaiknya diwujudkan lewat arsitektur, bukan lewat privacy policy.</p>
+  </section>
 
-    <div data-lang="en">
-      <p class="muted">Consequences: privacy by design, since raw data never leaves. Cross-ecosystem learning at the pattern level. Local speed for the overwhelming majority of decisions.</p>
-    </div>
-    <div data-lang="id">
-      <p class="muted">Konsekuensinya: privacy by design, karena data mentah tidak pernah keluar. Pembelajaran lintas ekosistem di level pola. Kecepatan lokal untuk hampir semua keputusan.</p>
-    </div>
-  </div>
-</section>
+  <section id="economics">
+    <p class="num"><span data-lang="en">Economics</span><span data-lang="id">Ekonomi</span></p>
+    <h2 data-lang="en">Asymmetric cost, not perfect detection</h2>
+    <h2 data-lang="id">Asymmetric cost, bukan deteksi sempurna</h2>
+    <p data-lang="en">An attacker can imitate one signal. Possibly several. What gets expensive is holding consistency across behavior, history, context, identity, temporal pattern and interaction relationships — all at once, over time.</p>
+    <p data-lang="id">Penyerang bisa meniru satu sinyal. Mungkin beberapa. Yang jadi mahal adalah menjaga konsistensi lintas perilaku, riwayat, konteks, identitas, pola waktu, dan relasi antar interaksi — semuanya sekaligus, dalam durasi panjang.</p>
+    <pre>legitimate interaction  ->  near-zero friction
+abusive automation      ->  increasing cost</pre>
+  </section>
 
-<section>
-  <div class="wrap">
-    <p class="num">04 / <span data-lang="en">Signals</span><span data-lang="id">Sinyal</span></p>
-    <h2 data-lang="en">Two kinds, never blended</h2>
-    <h2 data-lang="id">Dua jenis, tidak pernah dilebur</h2>
+  <section id="adaptive">
+    <p class="num"><span data-lang="en">Adaptation</span><span data-lang="id">Adaptasi</span></p>
+    <h2 data-lang="en">No security model gets to be final</h2>
+    <h2 data-lang="id">Tidak ada model security yang boleh dianggap final</h2>
+    <p data-lang="en">Attackers observe, learn, adapt, then automate. A guard that stops changing loses by default. The question is not whether the guard should evolve, but where the evolution signal comes from.</p>
+    <p data-lang="id">Penyerang mengamati, belajar, beradaptasi, lalu mengotomasi. Guard yang berhenti berubah kalah dengan sendirinya. Pertanyaannya bukan apakah guard harus berevolusi, tapi dari mana sinyal evolusinya datang.</p>
+    <pre>attacker:  observe -> learn -> adapt -> automate
+guard:     observe -> learn -> adapt -> release</pre>
+    <p data-lang="en">It does not come from harvesting every user's behavior into a central store. It comes from the software side: issues, pull requests, false-positive reports, abuse reports, benchmarks, security research. The maintainer learns from feedback about the software, not from the behavioral data of other people's users.</p>
+    <p data-lang="id">Sinyalnya tidak datang dari mengumpulkan perilaku setiap user ke penyimpanan pusat. Ia datang dari sisi software: issue, pull request, laporan false positive, laporan abuse, benchmark, riset keamanan. Maintainer belajar dari umpan balik tentang software-nya, bukan dari data perilaku pengguna orang lain.</p>
+    <blockquote data-lang="en">Software evolves centrally; trust stays local.</blockquote>
+    <blockquote data-lang="id">Software berkembang terpusat; trust tetap lokal.</blockquote>
+  </section>
 
-    <div class="cols">
-      <div class="card">
-        <h3 data-lang="en">Hard constraints</h3>
-        <h3 data-lang="id">Hard constraint</h3>
-        <div data-lang="en">
-          <p>Physically or logically impossible. The stable <strong>skeleton</strong> — always on, precise, never learned, immune to going stale.</p>
-          <ul><li>A form field filled with zero corresponding interaction — no mouse movement at all, consistent with direct JS injection.</li></ul>
-        </div>
-        <div data-lang="id">
-          <p>Mustahil secara fisik atau logis. <strong>Kerangka</strong> yang stabil — selalu aktif, presisi, tidak pernah dipelajari, tidak bisa kedaluwarsa.</p>
-          <ul><li>Field form terisi tanpa interaksi apa pun — tidak ada gerakan mouse sama sekali, konsisten dengan injeksi JS langsung.</li></ul>
-        </div>
-      </div>
-      <div class="card">
-        <h3 data-lang="en">Weak signals</h3>
-        <h3 data-lang="id">Weak signal</h3>
-        <div data-lang="en">
-          <p>Unusual, not impossible. <strong>Reinforcement</strong> — only meaningful in combination, operating around the skeleton.</p>
-          <ul>
-            <li>Sub-70ms actions (a calibrated threshold, not a law)</li>
-            <li>Repeated identical patterns over time</li>
-            <li>Randomized delays that are <em>too</em> uniformly random</li>
-          </ul>
-        </div>
-        <div data-lang="id">
-          <p>Tidak biasa, bukan mustahil. <strong>Penguat</strong> — hanya bermakna dalam kombinasi, bekerja di sekitar kerangka.</p>
-          <ul>
-            <li>Aksi di bawah 70ms (ambang hasil kalibrasi, bukan hukum)</li>
-            <li>Pola identik yang berulang sepanjang waktu</li>
-            <li>Delay acak yang <em>terlalu</em> seragam keacakannya</li>
-          </ul>
-        </div>
-      </div>
-    </div>
+  <section id="governance">
+    <p class="num"><span data-lang="en">Governance</span><span data-lang="id">Tata kelola</span></p>
+    <h2 data-lang="en">Open protocol, replaceable server</h2>
+    <h2 data-lang="id">Protokol terbuka, server bisa diganti</h2>
+    <p data-lang="en">Open core, stated plainly: the library is open source, and so is the protocol — the symptom format, the prescription structure, the shared vocabulary. Rule <em>content</em> stays private per server implementation, because published rules are rules an attacker can route around.</p>
+    <p data-lang="id">Open core, terang-terangan: library-nya open source, protokolnya juga — format symptom, struktur prescription, kosakata bersama. <em>Isi</em> aturan tetap privat per implementasi server, karena aturan yang dipublikasikan adalah aturan yang bisa dihindari penyerang.</p>
+    <p data-lang="en">The reference server is one implementation, not a requirement. Anyone — a company, another community, even a competitor — can run their own against the same protocol. That removes the single point of failure, and lets a compliance-bound organization self-host instead of trusting a third party.</p>
+    <p data-lang="id">Server referensi adalah satu implementasi, bukan keharusan. Siapa pun — perusahaan, komunitas lain, bahkan kompetitor — bisa menjalankan servernya sendiri dengan protokol yang sama. Itu menghapus single point of failure, dan memungkinkan organisasi yang terikat kepatuhan untuk self-host alih-alih menitipkan kepercayaan ke pihak ketiga.</p>
+    <p class="muted" data-lang="en">Precedents for this shape: DNS, SMTP, ActivityPub, Let's Encrypt — an open protocol with one prominent implementation most people default to, without that implementation being structurally required.</p>
+    <p class="muted" data-lang="id">Preseden bentuk ini: DNS, SMTP, ActivityPub, Let's Encrypt — protokol terbuka dengan satu implementasi menonjol yang jadi pilihan default, tanpa implementasi itu wajib secara struktural.</p>
+    <h3 data-lang="en">How the project learns</h3>
+    <h3 data-lang="id">Bagaimana proyek ini belajar</h3>
+    <pre>real-world problem -> community report -> maintainer analysis
+  -> new symptom / rule / model -> release -> local autonomous guard</pre>
+    <p data-lang="en">Software evolves centrally; trust stays local.</p>
+    <p data-lang="id">Software berkembang secara terpusat; trust tetap lokal.</p>
+  </section>
 
-    <div data-lang="en">
-      <p>Keeping them separate is what lets the system use statistical signals without inheriting a false-positive problem: weak signals never carry full-precision weight alone.</p>
-      <p class="muted">The tell in a bot's randomized delay is rarely the delay itself. It is the <strong>shape of the randomness</strong> — humans do not produce uniform distributions.</p>
-    </div>
-    <div data-lang="id">
-      <p>Memisahkan keduanya inilah yang membuat sistem bisa memakai sinyal statistik tanpa mewarisi masalah false positive: weak signal tidak pernah memikul beban presisi penuh sendirian.</p>
-      <p class="muted">Petunjuk pada delay acak sebuah bot jarang terletak pada delay-nya sendiri, melainkan pada <strong>bentuk keacakannya</strong> — manusia tidak menghasilkan distribusi seragam.</p>
-    </div>
-  </div>
-</section>
+  <section id="opencore">
+    <p class="num"><span data-lang="en">Open core</span><span data-lang="id">Open core</span></p>
+    <h2 data-lang="en">What is open, what is not, and what that costs</h2>
+    <h2 data-lang="id">Apa yang terbuka, apa yang tidak, dan berapa harganya</h2>
+    <p data-lang="en">The intent is not 100% open source, and pretending otherwise would be dishonest. The split, stated plainly:</p>
+    <p data-lang="id">Niatnya bukan 100% open source, dan berpura-pura sebaliknya tidak jujur. Pembagiannya, terang-terangan:</p>
+    <table>
+      <thead>
+        <tr>
+          <th data-lang="en">Component</th><th data-lang="id">Komponen</th>
+          <th data-lang="en">Openness</th><th data-lang="id">Keterbukaan</th>
+          <th data-lang="en">Reasoning</th><th data-lang="id">Alasan</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>library</code></td>
+          <td data-lang="en">Open source</td><td data-lang="id">Open source</td>
+          <td data-lang="en">It runs inside someone else's system; it must be auditable to be trustworthy.</td>
+          <td data-lang="id">Ia berjalan di dalam sistem orang lain; harus bisa diaudit supaya layak dipercaya.</td>
+        </tr>
+        <tr>
+          <td><code>protocol</code></td>
+          <td data-lang="en">Open spec</td><td data-lang="id">Spesifikasi terbuka</td>
+          <td data-lang="en">Symptom format, prescription structure, shared vocabulary — anyone can implement against it.</td>
+          <td data-lang="id">Format symptom, struktur prescription, kosakata bersama — siapa pun bisa mengimplementasikannya.</td>
+        </tr>
+        <tr>
+          <td data-lang="en"><code>rule content</code></td><td data-lang="id"><code>isi aturan</code></td>
+          <td data-lang="en">Private per server</td><td data-lang="id">Privat per server</td>
+          <td data-lang="en">Published rules are rules an attacker can read and route around.</td>
+          <td data-lang="id">Aturan yang dipublikasikan adalah aturan yang bisa dibaca dan dihindari penyerang.</td>
+        </tr>
+      </tbody>
+    </table>
+    <p data-lang="en">Open core has known failure modes, and this project has not solved them yet. Naming them is part of the design:</p>
+    <p data-lang="id">Open core punya mode kegagalan yang sudah dikenal, dan proyek ini belum menyelesaikannya. Menyebutkannya adalah bagian dari desain:</p>
+    <dl>
+      <dt data-lang="en">Contributor incentive mismatch</dt>
+      <dt data-lang="id">Insentif kontributor tidak sejalan</dt>
+      <dd data-lang="en">Work contributed to the open library can feel like value flowing into a closed server. Governance has to say early what stays open forever, and why the rest does not.</dd>
+      <dd data-lang="id">Kontribusi ke library terbuka bisa terasa seperti nilai yang mengalir ke server tertutup. Tata kelola harus menyatakan sejak awal apa yang terbuka selamanya, dan kenapa sisanya tidak.</dd>
 
-<section>
-  <div class="wrap">
-    <p class="num">05 / <span data-lang="en">Governance</span><span data-lang="id">Tata kelola</span></p>
-    <h2 data-lang="en">An open protocol, not a proprietary backend</h2>
-    <h2 data-lang="id">Protokol terbuka, bukan backend proprietary</h2>
+      <dt data-lang="en">Cost concentration</dt>
+      <dt data-lang="id">Biaya menumpuk di satu titik</dt>
+      <dd data-lang="en">Reference-server load scales with library adoption, on one person, with no cost model decided yet.</dd>
+      <dd data-lang="id">Beban server referensi tumbuh seiring adopsi library, di satu orang, tanpa model biaya yang sudah diputuskan.</dd>
 
-    <div data-lang="en">
-      <p><strong>Open</strong> — the library <em>and</em> the protocol: how a symptom is formatted, how a prescription is structured, the shared vocabulary.</p>
-      <p><strong>Closed</strong> — the rule content of any given server. Publishing exact thresholds hands attackers a fixed target to route around.</p>
-      <p>The reference server is one implementation, not a structural requirement. Anyone — a company, another community, even a competitor — can run their own against the same protocol. Same shape as DNS, SMTP, ActivityPub, Let's Encrypt.</p>
-      <p class="muted">This removes the single point of failure, lets compliance-sensitive adopters self-host, and reframes the project as a standard rather than a lock-in. The cost: the symptom vocabulary becomes a public spec — versioned, conservative, and load-bearing for everyone downstream.</p>
-    </div>
-    <div data-lang="id">
-      <p><strong>Terbuka</strong> — library <em>dan</em> protokolnya: bagaimana symptom diformat, bagaimana prescription disusun, serta kosakata bersamanya.</p>
-      <p><strong>Tertutup</strong> — isi aturan pada tiap server. Mempublikasikan ambang yang persis sama dengan menyerahkan sasaran tetap untuk dihindari penyerang.</p>
-      <p>Server rujukan hanyalah satu implementasi, bukan keharusan struktural. Siapa pun — perusahaan, komunitas lain, bahkan kompetitor — bisa menjalankan servernya sendiri di atas protokol yang sama. Polanya seperti DNS, SMTP, ActivityPub, Let's Encrypt.</p>
-      <p class="muted">Ini menghapus single point of failure, memungkinkan adopter yang ketat soal kepatuhan untuk self-host, dan memposisikan proyek sebagai standar alih-alih kunci vendor. Biayanya: kosakata symptom menjadi spesifikasi publik — berversi, konservatif, dan menjadi fondasi bagi semua yang memakainya.</p>
-    </div>
-  </div>
-</section>
-
-<section>
-  <div class="wrap">
-    <p class="num">06 / <span data-lang="en">Unresolved</span><span data-lang="id">Belum selesai</span></p>
-    <h2 data-lang="en">Open problems, named honestly</h2>
-    <h2 data-lang="id">Masalah terbuka, disebut terus terang</h2>
-
-    <dl data-lang="en">
-      <dt>Symptom vocabulary</dt>
-      <dd>The actual open problem. Needs a concrete two-tier v0.1 spec.</dd>
-      <dt>Signal encoding</dt>
-      <dd>The transmitted representation should be decodable only by the server, even though the library's source is public. Edges into one-way embeddings and server-issued transformation recipes. A research direction, not a resolved design.</dd>
-      <dt>Cold start &amp; sybil churn</dt>
-      <dd>History-based trust is gamed by attackers who simply discard identities and start fresh.</dd>
-      <dt>Root of trust</dt>
-      <dd>Behavior alone cannot anchor it. Without an anchor, the system measures consistency, not authenticity.</dd>
-      <dt>Poisoning resistance</dt>
-      <dd>Gradual baseline shifts where every individual step looks legitimate.</dd>
-      <dt>Legal basis</dt>
-      <dd>Behavioral history is personal data under GDPR and Indonesia's UU PDP.</dd>
-      <dt>Sequencing</dt>
-      <dd>Is a durable public protocol worth designing before a proof-of-concept even exists?</dd>
+      <dt data-lang="en">Blurred debugging responsibility</dt>
+      <dt data-lang="id">Tanggung jawab debug jadi kabur</dt>
+      <dd data-lang="en">On a false positive, the community can only inspect the library, even when the root cause is a bad prescription. There needs to be a way to report "this smells server-side" without exposing server internals.</dd>
+      <dd data-lang="id">Saat false positive, komunitas cuma bisa memeriksa library, padahal akarnya bisa prescription yang buruk. Harus ada cara melaporkan "ini kelihatannya dari server" tanpa membuka isi server.</dd>
     </dl>
-    <dl data-lang="id">
-      <dt>Kosakata symptom</dt>
-      <dd>Masalah terbuka yang sesungguhnya. Butuh spesifikasi v0.1 dua tingkat yang konkret.</dd>
-      <dt>Enkode sinyal</dt>
-      <dd>Representasi yang dikirim seharusnya hanya bisa dibaca server, walau kode library-nya publik. Menyentuh wilayah one-way embedding dan resep transformasi terbitan server. Arah riset, bukan desain yang sudah beres.</dd>
-      <dt>Cold start &amp; sybil churn</dt>
-      <dd>Trust berbasis riwayat bisa diakali penyerang yang tinggal membuang identitas dan mulai dari nol.</dd>
-      <dt>Akar trust</dt>
-      <dd>Perilaku saja tidak bisa menjadi jangkarnya. Tanpa jangkar, sistem hanya mengukur konsistensi, bukan keaslian.</dd>
-      <dt>Ketahanan terhadap poisoning</dt>
-      <dd>Pergeseran baseline bertahap, ketika setiap langkahnya tampak sah bila dilihat sendiri-sendiri.</dd>
-      <dt>Dasar hukum</dt>
-      <dd>Riwayat perilaku termasuk data pribadi menurut GDPR dan UU PDP Indonesia.</dd>
-      <dt>Urutan pengerjaan</dt>
-      <dd>Apakah protokol publik yang tahan lama layak dirancang sebelum proof-of-concept-nya ada?</dd>
+    <p class="muted" data-lang="en">The replaceable-server model in the previous section is what keeps the first failure mode — a single maintainer as the ecosystem's only brain — from being fatal.</p>
+    <p class="muted" data-lang="id">Model server yang bisa diganti di bagian sebelumnya adalah yang membuat mode kegagalan pertama — satu maintainer sebagai satu-satunya otak ekosistem — tidak jadi fatal.</p>
+  </section>
+
+  <section id="unresolved">
+    <p class="num"><span data-lang="en">Unresolved</span><span data-lang="id">Belum selesai</span></p>
+    <h2 data-lang="en">Open problems, stated honestly</h2>
+    <h2 data-lang="id">Masalah terbuka, ditulis jujur</h2>
+    <dl>
+      <dt data-lang="en">Symptom vocabulary</dt>
+      <dt data-lang="id">Kosakata gejala</dt>
+      <dd data-lang="en">The actual blocking problem. A public, versioned, two-tier spec that can be extended without being redefined.</dd>
+      <dd data-lang="id">Masalah utama yang memblokir. Spesifikasi publik, berversi, dua lapis, yang bisa diperluas tanpa didefinisikan ulang.</dd>
+
+      <dt data-lang="en">Signal encoding</dt>
+      <dt data-lang="id">Encoding sinyal</dt>
+      <dd data-lang="en">Server-only decodable representations. Research direction, not a design.</dd>
+      <dd data-lang="id">Representasi yang hanya bisa dibaca server. Arah riset, bukan desain.</dd>
+
+      <dt data-lang="en">Cold start and identity churn</dt>
+      <dt data-lang="id">Cold start dan pergantian identitas</dt>
+      <dd data-lang="en">A history-based model is gameable by an attacker who simply keeps starting fresh.</dd>
+      <dd data-lang="id">Model berbasis riwayat bisa diakali penyerang yang tinggal terus memulai dari nol.</dd>
+
+      <dt data-lang="en">Root of trust</dt>
+      <dt data-lang="id">Akar kepercayaan</dt>
+      <dd data-lang="en">If behavior alone is not the anchor, what is? Without one, the system measures consistency, not authenticity.</dd>
+      <dd data-lang="id">Kalau bukan perilaku yang jadi jangkar, lalu apa? Tanpa itu, sistem mengukur konsistensi, bukan keaslian.</dd>
+
+      <dt data-lang="en">Poisoning resistance</dt>
+      <dt data-lang="id">Ketahanan terhadap poisoning</dt>
+      <dd data-lang="en">Slow, incremental, individually-legitimate steps that shift the baseline. Hard to catch precisely because each step looks normal.</dd>
+      <dd data-lang="id">Langkah lambat, bertahap, yang masing-masing terlihat sah tapi menggeser baseline. Sulit ditangkap justru karena tiap langkahnya normal.</dd>
+
+      <dt data-lang="en">Cost of near-zero friction</dt>
+      <dt data-lang="id">Biaya friksi mendekati nol</dt>
+      <dd data-lang="en">Evaluating many weak signals in real time is expensive: latency, compute, per-entity state.</dd>
+      <dd data-lang="id">Mengevaluasi banyak weak signal secara real time itu mahal: latensi, komputasi, state per entity.</dd>
+
+      <dt data-lang="en">Legal basis</dt>
+      <dt data-lang="id">Dasar hukum</dt>
+      <dd data-lang="en">Behavioral history for scoring is personal-data processing under GDPR and UU PDP, and needs a lawful basis — even when it never leaves the local instance.</dd>
+      <dd data-lang="id">Riwayat perilaku untuk scoring adalah pemrosesan data pribadi menurut GDPR dan UU PDP, dan butuh dasar hukum — meski tidak pernah keluar dari instance lokal.</dd>
+
+      <dt data-lang="en">Sequencing</dt>
+      <dt data-lang="id">Urutan pengerjaan</dt>
+      <dd data-lang="en">Is a durable public protocol worth designing before a first proof of concept exists, or is that solving a scaling problem with nothing yet to scale?</dd>
+      <dd data-lang="id">Apakah protokol publik yang tahan lama layak dirancang sebelum proof of concept pertama ada, atau itu menyelesaikan masalah skala padahal belum ada yang perlu diskalakan?</dd>
     </dl>
-  </div>
-</section>
+  </section>
 
-<section>
-  <div class="wrap">
-    <p class="num">07 / <span data-lang="en">Roadmap</span><span data-lang="id">Peta jalan</span></p>
-    <h2 data-lang="en">Smallest thing that teaches us something</h2>
-    <h2 data-lang="id">Hal terkecil yang mengajari kami sesuatu</h2>
+  <section id="status">
+    <p class="num"><span data-lang="en">Status</span><span data-lang="id">Status</span></p>
+    <h2 data-lang="en">Where each piece actually stands</h2>
+    <h2 data-lang="id">Posisi sebenarnya tiap bagian</h2>
+    <p data-lang="en">Read this before assuming any part of the above is settled. Some of it is reasoned through; some of it is an open research direction with nothing built yet.</p>
+    <p data-lang="id">Baca ini sebelum menganggap ada bagian di atas yang sudah beres. Sebagian sudah dipikirkan matang; sebagian masih arah riset yang belum dibangun sama sekali.</p>
+    <table>
+      <thead>
+        <tr>
+          <th data-lang="en">Area</th><th data-lang="id">Area</th>
+          <th data-lang="en">Status</th><th data-lang="id">Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td data-lang="en">Trust as a spectrum, not a verdict</td><td data-lang="id">Trust sebagai spektrum, bukan putusan</td>
+          <td data-lang="en">Solid starting point</td><td data-lang="id">Titik awal yang kokoh</td>
+        </tr>
+        <tr>
+          <td data-lang="en">Product shape — local, one-way, advisory</td><td data-lang="id">Bentuk produk — lokal, satu arah, advisory</td>
+          <td data-lang="en">Clarified and coherent</td><td data-lang="id">Sudah jelas dan konsisten</td>
+        </tr>
+        <tr>
+          <td data-lang="en">Symptom to prescription flow</td><td data-lang="id">Alur symptom ke prescription</td>
+          <td data-lang="en">Strong conceptually; solves privacy naturally</td><td data-lang="id">Kuat secara konsep; menyelesaikan privasi dengan sendirinya</td>
+        </tr>
+        <tr>
+          <td data-lang="en">Hard constraint vs weak signal typing</td><td data-lang="id">Pemisahan hard constraint dan weak signal</td>
+          <td data-lang="en">The one real breakthrough so far</td><td data-lang="id">Satu-satunya terobosan nyata sejauh ini</td>
+        </tr>
+        <tr>
+          <td data-lang="en">What data the project needs to improve</td><td data-lang="id">Data apa yang dibutuhkan proyek untuk membaik</td>
+          <td data-lang="en">Resolved in principle: pattern shape, not identity</td><td data-lang="id">Selesai secara prinsip: bentuk pola, bukan identitas</td>
+        </tr>
+        <tr>
+          <td data-lang="en">Symptom vocabulary as a public spec</td><td data-lang="id">Kosakata symptom sebagai spesifikasi publik</td>
+          <td data-lang="en"><strong>Unresolved</strong> — the actual open problem</td><td data-lang="id"><strong>Belum selesai</strong> — ini masalah terbukanya</td>
+        </tr>
+        <tr>
+          <td data-lang="en">Server-only readable signal encoding</td><td data-lang="id">Encoding sinyal yang hanya terbaca server</td>
+          <td data-lang="en"><strong>Not started</strong> — research, not design</td><td data-lang="id"><strong>Belum dimulai</strong> — riset, bukan desain</td>
+        </tr>
+        <tr>
+          <td data-lang="en">Proof of concept</td><td data-lang="id">Proof of concept</td>
+          <td data-lang="en"><strong>None yet</strong> — no code exists</td><td data-lang="id"><strong>Belum ada</strong> — belum ada kode</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
 
+  <section id="roadmap">
+    <p class="num"><span data-lang="en">Roadmap</span><span data-lang="id">Roadmap</span></p>
+    <h2 data-lang="en">What happens next, in order</h2>
+    <h2 data-lang="id">Yang berikutnya, berurutan</h2>
     <ol class="road" data-lang="en">
-      <li>Smallest possible proof-of-concept — library only, hard constraints only, no server.</li>
-      <li>Enumerate hard constraints exhaustively.</li>
-      <li>Enumerate weak signals and how they combine into observe / restrict / block tiers.</li>
-      <li>Draft the two-tier symptom vocabulary as a v0.1 spec.</li>
-      <li>Only then: investigate encoding schemes for symptom transmission.</li>
+      <li>Draft the two-tier symptom vocabulary as a concrete v0.1 spec.</li>
+      <li>Enumerate the known hard constraints exhaustively — the current list is a starting set, not a complete one.</li>
+      <li>Enumerate known weak signals and how they combine into observe / restrict / block tiers.</li>
+      <li>Build the smallest possible proof of concept: library only, hard constraints only, no server.</li>
+      <li>Only then investigate encoding schemes for symptom transmission.</li>
     </ol>
     <ol class="road" data-lang="id">
-      <li>Proof-of-concept sekecil mungkin — library saja, hard constraint saja, tanpa server.</li>
-      <li>Mendaftar hard constraint secara menyeluruh.</li>
-      <li>Mendaftar weak signal dan cara menggabungkannya ke tingkatan observe / restrict / block.</li>
-      <li>Menyusun kosakata symptom dua tingkat sebagai spesifikasi v0.1.</li>
-      <li>Baru setelah itu: menelaah skema enkode untuk pengiriman symptom.</li>
+      <li>Susun kosakata gejala dua lapis sebagai spesifikasi v0.1 yang konkret.</li>
+      <li>Daftar hard constraint yang sudah diketahui secara lengkap — daftar sekarang baru titik awal, belum utuh.</li>
+      <li>Daftar weak signal yang diketahui dan bagaimana kombinasinya jadi tingkat observe / restrict / block.</li>
+      <li>Bangun proof of concept sekecil mungkin: library saja, hard constraint saja, tanpa server.</li>
+      <li>Baru setelah itu, teliti skema encoding untuk pengiriman symptom.</li>
     </ol>
+  </section>
 
-    <div class="cta">
-      <a class="primary" href="https://github.com/Fachryxyf/scorpio-guard/issues">
-        <span data-lang="en">Discussion is worth more than code right now →</span>
-        <span data-lang="id">Saat ini diskusi lebih berharga dari kode →</span>
-      </a>
-    </div>
-  </div>
-</section>
+  <section id="principles">
+    <p class="num"><span data-lang="en">Principles</span><span data-lang="id">Prinsip</span></p>
+    <h2 data-lang="en">What the guard actually claims</h2>
+    <h2 data-lang="id">Apa yang sebenarnya diklaim guard</h2>
+    <p data-lang="en">It never says "I know you are human." It says: based on the evidence I hold, I trust you enough to let you work.</p>
+    <p data-lang="id">Ia tidak pernah bilang "saya tahu kamu manusia." Ia bilang: berdasarkan evidence yang saya punya, saya cukup percaya untuk membiarkanmu bekerja.</p>
+    <pre>observe -> remember -> forget -> adapt -> decide</pre>
+    <blockquote data-lang="en">Make legitimate behavior cheap, make abuse expensive, and make security invisible to the people who deserve to use the system.</blockquote>
+    <blockquote data-lang="id">Buat perilaku legitimate jadi murah, buat abuse jadi mahal, dan buat security tak terlihat oleh orang-orang yang memang berhak memakai sistemnya.</blockquote>
+    <pre>The application owns the data.
+The Guard owns the interpretation.
+The API distributes the prescription.
+The prescription travels; the patient does not.</pre>
+  </section>
 </main>
+</div>
 
 <footer>
-  <div class="wrap foot-row">
-    <span>Scorpio Guard</span>
-    <a href="https://github.com/Fachryxyf/scorpio-guard">GitHub</a>
-    <a href="https://github.com/Fachryxyf">@Fachryxyf</a>
-    <span class="muted" data-lang="en">Design phase · 2026</span>
-    <span class="muted" data-lang="id">Tahap desain · 2026</span>
-  </div>
+  <span>Scorpio Guard</span>
+  <a href="https://github.com/Fachryxyf/scorpio-guard">GitHub</a>
+  <a href="https://github.com/Fachryxyf">@Fachryxyf</a>
+  <span data-lang="en">Design phase · 2026</span>
+  <span data-lang="id">Tahap desain · 2026</span>
 </footer>
 
 <script>
@@ -495,6 +867,42 @@
       paint();
     });
     paint();
+
+    // ponytail: sidebar is a plain <details> collapsed on narrow screens only.
+    // Upgrade path: a real off-canvas drawer if the TOC outgrows one screen.
+    var toc = document.getElementById('toc');
+    var narrow = matchMedia('(max-width: 60rem)');
+    function fitToc() { toc.open = !narrow.matches; }
+    narrow.addEventListener('change', fitToc);
+    fitToc();
+    toc.addEventListener('click', function (e) {
+      if (e.target.closest('a') && narrow.matches) toc.open = false;
+    });
+
+    // ponytail: IntersectionObserver is enough for a single-page TOC.
+    // Upgrade path: if this ever becomes multi-page docs, generate nav server-side.
+    var links = [].slice.call(document.querySelectorAll('nav.side a'));
+    var byId = {};
+    links.forEach(function (a) { byId[a.getAttribute('href').slice(1)] = a; });
+    var seen = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (!e.isIntersecting) return;
+        links.forEach(function (a) { a.removeAttribute('aria-current'); });
+        var a = byId[e.target.id];
+        if (a) a.setAttribute('aria-current', 'true');
+      });
+    }, { rootMargin: '-20% 0px -70% 0px' });
+    document.querySelectorAll('main section[id]').forEach(function (s) {
+      seen.observe(s);
+      var num = s.querySelector('.num');
+      if (!num) return;
+      var hash = document.createElement('a');
+      hash.className = 'hash';
+      hash.href = '#' + s.id;
+      hash.textContent = '#';
+      hash.setAttribute('aria-label', 'Permalink: ' + s.id);
+      num.appendChild(hash);
+    });
   })();
 </script>
 </body>
