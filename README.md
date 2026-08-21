@@ -34,7 +34,7 @@ Trust is built from many weak signals evaluated together over time. Identity is 
 
 Scorpio Guard is **not** Turnstile or reCAPTCHA. There is no round trip to a central service that issues a verdict token.
 
-- An **open-source library** installed inside your own ecosystem, accessed via an API key.
+- An **open-source library** installed inside your own ecosystem. No API key, and no network surface at all in the current scope.
 - **One-way flow** — it evaluates and advises *within* your environment.
 - **Advisory only** — it never unilaterally blocks or rejects. Every action belongs to the owner of the system it runs in.
 - **No phoning home** per request. Raw traffic and history stay local.
@@ -90,7 +90,7 @@ Named honestly, not hidden.
 - **Symptom vocabulary** — the actual open problem. Needs a concrete two-tier v0.1 spec.
 - **Signal encoding** — the transmitted representation should be decodable *only* by the server, even though the library's source is public. Edges into one-way embeddings and server-issued transformation recipes. Research direction, not a resolved design.
 - **Cold start & sybil churn** — history-based trust is gamed by attackers who simply discard identities.
-- **Root of trust** — behavior alone cannot anchor it. Without an anchor, the system measures consistency, not authenticity.
+- **Root of trust** — explicitly outside the library. It accepts an entity reference as a basis for measurement, never as proof of identity. If the host supplies a reference that is cheap to discard, every history-based defence goes with it — and that is the host's responsibility, not the library's.
 - **Poisoning resistance** — gradual baseline shifts where every individual step looks legitimate.
 - **Privacy/legal basis** — behavioral history is personal data under GDPR and Indonesia's UU PDP.
 - **Sequencing** — is a durable public protocol worth designing *before* a proof-of-concept exists?
@@ -104,6 +104,19 @@ Three repositories, not a monorepo — see [REPOSITORIES.md](REPOSITORIES.md) fo
 | `scorpio-guard` | Public | The TypeScript library. This repo. |
 | `scorpio-guard-protocol` | Public | Symptom vocabulary and wire format. Spec only. Not started. |
 | `scorpio-guard-server` | Private | Rust reference server. Rule content. Not started. |
+
+## Design Record
+
+Every design decision is recorded in [DECISIONS.md](DECISIONS.md): the question,
+the answer, the reasoning, and what each answer commits the implementation to.
+Read it before proposing a change to the model — several obvious-looking
+alternatives were considered and rejected there for reasons worth knowing.
+
+Settled so far: the entity as reference unit, trust as a Beta distribution,
+half-life decay over real elapsed time, evidence weights, decision bands with an
+uncertainty ceiling, retention, and the hard-constraint model. Still open: the
+anomaly feature space, entity relationships, and which real application the proof
+of concept runs against.
 
 ## Development
 

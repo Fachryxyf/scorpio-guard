@@ -112,7 +112,27 @@
   nav.side ol { list-style: none; margin: 0; padding: 0; }
   nav.side li { counter-increment: nav; }
   nav.side ol a::before { content: counter(nav, decimal-leading-zero) " · "; }
-  nav.side summary { display: none; }
+  nav.side > details > summary { display: none; }
+
+  /* collapsible groups keep a long TOC scannable */
+  details.grp { border-bottom: 1px solid var(--line); }
+  details.grp:last-child { border-bottom: 0; }
+  details.grp > summary {
+    display: flex; align-items: center; gap: .5rem; cursor: pointer;
+    list-style: none; padding: .7rem 0;
+    font: .6875rem/1 var(--mono); letter-spacing: .18em; text-transform: uppercase;
+    color: var(--ink-2);
+  }
+  details.grp > summary::-webkit-details-marker { display: none; }
+  details.grp > summary::after {
+    content: "+"; margin-left: auto; color: var(--line); font-size: .875rem;
+  }
+  details.grp[open] > summary::after { content: "–"; }
+  details.grp > summary:hover { color: var(--ink); }
+  details.grp[open] > summary { color: var(--ink); }
+  details.grp[data-has-current] > summary { color: var(--accent); }
+  details.grp[data-has-current] > summary::after { color: var(--accent); }
+  details.grp > ol { padding-bottom: .7rem; }
   nav.side a {
     display: block; padding: .3rem 0 .3rem .75rem;
     border: 0; border-left: 2px solid var(--line);
@@ -202,15 +222,15 @@
       position: static; max-height: none; border-right: 0;
       border-bottom: 1px solid var(--line); padding: 1.25rem;
     }
-    nav.side summary {
-      display: block; cursor: pointer; list-style: none;
+    nav.side > details > summary {
+      display: flex; align-items: center; cursor: pointer; list-style: none;
       font: .75rem/1 var(--mono); letter-spacing: .16em; text-transform: uppercase;
       color: var(--ink-2); padding: .35rem 0;
     }
-    nav.side summary::-webkit-details-marker { display: none; }
-    nav.side summary::after { content: " [+]"; color: var(--accent); }
-    nav.side details[open] > summary::after { content: " [-]"; }
-    nav.side details[open] { max-height: 60vh; overflow-y: auto; }
+    nav.side > details > summary::-webkit-details-marker { display: none; }
+    nav.side > details > summary::after { content: "[+]"; margin-left: auto; color: var(--accent); }
+    nav.side > details[open] > summary::after { content: "[-]"; }
+    nav.side > details[open] { max-height: 60vh; overflow-y: auto; }
     main { padding: 0 1.25rem 4rem; }
     footer { padding: 1.5rem 1.25rem; }
   }
@@ -239,47 +259,63 @@
 <nav class="side" aria-label="Documentation">
  <details class="toc" id="toc" open>
   <summary><span data-lang="en">Contents</span><span data-lang="id">Daftar isi</span></summary>
-  <p class="group" data-lang="en">Foundations</p>
-  <p class="group" data-lang="id">Fondasi</p>
-  <ol>
-    <li><a href="#premise"><span data-lang="en">Premise</span><span data-lang="id">Premis</span></a></li>
-    <li><a href="#shape"><span data-lang="en">Product shape</span><span data-lang="id">Bentuk produk</span></a></li>
-    <li><a href="#friction"><span data-lang="en">Zero friction</span><span data-lang="id">Tanpa friksi</span></a></li>
-  </ol>
-
-  <p class="group" data-lang="en">Model</p>
-  <p class="group" data-lang="id">Model</p>
-  <ol>
-    <li><a href="#trust"><span data-lang="en">Trust model</span><span data-lang="id">Model trust</span></a></li>
-    <li><a href="#memory"><span data-lang="en">Memory &amp; decay</span><span data-lang="id">Memori &amp; decay</span></a></li>
-    <li><a href="#anomaly"><span data-lang="en">Anomaly</span><span data-lang="id">Anomali</span></a></li>
-    <li><a href="#context"><span data-lang="en">Context</span><span data-lang="id">Konteks</span></a></li>
-    <li><a href="#decision"><span data-lang="en">Decision layer</span><span data-lang="id">Lapis keputusan</span></a></li>
-    <li><a href="#signals"><span data-lang="en">Signals</span><span data-lang="id">Sinyal</span></a></li>
-    <li><a href="#pipeline"><span data-lang="en">Mental model</span><span data-lang="id">Model mental</span></a></li>
-  </ol>
-
-  <p class="group" data-lang="en">Protocol</p>
-  <p class="group" data-lang="id">Protokol</p>
-  <ol>
-    <li><a href="#protocol"><span data-lang="en">Symptom flow</span><span data-lang="id">Alur gejala</span></a></li>
-    <li><a href="#vocabulary"><span data-lang="en">Vocabulary</span><span data-lang="id">Kosakata</span></a></li>
-    <li><a href="#encoding"><span data-lang="en">Encoding</span><span data-lang="id">Encoding</span></a></li>
-    <li><a href="#local"><span data-lang="en">Local-first</span><span data-lang="id">Local-first</span></a></li>
-  </ol>
-
-  <p class="group" data-lang="en">Project</p>
-  <p class="group" data-lang="id">Proyek</p>
-  <ol>
-    <li><a href="#economics"><span data-lang="en">Economics</span><span data-lang="id">Ekonomi</span></a></li>
-    <li><a href="#adaptive"><span data-lang="en">Adaptation</span><span data-lang="id">Adaptasi</span></a></li>
-    <li><a href="#governance"><span data-lang="en">Governance</span><span data-lang="id">Tata kelola</span></a></li>
-    <li><a href="#opencore"><span data-lang="en">Open core</span><span data-lang="id">Open core</span></a></li>
-    <li><a href="#unresolved"><span data-lang="en">Unresolved</span><span data-lang="id">Belum selesai</span></a></li>
-    <li><a href="#status"><span data-lang="en">Status</span><span data-lang="id">Status</span></a></li>
-    <li><a href="#roadmap"><span data-lang="en">Roadmap</span><span data-lang="id">Roadmap</span></a></li>
-    <li><a href="#principles"><span data-lang="en">Principles</span><span data-lang="id">Prinsip</span></a></li>
-  </ol>
+    <details class="grp" data-grp="foundations" open>
+      <summary><span data-lang="en">Foundations</span><span data-lang="id">Fondasi</span></summary>
+      <ol>
+        <li><a href="#premise"><span data-lang="en">Premise</span><span data-lang="id">Premis</span></a></li>
+        <li><a href="#shape"><span data-lang="en">Product shape</span><span data-lang="id">Bentuk produk</span></a></li>
+        <li><a href="#friction"><span data-lang="en">Zero friction</span><span data-lang="id">Tanpa friksi</span></a></li>
+      </ol>
+    </details>
+    <details class="grp" data-grp="trust">
+      <summary><span data-lang="en">Trust model</span><span data-lang="id">Model trust</span></summary>
+      <ol>
+        <li><a href="#trust"><span data-lang="en">Trust as a distribution</span><span data-lang="id">Trust sebagai distribusi</span></a></li>
+        <li><a href="#memory"><span data-lang="en">Memory &amp; decay</span><span data-lang="id">Memori &amp; decay</span></a></li>
+      </ol>
+    </details>
+    <details class="grp" data-grp="assessment">
+      <summary><span data-lang="en">Assessment</span><span data-lang="id">Penilaian</span></summary>
+      <ol>
+        <li><a href="#anomaly"><span data-lang="en">Anomaly</span><span data-lang="id">Anomali</span></a></li>
+        <li><a href="#context"><span data-lang="en">Context</span><span data-lang="id">Konteks</span></a></li>
+      </ol>
+    </details>
+    <details class="grp" data-grp="decision">
+      <summary><span data-lang="en">Decision</span><span data-lang="id">Keputusan</span></summary>
+      <ol>
+        <li><a href="#decision"><span data-lang="en">Decision layer</span><span data-lang="id">Lapis keputusan</span></a></li>
+        <li><a href="#signals"><span data-lang="en">Signals</span><span data-lang="id">Sinyal</span></a></li>
+        <li><a href="#pipeline"><span data-lang="en">Mental model</span><span data-lang="id">Model mental</span></a></li>
+      </ol>
+    </details>
+    <details class="grp" data-grp="protocol">
+      <summary><span data-lang="en">Protocol</span><span data-lang="id">Protokol</span></summary>
+      <ol>
+        <li><a href="#protocol"><span data-lang="en">Symptom flow</span><span data-lang="id">Alur gejala</span></a></li>
+        <li><a href="#vocabulary"><span data-lang="en">Vocabulary</span><span data-lang="id">Kosakata</span></a></li>
+        <li><a href="#encoding"><span data-lang="en">Encoding</span><span data-lang="id">Encoding</span></a></li>
+        <li><a href="#local"><span data-lang="en">Local-first</span><span data-lang="id">Local-first</span></a></li>
+      </ol>
+    </details>
+    <details class="grp" data-grp="project">
+      <summary><span data-lang="en">Project</span><span data-lang="id">Proyek</span></summary>
+      <ol>
+        <li><a href="#economics"><span data-lang="en">Economics</span><span data-lang="id">Ekonomi</span></a></li>
+        <li><a href="#adaptive"><span data-lang="en">Adaptation</span><span data-lang="id">Adaptasi</span></a></li>
+        <li><a href="#governance"><span data-lang="en">Governance</span><span data-lang="id">Tata kelola</span></a></li>
+        <li><a href="#opencore"><span data-lang="en">Open core</span><span data-lang="id">Open core</span></a></li>
+      </ol>
+    </details>
+    <details class="grp" data-grp="honest">
+      <summary><span data-lang="en">Honest status</span><span data-lang="id">Status jujur</span></summary>
+      <ol>
+        <li><a href="#unresolved"><span data-lang="en">Unresolved</span><span data-lang="id">Belum selesai</span></a></li>
+        <li><a href="#status"><span data-lang="en">Where it stands</span><span data-lang="id">Posisi saat ini</span></a></li>
+        <li><a href="#roadmap"><span data-lang="en">Roadmap</span><span data-lang="id">Roadmap</span></a></li>
+        <li><a href="#principles"><span data-lang="en">Principles</span><span data-lang="id">Prinsip</span></a></li>
+      </ol>
+    </details>
  </details>
 </nav>
 
@@ -897,6 +933,7 @@ The prescription travels; the patient does not.</pre>
     // The sidebar is taller than the viewport, so moving the marker is not enough:
     // it has to stay visible inside the sidebar's own scroll box.
     var side = document.querySelector('nav.side');
+    var groups = [].slice.call(document.querySelectorAll('details.grp'));
     var smooth = !matchMedia('(prefers-reduced-motion: reduce)').matches;
     function revealInToc(a) {
       if (side.scrollHeight <= side.clientHeight) return;
@@ -921,6 +958,15 @@ The prescription travels; the patient does not.</pre>
         var a = byId[e.target.id];
         if (!a) return;
         a.setAttribute('aria-current', 'true');
+        groups.forEach(function (g) { g.removeAttribute('data-has-current'); });
+        var group = a.closest('details.grp');
+        if (group) {
+          group.setAttribute('data-has-current', '');
+          if (!group.open) {
+            groups.forEach(function (g) { if (g !== group) g.open = false; });
+            group.open = true;
+          }
+        }
         if (!narrow.matches) revealInToc(a);
       });
     }, { rootMargin: '-20% 0px -70% 0px' });
