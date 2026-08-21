@@ -46,11 +46,26 @@ export const DEFAULT_UNCERTAINTY_BANDS = [
 export type TrustBand = (typeof DEFAULT_TRUST_BANDS)[number]['band'];
 export type UncertaintyLevel = (typeof DEFAULT_UNCERTAINTY_BANDS)[number]['level'];
 
+/**
+ * What a proven violation advises.
+ *
+ * D14 is explicit that "hard" describes the certainty of the violation, not the
+ * severity of the treatment — so SG must advise *something* without claiming the
+ * authority to enforce. `RESTRICT` rather than `BLOCK` keeps the final escalation
+ * with the host.
+ *
+ * ponytail: one value for all five constraint classes. Upgrade path: per-class
+ * advice, once real flows show that a segment jump and an idle action deserve
+ * different responses.
+ */
+export const DEFAULT_HARD_VIOLATION_DECISION = 'RESTRICT';
+
 export type Policy = {
   readonly halfLifeHours: number;
   readonly retentionHours: number;
   readonly weights: { readonly weak: number; readonly strong: number };
   readonly softViolationWeight: number;
+  readonly hardViolationDecision: 'INCREASE_FRICTION' | 'RESTRICT' | 'BLOCK';
 };
 
 export const DEFAULT_POLICY: Policy = {
@@ -58,4 +73,5 @@ export const DEFAULT_POLICY: Policy = {
   retentionHours: DEFAULT_RETENTION_HOURS,
   weights: DEFAULT_WEIGHTS,
   softViolationWeight: DEFAULT_SOFT_VIOLATION_WEIGHT,
+  hardViolationDecision: DEFAULT_HARD_VIOLATION_DECISION,
 };

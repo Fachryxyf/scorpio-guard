@@ -17,9 +17,10 @@ the answer given, and what that answer commits the implementation to.
   policy; the tests are what make a policy change visible.
 
 Status: all thirty original questions are answered, plus D32, D33, D37 and D38
-arising from review. Four questions remain open. D34 — choosing the
+arising from review. Five questions remain open. D34 — choosing the
 proof-of-concept target — is the highest priority among them, since several
-decisions cannot be validated without one.
+decisions cannot be validated without one. D39 is a contradiction the
+implementation surfaced and is worth reading before adopting anything.
 
 Last updated: 2026-08-21
 
@@ -45,6 +46,7 @@ Last updated: 2026-08-21
 
 - [D5 — Decision is a function of trust and uncertainty](#d5--decision-is-a-function-of-trust-and-uncertainty)
 - [D37 — Saturation guard belongs in the decision layer, not the trust model](#d37--saturation-guard-belongs-in-the-decision-layer-not-the-trust-model)
+- [D39 — Unresolved: the cold-start band contradicts the zero-friction goal](#d39--unresolved-the-cold-start-band-contradicts-the-zero-friction-goal)
 
 **Part IV — Hard constraints**
 
@@ -787,6 +789,65 @@ an attacker is protection against future escalation, not a treatment change now.
 
 ---
 
+## D39 — Unresolved: the cold-start band contradicts the zero-friction goal
+
+**Open. Surfaced by implementation, not by review.**
+
+Composing D5 and D21 produces a result worth stating plainly, because it conflicts
+with a stated product goal.
+
+A first-time visitor has state `(0, 0)`, so `E[p] = 0.5`. Under D5 that is the
+`friction / challenge` band. High uncertainty caps the treatment, but the cap
+lowers to `INCREASE_FRICTION` — it does not lower to `ALLOW`. So the advice
+returned for an ordinary new visitor is:
+
+```
+INCREASE_FRICTION
+```
+
+Trajectory on weak positives, as implemented:
+
+| Observations | `E[p]` | Band | Advice |
+|---|---|---|---|
+| 0 | 0.500 | friction | `INCREASE_FRICTION` |
+| 1 | 0.600 | observe | `OBSERVE` |
+| 3 | 0.714 | observe | `OBSERVE` |
+| 6 | 0.800 | trusted | `ALLOW` |
+
+### Why this is a contradiction
+
+The design states as a target that legitimate traffic experiences *nothing*, and
+that a new entity is unknown rather than untrusted. Advising friction on first
+contact is not nothing, and it treats every new visitor as suspect — which is the
+behavior the premise set out to reject.
+
+It also lands hardest on exactly the population the design cares about: a
+legitimate first-time user, who has no history precisely because they are new.
+
+### Why it is recorded rather than patched
+
+Three fixes are available and they are not equivalent, so this is a decision, not
+a bug to be quietly resolved:
+
+1. **The uncertainty ceiling should floor at `ALLOW` or `OBSERVE` when there is no
+   negative evidence at all.** Distinguishes "no evidence" from "balanced
+   evidence" — both read `E[p] = 0.5`, but they are not the same epistemic state.
+2. **The `friction` band should start below 0.5.** Makes the prior sit in
+   `observe` rather than `friction`. A threshold change, and the least invasive.
+3. **Treatment for `coldStart` is the host's call.** Consistent with SG being
+   advisory, but pushes a decision the design has opinions about onto adopters.
+
+Option 1 looks most consistent with the rest of the model: mass is already
+separated from the prior in D3, so "has any evidence arrived at all" is a question
+the state can answer directly, and `Var[p] = 1/12` exactly identifies the untouched
+prior.
+
+Recorded here so the current behavior is a known position rather than an accident.
+The guard implements D5 as written; `coldStart` is exposed on every assessment so
+a host can act on it in the meantime.
+
+---
+
 # Part IV — Hard constraints
 
 Provable invariant violations: how they are declared, and why they stay outside the probabilistic model.
@@ -1330,6 +1391,7 @@ answers:
 | D34 | **Which real application is the PoC target?** Highest priority — not a closing task | D13 classes, D16 invariants, D30, and validating D37 against real traffic |
 | D35 | Does an anomaly observation with no trust evidence count as a meaningful update for retention? | D6 retention, blocked by D18 |
 | D36 | Which numeric features make up the anomaly feature space, including the diversity signal D37 requires? | Anomaly model, and closing the D37 saturation gap |
+| D39 | A first-time visitor is advised `INCREASE_FRICTION`, which contradicts the zero-friction goal. Floor the ceiling on no-evidence, move the band, or leave it to the host? | Nothing — current behavior is D5 as written, and `coldStart` is exposed so a host can act |
 
 D34 is listed first deliberately. It was originally treated as a closing task,
 but D16 declares invariants from a real application model and D37 can only be

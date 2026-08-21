@@ -139,16 +139,49 @@ npm run build     # emits dist/
 - `symptoms.ts` — the v1 symptom vocabulary and its boundary check.
 - `constraints.ts`, `transitions.ts` — declared invariants, and what a violation means.
 - `store.ts` — the `StateStore` interface and an in-memory implementation.
+- `guard.ts` — `createGuard()` and `evaluate()`, composing the above.
 - `policy.ts`, `clock.ts` — tunable values in one place, and an injectable clock.
 
-Thirty-nine tests, which double as the record of every numeric and semantic
+Fifty-two tests, which double as the record of every numeric and semantic
 property the design depends on.
+
+```js
+import { createGuard, transitionGraph } from '@fachryxyf/scorpio-guard';
+
+const guard = createGuard({
+  invariants: [
+    transitionGraph({
+      id: 'checkout-order',
+      scope: 'checkout',
+      strength: 'hard', // asserts this edge set is complete for this scope
+      allowed: [
+        { from: 'cart', to: 'address' },
+        { from: 'address', to: 'payment' },
+      ],
+    }),
+  ],
+});
+
+const result = await guard.evaluate({
+  entity: sessionId, // any stable reference; SG never interprets it
+  observation: { scope: 'checkout', data: { from: 'cart', to: 'payment' } },
+  context: { endpoint: '/pay' },
+});
+
+result.decision; // 'RESTRICT' — advice, never enforcement
+result.trace; // why, in the order that decided it
+```
+
+> **Known contradiction.** A first-time visitor is currently advised
+> `INCREASE_FRICTION`, which conflicts with the zero-friction goal above. See D39
+> in the design record — recorded as an open decision, not silently patched.
+> `coldStart` is exposed on every assessment so a host can act on it meanwhile.
 
 ### What does not exist
 
-Signal collection, the anomaly model and its feature space, the prescription
-client, and the `evaluate()` surface that composes the pieces. Nothing has met
-real traffic yet.
+Signal collection, the anomaly model and its feature space, and the prescription
+client. Nothing has met real traffic yet, which is the point of D30 — the
+hard-constraint classes cannot be validated against a synthetic fixture.
 
 ## Roadmap
 

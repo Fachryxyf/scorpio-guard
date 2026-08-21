@@ -15,6 +15,7 @@ export {
   DEFAULT_TRUST_BANDS,
   DEFAULT_UNCERTAINTY_BANDS,
   DEFAULT_SOFT_VIOLATION_WEIGHT,
+  DEFAULT_HARD_VIOLATION_DECISION,
 } from './core/policy.ts';
 export type { Policy, TrustBand, UncertaintyLevel } from './core/policy.ts';
 
@@ -46,3 +47,14 @@ export type { ConstraintClass, Invariant, Strength, Violation } from './core/con
 
 export { transitionGraph } from './core/transitions.ts';
 export type { Transition } from './core/transitions.ts';
+
+export { createGuard } from './core/guard.ts';
+export type {
+  Assessment,
+  EvaluateInput,
+  EvaluationContext,
+  EvidenceStrength,
+  Guard,
+  GuardOptions,
+  Observation,
+} from './core/guard.ts';

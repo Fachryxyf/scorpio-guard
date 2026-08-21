@@ -1,0 +1,195 @@
+import { assessTrust, type TrustAssessment } from './assess.ts';
+import { systemClock, type Clock } from './clock.ts';
+import {
+  checkInvariants,
+  hardViolations,
+  softViolationMass,
+  softViolations,
+  type Invariant,
+  type Violation,
+} from './constraints.ts';
+import { severity, type Decision } from './decision.ts';
+import { DEFAULT_POLICY, type Policy } from './policy.ts';
+import { memoryStore, type StateStore } from './store.ts';
+import {
+  applyEvidence,
+  expectedTrust,
+  freshState,
+  isExpired,
+  uncertainty,
+  type EntityState,
+} from './trust.ts';
+
+export type EvidenceStrength = 'weak' | 'strong';
+
+export type Observation = {
+  /**
+   * Which declared scope this observation belongs to. Invariants outside it are
+   * not consulted, and an undeclared scope yields no violations \u2014 unknown, not
+   * forbidden. D32.
+   */
+  readonly scope?: string;
+
+  /** Whatever the host's invariants know how to read. Never inspected by SG. */
+  readonly data?: unknown;
+
+  /** Evidence the host attributes to this interaction. D4. */
+  readonly evidence?: {
+    readonly positive?: EvidenceStrength;
+    readonly negative?: EvidenceStrength;
+  };
+};
+
+export type EvaluationContext = {
+  /**
+   * Endpoint sensitivity and anything else the host wants recorded against the
+   * decision. Part of `C` in `T = PI(A, C)` \u2014 not part of the state key, since
+   * trust is global per entity. D2.
+   */
+  readonly [key: string]: unknown;
+};
+
+export type Assessment = {
+  readonly entity: string;
+  readonly decision: Decision;
+  readonly trust: TrustAssessment;
+  readonly violations: readonly Violation[];
+  /** True when a proven violation set the outcome, bypassing the trust ceiling. */
+  readonly hardViolated: boolean;
+  /** True when state was absent or past its retention horizon. D6, D21. */
+  readonly coldStart: boolean;
+  readonly context: EvaluationContext | undefined;
+  /** Why this outcome, in order of what actually decided it. D23. */
+  readonly trace: readonly string[];
+};
+
+export type GuardOptions = {
+  readonly store?: StateStore;
+  readonly clock?: Clock;
+  readonly policy?: Partial<Policy>;
+  readonly invariants?: readonly Invariant[];
+  /** See D37. Defaults to withholding escalation with no anomaly data. */
+  readonly allowEscalationWithoutAnomaly?: boolean;
+};
+
+export type EvaluateInput = {
+  readonly entity: string;
+  readonly observation?: Observation;
+  readonly context?: EvaluationContext;
+  /**
+   * Whether observed behavior is diverse enough for low variance to be believed.
+   * D37. Omitted while the anomaly model does not exist (D18) \u2014 which is not the
+   * same claim as behavior being monotonous.
+   */
+  readonly anomalyConcurs?: boolean;
+};
+
+/**
+ * The guard. Advisory only: it returns a point on the decision spectrum and the
+ * reasoning behind it, and the host decides what to do. D9, D14.
+ */
+export function createGuard(options: GuardOptions = {}) {
+  const store = options.store ?? memoryStore();
+  const clock = options.clock ?? systemClock;
+  const policy: Policy = { ...DEFAULT_POLICY, ...options.policy };
+  const invariants = options.invariants ?? [];
+
+  /** Load state, treating absent and expired alike. D6. */
+  async function load(entity: string, now: number): Promise<{ state: EntityState; coldStart: boolean }> {
+    const stored = await store.get(entity);
+    if (!stored) return { state: freshState(now), coldStart: true };
+
+    if (isExpired(stored, now, policy.retentionHours)) {
+      await store.delete(entity);
+      return { state: freshState(now), coldStart: true };
+    }
+    return { state: stored, coldStart: false };
+  }
+
+  return {
+    async evaluate(input: EvaluateInput): Promise<Assessment> {
+      const now = clock.now();
+      const observation = input.observation ?? {};
+      const trace: string[] = [];
+
+      const { state, coldStart } = await load(input.entity, now);
+      if (coldStart) trace.push('cold start: no retained state, prior is Beta(1,1)');
+
+      // Declared invariants first: they are proof, and proof does not depend on
+      // accumulated trust. D15, D16.
+      const scope = observation.scope;
+      const checked = scope
+        ? checkInvariants(observation.data, scope, invariants)
+        : { declared: false, violations: [] as readonly Violation[] };
+
+      if (scope && !checked.declared) {
+        trace.push(`scope "${scope}" has no declared invariants: unknown, not forbidden`);
+      }
+
+      const hard = hardViolations(checked.violations);
+      const soft = softViolations(checked.violations);
+
+      // Evidence: what the host attributed, plus mass owed by soft violations. D38.
+      const positive = observation.evidence?.positive
+        ? policy.weights[observation.evidence.positive]
+        : 0;
+      const attributedNegative = observation.evidence?.negative
+        ? policy.weights[observation.evidence.negative]
+        : 0;
+      const negative = attributedNegative + softViolationMass(soft, policy.softViolationWeight);
+
+      if (soft.length > 0) {
+        trace.push(
+          `${soft.length} soft violation(s) contribute ${softViolationMass(soft, policy.softViolationWeight)} negative mass`,
+        );
+      }
+
+      const updated = applyEvidence(state, { positive, negative }, now, policy.halfLifeHours);
+      await store.set(input.entity, updated);
+
+      const trust = assessTrust(
+        expectedTrust(updated, now, policy.halfLifeHours),
+        uncertainty(updated, now, policy.halfLifeHours),
+        {
+          anomalyConcurs: input.anomalyConcurs,
+          allowEscalationWithoutAnomaly: options.allowEscalationWithoutAnomaly ?? false,
+        },
+      );
+      trace.push(`trust: ${trust.reason}`);
+
+      // A proof is not subject to the uncertainty ceiling, which exists to guard
+      // against probabilistic error. D14, D37. It still advises rather than
+      // enforces, so the escalation is bounded by policy.
+      let decision = trust.decision;
+      if (hard.length > 0) {
+        const advised = policy.hardViolationDecision;
+        if (severity(advised) > severity(decision)) {
+          decision = advised;
+          trace.push(
+            `hard violation of ${hard.map((violation) => violation.invariant).join(', ')}: advises ${advised}, ceiling bypassed`,
+          );
+        } else {
+          trace.push(`hard violation recorded; trust already advises ${decision}`);
+        }
+      }
+
+      return {
+        entity: input.entity,
+        decision,
+        trust,
+        violations: checked.violations,
+        hardViolated: hard.length > 0,
+        coldStart,
+        context: input.context,
+        trace,
+      };
+    },
+
+    /** Forget one entity outright. D22. Same operation retention uses. */
+    async forget(entity: string): Promise<void> {
+      await store.delete(entity);
+    },
+  };
+}
+
+export type Guard = ReturnType<typeof createGuard>;
