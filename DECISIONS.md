@@ -16,11 +16,10 @@ the answer given, and what that answer commits the implementation to.
   property is locked as a test in `src/core/trust.test.ts`. Values here are
   policy; the tests are what make a policy change visible.
 
-Status: all thirty original questions are answered, plus D32, D33, D37 and D38
-arising from review. Five questions remain open. D34 — choosing the
-proof-of-concept target — is the highest priority among them, since several
-decisions cannot be validated without one. D39 is a contradiction the
-implementation surfaced and is worth reading before adopting anything.
+Status: all thirty original questions are answered, plus D32, D33, D37, D38 and
+D40 arising from review and implementation. Four questions remain open. D34 —
+choosing the proof-of-concept target — is the highest priority among them, since
+several decisions cannot be validated without one.
 
 Last updated: 2026-08-21
 
@@ -46,7 +45,8 @@ Last updated: 2026-08-21
 
 - [D5 — Decision is a function of trust and uncertainty](#d5--decision-is-a-function-of-trust-and-uncertainty)
 - [D37 — Saturation guard belongs in the decision layer, not the trust model](#d37--saturation-guard-belongs-in-the-decision-layer-not-the-trust-model)
-- [D39 — Unresolved: the cold-start band contradicts the zero-friction goal](#d39--unresolved-the-cold-start-band-contradicts-the-zero-friction-goal)
+- [D40 — An epistemic stage precedes trust and uncertainty](#d40--an-epistemic-stage-precedes-trust-and-uncertainty)
+- [D39 — The cold-start band contradicted the zero-friction goal](#d39--the-cold-start-band-contradicted-the-zero-friction-goal)
 
 **Part IV — Hard constraints**
 
@@ -582,6 +582,10 @@ D = pi(E[p], Var[p])
 
 > Superseded in scope by D15: `pi` takes four dimensions, of which trust is one.
 > The bands and the cap below describe how the trust dimension is read.
+>
+> Extended by D40: an epistemic stage over evidence mass precedes the bands, so a
+> mean is not interpreted before enough evidence exists to interpret it. D40 also
+> resolves D39.
 
 ### Default trust bands
 
@@ -789,9 +793,119 @@ an attacker is protection against future escalation, not a treatment change now.
 
 ---
 
-## D39 — Unresolved: the cold-start band contradicts the zero-friction goal
+## D40 — An epistemic stage precedes trust and uncertainty
 
-**Open. Surfaced by implementation, not by review.**
+**Decided. Resolves D39.**
+
+Trust expectation and uncertainty must not be interpreted without considering the
+amount of accumulated evidence.
+
+`Beta(1,1)` represents an **unknown** entity, not a neutral-trust entity.
+
+> Lack of evidence is not negative evidence.
+
+So decision evaluation gains an epistemic stage ahead of trust and uncertainty:
+
+```
+UNKNOWN      -> default to ALLOW / passive observation when no adverse signal exists
+DEVELOPING   -> trust begins influencing treatment
+ESTABLISHED  -> full trust/uncertainty decision model applies
+```
+
+Evidence mass:
+
+```
+n = alpha + beta
+```
+
+is the measure of whether the trust state holds enough evidence to influence
+treatment.
+
+Unknown entities may still receive friction or stronger treatment when independent
+anomaly signals or hard-constraint violations justify it.
+
+> Lack of evidence is not evidence of distrust.
+
+### Why this resolves D39 correctly
+
+D39 recorded three candidate fixes. This is the first of them, and it is the one
+that addresses the cause rather than the symptom.
+
+The defect was that `Var[p]` was carrying two different questions at once. For a
+Beta distribution:
+
+```
+Var[p] = p(1-p) / (n+1)
+```
+
+so variance is a function of the mean *and* the mass. A fresh entity and a
+long-observed entity with genuinely mixed evidence both read `E[p] = 0.5`, and the
+uncertainty band alone cannot tell them apart in a way the decision layer can act
+on. Separating mass out as its own stage makes the epistemic question explicit
+instead of leaving it entangled in the variance.
+
+Moving the band boundary — D39's second option — would have hidden the same
+conflation behind a different threshold. Deferring to the host — the third — would
+have exported a question the design has a clear position on.
+
+### Thresholds
+
+```
+n < 3    unknown
+3 <= n < 7   developing
+n >= 7   established
+```
+
+Tied to the D5 trajectory rather than chosen freely: a fresh entity is `n = 2`
+(prior only), `n = 3` is about where a second observation has landed, and `n = 7`
+is about where low uncertainty becomes reachable at all. Policy, configurable.
+
+Reachability was checked against the D3/D4 ceilings, since a stage that cannot be
+reached would be decoration:
+
+| Arrival interval | Ceiling `n`, weak only | Ceiling `n`, strong only |
+|---|---|---|
+| 1 hour | 19.6 | 72.3 |
+| 6 hours | 5.1 | 14.6 |
+| 24 hours | 3.0 | 6.0 |
+| 48 hours | 2.7 | 4.7 |
+
+An entity interacting once a day on weak evidence tops out at `developing` and
+never reaches `established`. That is the intended reading: a daily visitor really
+does not accumulate enough for the guard to act autonomously against them.
+
+### What this commits the code to
+
+- Three ceilings, and **the lowest binds**: epistemic stage, uncertainty, and
+  anomaly concurrence. Each answers a different question, so none subsumes another.
+- The `unknown` ceiling is `ALLOW`. Not a floor forcing `ALLOW` — it removes the
+  trust dimension's standing to ask for anything, while `HardConstraints` and
+  `Anomaly` still reach the decision layer on their own authority. Verified: a
+  first-contact entity violating a declared invariant is still advised `RESTRICT`.
+- Mass decays with everything else under D3, so an entity that goes quiet can
+  fall back from `established` to `unknown`. Correct, and consistent with
+  expiry (D6) rather than in tension with it.
+
+### As implemented
+
+`assessTrust(mean, variance, mass, options)` in `src/core/assess.ts`. A first
+contact now reads:
+
+```
+ALLOW — unknown entity (n=2): lack of evidence is not evidence of distrust
+```
+
+Every assessment carries `mass` and `stage` alongside the mean and variance, so
+the trace states which ceiling bound and why (D23).
+
+---
+
+## D39 — The cold-start band contradicted the zero-friction goal
+
+**Resolved by D40.** Kept as the record of how the defect was found and which
+alternatives were rejected.
+
+**Originally: open, surfaced by implementation rather than by review.**
 
 Composing D5 and D21 produces a result worth stating plainly, because it conflicts
 with a stated product goal.
@@ -842,9 +956,10 @@ separated from the prior in D3, so "has any evidence arrived at all" is a questi
 the state can answer directly, and `Var[p] = 1/12` exactly identifies the untouched
 prior.
 
-Recorded here so the current behavior is a known position rather than an accident.
-The guard implements D5 as written; `coldStart` is exposed on every assessment so
-a host can act on it in the meantime.
+**Outcome:** option 1, as D40. The reasoning that settled it: `Var[p] = p(1-p)/(n+1)`
+means variance already mixes the mean with the mass, so no threshold on variance
+alone could separate *no evidence* from *balanced evidence*. Options 2 and 3 would
+each have left that conflation in place.
 
 ---
 
@@ -1391,7 +1506,6 @@ answers:
 | D34 | **Which real application is the PoC target?** Highest priority — not a closing task | D13 classes, D16 invariants, D30, and validating D37 against real traffic |
 | D35 | Does an anomaly observation with no trust evidence count as a meaningful update for retention? | D6 retention, blocked by D18 |
 | D36 | Which numeric features make up the anomaly feature space, including the diversity signal D37 requires? | Anomaly model, and closing the D37 saturation gap |
-| D39 | A first-time visitor is advised `INCREASE_FRICTION`, which contradicts the zero-friction goal. Floor the ceiling on no-evidence, move the band, or leave it to the host? | Nothing — current behavior is D5 as written, and `coldStart` is exposed so a host can act |
 
 D34 is listed first deliberately. It was originally treated as a closing task,
 but D16 declares invariants from a real application model and D37 can only be

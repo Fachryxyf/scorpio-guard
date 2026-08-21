@@ -98,6 +98,17 @@ export function uncertainty(state: EntityState, now: number, halfLifeHours?: num
 }
 
 /**
+ * Evidence mass, `n = alpha + beta`. D5 revision.
+ *
+ * Includes the prior, so a fresh entity reads exactly 2 — which is what makes
+ * "has any evidence arrived at all" answerable rather than inferred from the mean.
+ */
+export function evidenceMass(state: EntityState, now: number, halfLifeHours?: number): number {
+  const { a, b } = decayedMass(state, now, halfLifeHours);
+  return 2 + a + b;
+}
+
+/**
  * Has state passed the retention horizon? D6.
  *
  * Measured from the last meaningful update, not the last sighting, so trivial

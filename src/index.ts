@@ -16,14 +16,16 @@ export {
   DEFAULT_UNCERTAINTY_BANDS,
   DEFAULT_SOFT_VIOLATION_WEIGHT,
   DEFAULT_HARD_VIOLATION_DECISION,
+  DEFAULT_EPISTEMIC_STAGES,
 } from './core/policy.ts';
-export type { Policy, TrustBand, UncertaintyLevel } from './core/policy.ts';
+export type { EpistemicStage, Policy, TrustBand, UncertaintyLevel } from './core/policy.ts';
 
 export {
   freshState,
   decayFactor,
   decayedMass,
   applyEvidence,
+  evidenceMass,
   expectedTrust,
   uncertainty,
   isExpired,
@@ -33,7 +35,7 @@ export type { EntityState } from './core/trust.ts';
 export { memoryStore } from './core/store.ts';
 export type { StateStore } from './core/store.ts';
 
-export { assessTrust, trustBand, uncertaintyLevel } from './core/assess.ts';
+export { assessTrust, epistemicStage, trustBand, uncertaintyLevel } from './core/assess.ts';
 export type { AssessOptions, TrustAssessment } from './core/assess.ts';
 
 export {

@@ -36,6 +36,25 @@ export const DEFAULT_TRUST_BANDS = [
   { atLeast: 0, band: 'deny' },
 ] as const;
 
+/**
+ * Epistemic stages over evidence mass `n = alpha + beta`. D5, revised.
+ *
+ * Read as "at least this much evidence". A fresh entity has `n = 2` — the prior
+ * alone — and must land in `unknown`, because lack of evidence is not negative
+ * evidence.
+ *
+ * The boundaries are tied to the D5 trajectory rather than picked freely: `3` is
+ * roughly where a second observation has arrived and the mean starts meaning
+ * something, `7` is roughly where low uncertainty becomes reachable at all.
+ */
+export const DEFAULT_EPISTEMIC_STAGES = [
+  { atLeast: 7, stage: 'established' },
+  { atLeast: 3, stage: 'developing' },
+  { atLeast: 0, stage: 'unknown' },
+] as const;
+
+export type EpistemicStage = (typeof DEFAULT_EPISTEMIC_STAGES)[number]['stage'];
+
 /** Uncertainty bands over Var[p], read as "at most this variance". D5. */
 export const DEFAULT_UNCERTAINTY_BANDS = [
   { atMost: 0.02, level: 'low' },
@@ -66,6 +85,9 @@ export type Policy = {
   readonly weights: { readonly weak: number; readonly strong: number };
   readonly softViolationWeight: number;
   readonly hardViolationDecision: 'INCREASE_FRICTION' | 'RESTRICT' | 'BLOCK';
+  /** Mass thresholds for the epistemic stages. */
+  readonly developingAt: number;
+  readonly establishedAt: number;
 };
 
 export const DEFAULT_POLICY: Policy = {
@@ -74,4 +96,6 @@ export const DEFAULT_POLICY: Policy = {
   weights: DEFAULT_WEIGHTS,
   softViolationWeight: DEFAULT_SOFT_VIOLATION_WEIGHT,
   hardViolationDecision: DEFAULT_HARD_VIOLATION_DECISION,
+  developingAt: 3,
+  establishedAt: 7,
 };

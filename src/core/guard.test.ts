@@ -30,14 +30,29 @@ const checkout = transitionGraph({
   ],
 });
 
-test('D21: a first-time entity is capped at friction, never restricted', async () => {
+test('D5/D21: a first-time visitor experiences nothing', async () => {
   const guard = createGuard({ clock: fakeClock() });
   const result = await guard.evaluate({ entity: 'visitor-1' });
 
   assert.equal(result.coldStart, true);
-  assert.equal(result.decision, 'INCREASE_FRICTION');
-  assert.ok(result.decision !== 'RESTRICT' && result.decision !== 'BLOCK');
+  assert.equal(result.trust.stage, 'unknown');
+  assert.equal(result.decision, 'ALLOW', 'lack of evidence is not evidence of distrust');
   assert.match(result.trace.join(' '), /cold start/);
+});
+
+test('D5: an unknown entity can still be treated on independent grounds', async () => {
+  // The epistemic ceiling silences the trust dimension; it does not silence a
+  // proven violation, which arrives on its own authority.
+  const guard = createGuard({ clock: fakeClock(), invariants: [checkout] });
+
+  const result = await guard.evaluate({
+    entity: 'visitor-1',
+    observation: { scope: 'checkout', data: { from: 'cart', to: 'payment' } },
+  });
+
+  assert.equal(result.trust.stage, 'unknown');
+  assert.equal(result.trust.decision, 'ALLOW', 'trust alone asks for nothing');
+  assert.equal(result.decision, 'RESTRICT', 'the hard violation still decides');
 });
 
 test('D4: attributed evidence accumulates across calls', async () => {

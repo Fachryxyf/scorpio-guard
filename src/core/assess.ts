@@ -1,8 +1,11 @@
 import type { Decision } from './decision.ts';
 import { severity } from './decision.ts';
 import {
+  DEFAULT_EPISTEMIC_STAGES,
+  DEFAULT_POLICY,
   DEFAULT_TRUST_BANDS,
   DEFAULT_UNCERTAINTY_BANDS,
+  type EpistemicStage,
   type TrustBand,
   type UncertaintyLevel,
 } from './policy.ts';
@@ -24,12 +27,26 @@ export function uncertaintyLevel(variance: number): UncertaintyLevel {
 }
 
 /**
+ * Which epistemic stage an evidence mass falls into. D5, revised.
+ *
+ * `n = alpha + beta`, so a fresh entity is `n = 2`: the prior and nothing else.
+ */
+export function epistemicStage(
+  mass: number,
+  thresholds: { developingAt: number; establishedAt: number } = DEFAULT_POLICY,
+): EpistemicStage {
+  if (mass >= thresholds.establishedAt) return 'established';
+  if (mass >= thresholds.developingAt) return 'developing';
+  return 'unknown';
+}
+
+/**
  * The decision each trust band proposes, before any ceiling is applied.
  *
  * The bands in D5 are named as pairs ("trusted / observe"), describing a range
  * rather than one rung. Read here as the least interventionist rung of each pair,
- * because the uncertainty ceiling can only ever lower a decision — so starting at
- * the gentler end would make the ceiling unable to express itself.
+ * because a ceiling can only ever lower a decision \u2014 so starting at the gentler
+ * end would make the ceiling unable to express itself.
  */
 const BAND_DECISION: Record<TrustBand, Decision> = {
   trusted: 'ALLOW',
@@ -46,18 +63,34 @@ const UNCERTAINTY_CEILING: Record<UncertaintyLevel, Decision> = {
   high: 'INCREASE_FRICTION',
 };
 
+/**
+ * The most severe treatment each epistemic stage permits on trust alone.
+ *
+ * An `unknown` entity contributes nothing: with no evidence, the trust dimension
+ * has no standing to ask for anything. It does not force `ALLOW` either \u2014 an
+ * independent anomaly signal or hard-constraint violation still reaches the
+ * decision layer on its own authority.
+ */
+const STAGE_CEILING: Record<EpistemicStage, Decision> = {
+  unknown: 'ALLOW',
+  developing: 'INCREASE_FRICTION',
+  established: 'BLOCK',
+};
+
 export type TrustAssessment = {
   readonly mean: number;
   readonly variance: number;
+  /** Evidence mass, `n = alpha + beta`. A fresh entity reads 2. */
+  readonly mass: number;
+  readonly stage: EpistemicStage;
   readonly band: TrustBand;
   readonly uncertainty: UncertaintyLevel;
   /** What the trust band alone proposed. */
   readonly proposed: Decision;
-  /** The ceiling that applied, after uncertainty and anomaly concurrence. */
+  /** The binding ceiling, after epistemic stage, uncertainty and anomaly. */
   readonly ceiling: Decision;
   /** The advice: `proposed`, lowered to `ceiling` if it exceeded it. */
   readonly decision: Decision;
-  /** True when the ceiling actually lowered the proposal. */
   readonly capped: boolean;
   readonly reason: string;
 };
@@ -68,7 +101,7 @@ export type AssessOptions = {
    * enough for low variance to be believed. D37.
    *
    * `undefined` means no anomaly data exists yet, which is the current state of
-   * the project — not an assertion that behavior is monotonous.
+   * the project \u2014 not an assertion that behavior is monotonous.
    */
   readonly anomalyConcurs?: boolean | undefined;
 
@@ -77,50 +110,92 @@ export type AssessOptions = {
    *
    * Defaults to `false`: uniform, high-volume traffic drives variance down while
    * proving very little, and D37 places the fix here rather than in the trust
-   * mathematics. Lifting this is a deliberate host policy choice, not a default.
+   * mathematics.
    */
   readonly allowEscalationWithoutAnomaly?: boolean;
+
+  readonly thresholds?: { developingAt: number; establishedAt: number };
 };
 
 /**
- * Read a trust distribution as advice. D5, capped per D37.
+ * Read a trust distribution as advice. D5, with the epistemic stage of the D5
+ * revision and the anomaly concurrence of D37.
  *
- * Advisory only — the host decides what to do with the result (D14).
+ * Three ceilings apply and the lowest binds:
+ *
+ * - epistemic stage \u2014 has enough evidence arrived to interpret the mean at all
+ * - uncertainty \u2014 is the distribution tight enough to act on
+ * - anomaly concurrence \u2014 is that tightness earned by varied behavior
+ *
+ * Advisory only; the host decides what to do with the result. D14.
  */
 export function assessTrust(
   mean: number,
   variance: number,
+  mass: number,
   options: AssessOptions = {},
 ): TrustAssessment {
   const band = trustBand(mean);
   const level = uncertaintyLevel(variance);
+  const stage = epistemicStage(mass, options.thresholds ?? DEFAULT_POLICY);
   const proposed = BAND_DECISION[band];
 
-  let ceiling = UNCERTAINTY_CEILING[level];
-  let reason = `${level} uncertainty permits at most ${ceiling}`;
+  const candidates: ReadonlyArray<{ ceiling: Decision; reason: string }> = [
+    {
+      ceiling: STAGE_CEILING[stage],
+      reason:
+        stage === 'unknown'
+          ? `unknown entity (n=${round(mass)}): lack of evidence is not evidence of distrust`
+          : `${stage} evidence (n=${round(mass)}) permits at most ${STAGE_CEILING[stage]}`,
+    },
+    {
+      ceiling: UNCERTAINTY_CEILING[level],
+      reason: `${level} uncertainty permits at most ${UNCERTAINTY_CEILING[level]}`,
+    },
+    anomalyCeiling(level, options),
+  ];
 
-  // D37: low variance earned by monotonous volume is not evidence of anything.
-  const concurrence = options.anomalyConcurs ?? options.allowEscalationWithoutAnomaly ?? false;
-  if (level === 'low' && !concurrence) {
-    ceiling = 'INCREASE_FRICTION';
-    reason =
-      options.anomalyConcurs === false
-        ? 'low uncertainty withheld: behavior is not diverse enough to believe it (D37)'
-        : 'low uncertainty withheld: no anomaly data to corroborate it (D37)';
-  }
+  const binding = candidates.reduce((lowest, candidate) =>
+    severity(candidate.ceiling) < severity(lowest.ceiling) ? candidate : lowest,
+  );
 
-  const capped = severity(proposed) > severity(ceiling);
-  const decision = capped ? ceiling : proposed;
+  const capped = severity(proposed) > severity(binding.ceiling);
+  const decision = capped ? binding.ceiling : proposed;
 
   return {
     mean,
     variance,
+    mass,
+    stage,
     band,
     uncertainty: level,
     proposed,
-    ceiling,
+    ceiling: binding.ceiling,
     decision,
     capped,
-    reason: capped ? reason : `${band} band advises ${proposed}`,
+    reason: capped ? binding.reason : `${band} band advises ${proposed}`,
   };
+}
+
+/** D37: low variance earned by monotonous volume is not evidence of anything. */
+function anomalyCeiling(
+  level: UncertaintyLevel,
+  options: AssessOptions,
+): { ceiling: Decision; reason: string } {
+  if (level !== 'low') return { ceiling: 'BLOCK', reason: 'anomaly ceiling not engaged' };
+
+  const concurrence = options.anomalyConcurs ?? options.allowEscalationWithoutAnomaly ?? false;
+  if (concurrence) return { ceiling: 'BLOCK', reason: 'anomaly concurs with low uncertainty' };
+
+  return {
+    ceiling: 'INCREASE_FRICTION',
+    reason:
+      options.anomalyConcurs === false
+        ? 'low uncertainty withheld: behavior is not diverse enough to believe it (D37)'
+        : 'low uncertainty withheld: no anomaly data to corroborate it (D37)',
+  };
+}
+
+function round(value: number): string {
+  return value.toFixed(2).replace(/\.?0+$/, '');
 }

@@ -13,6 +13,7 @@ import { DEFAULT_POLICY, type Policy } from './policy.ts';
 import { memoryStore, type StateStore } from './store.ts';
 import {
   applyEvidence,
+  evidenceMass,
   expectedTrust,
   freshState,
   isExpired,
@@ -150,9 +151,11 @@ export function createGuard(options: GuardOptions = {}) {
       const trust = assessTrust(
         expectedTrust(updated, now, policy.halfLifeHours),
         uncertainty(updated, now, policy.halfLifeHours),
+        evidenceMass(updated, now, policy.halfLifeHours),
         {
           anomalyConcurs: input.anomalyConcurs,
           allowEscalationWithoutAnomaly: options.allowEscalationWithoutAnomaly ?? false,
+          thresholds: { developingAt: policy.developingAt, establishedAt: policy.establishedAt },
         },
       );
       trace.push(`trust: ${trust.reason}`);

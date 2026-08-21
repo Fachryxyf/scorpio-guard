@@ -4,6 +4,7 @@ import assert from 'node:assert/strict';
 import {
   applyEvidence,
   decayFactor,
+  evidenceMass,
   expectedTrust,
   freshState,
   isExpired,
@@ -167,4 +168,15 @@ test('D6: decay alone does not converge on a bounded schedule, which is why expi
   close(expectedTrust(saturated, week), 0.8637, 1e-3);
   assert.ok(uncertainty(saturated, week) <= 0.02, 'still low uncertainty after a week');
   assert.equal(isExpired(saturated, week + 1, DEFAULT_RETENTION_HOURS), true);
+});
+
+test('D5: evidence mass is n = alpha + beta, and a fresh entity reads exactly 2', () => {
+  assert.equal(evidenceMass(freshState(0), 0), 2);
+
+  const withEvidence = applyEvidence(freshState(0), { positive: 3, negative: 1 }, 0);
+  close(evidenceMass(withEvidence, 0), 6);
+
+  // Mass decays with everything else, so an entity can fall back to `unknown`.
+  close(evidenceMass(withEvidence, H * HOUR), 4);
+  close(evidenceMass(withEvidence, 10_000 * HOUR), 2);
 });

@@ -142,7 +142,7 @@ npm run build     # emits dist/
 - `guard.ts` — `createGuard()` and `evaluate()`, composing the above.
 - `policy.ts`, `clock.ts` — tunable values in one place, and an injectable clock.
 
-Fifty-two tests, which double as the record of every numeric and semantic
+Fifty-seven tests, which double as the record of every numeric and semantic
 property the design depends on.
 
 ```js
@@ -169,13 +169,14 @@ const result = await guard.evaluate({
 });
 
 result.decision; // 'RESTRICT' — advice, never enforcement
+result.trust.stage; // 'unknown' | 'developing' | 'established'
 result.trace; // why, in the order that decided it
 ```
 
-> **Known contradiction.** A first-time visitor is currently advised
-> `INCREASE_FRICTION`, which conflicts with the zero-friction goal above. See D39
-> in the design record — recorded as an open decision, not silently patched.
-> `coldStart` is exposed on every assessment so a host can act on it meanwhile.
+A first-time visitor is advised `ALLOW`. Trust is read through an epistemic stage
+over evidence mass `n = alpha + beta`, so an unknown entity contributes nothing to
+the decision — while a hard-constraint violation still decides on its own
+authority. See D39 and D40 in the design record for how that was arrived at.
 
 ### What does not exist
 
