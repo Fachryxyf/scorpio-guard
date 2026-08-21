@@ -16,16 +16,21 @@ decided will be closed with a pointer to the entry.
 
 | Contribution | Why it helps |
 |---|---|
-| A hard constraint the design missed | The constraint list is a starting set, not a complete one. A new class of provable impossibility is the highest-value thing anyone can bring. |
 | A false positive, with its trace | `evaluate()` returns `trace` for exactly this. Paste it. A decision without its trace cannot be diagnosed. |
-| A weak signal, and how it combines | Signals only mean something in combination. "This is suspicious" is not actionable; "this plus that, at these thresholds" is. |
-| A store implementation | Run `checkStoreConformance()` against it and paste the result. Eleven checks. |
+| A proof source the taxonomy missed | D41 closes the constraint classes over six kinds of fact a host can prove something from. A *seventh kind of proof* would reopen it — a new attack shape would not, since it should already map to an existing class. Say which of the six yours is not. |
+| A weak signal, with its innocent cause | D42 requires the plausible legitimate path to triggering it. A signal whose false-positive story cannot be written down is not understood well enough to weigh. Thresholds are deliberately not part of the catalogue. |
+| A store implementation | Run `checkStoreConformance()` against it and paste the result. Eleven checks, and two implementations already pass them. |
 | A threshold that is wrong on real traffic | The whole model is reasoned guesses. Say what you observed and how much of it. |
 
 ## What is not useful yet
 
-- A prescription client or wire format. The symptom vocabulary is unspecified, so
+- A prescription client or wire format. The vocabulary's *structure* is settled
+  (D43) but the wire format is not, and it belongs to `scorpio-guard-protocol`, so
   anything transmitting is premature.
+- A new symptom *category*. The stable tier is meant never to grow — that is the
+  whole point of splitting it from the detail tier. A new **detail** under an
+  existing category is welcome; a seventh category needs an argument that the guard
+  can observe a kind of thing none of the six covers.
 - An anomaly algorithm. The feature space is settled; the algorithm is deliberately
   deferred until there is traffic to choose it against.
 - Framework middleware. The core API is still moving, and middleware is an adapter
@@ -50,13 +55,17 @@ House rules, in order of how likely they are to get a change sent back:
    design. `D5: evidence mass is n = alpha + beta` is a test name, not a comment.
 2. **`src/core/` imports nothing platform-specific.** No DOM types, no `node:`
    modules. That rule is what keeps one model usable on both sides of the wire.
-   Browser code lives in `src/collect/`.
+   Browser code lives in `src/collect/`, platform-backed stores in `src/store/`.
 3. **Numbers live in `src/core/policy.ts`.** A threshold inline in a function is
    a threshold nobody can find or override.
 4. **Time comes from the injected `Clock`.** Never `Date.now()` in the core.
 5. **A deliberate simplification is marked `ponytail:`**, naming its ceiling and
-   the upgrade path. An unmarked shortcut reads as an oversight.
-6. **The guard advises. It never enforces.** Any API that acts on its own belongs
+   the upgrade path. An unmarked shortcut reads as an oversight — and a marked one
+   is a debt, so removing it counts as a contribution.
+6. **No threshold goes in `signals.ts`.** The catalogue names what is measured,
+   never when it fires: the library is public, so a published number is a target to
+   route around. Thresholds live in policy an adopter overrides.
+7. **The guard advises. It never enforces.** Any API that acts on its own belongs
    in the host application, not here.
 
 ## Reporting a false positive

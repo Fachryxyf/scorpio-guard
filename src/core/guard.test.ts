@@ -5,7 +5,9 @@ import type { Clock } from './clock.ts';
 import { createGuard } from './guard.ts';
 import { DEFAULT_RETENTION_HOURS, DEFAULT_WEIGHTS } from './policy.ts';
 import { memoryStore } from './store.ts';
+import { WEAK_SIGNALS } from './signals.ts';
 import { transitionGraph } from './transitions.ts';
+import type { Invariant } from './constraints.ts';
 
 const HOUR = 3_600_000;
 
@@ -29,6 +31,23 @@ const checkout = transitionGraph({
     { from: 'address', to: 'payment' },
   ],
 });
+
+/**
+ * A value the application itself issued. D41, `issuance`: a token the system
+ * never handed out cannot have come from a legitimate client.
+ */
+const issued = new Set(['issued-a', 'issued-b']);
+
+const unissued: Invariant = {
+  id: 'lookup.token-was-issued',
+  class: 'IMPOSSIBLE_UNISSUED_REFERENCE',
+  strength: 'hard',
+  scope: 'lookup',
+  holds: (observation) => {
+    const token = (observation as { token?: unknown }).token;
+    return typeof token !== 'string' || issued.has(token);
+  },
+};
 
 test('D5/D21: a first-time visitor experiences nothing', async () => {
   const guard = createGuard({ clock: fakeClock() });
@@ -316,4 +335,78 @@ test('D37: a host verdict overrides the computed diversity signal', async () => 
 
   assert.equal(result.diversity, true);
   assert.equal(result.decision, 'BLOCK');
+});
+
+test('D42: weak signals become negative mass and cannot escalate on their own', async () => {
+  const clock = fakeClock();
+  const guard = createGuard({ clock });
+
+  // Every published signal at once, on an entity with no history.
+  const result = await guard.evaluate({
+    entity: 'signalled',
+    observation: { signals: WEAK_SIGNALS.map((signal) => signal.id) },
+  });
+
+  assert.equal(
+    result.decision,
+    'ALLOW',
+    'measurement alone must not reach a treatment; the epistemic stage still binds',
+  );
+  assert.match(result.trace.join(' '), /weak signal\(s\) contribute/);
+});
+
+test('D42: weak signals do move trust once evidence exists to interpret', async () => {
+  const clock = fakeClock();
+  const guard = createGuard({ clock, store: memoryStore() });
+
+  for (let i = 0; i < 5; i += 1) {
+    await guard.evaluate({
+      entity: 'drifting',
+      observation: { scope: `s${i}`, evidence: { positive: 'strong' } },
+    });
+    clock.advance(1);
+  }
+
+  const before = await guard.evaluate({ entity: 'drifting' });
+  clock.advance(1);
+  const after = await guard.evaluate({
+    entity: 'drifting',
+    observation: { signals: ['SIG_UNIFORM_DELAY_SHAPE', 'SIG_UNINTERACTED_INPUT'] },
+  });
+
+  assert.ok(
+    after.trust.mean < before.trust.mean,
+    'observed signals should lower the mean, not merely be logged',
+  );
+});
+
+test('D42: an invented signal id is ignored rather than treated as suspicious', async () => {
+  const guard = createGuard({ clock: fakeClock() });
+  const result = await guard.evaluate({
+    entity: 'inventive',
+    observation: { signals: ['SIG_NOT_IN_THE_CATALOGUE'] },
+  });
+
+  assert.doesNotMatch(result.trace.join(' '), /weak signal\(s\) contribute/);
+});
+
+test('D41: per-class advice applies, and the strongest violated class wins', async () => {
+  const clock = fakeClock();
+  const guard = createGuard({
+    clock,
+    invariants: [checkout, unissued],
+    policy: { hardViolationDecision: { IMPOSSIBLE_UNISSUED_REFERENCE: 'BLOCK' } },
+  });
+
+  const jump = await guard.evaluate({
+    entity: 'jumper',
+    observation: { scope: 'checkout', data: { from: 'cart', to: 'confirm' } },
+  });
+  assert.equal(jump.decision, 'RESTRICT', 'an unlisted class falls back to the default');
+
+  const forged = await guard.evaluate({
+    entity: 'forger',
+    observation: { scope: 'lookup', data: { token: 'never-issued' } },
+  });
+  assert.equal(forged.decision, 'BLOCK', 'the declared per-class advice applies');
 });

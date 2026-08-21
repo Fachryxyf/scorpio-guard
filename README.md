@@ -56,6 +56,14 @@ library  ──▶  acts locally, on local data only
 - **Prescription** — a general strategy for handling that pattern class.
 - **Action** — always local, always the operator's.
 
+The vocabulary is **two tiers, split by rate of change** (D43), because a deployed
+instance speaks the vocabulary it shipped with and cannot negotiate with a server
+that has moved on. Six principle-level *categories* form a stable skeleton expected
+never to grow; the *details* under them are free to evolve release to release, and a
+detail a receiver has never heard of degrades to its category instead of failing.
+Symptoms carry shape and never values — `SYM_REQUEST_BURST` says volume arrived
+compressed in time, with no count, no interval and no endpoint.
+
 Consequences: privacy by design (raw data never leaves), cross-ecosystem learning at the pattern level, and local speed for the overwhelming majority of decisions.
 
 ## Two Kinds of Signal
@@ -67,11 +75,32 @@ The core design breakthrough: these are not blended into one score.
 | Nature | Physically/logically impossible | Unusual, not impossible |
 | Role | Stable **skeleton** — always on, precise | **Reinforcement** — only meaningful in combination |
 | Learned? | Never | Yes, statistically |
-| Examples | Form filled with zero corresponding interaction | Sub-70ms actions, repeated identical patterns, *too*-uniform randomized delays |
+| Enumerated | Seven classes, closed (D41) | Ten signals over six sources (D42) |
+| Reaches a decision | On its own authority | Never — only as trust mass |
+| Examples | Form filled with zero corresponding interaction; a reference the system never issued | Repeated identical patterns, *too*-uniform randomized delays, breadth of enumeration |
 
 Weak signals operate *around* the hard constraints, which relieves them of carrying full-precision weight alone. That is what lets the system use statistical signals without inheriting a false-positive problem.
 
 The tell in a bot's randomized delay is rarely the delay itself — it is the **shape of the randomness**. Humans do not produce uniform distributions.
+
+Both lists are closed, and closed the same way: by enumerating what the guard can
+*know* rather than what an attacker might do. Hard constraints are bounded by the
+six kinds of fact a host can prove something from — reachability, precondition,
+causality, order, issuance, exclusivity. Weak signals are bounded by the six kinds
+of thing SG can observe — timing, repetition, interaction, sequence, target,
+environment. Anything outside the first list is measurement rather than proof, which
+is precisely what makes it belong to the second.
+
+The weak-signal catalogue deliberately contains **no thresholds**. Each entry names
+what is measured, never when it fires, because publishing `flag if interval < 220ms`
+in an open-source library hands an attacker the number to route around. Every entry
+also records a plausible *innocent cause*: a signal whose false-positive path cannot
+be written down is not understood well enough to weigh.
+
+Weak signals cannot escalate on their own, and that is arithmetic rather than
+intent. Tripping every signal in the catalogue at once contributes the mass of one
+weak observation, which leaves a fresh entity below the evidence threshold where the
+trust dimension is allowed to ask for anything at all.
 
 ## Open Protocol, Not a Proprietary Backend
 
@@ -88,7 +117,7 @@ This removes the single point of failure, lets compliance-sensitive adopters sel
 
 Named honestly, not hidden.
 
-- **Symptom vocabulary** — the actual open problem. Needs a concrete two-tier v0.1 spec.
+- **Symptom vocabulary** — the two-tier *structure* is settled (D43) and the detail list is a first pass. What remains is the wire format, which belongs to `scorpio-guard-protocol`, and the fact that nothing has been round-tripped against a real server because nothing transmits.
 - **Signal encoding** — the transmitted representation should be decodable *only* by the server, even though the library's source is public. Edges into one-way embeddings and server-issued transformation recipes. Research direction, not a resolved design.
 - **Cold start & sybil churn** — history-based trust is gamed by attackers who simply discard identities.
 - **Root of trust** — explicitly outside the library. It accepts an entity reference as a basis for measurement, never as proof of identity. If the host supplies a reference that is cheap to discard, every history-based defence goes with it — and that is the host's responsibility, not the library's.
@@ -113,7 +142,7 @@ the answer, the reasoning, and what each answer commits the implementation to.
 Read it before proposing a change to the model — several obvious-looking
 alternatives were considered and rejected there for reasons worth knowing.
 
-Forty-three entries is more than anyone reads front to back, so the site carries a
+Forty-seven entries is more than anyone reads front to back, so the site carries a
 [decision index](https://scorpio-guard.fachryxyf.com/#decisions) — every entry
 grouped by what it decides, with the file it turned into — and a
 [glossary](https://scorpio-guard.fachryxyf.com/#glossary) for the terms used in a
@@ -122,10 +151,11 @@ advisory.
 
 Settled so far: the entity as reference unit, trust as a Beta distribution,
 half-life decay over real elapsed time, evidence weights, decision bands with an
-uncertainty ceiling, retention, the hard-constraint model, the epistemic stage over
-evidence mass, and the anomaly feature space. Still open: the anomaly *algorithm*
-over that space, entity relationships, and a target that can validate the thesis
-rather than smoke-test it.
+uncertainty ceiling, retention, the hard-constraint taxonomy and its closure
+argument, the weak-signal catalogue, the epistemic stage over evidence mass, the
+anomaly feature space, and the two-tier symptom vocabulary. Still open: the anomaly
+*algorithm* over that space, entity relationships, and a target that can validate
+the thesis rather than smoke-test it.
 
 ## Install
 
@@ -186,6 +216,37 @@ A first-time entity is advised `ALLOW` at stage `unknown`: lack of evidence is n
 negative evidence. A brand-new entity that breaks a `hard` invariant is still
 restricted.
 
+Weak signals are passed by catalogue id, and are treated as measurement rather than
+proof — they become negative evidence and nothing more:
+
+```js
+import { WEAK_SIGNALS } from '@fachryxyf/scorpio-guard';
+
+await guard.evaluate({
+  entity: sessionId,
+  observation: { signals: ['SIG_UNIFORM_DELAY_SHAPE', 'SIG_BROAD_ENUMERATION'] },
+});
+```
+
+Ids the catalogue does not know are ignored rather than treated as suspicious.
+`WEAK_SIGNALS` documents each one: what it measures, what it is worth, a plausible
+innocent cause, and whether SG already computes it for you.
+
+The default store is process-local, so trust does not survive a restart. For
+anything that restarts — serverless, a supervised process, a container — use the
+durable store:
+
+```js
+import { createGuard } from '@fachryxyf/scorpio-guard';
+import { sqliteStore } from '@fachryxyf/scorpio-guard/sqlite';
+
+const guard = createGuard({ store: sqliteStore({ path: './trust.db' }) });
+```
+
+Still no dependencies: `node:sqlite` is in the standard library. Behavioral history
+is personal data, so treat that file as such — `guard.forget()` deletes a row, and
+retention expiry deletes it for you.
+
 Deleting an entity's history is one call, and it is the same code path retention
 uses with the horizon forced to zero:
 
@@ -218,9 +279,10 @@ npm run build     # emits dist/
 - `trust.ts` — Beta-Bernoulli state, half-life decay over real elapsed time, retention.
 - `assess.ts` — trust and uncertainty bands, and the ceiling that caps escalation.
 - `decision.ts` — the five-rung decision spectrum.
-- `symptoms.ts` — the v1 symptom vocabulary. Not exported: nothing transmits yet.
+- `symptoms.ts` — the two-tier symptom vocabulary. Not exported: nothing transmits yet.
 - `behavior.ts` — the anomaly feature space, and the diversity signal it feeds.
-- `constraints.ts`, `transitions.ts` — declared invariants, and what a violation means.
+- `constraints.ts`, `transitions.ts` — declared invariants, the seven classes, and what a violation means.
+- `signals.ts` — the weak-signal catalogue and how observed signals become mass.
 - `store.ts` — the `StateStore` interface and an in-memory implementation.
 - `conformance.ts` — runnable contract checks for any store you write.
 - `guard.ts` — `createGuard()` and `evaluate()`, composing the above.
@@ -228,10 +290,16 @@ npm run build     # emits dist/
 
 `src/collect/` — browser-side observation, imported from `@fachryxyf/scorpio-guard/collect`. Counts interaction; records nothing about content.
 
+`src/store/sqlite.ts` — a durable store on `node:sqlite`, imported from
+`@fachryxyf/scorpio-guard/sqlite`. Still zero dependencies, since it is in the
+standard library. The in-memory default is process-local, so every restart is a cold
+start; this one survives a restart and is shared across processes on one host. Both
+pass the same conformance kit.
+
 `examples/healthme/` — the first integration target (D34), declared invariants and
 an observational harness that records advice without acting on it.
 
-One hundred and five tests, which double as the record of every numeric and
+One hundred and thirty-four tests, which double as the record of every numeric and
 semantic property the design depends on.
 
 Writing your own store? Prove it works before trusting it:
@@ -303,14 +371,19 @@ scraping, and a real adversary. See D34 in the design record.
 
 ## Roadmap
 
-Done: the core model, the pluggable store with its conformance kit, the browser
-collector, and one observational integration against a real flow. Next, in order:
+Done: the core model, the pluggable store with its conformance kit and a durable
+SQLite implementation, the browser collector, one observational integration against
+a real flow, and the three enumeration tasks — the constraint taxonomy closed over
+proof sources (D41), the weak-signal catalogue (D42), and the two-tier symptom
+vocabulary (D43).
+
+What remains is what traffic gates, in order:
 
 1. An integration target that can exercise the statistical layer — unauthenticated traffic, data worth scraping, a real adversary. Little below this is worth much before it.
-2. Enumerate hard constraints exhaustively.
-3. Enumerate weak signals and their combination into observe / restrict / block tiers.
-4. Choose an anomaly algorithm over the settled feature space, once there is traffic to choose it against.
-5. Draft the two-tier symptom vocabulary as a v0.1 spec.
+2. Collectors for the seven catalogued signals that nothing computes yet — most need host cooperation, and each needs a false-positive story before it earns a threshold.
+3. Choose an anomaly algorithm over the settled feature space, once there is traffic to choose it against.
+4. Calibrate: every threshold in the model is still a reasoned guess.
+5. Publish the symptom vocabulary as a `scorpio-guard-protocol` v0.1 wire spec — the structure is settled, the format is not.
 6. Only then: investigate encoding schemes for symptom transmission.
 
 ## Contributing

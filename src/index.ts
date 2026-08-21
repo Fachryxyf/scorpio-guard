@@ -40,12 +40,30 @@ export type { AssessOptions, TrustAssessment } from './core/assess.ts';
 
 export {
   CONSTRAINT_CLASSES,
+  PROOF_SOURCES,
+  PROOF_SOURCE_OF,
   checkInvariants,
   hardViolations,
   softViolations,
   softViolationMass,
 } from './core/constraints.ts';
-export type { ConstraintClass, Invariant, Strength, Violation } from './core/constraints.ts';
+export type {
+  ConstraintClass,
+  Invariant,
+  ProofSource,
+  Strength,
+  Violation,
+} from './core/constraints.ts';
+
+export {
+  SIGNAL_SOURCES,
+  SIGNAL_WEIGHTS,
+  WEAK_SIGNALS,
+  isWeakSignal,
+  signalMass,
+  signalsBySource,
+} from './core/signals.ts';
+export type { SignalSource, SignalWeight, WeakSignal } from './core/signals.ts';
 
 export { transitionGraph } from './core/transitions.ts';
 export type { Transition } from './core/transitions.ts';

@@ -56,17 +56,20 @@ Last updated: 2026-08-21
 - [D16 — Invariants are declared, never learned](#d16--invariants-are-declared-never-learned)
 - [D32 — Declaring `hard` is itself a claim of completeness](#d32--declaring-hard-is-itself-a-claim-of-completeness)
 - [D38 — A violated `soft` invariant is strong negative trust evidence](#d38--a-violated-soft-invariant-is-strong-negative-trust-evidence)
+- [D41 — The constraint taxonomy is closed over proof sources, not attacks](#d41--the-constraint-taxonomy-is-closed-over-proof-sources-not-attacks)
 
 **Part V — Anomaly model**
 
 - [D18 — Anomaly: feature space first, algorithm later](#d18--anomaly-feature-space-first-algorithm-later)
 - [D36 — The anomaly feature space](#d36--the-anomaly-feature-space)
 - [D35 — An observation without evidence is not a meaningful update](#d35--an-observation-without-evidence-is-not-a-meaningful-update)
+- [D42 — The weak-signal catalogue, with no thresholds in it](#d42--the-weak-signal-catalogue-with-no-thresholds-in-it)
 
 **Part VI — Architecture and API**
 
 - [D7 — One package, multiple entry points](#d7--one-package-multiple-entry-points)
 - [D8 — Pluggable `StateStore`, in-memory default, async](#d8--pluggable-statestore-in-memory-default-async)
+- [D44 — A durable store ships, on `node:sqlite`](#d44--a-durable-store-ships-on-nodesqlite)
 - [D9 — `guard.evaluate({ entity, observation, context })`](#d9--guardevaluate-entity-observation-context-)
 - [D10 — All public evaluation and storage APIs are async](#d10--all-public-evaluation-and-storage-apis-are-async)
 - [D11 — Time is injected through a `Clock` interface](#d11--time-is-injected-through-a-clock-interface)
@@ -77,6 +80,7 @@ Last updated: 2026-08-21
 
 - [D17 — No API key in the local core](#d17--no-api-key-in-the-local-core)
 - [D19 — Symptoms are local-first, never per request](#d19--symptoms-are-local-first-never-per-request)
+- [D43 — The symptom vocabulary is two tiers, split by rate of change](#d43--the-symptom-vocabulary-is-two-tiers-split-by-rate-of-change)
 - [D21 — Cold start, restated](#d21--cold-start-restated)
 - [D22 — Purge primitive from the start; consent belongs to the host](#d22--purge-primitive-from-the-start-consent-belongs-to-the-host)
 - [D23 — Decision trace is mandatory](#d23--decision-trace-is-mandatory)
@@ -989,6 +993,10 @@ Impossible State Transition
 Impossible Action Prerequisite
 ```
 
+**Superseded in part by D41**, which closes this enumeration at seven classes by
+deriving it from what a host can prove rather than from what an attack looks like.
+The reframing below is what made that possible and still holds.
+
 A hard constraint must be **provable** from the available observation and the
 application's declared invariants.
 
@@ -1233,6 +1241,71 @@ zero mass by construction, which is asserted directly in `constraints.test.ts`.
 
 ---
 
+## D41 — The constraint taxonomy is closed over proof sources, not attacks
+
+**Decided, closing D13.**
+
+D13 recorded five constraint classes and called them an initial set; the design
+notes called the list "a starting set, not exhaustive". Both left the enumeration
+open, and an open enumeration of *attack shapes* can never close — there is always
+another way to misuse an application.
+
+The taxonomy closes when the question changes. A host cannot declare an
+impossibility it cannot prove, so the right question is not *what can go wrong*
+but **what does a host already hold that makes a violation provable**. Those facts
+are finite:
+
+| Proof source | The host holds | Class |
+|---|---|---|
+| `reachability` | the flow graph it declared | `IMPOSSIBLE_SEGMENT_JUMP`, `IMPOSSIBLE_STATE_TRANSITION` |
+| `precondition` | state required before an action is available | `IMPOSSIBLE_ACTION_PREREQUISITE` |
+| `causality` | the input that must have produced an effect | `IMPOSSIBLE_IDLE_ACTION` |
+| `order` | timestamps the system itself recorded | `IMPOSSIBLE_TEMPORAL_ORDER` |
+| `issuance` | values the system itself handed out | `IMPOSSIBLE_UNISSUED_REFERENCE` |
+| `exclusivity` | facts that cannot both be true | `IMPOSSIBLE_EXCLUSIVE_STATE` |
+
+Anything not derivable from one of the six is **measurement, not proof**, and
+belongs in the weak-signal catalogue of D42 instead. That is the closure argument:
+the class list is finite because the proof sources are, and the boundary between
+the two files is now a definition rather than a judgement call.
+
+### The two classes this added
+
+Both were missing rather than newly invented, and both come from the scraping
+experience in the design notes.
+
+- `IMPOSSIBLE_UNISSUED_REFERENCE` — a reference the system never issued. The notes
+  describe *submitting a form without ever having loaded it, with no case ID known
+  in advance*; D13's five classes could only express the ordering half of that, not
+  the forged identifier itself.
+- `IMPOSSIBLE_EXCLUSIVE_STATE` — two facts that cannot both hold. Distinct from a
+  transition violation: nothing illegal was traversed, the claimed state is
+  internally contradictory.
+
+`IMPOSSIBLE_SEGMENT_JUMP` and `IMPOSSIBLE_STATE_TRANSITION` share `reachability`
+and are kept separate anyway: they are the same proof at two declaration
+granularities, and the class name is diagnostic for a host reading a trace even
+though SG's advice does not depend on the distinction.
+
+### Consequence: advice may be declared per class
+
+D14 keeps treatment as policy, and a single `hardViolationDecision` implied SG had
+a view on which impossibilities are worse. It has none — all seven are equally
+*proven*, and what a given violation should cost is a property of the host's flow.
+
+So `hardViolationDecision` accepts either one decision or a partial map keyed by
+class, and unlisted classes fall back to `RESTRICT`. When several classes are
+violated at once the strongest applies, which is the rule the decision layer
+already uses.
+
+### As implemented
+
+`CONSTRAINT_CLASSES`, `PROOF_SOURCES` and `PROOF_SOURCE_OF` in
+`src/core/constraints.ts`; `hardViolationDecision()` in `policy.ts`. The closure
+argument is asserted rather than described: `constraints.test.ts` fails if a class
+claims a proof source outside the six, or if a declared source has no class able to
+express it.
+
 ---
 
 # Part V — Anomaly model
@@ -1354,6 +1427,79 @@ evidence for seven days is expired, and its behavioral window goes with it.
 
 ---
 
+## D42 — The weak-signal catalogue, with no thresholds in it
+
+**Decided, answering the second open item from the design notes.**
+
+The notes ask for known weak signals to be enumerated "and how they combine into
+an observe / restrict / block decision tier". The enumeration is now written down.
+The second half of that request is **declined**, and the reason matters more than
+the list.
+
+### Weak signals do not map to a decision tier
+
+Nothing in this catalogue reaches a decision. A weak signal becomes negative trust
+mass, and that mass then passes through decay (D3), the epistemic stage (D40), the
+uncertainty ceiling and the diversity check (D37) like any other evidence. Giving
+signals their own tier mapping would create a second path to a treatment that
+skips all four, which is exactly the blended score D13/D18 exist to avoid.
+
+The design notes' own wording is the argument: weak signals "operate *around* the
+hard constraints as reinforcement, not as standalone triggers". A tier mapping
+would make them triggers.
+
+### Cap: the whole catalogue is worth one weak observation
+
+`signalMass()` sums the observed signals — summed rather than averaged, since a
+second signal must not weaken the first — and caps the total at one weak
+observation's mass (`0.5`).
+
+The cap makes "never a standalone trigger" numeric rather than aspirational. With
+the prior at `n = 2` and `developingAt` at `3` (D40), an interaction tripping
+*every* signal in the catalogue still leaves the entity in the `unknown` stage,
+where the trust dimension asks for nothing at all. Escalation therefore requires
+accumulation across interactions — which is the "meaningful in combination" the
+notes ask for, read as combination over time rather than within one
+well-instrumented request.
+
+It also keeps a growing catalogue from becoming quietly more punitive per
+interaction than it was when these numbers were reasoned about.
+
+### No thresholds in the catalogue
+
+Every entry names *what is measured* and never *when it fires*: "gaps too evenly
+distributed", not "CV below 0.25". Design notes §7 is explicit — the library is
+open source, so publishing `flag if interval < 220ms` hands an attacker the exact
+number to route around. Where a threshold is unavoidable it lives in
+`DEFAULT_DIVERSITY` (D36) as policy an adopter is expected to change, not as a
+published constant of the signal.
+
+`signals.test.ts` enforces this: a `measures` string containing a number with a
+unit fails the suite.
+
+### Bounded the same way D41 is
+
+Signals are enumerated over what SG can *observe* — `timing`, `repetition`,
+`interaction`, `sequence`, `target`, `environment` — the dual of D41's proof
+sources. A signal SG cannot observe is not a signal it can carry, and the test
+suite fails if a declared source has no signal under it.
+
+Every entry also carries an `innocentCause`: the plausible legitimate path to
+triggering it. That is not documentation courtesy. False positives are the central
+constraint (design notes §6), and a signal whose innocent cause cannot be written
+down is not understood well enough to weigh.
+
+Three entries are marked `computed` — the ones D36 already derives. The rest
+describe what a host must supply, and exist so that "known weak signals" is a
+written list rather than folklore.
+
+### As implemented
+
+`src/core/signals.ts`, exported from the package surface, plus
+`observation.signals` on `guard.evaluate()`. Ids the catalogue does not know are
+ignored rather than guessed at, so a host cannot widen SG's vocabulary by inventing
+tokens.
+
 ---
 
 # Part VI — Architecture and API
@@ -1438,6 +1584,60 @@ every write path a lie about what is held. Now frozen on write.
 
 That is the argument for shipping the kit — the reference store had the defect, and
 prose describing the contract would not have found it.
+
+---
+
+## D44 — A durable store ships, on `node:sqlite`
+
+**Decided, extending D8.**
+
+D8 shipped an interface and one in-memory implementation, and called the missing
+durable store an upgrade path. That left a claim overstated: D20 says a serverless
+guard is fully functional, which was true of the decision path and false of its
+memory. A process-local store means every restart is a cold start, so an entity's
+accumulated trust is discarded without anything reporting it — the failure is
+silent, which is the worst shape for it to have.
+
+`sqliteStore()` ships as the durable counterpart, at the `./sqlite` entry point.
+
+### Why SQLite rather than Redis
+
+`node:sqlite` is in the standard library, so durability costs an adopter no
+dependency and no infrastructure. A Redis store would need both, and would still be
+written against the same three methods — so it remains an adopter's choice rather
+than a gap in the library.
+
+The limit is stated rather than papered over: SQLite is one file on one filesystem,
+so this covers restart durability and multi-process sharing on a single host. A
+multi-host deployment still needs a networked store, and the interface is the same
+one.
+
+### It stays out of `src/core/`
+
+Separate entry point, not part of the core, because D12 keeps `src/core/` free of
+platform APIs — the same model has to run in a browser. `memoryStore()` remains the
+default for the same reason: it needs no filesystem and runs anywhere the core does.
+
+### State is one JSON column
+
+Not normalised into typed columns. The observation window (D36) is a
+variable-length array, the trust fields are floats whose exact values matter, and
+D1 makes the entity key opaque — so there is nothing to query by, and normalising
+would buy queryability nothing needs while adding two ways to lose precision.
+
+Sweeping filters through `isExpired()` rather than through a `WHERE` clause on the
+retention boundary. Duplicating that boundary in SQL is how two stores start
+disagreeing about when state dies; the timestamp column narrows the candidate set,
+and the shared function decides.
+
+### As implemented
+
+`src/store/sqlite.ts`, exported as `./sqlite`. It passes the same
+`checkStoreConformance()` kit as the in-memory store — the kit's purpose, finally
+exercised by a second implementation — and `sqlite.test.ts` asserts that trust
+survives closing and reopening the file, which is the one thing the memory store
+provably cannot do. The table name is validated before interpolation, since
+`node:sqlite` binds values but not identifiers.
 
 ## D9 — `guard.evaluate({ entity, observation, context })`
 
@@ -1529,6 +1729,80 @@ batched.
 Batching is also a privacy property, not only an efficiency one: per-request
 transmission leaks timing and volume through the shape of the traffic even when
 payloads are abstract.
+
+---
+
+## D43 — The symptom vocabulary is two tiers, split by rate of change
+
+**Decided, closing the vocabulary item the design notes flagged as the reason for
+the whole discussion.**
+
+The notes state the constraint precisely: library and server are **frozen relative
+to each other**. A deployed instance speaks the vocabulary it shipped with and
+cannot negotiate with a server that has moved on. A flat list therefore makes every
+addition a breaking change for every instance already in the field, and waiting to
+know all the symptoms before publishing any is the same deadlock in a different
+shape.
+
+The vocabulary is split by **rate of change**, which is the only axis that
+dissolves it:
+
+- **Category** — a small set of principle-level classes, expected never to grow. A
+  server that understands only categories understands every message any version
+  will ever send.
+- **Detail** — the specific pattern within a category, free to grow release to
+  release. An unrecognised detail **degrades to its category** rather than failing.
+
+### The category tier claims exhaustiveness, and earns it
+
+Six categories: `SYM_TIMING`, `SYM_REPETITION`, `SYM_INTERACTION`, `SYM_SEQUENCE`,
+`SYM_TARGET`, `SYM_CONSTRAINT`.
+
+These are not chosen by taste. The first five are the observable dimensions
+enumerated in D42; the sixth carries proven violations, kept separate so a receiver
+never has to infer certainty from a token's name — the same hard/weak split D13 and
+D18 draw locally, preserved on the wire.
+
+So the tier is exhaustive for the same reason D41's taxonomy is: it enumerates over
+what the guard can know, not over what an attacker might do.
+
+### The category travels with the detail
+
+A report carries both. Deriving the category from the detail would defeat the
+entire split — a receiver too old to recognise a detail cannot look up what it does
+not have. `readSymptom()` accepts an unknown detail and falls back to the stated
+category; an unknown *category* is rejected, because nothing remains to fall back
+to.
+
+### `SYM_UNKNOWN_PATTERN` is demoted
+
+It was a peer of the others in the flat v1 list. It is not a principle-level class
+— being unable to name something is an admission, and making it a category would
+freeze "we don't know" into the stable tier permanently. Inability to name a
+pattern is expressed as a category with no recognised detail, which is what an
+unrecognised detail already degrades to.
+
+### Symptoms stay shapes, never values
+
+`SYM_REQUEST_BURST` says volume arrived compressed in time. It carries no count, no
+interval, no endpoint. That is the privacy claim of the whole symptom model — the
+server learns that a shape recurred, not what produced it — and it is asserted:
+`symptoms.test.ts` fails if any token contains a digit.
+
+### Still not exported, and still not final
+
+The vocabulary remains internal. D17 removed the API key and D20 makes a serverless
+guard fully functional, so nothing transmits; an exported vocabulary with no
+transmitter invites use it has no semantics for. What is settled here is the
+**structure** — the wire format and the final detail list are owed to
+`scorpio-guard-protocol`, which now has a shape to specify rather than a blank
+page.
+
+### As implemented
+
+`src/core/symptoms.ts`: `SYMPTOM_CATEGORIES`, `SYMPTOM_DETAILS`, `reportSymptom()`,
+`readSymptom()`. `SYMPTOM_SCHEMA_VERSION` now versions the detail tier only — a
+change to the category tier would be a new major and a new document, not a bump.
 
 ## D21 — Cold start, restated
 
@@ -1869,6 +2143,8 @@ until the proof of concept meets real traffic.
 | D40 | Epistemic stage thresholds | `n >= 3` and `n >= 7` are tied to the D5 trajectory, not to observed populations. |
 | D3, D4 | `H = 24h`, weights `0.5` and `2.0` | Policy defaults. Locked as tests, so a revision is visible rather than silent. |
 | D31 | `Relationship : E x E -> R` | Deferred out of the PoC. The coordination reading is where the value and the privacy cost both sit, and that tension is a decision for later. |
+| D42 | Weak-signal catalogue and its weights | The three coarse weights are ordered by judgement, not measured. Seven of the ten signals have no collector yet, so a host must supply them. |
+| D43 | Two-tier symptom vocabulary | The structure is settled; the detail list is a first pass, and the wire format belongs to `scorpio-guard-protocol`. Nothing transmits, so nothing has been round-tripped against a real server. |
 
 D34 has been run and is recorded with its limits: HealthMe establishes that the
 library works against a real flow, and establishes nothing about the probabilistic

@@ -7,8 +7,15 @@ import {
   softViolationMass,
   softViolations,
   type Invariant,
+  CONSTRAINT_CLASSES,
+  PROOF_SOURCES,
+  PROOF_SOURCE_OF,
 } from './constraints.ts';
-import { DEFAULT_WEIGHTS } from './policy.ts';
+import {
+  DEFAULT_HARD_VIOLATION_DECISION,
+  DEFAULT_WEIGHTS,
+  hardViolationDecision,
+} from './policy.ts';
 import { transitionGraph } from './transitions.ts';
 
 const checkout = transitionGraph({
@@ -123,4 +130,35 @@ test('D38: mass scales with the number of soft violations and honours policy', (
   const result = checkInvariants({}, 's', two);
   assert.equal(softViolationMass(result.violations), 2 * DEFAULT_WEIGHTS.strong);
   assert.equal(softViolationMass(result.violations, 0.5), 1);
+});
+
+test('D41: every constraint class names the fact that proves it', () => {
+  for (const constraintClass of CONSTRAINT_CLASSES) {
+    const source = PROOF_SOURCE_OF[constraintClass];
+    assert.ok(
+      (PROOF_SOURCES as readonly string[]).includes(source),
+      `${constraintClass} claims proof source "${source}", which is not one of the six`,
+    );
+  }
+});
+
+test('D41: the taxonomy is closed because the proof sources are', () => {
+  // Every declared source must be reachable by some class, or the enumeration
+  // has a hole: something is provable that no class can express.
+  const covered = new Set(Object.values(PROOF_SOURCE_OF));
+  for (const source of PROOF_SOURCES) {
+    assert.ok(covered.has(source), `nothing can express a proof from "${source}"`);
+  }
+});
+
+test('D41: hard-violation advice can be declared per class, and falls back otherwise', () => {
+  assert.equal(hardViolationDecision('RESTRICT', 'IMPOSSIBLE_IDLE_ACTION'), 'RESTRICT');
+
+  const perClass = { IMPOSSIBLE_UNISSUED_REFERENCE: 'BLOCK' } as const;
+  assert.equal(hardViolationDecision(perClass, 'IMPOSSIBLE_UNISSUED_REFERENCE'), 'BLOCK');
+  assert.equal(
+    hardViolationDecision(perClass, 'IMPOSSIBLE_IDLE_ACTION'),
+    DEFAULT_HARD_VIOLATION_DECISION,
+    'an unlisted class must fall back rather than escalate by association',
+  );
 });

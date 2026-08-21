@@ -1,3 +1,5 @@
+import type { ConstraintClass } from './constraints.ts';
+
 /**
  * Every tunable number in one place.
  *
@@ -66,25 +68,48 @@ export type TrustBand = (typeof DEFAULT_TRUST_BANDS)[number]['band'];
 export type UncertaintyLevel = (typeof DEFAULT_UNCERTAINTY_BANDS)[number]['level'];
 
 /**
- * What a proven violation advises.
+ * What a proven violation advises, by default.
  *
  * D14 is explicit that "hard" describes the certainty of the violation, not the
  * severity of the treatment — so SG must advise *something* without claiming the
  * authority to enforce. `RESTRICT` rather than `BLOCK` keeps the final escalation
  * with the host.
  *
- * ponytail: one value for all five constraint classes. Upgrade path: per-class
- * advice, once real flows show that a segment jump and an idle action deserve
- * different responses.
+ * One value for every constraint class, because SG has no basis for ranking them:
+ * all seven are equally *proven*, and how much a given impossibility should cost
+ * is a property of the host's flow, not of the class. Hosts that do have a basis
+ * override per class — see `HardViolationPolicy`.
  */
 export const DEFAULT_HARD_VIOLATION_DECISION = 'RESTRICT';
+
+/**
+ * Advice for proven violations: one decision for all classes, or per class. D41.
+ *
+ * The per-class form is partial — classes left out fall back to
+ * `DEFAULT_HARD_VIOLATION_DECISION`, so declaring one exception does not oblige a
+ * host to restate the other six.
+ */
+export type HardViolationDecision = 'INCREASE_FRICTION' | 'RESTRICT' | 'BLOCK';
+
+export type HardViolationPolicy =
+  | HardViolationDecision
+  | { readonly [K in ConstraintClass]?: HardViolationDecision };
+
+/** What a violation of this class advises, honouring a per-class override. D41. */
+export function hardViolationDecision(
+  policy: HardViolationPolicy,
+  violationClass: ConstraintClass,
+): HardViolationDecision {
+  if (typeof policy === 'string') return policy;
+  return policy[violationClass] ?? DEFAULT_HARD_VIOLATION_DECISION;
+}
 
 export type Policy = {
   readonly halfLifeHours: number;
   readonly retentionHours: number;
   readonly weights: { readonly weak: number; readonly strong: number };
   readonly softViolationWeight: number;
-  readonly hardViolationDecision: 'INCREASE_FRICTION' | 'RESTRICT' | 'BLOCK';
+  readonly hardViolationDecision: HardViolationPolicy;
   /** Mass thresholds for the epistemic stages. */
   readonly developingAt: number;
   readonly establishedAt: number;

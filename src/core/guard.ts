@@ -17,8 +17,9 @@ import {
   type Invariant,
   type Violation,
 } from './constraints.ts';
-import { severity, type Decision } from './decision.ts';
-import { DEFAULT_POLICY, type Policy } from './policy.ts';
+import { severity, strongest, type Decision } from './decision.ts';
+import { signalMass, type WeakSignal } from './signals.ts';
+import { DEFAULT_POLICY, hardViolationDecision, type Policy } from './policy.ts';
 import { memoryStore, type StateStore } from './store.ts';
 import {
   applyEvidence,
@@ -48,6 +49,15 @@ export type Observation = {
     readonly positive?: EvidenceStrength;
     readonly negative?: EvidenceStrength;
   };
+
+  /**
+   * Weak signals the host observed, by catalogue id. D42.
+   *
+   * Measurement, not proof: these become negative trust mass and nothing else.
+   * Ids the catalogue does not know are ignored rather than guessed at, so a
+   * newer host cannot widen SG's vocabulary by inventing tokens.
+   */
+  readonly signals?: readonly string[];
 };
 
 export type EvaluationContext = {
@@ -91,6 +101,8 @@ export type GuardOptions = {
   readonly diversity?: DiversityThresholds;
   /** Observations retained per entity for behavioral features. D36. */
   readonly windowSize?: number;
+  /** Override the weak-signal catalogue. D42. Defaults to the published one. */
+  readonly signals?: readonly WeakSignal[];
 };
 
 export type EvaluateInput = {
@@ -160,7 +172,15 @@ export function createGuard(options: GuardOptions = {}) {
       const attributedNegative = observation.evidence?.negative
         ? policy.weights[observation.evidence.negative]
         : 0;
-      const negative = attributedNegative + softViolationMass(soft, policy.softViolationWeight);
+      const signalled = signalMass(observation.signals ?? [], options.signals);
+      const negative =
+        attributedNegative + softViolationMass(soft, policy.softViolationWeight) + signalled;
+
+      if (signalled > 0) {
+        trace.push(
+          `${observation.signals?.length ?? 0} weak signal(s) contribute ${signalled} negative mass; they cannot escalate on their own`,
+        );
+      }
 
       if (soft.length > 0) {
         trace.push(
@@ -207,7 +227,11 @@ export function createGuard(options: GuardOptions = {}) {
       // enforces, so the escalation is bounded by policy.
       let decision = trust.decision;
       if (hard.length > 0) {
-        const advised = policy.hardViolationDecision;
+        // Per-class advice, strongest wins — the same rule the decision layer
+        // already uses when several dimensions each advise something. D41.
+        const advised = strongest(
+          hard.map((violation) => hardViolationDecision(policy.hardViolationDecision, violation.class)),
+        );
         if (severity(advised) > severity(decision)) {
           decision = advised;
           trace.push(

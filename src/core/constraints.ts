@@ -7,16 +7,72 @@ import { DEFAULT_SOFT_VIOLATION_WEIGHT } from './policy.ts';
  * something has been seen — that is the anomaly dimension's job (D18).
  */
 
-/** The five classes of invariant violation. D13. */
+/**
+ * The classes of invariant violation. D13, closed by D41.
+ *
+ * D13 recorded five classes and the design notes called that list a starting
+ * set. D41 closes it by asking what a host can actually prove rather than what
+ * an attack looks like: every class below names one source of proof, and the
+ * enumeration is exhaustive over those sources rather than over attack shapes.
+ */
 export const CONSTRAINT_CLASSES = [
   'IMPOSSIBLE_SEGMENT_JUMP',
   'IMPOSSIBLE_IDLE_ACTION',
   'IMPOSSIBLE_TEMPORAL_ORDER',
   'IMPOSSIBLE_STATE_TRANSITION',
   'IMPOSSIBLE_ACTION_PREREQUISITE',
+  'IMPOSSIBLE_UNISSUED_REFERENCE',
+  'IMPOSSIBLE_EXCLUSIVE_STATE',
 ] as const;
 
 export type ConstraintClass = (typeof CONSTRAINT_CLASSES)[number];
+
+/**
+ * What a host holds that makes a violation provable. D41.
+ *
+ * A host can only prove impossibility from facts it already has, and those facts
+ * come in six kinds:
+ *
+ * - `reachability` — the flow graph it declared
+ * - `precondition` — state that must hold before an action is available
+ * - `causality` — the input that must have produced an observed effect
+ * - `order` — timestamps the system itself recorded
+ * - `issuance` — values the system itself handed out
+ * - `exclusivity` — facts that cannot both be true
+ *
+ * Anything not derivable from one of these is measurement, not proof, and
+ * belongs in the weak-signal catalogue (`signals.ts`) instead. That is the whole
+ * closure argument: the taxonomy is finite because the proof sources are.
+ */
+export const PROOF_SOURCES = [
+  'reachability',
+  'precondition',
+  'causality',
+  'order',
+  'issuance',
+  'exclusivity',
+] as const;
+
+export type ProofSource = (typeof PROOF_SOURCES)[number];
+
+/**
+ * Which fact proves each class.
+ *
+ * `IMPOSSIBLE_SEGMENT_JUMP` and `IMPOSSIBLE_STATE_TRANSITION` share a proof
+ * source deliberately: they are the same proof at two declaration granularities
+ * — a required earlier step, and a missing edge in an explicit edge set. They
+ * stay separate because the class is diagnostic, and a host reading a trace
+ * benefits from the distinction even though SG's advice does not depend on it.
+ */
+export const PROOF_SOURCE_OF: Record<ConstraintClass, ProofSource> = {
+  IMPOSSIBLE_SEGMENT_JUMP: 'reachability',
+  IMPOSSIBLE_STATE_TRANSITION: 'reachability',
+  IMPOSSIBLE_ACTION_PREREQUISITE: 'precondition',
+  IMPOSSIBLE_IDLE_ACTION: 'causality',
+  IMPOSSIBLE_TEMPORAL_ORDER: 'order',
+  IMPOSSIBLE_UNISSUED_REFERENCE: 'issuance',
+  IMPOSSIBLE_EXCLUSIVE_STATE: 'exclusivity',
+};
 
 /**
  * Epistemic strength, declared by the host per constraint. D32.

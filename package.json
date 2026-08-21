@@ -19,6 +19,10 @@
     "./collect": {
       "types": "./dist/collect/index.d.ts",
       "default": "./dist/collect/index.js"
+    },
+    "./sqlite": {
+      "types": "./dist/store/sqlite.d.ts",
+      "default": "./dist/store/sqlite.js"
     }
   },
   "scripts": {

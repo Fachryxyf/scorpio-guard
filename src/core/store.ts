@@ -60,10 +60,12 @@ export const DEFAULT_SWEEP_EVERY = 512;
 /**
  * In-memory store. The default, and a real implementation rather than a stub.
  *
- * ponytail: process-local, so it resets on restart and is not shared across
- * instances. Correct for one process; wrong for serverless or multi-instance
- * deployments, where a cold start silently discards all accumulated trust.
- * Upgrade path: a Redis or SQL store behind the same three-method interface.
+ * Process-local by construction: it resets on restart and is invisible to other
+ * instances. That is correct for one process and wrong for anything that restarts
+ * often, so it is no longer the only option — `sqliteStore` (`./sqlite`) is the
+ * durable counterpart behind the same three methods, and both pass the same
+ * conformance kit. This one remains the default because it needs no filesystem
+ * and runs anywhere the core does.
  */
 export function memoryStore(options: MemoryStoreOptions = {}): MemoryStore {
   const states = new Map<string, EntityState>();

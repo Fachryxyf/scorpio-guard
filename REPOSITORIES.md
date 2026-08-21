@@ -30,14 +30,20 @@ Layout, per D7 in the design record — one package, several entry points, with
 `src/core/` free of platform APIs so the same model serves both sides:
 
 ```
-src/core/     the model: trust, decay, decision, constraints, storage contract
+src/core/     the model: trust, decay, decision, constraints, signals, storage contract
 src/collect/  browser-side observation, exported as ./collect
+src/store/    platform-backed stores, exported as ./sqlite
 examples/     the first integration target, observational only
 ```
 
-Not built yet: an anomaly classifier over the feature space, and the prescription
-client. There is no `src/server/`: the core is framework-agnostic and needs no
-host-specific layer until an adapter is written.
+Not built yet: an anomaly classifier over the feature space, the prescription
+client, and collectors for seven of the ten catalogued weak signals. There is no
+`src/server/`: the core is framework-agnostic and needs no host-specific layer
+until an adapter is written.
+
+`src/store/` is the one deliberate exception to "no platform APIs", and it is why
+platform code lives in its own directory rather than in `src/core/`: a durable store
+needs a filesystem, and the model still has to run in a browser.
 
 ---
 
@@ -50,9 +56,15 @@ of failure.
 Scope:
 
 - The symptom vocabulary, in two tiers: stable skeleton categories that rarely
-  change, and flexible technical detail underneath.
+  change, and flexible technical detail underneath. The **structure** is settled in
+  D43 and lives in `src/core/symptoms.ts` — six categories, details that degrade to
+  their category, and a schema version that moves only for the detail tier. This
+  repository inherits it rather than inventing it.
 - Request and response shapes for symptom and prescription exchange.
-- A version negotiation rule, so a v1 library and a v2 server can still talk.
+- A version negotiation rule, so a v1 library and a v2 server can still talk. Note
+  that D43 makes strict negotiation optional rather than necessary: an unrecognised
+  detail already degrades to its category, so a v2 library and a v1 server remain
+  mutually intelligible without one.
 - A conformance checklist for anyone implementing a compatible server.
 
 Explicitly out of scope: any actual rule, threshold, or heuristic. The protocol
@@ -64,9 +76,11 @@ implementer depends on it, it cannot be casually changed.
 
 Open question, unresolved: whether a durable public spec is worth formalizing
 before a first proof of concept exists, or whether that is solving a scaling
-problem with nothing yet to scale. The current lean is to keep the vocabulary
-inside the library until real usage shows which categories are load-bearing,
-then extract it.
+problem with nothing yet to scale. The current lean is unchanged — keep the
+vocabulary inside the library until real usage shows which categories are
+load-bearing, then extract it. D43 makes that lean cheaper to hold: the structure
+is already designed and tested in place, so extraction is a move rather than a
+design exercise.
 
 ---
 

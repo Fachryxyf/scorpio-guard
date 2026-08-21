@@ -22,9 +22,13 @@ export type ObservationTrace = {
  * The feature vector. All values are dimensionless or in units of time, so a
  * later model consumes numbers rather than reconstructing meaning.
  *
- * ponytail: computed from a bounded window, not a streaming estimator. Exact for
- * a small window and cheap to reason about. Upgrade path: streaming moments if
- * the window ever needs to be large.
+ * Computed from a bounded window (D36, `DEFAULT_WINDOW_SIZE`), not from a
+ * streaming estimator. That is a decision rather than a shortcut: over a window
+ * this size the values here are exact, a streaming estimator would only
+ * approximate them, and the bound is itself required — an unbounded per-entity
+ * history is a memory-growth surface and a retention problem (D6, D22). A
+ * streaming form becomes worth writing only if the window ever needs to be large,
+ * which nothing in the model currently asks for.
  */
 export type BehaviorFeatures = {
   /** Observations in the window. */

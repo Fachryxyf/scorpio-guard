@@ -22,7 +22,14 @@ claim:
   forwarding. There is nothing to intercept because nothing is sent.
 - **Thresholds are public.** The library and its policy defaults are open by
   design. They are set leniently, so knowing them tells an attacker how to avoid
-  escalation, not how to trigger a false positive against someone else.
+  escalation, not how to trigger a false positive against someone else. The weak
+  signal *catalogue* is deliberately threshold-free for the same reason: it names
+  what is measured, never when it fires.
+- **Weak signals cannot escalate on their own.** Every catalogued signal an
+  interaction trips contributes at most the mass of one weak observation in total,
+  which leaves a fresh entity below the evidence threshold where trust may ask for
+  anything. Anything that escalates on measurement alone is a bug, not a policy
+  choice.
 
 ## Handling personal data
 
@@ -34,6 +41,11 @@ basis stay with the host.
 
 The browser collector counts interaction and records nothing about content: not
 which keys, not field values, not pointer coordinates.
+
+The durable store (`./sqlite`) writes that state to a file you choose. It holds the
+same data the in-memory store holds, with the same deletion path — but it survives a
+restart, which is the point, so treat the file as personal data at rest and back it
+up or encrypt it accordingly.
 
 ## Reporting a vulnerability
 
@@ -48,9 +60,13 @@ estimate rather than a service level.
 ### In scope
 
 - A way to make the guard advise `ALLOW` for a proven `hard` invariant violation.
-- State corruption or cross-entity leakage through the store interface.
+- State corruption or cross-entity leakage through the store interface, in either
+  store implementation.
 - A trace that misreports which layer decided an outcome.
 - Anything that causes the collector to record content.
+- Weak signals reaching a treatment without accumulating evidence, or an unknown
+  signal id being treated as suspicious rather than ignored.
+- SQL injection through any value or identifier reaching the SQLite store.
 
 ### Out of scope
 
