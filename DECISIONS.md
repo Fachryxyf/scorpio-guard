@@ -1626,6 +1626,22 @@ missing and needs adding.
 **Decided.** Scoped. Publish after the PoC API is stable, so `private: true`
 stays in `package.json` until then.
 
+### Installable before it is published
+
+`private: true` blocks `npm publish`, not `npm install github:...`. So the package
+carries its real scoped name from the start, and a `prepare` script runs the same
+`tsc -p tsconfig.build.json` as `build`.
+
+The reasoning: `files` ships `dist` only, and `dist` is git-ignored, so a git
+install without a build hook resolves `exports` to files that do not exist. An
+adopter would see a module-not-found error and no explanation. `prepare` runs on
+install from git and before publish, and is skipped for a consumer installing from
+the registry later — one line covers both eras.
+
+Naming it scoped now rather than at publish time means the import path in every
+example, the README, and the site is the path that will keep working, instead of a
+bare `scorpio-guard` that silently becomes wrong on the day it is published.
+
 ## D26 — Node floor: `>=22.6`
 
 **Decided.** Keeps tests running TypeScript directly with no build step and no

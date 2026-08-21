@@ -1,5 +1,5 @@
 {
-  "name": "scorpio-guard",
+  "name": "@fachryxyf/scorpio-guard",
   "version": "0.0.0",
   "description": "Adaptive trust evaluation for web interactions \u2014 a local, advisory library.",
   "license": "MIT",
@@ -23,6 +23,7 @@
   },
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
+    "prepare": "tsc -p tsconfig.build.json",
     "typecheck": "tsc --noEmit && tsc -p examples --noEmit",
     "test": "node --experimental-strip-types --test \"src/**/*.test.ts\" \"examples/**/*.test.ts\"",
     "smoke": "node scripts/smoke.mjs"
