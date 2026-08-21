@@ -162,7 +162,69 @@
   section > .num::before { content: counter(sec, decimal-leading-zero) " / "; }
   .num a.hash { color: var(--line); border: 0; margin-left: .5rem; }
   .num a.hash:hover { color: var(--accent); border: 0; }
-  .lede { padding: 3rem 0 0; }
+
+  /* main page: a wiki front page, not a marketing hero */
+  .mp { padding: 2.5rem 0 0; }
+  .mp h1 { margin-bottom: .875rem; }
+  /* the front page headings are labels, not section titles: h2 for outline, h3 for looks */
+  .mp > h2 {
+    font: 600 .8125rem/1.4 var(--mono); letter-spacing: .1em;
+    text-transform: uppercase; color: var(--ink-2); margin: 1.75rem 0 .625rem;
+  }
+  .mp .lead { max-width: 60ch; }
+  .mp .lead b { font-weight: 600; color: var(--ink); }
+
+  .infobox {
+    float: right; width: 19rem; max-width: 100%;
+    margin: 0 0 1.25rem 1.75rem;
+    border: 1px solid var(--line); border-radius: 3px; background: var(--bg-2);
+    font-size: .8125rem;
+  }
+  .infobox > p {
+    margin: 0; padding: .625rem .875rem; border-bottom: 1px solid var(--line);
+    font: 600 .6875rem/1.3 var(--mono); letter-spacing: .12em; text-transform: uppercase;
+    color: var(--ink-2);
+  }
+  .infobox table { margin: 0; font-size: .8125rem; }
+  .infobox th, .infobox td { padding: .4rem .875rem; border-bottom: 1px solid var(--line); }
+  .infobox th {
+    width: 7.5rem; font: 600 .6875rem/1.4 var(--mono); letter-spacing: .06em;
+    text-transform: none; color: var(--ink-2); vertical-align: top;
+  }
+  .infobox td { font-family: var(--mono); color: var(--ink); }
+  .infobox tr:last-child th, .infobox tr:last-child td { border-bottom: 0; }
+
+  /* status strip: the answer to "is this usable yet" without scrolling */
+  ul.glance { list-style: none; padding: 0; margin: 0 0 1.5rem; max-width: none; }
+  ul.glance li {
+    display: flex; gap: .75rem; align-items: baseline;
+    padding: .5rem 0; border-bottom: 1px solid var(--line); margin: 0; max-width: none;
+  }
+  ul.glance li:first-child { border-top: 1px solid var(--line); }
+  ul.glance .state {
+    flex: none; width: 8.5rem;
+    font: .6875rem/1.5 var(--mono); letter-spacing: .1em; text-transform: uppercase;
+  }
+  ul.glance .yes { color: var(--accent); }
+  ul.glance .no { color: var(--ink-2); }
+  ul.glance .what { color: var(--ink-2); }
+  ul.glance .what b { color: var(--ink); font-weight: 600; }
+
+  /* portals: the catalogue of everything on the page */
+  .portals { display: grid; gap: 1.25rem 1.75rem; grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr)); margin: 0 0 1.5rem; }
+  .portal { border-top: 2px solid var(--line); padding-top: .75rem; }
+  .portal h3 { margin: 0 0 .5rem; }
+  .portal ol { list-style: none; padding: 0; margin: 0; }
+  .portal li { margin: 0 0 .4rem; max-width: none; font-size: .875rem; line-height: 1.5; }
+  .portal li a { font-family: var(--mono); font-size: .8125rem; }
+  .portal li span { color: var(--ink-2); }
+  .portal li span::before { content: " — "; color: var(--line); }
+
+  @media (max-width: 44rem) {
+    .infobox { float: none; width: auto; margin: 1.25rem 0; }
+    ul.glance li { display: block; }
+    ul.glance .state { width: auto; display: block; margin-bottom: .15rem; }
+  }
   section { padding: 2.75rem 0 0; scroll-margin-top: 4.25rem; }
   section + section { border-top: 1px solid var(--line); margin-top: 2.75rem; }
   .num {
@@ -397,40 +459,161 @@
 </nav>
 
 <main id="doc">
-  <div class="lede">
-    <p class="num" data-lang="en">Design notes &amp; implementation · v0 · 2026</p>
-    <p class="num" data-lang="id">Catatan desain &amp; implementasi · v0 · 2026</p>
+  <div class="mp">
+    <div class="infobox">
+      <p data-lang="en">Scorpio Guard</p>
+      <p data-lang="id">Scorpio Guard</p>
+      <table>
+        <tbody>
+          <tr><th data-lang="en">Type</th><th data-lang="id">Jenis</th>
+              <td data-lang="en">library, advisory</td><td data-lang="id">library, advisory</td></tr>
+          <tr><th data-lang="en">Status</th><th data-lang="id">Status</th>
+              <td data-lang="en">pre-alpha</td><td data-lang="id">pra-alfa</td></tr>
+          <tr><th data-lang="en">Stage</th><th data-lang="id">Tahap</th>
+              <td data-lang="en">implementation</td><td data-lang="id">implementasi</td></tr>
+          <tr><th data-lang="en">Language</th><th data-lang="id">Bahasa</th>
+              <td>TypeScript</td></tr>
+          <tr><th data-lang="en">Runtime</th><th data-lang="id">Runtime</th>
+              <td>node &gt;=22.6, ESM</td></tr>
+          <tr><th data-lang="en">Dependencies</th><th data-lang="id">Dependensi</th>
+              <td data-lang="en">none</td><td data-lang="id">tidak ada</td></tr>
+          <tr><th data-lang="en">Licence</th><th data-lang="id">Lisensi</th>
+              <td>MIT</td></tr>
+          <tr><th data-lang="en">Tests</th><th data-lang="id">Test</th>
+              <td>105</td></tr>
+          <tr><th data-lang="en">Decisions</th><th data-lang="id">Keputusan</th>
+              <td><a href="#decisions">43</a></td></tr>
+          <tr><th data-lang="en">Network</th><th data-lang="id">Jaringan</th>
+              <td data-lang="en">none, by design</td><td data-lang="id">tidak ada, by design</td></tr>
+          <tr><th data-lang="en">Calibrated</th><th data-lang="id">Terkalibrasi</th>
+              <td data-lang="en">no</td><td data-lang="id">belum</td></tr>
+          <tr><th data-lang="en">Source</th><th data-lang="id">Sumber</th>
+              <td><a href="https://github.com/Fachryxyf/scorpio-guard">GitHub</a></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p class="num" data-lang="en">Documentation &amp; design record · v0 · 2026</p>
+    <p class="num" data-lang="id">Dokumentasi &amp; catatan desain · v0 · 2026</p>
     <h1 data-lang="en">Trust is a spectrum, not a verdict.</h1>
     <h1 data-lang="id">Trust itu spektrum, bukan putusan.</h1>
-    <p data-lang="en">Scorpio Guard is a local, advisory trust-evaluation library for web interactions, sitting on top of an open symptom/prescription protocol. It does not answer <em>human or bot</em>. It estimates how much trust an interaction currently deserves, and hands that judgement back to whoever owns the application.</p>
-    <p data-lang="id">Scorpio Guard adalah library evaluasi trust yang berjalan lokal dan bersifat advisory untuk interaksi web, di atas protokol symptom/prescription yang terbuka. Ia tidak menjawab <em>manusia atau bot</em>. Ia memperkirakan seberapa besar trust yang layak diberikan pada sebuah interaksi, lalu menyerahkan penilaian itu ke pemilik aplikasi.</p>
-    <p>
-      <span class="tag" data-lang="en">Status · pre-alpha</span><span class="tag" data-lang="id">Status · pra-alfa</span>
-      <span class="tag" data-lang="en">Stage · implementation</span><span class="tag" data-lang="id">Tahap · implementasi</span>
-      <span class="tag" data-lang="en">Model · open core</span><span class="tag" data-lang="id">Model · open core</span>
-      <span class="tag" data-lang="en">Core · tested, uncalibrated</span><span class="tag" data-lang="id">Core · teruji, belum terkalibrasi</span>
-    </p>
+    <p class="lead" data-lang="en"><b>Scorpio Guard</b> is a local, advisory trust-evaluation library for web interactions. It does not answer <em>human or bot</em> — that question has no answer, because any behavior a human produces can be recorded and replayed. It estimates how much trust an interaction currently deserves, explains how it got there, and hands the judgement back to whoever owns the application.</p>
+    <p class="lead" data-lang="id"><b>Scorpio Guard</b> adalah library evaluasi trust yang berjalan lokal dan bersifat advisory untuk interaksi web. Ia tidak menjawab <em>manusia atau bot</em> — pertanyaan itu tidak punya jawaban, karena perilaku apa pun yang dihasilkan manusia bisa direkam dan diulang. Ia memperkirakan seberapa besar trust yang layak diberikan pada sebuah interaksi, menjelaskan bagaimana ia sampai ke sana, dan menyerahkan penilaiannya ke pemilik aplikasi.</p>
     <pre>npm install github:Fachryxyf/scorpio-guard</pre>
-    <div class="cards">
-      <div class="card">
-        <h3><a href="#quickstart" data-lang="en">Quickstart &rarr;</a><a href="#quickstart" data-lang="id">Mulai cepat &rarr;</a></h3>
-        <p data-lang="en">Declare what is impossible in your flow, create one guard, read the advice and its trace. Four steps.</p>
-        <p data-lang="id">Deklarasikan apa yang mustahil di alur kamu, buat satu guard, baca sarannya dan jejaknya. Empat langkah.</p>
+
+    <h2 data-lang="en">Is it usable yet</h2>
+    <h2 data-lang="id">Sudah bisa dipakai belum</h2>
+    <ul class="glance">
+      <li>
+        <span class="state yes" data-lang="en">Built</span><span class="state yes" data-lang="id">Sudah ada</span>
+        <span class="what" data-lang="en">The <b>trust model</b> — Beta distribution, half-life decay, retention, the epistemic stage, the five decision rungs. <a href="#trust">How it works</a>.</span>
+        <span class="what" data-lang="id">Model <b>trust</b> — distribusi Beta, decay half-life, retensi, tahap epistemik, lima tingkat keputusan. <a href="#trust">Cara kerjanya</a>.</span>
+      </li>
+      <li>
+        <span class="state yes" data-lang="en">Built</span><span class="state yes" data-lang="id">Sudah ada</span>
+        <span class="what" data-lang="en"><b>Declared invariants</b> — provable impossibility in your own flow, and what a violation is allowed to conclude. <a href="#signals">Hard vs weak</a>.</span>
+        <span class="what" data-lang="id"><b>Invariant terdeklarasi</b> — kemustahilan yang bisa dibuktikan di alur kamu, dan apa yang boleh disimpulkan dari pelanggarannya. <a href="#signals">Hard vs weak</a>.</span>
+      </li>
+      <li>
+        <span class="state yes" data-lang="en">Built</span><span class="state yes" data-lang="id">Sudah ada</span>
+        <span class="what" data-lang="en">A <b>pluggable store</b> whose contract ships as eleven runnable checks. <a href="#stores">Prove yours</a>.</span>
+        <span class="what" data-lang="id"><b>Store yang bisa diganti</b>, kontraknya dikirim sebagai sebelas pemeriksaan. <a href="#stores">Buktikan store-mu</a>.</span>
+      </li>
+      <li>
+        <span class="state yes" data-lang="en">Built</span><span class="state yes" data-lang="id">Sudah ada</span>
+        <span class="what" data-lang="en">A <b>browser collector</b> that counts interaction and records nothing about content. <a href="#recipes">Use it</a>.</span>
+        <span class="what" data-lang="id"><b>Collector browser</b> yang menghitung interaksi dan tidak mencatat isinya. <a href="#recipes">Pakai</a>.</span>
+      </li>
+      <li>
+        <span class="state no" data-lang="en">Deferred</span><span class="state no" data-lang="id">Ditunda</span>
+        <span class="what" data-lang="en">The <b>anomaly algorithm</b>. The feature space is settled; the algorithm waits for traffic to choose it against. <a href="#anomaly">Why</a>.</span>
+        <span class="what" data-lang="id"><b>Algoritma anomali</b>. Ruang fiturnya sudah; algoritmanya menunggu trafik untuk memilihnya. <a href="#anomaly">Kenapa</a>.</span>
+      </li>
+      <li>
+        <span class="state no" data-lang="en">Not started</span><span class="state no" data-lang="id">Belum mulai</span>
+        <span class="what" data-lang="en">The <b>symptom protocol</b> and its server. Nothing transmits yet, and the vocabulary is the open problem. <a href="#protocol">The plan</a>.</span>
+        <span class="what" data-lang="id"><b>Protokol symptom</b> dan server-nya. Belum ada yang dikirim, dan kosakatanya masih masalah terbuka. <a href="#protocol">Rencananya</a>.</span>
+      </li>
+      <li>
+        <span class="state no" data-lang="en">Never</span><span class="state no" data-lang="id">Belum pernah</span>
+        <span class="what" data-lang="en">Met <b>real adversarial traffic</b>. Every threshold is a reasoned guess, set leniently so being wrong withholds escalation. <a href="#status">Read this first</a>.</span>
+        <span class="what" data-lang="id">Bertemu <b>trafik lawan yang nyata</b>. Tiap ambang masih dugaan beralasan, disetel longgar supaya kalau salah ia menahan eskalasi. <a href="#status">Baca ini dulu</a>.</span>
+      </li>
+    </ul>
+
+    <h2 data-lang="en">Contents</h2>
+    <h2 data-lang="id">Isi</h2>
+    <div class="portals">
+      <div class="portal">
+        <h3 data-lang="en">Using it</h3>
+        <h3 data-lang="id">Cara pakai</h3>
+        <ol>
+          <li><a href="#install">Install</a><span data-lang="en">requirements, and why it is not on npm yet</span><span data-lang="id">syaratnya, dan kenapa belum ada di npm</span></li>
+          <li><a href="#quickstart" data-lang="en">Quickstart</a><a href="#quickstart" data-lang="id">Mulai cepat</a><span data-lang="en">first evaluation in four steps</span><span data-lang="id">evaluasi pertama dalam empat langkah</span></li>
+          <li><a href="#api" data-lang="en">API surface</a><a href="#api" data-lang="id">Permukaan API</a><span data-lang="en">every export, in one table</span><span data-lang="id">setiap export, dalam satu tabel</span></li>
+          <li><a href="#policy" data-lang="en">Policy defaults</a><a href="#policy" data-lang="id">Default policy</a><span data-lang="en">every tunable number, and what changing it means</span><span data-lang="id">setiap angka yang bisa disetel, dan arti mengubahnya</span></li>
+          <li><a href="#recipes" data-lang="en">Recipes</a><a href="#recipes" data-lang="id">Resep</a><span data-lang="en">observational rollout, deletion, collector, shared store</span><span data-lang="id">rollout observasional, penghapusan, collector, store bersama</span></li>
+        </ol>
       </div>
-      <div class="card">
-        <h3><a href="#api" data-lang="en">API surface &rarr;</a><a href="#api" data-lang="id">Permukaan API &rarr;</a></h3>
-        <p data-lang="en">Every export, and what it does. Most adopters need three of them.</p>
-        <p data-lang="id">Setiap export, dan fungsinya. Sebagian besar pemakai butuh tiga saja.</p>
+      <div class="portal">
+        <h3 data-lang="en">How it decides</h3>
+        <h3 data-lang="id">Cara ia memutuskan</h3>
+        <ol>
+          <li><a href="#trust" data-lang="en">Trust as a distribution</a><a href="#trust" data-lang="id">Trust sebagai distribusi</a><span data-lang="en">Beta, not a score</span><span data-lang="id">Beta, bukan skor</span></li>
+          <li><a href="#memory" data-lang="en">Memory &amp; decay</a><a href="#memory" data-lang="id">Memori &amp; decay</a><span data-lang="en">remembering without becoming dogmatic</span><span data-lang="id">mengingat tanpa jadi dogmatis</span></li>
+          <li><a href="#epistemic" data-lang="en">Epistemic stage</a><a href="#epistemic" data-lang="id">Tahap epistemik</a><span data-lang="en">lack of evidence is not distrust</span><span data-lang="id">tak ada evidence bukan ketidakpercayaan</span></li>
+          <li><a href="#signals" data-lang="en">Signals</a><a href="#signals" data-lang="id">Sinyal</a><span data-lang="en">hard constraints vs weak signals</span><span data-lang="id">hard constraint vs weak signal</span></li>
+          <li><a href="#decision" data-lang="en">Decision layer</a><a href="#decision" data-lang="id">Lapis keputusan</a><span data-lang="en">five rungs, strongest wins</span><span data-lang="id">lima tingkat, yang terkuat menang</span></li>
+          <li><a href="#anomaly" data-lang="en">Anomaly</a><a href="#anomaly" data-lang="id">Anomali</a><span data-lang="en">the feature space, and the deferred algorithm</span><span data-lang="id">ruang fiturnya, dan algoritma yang ditunda</span></li>
+          <li><a href="#pipeline" data-lang="en">Mental model</a><a href="#pipeline" data-lang="id">Model mental</a><span data-lang="en">the whole pipeline on one line</span><span data-lang="id">seluruh pipeline dalam satu baris</span></li>
+        </ol>
       </div>
-      <div class="card">
-        <h3><a href="#policy" data-lang="en">Policy defaults &rarr;</a><a href="#policy" data-lang="id">Default policy &rarr;</a></h3>
-        <p data-lang="en">Every tunable number, and what changing it means. None is calibrated yet.</p>
-        <p data-lang="id">Setiap angka yang bisa disetel, dan arti mengubahnya. Belum ada yang terkalibrasi.</p>
+      <div class="portal">
+        <h3 data-lang="en">Status &amp; limits</h3>
+        <h3 data-lang="id">Status &amp; batasnya</h3>
+        <ol>
+          <li><a href="#status" data-lang="en">Where it stands</a><a href="#status" data-lang="id">Posisi saat ini</a><span data-lang="en">each piece, honestly</span><span data-lang="id">tiap bagian, apa adanya</span></li>
+          <li><a href="#firstrun" data-lang="en">First integration</a><a href="#firstrun" data-lang="id">Integrasi pertama</a><span data-lang="en">a real flow, and what it does not prove</span><span data-lang="id">alur nyata, dan apa yang belum dibuktikannya</span></li>
+          <li><a href="#unresolved" data-lang="en">Unresolved</a><a href="#unresolved" data-lang="id">Belum selesai</a><span data-lang="en">open problems, named</span><span data-lang="id">masalah terbuka, disebut namanya</span></li>
+          <li><a href="#roadmap">Roadmap</a><span data-lang="en">what happens next, in order</span><span data-lang="id">yang berikutnya, berurutan</span></li>
+          <li><a href="#library" data-lang="en">The library</a><a href="#library" data-lang="id">Library-nya</a><span data-lang="en">what is actually built</span><span data-lang="id">apa yang benar-benar sudah dibangun</span></li>
+          <li><a href="#stores" data-lang="en">State store</a><a href="#stores" data-lang="id">Penyimpanan state</a><span data-lang="en">the contract, as runnable checks</span><span data-lang="id">kontraknya, sebagai pemeriksaan</span></li>
+        </ol>
       </div>
-      <div class="card">
-        <h3><a href="#status" data-lang="en">Honest status &rarr;</a><a href="#status" data-lang="id">Status jujur &rarr;</a></h3>
-        <p data-lang="en">What is built, what is deliberately deferred, and what has never met real traffic.</p>
-        <p data-lang="id">Apa yang sudah dibangun, apa yang sengaja ditunda, dan apa yang belum pernah bertemu trafik nyata.</p>
+      <div class="portal">
+        <h3 data-lang="en">Why it is shaped this way</h3>
+        <h3 data-lang="id">Kenapa bentuknya begini</h3>
+        <ol>
+          <li><a href="#premise" data-lang="en">Premise</a><a href="#premise" data-lang="id">Premis</a><span data-lang="en">no web behavior is inherently human</span><span data-lang="id">tak ada perilaku web yang inheren manusiawi</span></li>
+          <li><a href="#shape" data-lang="en">Product shape</a><a href="#shape" data-lang="id">Bentuk produk</a><span data-lang="en">local, one-way, advisory</span><span data-lang="id">lokal, satu arah, advisory</span></li>
+          <li><a href="#friction" data-lang="en">Zero friction</a><a href="#friction" data-lang="id">Tanpa friksi</a><span data-lang="en">the constraint everything else answers to</span><span data-lang="id">batasan yang dipatuhi semua hal lain</span></li>
+          <li><a href="#local">Local-first</a><span data-lang="en">data stays where the decision happens</span><span data-lang="id">data tetap di tempat keputusan dibuat</span></li>
+          <li><a href="#economics" data-lang="en">Economics</a><a href="#economics" data-lang="id">Ekonomi</a><span data-lang="en">asymmetric cost, not perfect detection</span><span data-lang="id">asymmetric cost, bukan deteksi sempurna</span></li>
+          <li><a href="#opencore" data-lang="en">Open core</a><a href="#opencore" data-lang="id">Open core</a><span data-lang="en">what is open, what is not, and the risks</span><span data-lang="id">apa yang terbuka, apa yang tidak, dan risikonya</span></li>
+        </ol>
+      </div>
+      <div class="portal">
+        <h3 data-lang="en">The protocol</h3>
+        <h3 data-lang="id">Protokolnya</h3>
+        <ol>
+          <li><a href="#protocol" data-lang="en">Symptom flow</a><a href="#protocol" data-lang="id">Alur gejala</a><span data-lang="en">prescription, not diagnosis</span><span data-lang="id">resep, bukan diagnosis</span></li>
+          <li><a href="#vocabulary" data-lang="en">Vocabulary</a><a href="#vocabulary" data-lang="id">Kosakata</a><span data-lang="en">two tiers, and why it is load-bearing</span><span data-lang="id">dua lapis, dan kenapa ia menopang semuanya</span></li>
+          <li><a href="#encoding">Encoding</a><span data-lang="en">readable by the server only — research, not design</span><span data-lang="id">hanya terbaca server — riset, bukan desain</span></li>
+          <li><a href="#governance" data-lang="en">Governance</a><a href="#governance" data-lang="id">Tata kelola</a><span data-lang="en">one implementation, not a requirement</span><span data-lang="id">satu implementasi, bukan keharusan</span></li>
+          <li><a href="#adaptive" data-lang="en">Adaptation</a><a href="#adaptive" data-lang="id">Adaptasi</a><span data-lang="en">where the evolution signal comes from</span><span data-lang="id">dari mana sinyal evolusinya datang</span></li>
+        </ol>
+      </div>
+      <div class="portal">
+        <h3 data-lang="en">Reference</h3>
+        <h3 data-lang="id">Rujukan</h3>
+        <ol>
+          <li><a href="#glossary" data-lang="en">Glossary</a><a href="#glossary" data-lang="id">Glosarium</a><span data-lang="en">sixteen terms used in a narrow sense</span><span data-lang="id">enam belas istilah dalam arti sempit</span></li>
+          <li><a href="#decisions" data-lang="en">Decision index</a><a href="#decisions" data-lang="id">Indeks keputusan</a><span data-lang="en">all 43, and the file each became</span><span data-lang="id">semua 43, dan file tempatnya menjelma</span></li>
+          <li><a href="#context" data-lang="en">Context</a><a href="#context" data-lang="id">Konteks</a><span data-lang="en">the same trust, read differently per endpoint</span><span data-lang="id">trust yang sama, dibaca beda per endpoint</span></li>
+          <li><a href="#principles" data-lang="en">Principles</a><a href="#principles" data-lang="id">Prinsip</a><span data-lang="en">what the guard actually claims</span><span data-lang="id">apa yang sebenarnya diklaim guard</span></li>
+          <li><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/CONTRIBUTING.md" data-lang="en">Contributing</a><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/CONTRIBUTING.md" data-lang="id">Berkontribusi</a><span data-lang="en">what helps most, and the house rules</span><span data-lang="id">yang paling membantu, dan aturan rumahnya</span></li>
+          <li><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/SECURITY.md" data-lang="en">Security</a><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/SECURITY.md" data-lang="id">Keamanan</a><span data-lang="en">what it does not claim, and private reporting</span><span data-lang="id">apa yang tidak diklaimnya, dan pelaporan privat</span></li>
+        </ol>
       </div>
     </div>
   </div>
@@ -1646,7 +1829,7 @@ The prescription travels; the patient does not.</pre>
         <tr><td><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md#d8--pluggable-statestore-in-memory-default-async">D8</a></td>
           <td data-lang="en">Pluggable <code>StateStore</code>, in-memory default, and a contract that ships as runnable checks</td><td data-lang="id"><code>StateStore</code> yang bisa diganti, default in-memory, dan kontrak yang dikirim sebagai pemeriksaan</td>
           <td><code>store.ts</code>, <code>conformance.ts</code></td></tr>
-        <tr><td><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md#d9--guardevaluate-entity-observation-context">D9</a></td>
+        <tr><td><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md#d9--guardevaluate-entity-observation-context-">D9</a></td>
           <td data-lang="en"><code>evaluate({ entity, observation, context })</code> — the formal model with the names filled in</td><td data-lang="id"><code>evaluate({ entity, observation, context })</code> — model formalnya dengan nama-nama terisi</td>
           <td><code>guard.ts</code></td></tr>
         <tr><td><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md#d10--all-public-evaluation-and-storage-apis-are-async">D10</a></td>
