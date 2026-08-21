@@ -1,0 +1,50 @@
+name: Hard constraint discovery
+description: A class of behavior that is provably impossible, not merely unusual.
+labels: ["hard constraint"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        The constraint list is a starting set, not a complete one. A new class of
+        provable impossibility is the highest-value contribution to this project.
+
+        The test is completeness: within a declared scope, can the legitimate set
+        be enumerated exhaustively? If not, it is a weak signal — still worth
+        reporting, under the other template.
+  - type: textarea
+    id: constraint
+    attributes:
+      label: What is impossible
+      description: State it as a rule, not as an anecdote.
+    validations:
+      required: true
+  - type: dropdown
+    id: class
+    attributes:
+      label: Which class it belongs to, if any
+      options:
+        - IMPOSSIBLE_SEGMENT_JUMP
+        - IMPOSSIBLE_IDLE_ACTION
+        - IMPOSSIBLE_TEMPORAL_ORDER
+        - IMPOSSIBLE_STATE_TRANSITION
+        - IMPOSSIBLE_ACTION_PREREQUISITE
+        - A new class the five above do not cover
+    validations:
+      required: true
+  - type: textarea
+    id: legitimate
+    attributes:
+      label: What legitimate traffic could produce the same shape
+      description: >
+        Password managers, autofill, assistive technology, prefetching, browser
+        extensions, flaky networks. If any of these produce it, the constraint is
+        `soft`, not `hard`.
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: The scope it holds over
+      description: Declaring `hard` asserts the declaration is complete for its scope.
+    validations:
+      required: true

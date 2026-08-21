@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Security vulnerability
+    url: https://github.com/Fachryxyf/scorpio-guard/security/advisories/new
+    about: Report privately. Do not open a public issue for something exploitable.
+  - name: Design decisions
+    url: https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md
+    about: Every decision, its reasoning, and what it commits the code to. Read before proposing a change to the model.

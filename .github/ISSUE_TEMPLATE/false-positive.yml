@@ -1,0 +1,48 @@
+name: False positive
+description: The guard advised escalation for behavior that was legitimate.
+labels: ["false positive"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        The trace is the important part. Without it a report is a guess about a guess.
+
+        Do not paste raw user data. The trace describes the shape of what happened,
+        which is the whole point of the design.
+  - type: textarea
+    id: trace
+    attributes:
+      label: The trace
+      description: "`result.trace`, verbatim."
+      render: text
+    validations:
+      required: true
+  - type: input
+    id: decision
+    attributes:
+      label: Decision advised
+      placeholder: RESTRICT
+    validations:
+      required: true
+  - type: textarea
+    id: observation
+    attributes:
+      label: The observation shape
+      description: Scope, and the shape of `data`. Field names are fine; values usually are not.
+      render: js
+    validations:
+      required: true
+  - type: textarea
+    id: policy
+    attributes:
+      label: Policy overrides
+      description: Anything passed to `createGuard()`. Say "defaults" if none.
+      render: js
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What should have happened, and why the behavior was legitimate
+    validations:
+      required: true
