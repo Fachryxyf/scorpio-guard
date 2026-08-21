@@ -27,3 +27,9 @@ export {
   isExpired,
 } from './core/trust.ts';
 export type { EntityState } from './core/trust.ts';
+
+export { memoryStore } from './core/store.ts';
+export type { StateStore } from './core/store.ts';
+
+export { assessTrust, trustBand, uncertaintyLevel } from './core/assess.ts';
+export type { AssessOptions, TrustAssessment } from './core/assess.ts';

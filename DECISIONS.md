@@ -765,6 +765,24 @@ one gates the other, rather than being averaged.
   means no concurrence, so a fully lifted cap must be an explicit host policy
   choice rather than a silent default. Pending D18.
 
+### As implemented
+
+`assessTrust()` in `src/core/assess.ts` takes `anomalyConcurs`, which is
+deliberately three-valued: `true` concurs, `false` denies, `undefined` means no
+anomaly data exists — which is the project's current state and is not the same
+claim as monotonous behavior.
+
+With low variance and no concurrence, the ceiling holds at `INCREASE_FRICTION`
+and the reason string says why. A host may set
+`allowEscalationWithoutAnomaly: true` to opt out, but an explicit
+`anomalyConcurs: false` still overrides that opt-in — a stated verdict outranks a
+blanket permission. Both paths are covered by tests in `assess.test.ts`.
+
+Worth recording: for a *trusted* entity, the D37 guard changes nothing, because
+`ALLOW` already sits below every ceiling. The farming concern is entirely about
+escalation, and a saturated entity was never being escalated — what farming buys
+an attacker is protection against future escalation, not a treatment change now.
+
 ---
 
 # Part IV — Hard constraints

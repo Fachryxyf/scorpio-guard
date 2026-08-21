@@ -129,7 +129,25 @@ npm run typecheck
 npm run build     # emits dist/
 ```
 
-What exists so far is the decision spectrum and the v1 symptom vocabulary. The trust model, signal collection, the anomaly model, and the prescription client are not implemented.
+### What exists
+
+`src/core/` — the model, with no platform dependencies:
+
+- `trust.ts` — Beta-Bernoulli state, half-life decay over real elapsed time, retention.
+- `assess.ts` — trust and uncertainty bands, and the ceiling that caps escalation.
+- `decision.ts` — the five-rung decision spectrum.
+- `symptoms.ts` — the v1 symptom vocabulary and its boundary check.
+- `store.ts` — the `StateStore` interface and an in-memory implementation.
+- `policy.ts`, `clock.ts` — tunable values in one place, and an injectable clock.
+
+Thirty tests, which double as the record of every numeric property the design
+depends on.
+
+### What does not exist
+
+Signal collection, the anomaly model and its feature space, hard-constraint
+checking, the prescription client, and the `evaluate()` surface that composes
+them. Nothing has met real traffic yet.
 
 ## Roadmap
 

@@ -26,14 +26,17 @@ TypeScript because the hard constraints are largely client-side observations —
 pointer events, DOM interaction, event ordering. Those cannot be reconstructed
 from a backend request log.
 
-Current skeleton:
+Layout, per D7 in the design record — one package, several entry points, with
+`src/core/` free of platform APIs so the same model serves both sides:
 
-- `src/decision.ts` — the decision spectrum and how several advisories combine.
-- `src/symptoms.ts` — the v1 symptom vocabulary and its boundary check.
-- `src/index.ts` — public surface.
+```
+src/core/     the model: trust, decay, decision, symptoms, storage contract
+src/collect/  browser-side observation (not started)
+src/server/   host-side evaluation (not started)
+```
 
-Not built yet: signal collection, the Beta-Bernoulli trust model, decay, the
-anomaly model, and the prescription client.
+Not built yet: signal collection, the anomaly model, hard-constraint checking,
+and the prescription client.
 
 ---
 
