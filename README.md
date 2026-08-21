@@ -113,6 +113,13 @@ the answer, the reasoning, and what each answer commits the implementation to.
 Read it before proposing a change to the model — several obvious-looking
 alternatives were considered and rejected there for reasons worth knowing.
 
+Forty-three entries is more than anyone reads front to back, so the site carries a
+[decision index](https://scorpio-guard.fachryxyf.com/#decisions) — every entry
+grouped by what it decides, with the file it turned into — and a
+[glossary](https://scorpio-guard.fachryxyf.com/#glossary) for the terms used in a
+narrower sense than usual: entity, evidence mass, hard versus soft, diversity,
+advisory.
+
 Settled so far: the entity as reference unit, trust as a Beta distribution,
 half-life decay over real elapsed time, evidence weights, decision bands with an
 uncertainty ceiling, retention, the hard-constraint model, the epistemic stage over

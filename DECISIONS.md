@@ -1656,6 +1656,25 @@ extra dependency.
 **Decided.** `index.html` and `404.html` remain at the repository root. Migration
 to `docs/` later if needed.
 
+## D28.1 — The site indexes the record; it does not restate it
+
+**Decided.** `index.html` carries a glossary and a decision index. Neither
+duplicates the reasoning here: the glossary defines terms used in a narrower sense
+than ordinary English, and the index maps each entry to the file it turned into.
+
+The reasoning: forty-odd entries is past what anyone reads front to back, and the
+alternative to an index is prose repeated in two places that drift apart. The
+failure mode is already visible in this repository's own history — the site claimed
+no proof-of-concept code existed for several commits after it did.
+
+So the site links into the record by anchor rather than paraphrasing it, and the
+index lists the file each decision produced, which is the part the record does not
+say and cannot stay current about on its own.
+
+Sidebar filtering is substring matching over link text already in the DOM. Both
+languages are present, so a query in either finds the section. No search index,
+because there is one page.
+
 ## D29 — No empty repositories
 
 **Decided.** `scorpio-guard-protocol` and `scorpio-guard-server` are not created
