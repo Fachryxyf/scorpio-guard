@@ -137,12 +137,13 @@ npm run build     # emits dist/
 - `assess.ts` — trust and uncertainty bands, and the ceiling that caps escalation.
 - `decision.ts` — the five-rung decision spectrum.
 - `symptoms.ts` — the v1 symptom vocabulary and its boundary check.
+- `behavior.ts` — the anomaly feature space, and the diversity signal it feeds.
 - `constraints.ts`, `transitions.ts` — declared invariants, and what a violation means.
 - `store.ts` — the `StateStore` interface and an in-memory implementation.
 - `guard.ts` — `createGuard()` and `evaluate()`, composing the above.
 - `policy.ts`, `clock.ts` — tunable values in one place, and an injectable clock.
 
-Fifty-seven tests, which double as the record of every numeric and semantic
+Seventy-one tests, which double as the record of every numeric and semantic
 property the design depends on.
 
 ```js
@@ -170,6 +171,7 @@ const result = await guard.evaluate({
 
 result.decision; // 'RESTRICT' — advice, never enforcement
 result.trust.stage; // 'unknown' | 'developing' | 'established'
+result.diversity; // was the volume varied, or mechanical?
 result.trace; // why, in the order that decided it
 ```
 
@@ -180,9 +182,13 @@ authority. See D39 and D40 in the design record for how that was arrived at.
 
 ### What does not exist
 
-Signal collection, the anomaly model and its feature space, and the prescription
-client. Nothing has met real traffic yet, which is the point of D30 — the
-hard-constraint classes cannot be validated against a synthetic fixture.
+Browser-side signal collection, an anomaly *classifier* over the feature space,
+and the prescription client.
+
+More importantly: nothing has met real traffic. Every threshold in the model is a
+reasoned guess. D34 names the first integration target, and the plan there is
+observational — run alongside the existing defences, change nothing, record what
+the guard would have advised.
 
 ## Roadmap
 

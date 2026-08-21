@@ -1,4 +1,13 @@
 import { assessTrust, type TrustAssessment } from './assess.ts';
+import {
+  DEFAULT_DIVERSITY,
+  DEFAULT_WINDOW_SIZE,
+  behaviorFeatures,
+  diversityConcurs,
+  pushObservation,
+  type BehaviorFeatures,
+  type DiversityThresholds,
+} from './behavior.ts';
 import { systemClock, type Clock } from './clock.ts';
 import {
   checkInvariants,
@@ -26,7 +35,7 @@ export type EvidenceStrength = 'weak' | 'strong';
 export type Observation = {
   /**
    * Which declared scope this observation belongs to. Invariants outside it are
-   * not consulted, and an undeclared scope yields no violations \u2014 unknown, not
+   * not consulted, and an undeclared scope yields no violations — unknown, not
    * forbidden. D32.
    */
   readonly scope?: string;
@@ -44,7 +53,7 @@ export type Observation = {
 export type EvaluationContext = {
   /**
    * Endpoint sensitivity and anything else the host wants recorded against the
-   * decision. Part of `C` in `T = PI(A, C)` \u2014 not part of the state key, since
+   * decision. Part of `C` in `T = PI(A, C)` — not part of the state key, since
    * trust is global per entity. D2.
    */
   readonly [key: string]: unknown;
@@ -54,6 +63,13 @@ export type Assessment = {
   readonly entity: string;
   readonly decision: Decision;
   readonly trust: TrustAssessment;
+  /** Behavioral features over the retained window. D36. */
+  readonly behavior: BehaviorFeatures;
+  /**
+   * Whether behavior was varied enough to believe low variance. D37.
+   * `undefined` when the window is too small to judge.
+   */
+  readonly diversity: boolean | undefined;
   readonly violations: readonly Violation[];
   /** True when a proven violation set the outcome, bypassing the trust ceiling. */
   readonly hardViolated: boolean;
@@ -71,6 +87,10 @@ export type GuardOptions = {
   readonly invariants?: readonly Invariant[];
   /** See D37. Defaults to withholding escalation with no anomaly data. */
   readonly allowEscalationWithoutAnomaly?: boolean;
+  /** Thresholds for the diversity signal. D36. */
+  readonly diversity?: DiversityThresholds;
+  /** Observations retained per entity for behavioral features. D36. */
+  readonly windowSize?: number;
 };
 
 export type EvaluateInput = {
@@ -78,9 +98,10 @@ export type EvaluateInput = {
   readonly observation?: Observation;
   readonly context?: EvaluationContext;
   /**
-   * Whether observed behavior is diverse enough for low variance to be believed.
-   * D37. Omitted while the anomaly model does not exist (D18) \u2014 which is not the
-   * same claim as behavior being monotonous.
+   * Override the computed diversity verdict. D37.
+   *
+   * Normally omitted: SG derives concurrence from the entity's own observation
+   * window (D36). Supply this only when the host holds a better signal.
    */
   readonly anomalyConcurs?: boolean;
 };
@@ -94,6 +115,8 @@ export function createGuard(options: GuardOptions = {}) {
   const clock = options.clock ?? systemClock;
   const policy: Policy = { ...DEFAULT_POLICY, ...options.policy };
   const invariants = options.invariants ?? [];
+  const diversityThresholds = options.diversity ?? DEFAULT_DIVERSITY;
+  const windowSize = options.windowSize ?? DEFAULT_WINDOW_SIZE;
 
   /** Load state, treating absent and expired alike. D6. */
   async function load(entity: string, now: number): Promise<{ state: EntityState; coldStart: boolean }> {
@@ -145,15 +168,34 @@ export function createGuard(options: GuardOptions = {}) {
         );
       }
 
-      const updated = applyEvidence(state, { positive, negative }, now, policy.halfLifeHours);
+      const withEvidence = applyEvidence(state, { positive, negative }, now, policy.halfLifeHours);
+      const updated: EntityState = {
+        ...withEvidence,
+        window: pushObservation(state.window, { at: now, scope: scope ?? 'unscoped' }, windowSize),
+      };
       await store.set(input.entity, updated);
+
+      // The anomaly dimension: features over this entity's own recent behavior.
+      // Computed from the updated window so the current interaction counts. D36.
+      const behavior = behaviorFeatures(updated.window);
+      const diversity = input.anomalyConcurs ?? diversityConcurs(behavior, diversityThresholds);
+
+      if (diversity === undefined) {
+        trace.push(
+          `diversity undetermined: ${behavior.count} observation(s), needs ${diversityThresholds.minObservations}`,
+        );
+      } else {
+        trace.push(
+          `diversity ${diversity ? 'concurs' : 'withheld'}: ${behavior.distinctScopes} scope(s), entropy ${behavior.scopeEntropy.toFixed(2)}, gap CV ${behavior.interArrivalCv.toFixed(2)}`,
+        );
+      }
 
       const trust = assessTrust(
         expectedTrust(updated, now, policy.halfLifeHours),
         uncertainty(updated, now, policy.halfLifeHours),
         evidenceMass(updated, now, policy.halfLifeHours),
         {
-          anomalyConcurs: input.anomalyConcurs,
+          anomalyConcurs: diversity,
           allowEscalationWithoutAnomaly: options.allowEscalationWithoutAnomaly ?? false,
           thresholds: { developingAt: policy.developingAt, establishedAt: policy.establishedAt },
         },
@@ -180,6 +222,8 @@ export function createGuard(options: GuardOptions = {}) {
         entity: input.entity,
         decision,
         trust,
+        behavior,
+        diversity,
         violations: checked.violations,
         hardViolated: hard.length > 0,
         coldStart,

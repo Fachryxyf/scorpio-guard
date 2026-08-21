@@ -101,7 +101,7 @@ export function softViolations(violations: readonly Violation[]): readonly Viola
  * through a learned baseline would also let it influence the D37 diversity
  * check, which it has no business touching.
  *
- * Hard violations contribute nothing here \u2014 they reach the decision layer as
+ * Hard violations contribute nothing here — they reach the decision layer as
  * their own dimension and never become mass, because proof that decays under a
  * half-life would be incoherent (D15).
  */

@@ -242,3 +242,78 @@ test('D10: the guard is usable concurrently for distinct entities', async () => 
   assert.deepEqual(results.map((r) => r.entity), ['a', 'b', 'c']);
   assert.ok(results.every((r) => r.coldStart));
 });
+
+test('D36/D37: the guard derives diversity from the entity own window', async () => {
+  const clock = fakeClock();
+  const guard = createGuard({ clock });
+
+  // Mechanical: same scope, fixed interval, sustained negatives.
+  let mechanical;
+  for (let i = 0; i < 12; i += 1) {
+    mechanical = await guard.evaluate({
+      entity: 'bot',
+      observation: { scope: 'search', evidence: { negative: 'strong' } },
+    });
+    clock.advance(1);
+  }
+
+  assert.equal(mechanical?.behavior.interArrivalCv, 0, 'fixed intervals must read zero variation');
+  assert.equal(mechanical?.diversity, false);
+  assert.equal(mechanical?.trust.uncertainty, 'low');
+  assert.equal(mechanical?.decision, 'INCREASE_FRICTION', 'volume alone must not unlock escalation');
+  assert.match(mechanical?.trace.join(' ') ?? '', /diversity withheld/);
+});
+
+test('D36: a small window leaves diversity undetermined rather than false', async () => {
+  const guard = createGuard({ clock: fakeClock() });
+  const result = await guard.evaluate({ entity: 'e1', observation: { scope: 'home' } });
+
+  assert.equal(result.diversity, undefined);
+  assert.equal(result.behavior.count, 1);
+  assert.match(result.trace.join(' '), /diversity undetermined/);
+});
+
+test('D36: the observation window is bounded per entity', async () => {
+  const clock = fakeClock();
+  const guard = createGuard({ clock, windowSize: 5 });
+
+  for (let i = 0; i < 12; i += 1) {
+    await guard.evaluate({ entity: 'e1', observation: { scope: `s-${i}` } });
+    clock.advance(1);
+  }
+  const result = await guard.evaluate({ entity: 'e1', observation: { scope: 'last' } });
+  assert.equal(result.behavior.count, 5);
+});
+
+test('D22: forgetting an entity discards its behavioral window too', async () => {
+  const clock = fakeClock();
+  const guard = createGuard({ clock });
+
+  for (let i = 0; i < 10; i += 1) {
+    await guard.evaluate({ entity: 'e1', observation: { scope: 'search' } });
+    clock.advance(1);
+  }
+  await guard.forget('e1');
+
+  const returning = await guard.evaluate({ entity: 'e1', observation: { scope: 'search' } });
+  assert.equal(returning.behavior.count, 1, 'no behavioral history may survive a purge');
+  assert.equal(returning.diversity, undefined);
+});
+
+test('D37: a host verdict overrides the computed diversity signal', async () => {
+  const clock = fakeClock();
+  const guard = createGuard({ clock });
+
+  for (let i = 0; i < 12; i += 1) {
+    await guard.evaluate({
+      entity: 'e1',
+      observation: { scope: 'search', evidence: { negative: 'strong' } },
+      anomalyConcurs: true,
+    });
+    clock.advance(1);
+  }
+  const result = await guard.evaluate({ entity: 'e1', anomalyConcurs: true });
+
+  assert.equal(result.diversity, true);
+  assert.equal(result.decision, 'BLOCK');
+});

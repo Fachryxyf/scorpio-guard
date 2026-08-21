@@ -60,3 +60,16 @@ export type {
   GuardOptions,
   Observation,
 } from './core/guard.ts';
+
+export {
+  behaviorFeatures,
+  diversityConcurs,
+  pushObservation,
+  DEFAULT_DIVERSITY,
+  DEFAULT_WINDOW_SIZE,
+} from './core/behavior.ts';
+export type {
+  BehaviorFeatures,
+  DiversityThresholds,
+  ObservationTrace,
+} from './core/behavior.ts';

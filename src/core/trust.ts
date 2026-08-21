@@ -1,3 +1,4 @@
+import type { ObservationTrace } from './behavior.ts';
 import { DEFAULT_HALF_LIFE_HOURS } from './policy.ts';
 
 const HOUR_MS = 3_600_000;
@@ -17,10 +18,18 @@ export type EntityState = {
   readonly b: number;
   readonly lastSeen: number;
   readonly lastMeaningfulUpdate: number;
+  /**
+   * Bounded window of recent observations, for the anomaly features of D36.
+   *
+   * Kept beside the trust state so one store round trip serves both dimensions,
+   * and so a purge (D22) or an expiry (D6) removes behavioral history along with
+   * everything else rather than leaving an orphan.
+   */
+  readonly window: readonly ObservationTrace[];
 };
 
 export function freshState(now: number): EntityState {
-  return { a: 0, b: 0, lastSeen: now, lastMeaningfulUpdate: now };
+  return { a: 0, b: 0, lastSeen: now, lastMeaningfulUpdate: now, window: [] };
 }
 
 /**
@@ -79,6 +88,7 @@ export function applyEvidence(
     b: decayed.b + negative,
     lastSeen: now,
     lastMeaningfulUpdate: meaningful ? now : state.lastMeaningfulUpdate,
+    window: state.window,
   };
 }
 

@@ -16,10 +16,10 @@ the answer given, and what that answer commits the implementation to.
   property is locked as a test in `src/core/trust.test.ts`. Values here are
   policy; the tests are what make a policy change visible.
 
-Status: all thirty original questions are answered, plus D32, D33, D37, D38 and
-D40 arising from review and implementation. Four questions remain open. D34 —
-choosing the proof-of-concept target — is the highest priority among them, since
-several decisions cannot be validated without one.
+Status: every numbered question is answered — the original thirty, plus D31 to
+D40 arising from review and implementation. Nothing is blocked on a decision.
+What remains is validation: the values recorded here have not met real traffic
+yet, and D34 names where they will.
 
 Last updated: 2026-08-21
 
@@ -60,6 +60,8 @@ Last updated: 2026-08-21
 **Part V — Anomaly model**
 
 - [D18 — Anomaly: feature space first, algorithm later](#d18--anomaly-feature-space-first-algorithm-later)
+- [D36 — The anomaly feature space](#d36--the-anomaly-feature-space)
+- [D35 — An observation without evidence is not a meaningful update](#d35--an-observation-without-evidence-is-not-a-meaningful-update)
 
 **Part VI — Architecture and API**
 
@@ -78,6 +80,7 @@ Last updated: 2026-08-21
 - [D21 — Cold start, restated](#d21--cold-start-restated)
 - [D22 — Purge primitive from the start; consent belongs to the host](#d22--purge-primitive-from-the-start-consent-belongs-to-the-host)
 - [D23 — Decision trace is mandatory](#d23--decision-trace-is-mandatory)
+- [D31 — `Relationship : E x E -> R` is deferred out of the PoC](#d31--relationship--e-x-e---r-is-deferred-out-of-the-poc)
 
 **Part VIII — Project and tooling**
 
@@ -87,6 +90,7 @@ Last updated: 2026-08-21
 - [D27 — CI now: typecheck and test](#d27--ci-now-typecheck-and-test)
 - [D28 — Site stays where it is](#d28--site-stays-where-it-is)
 - [D29 — No empty repositories](#d29--no-empty-repositories)
+- [D34 — PoC target: HealthMe](#d34--poc-target-healthme)
 - [D30 — PoC must run against a real application flow](#d30--poc-must-run-against-a-real-application-flow)
 
 **[Open questions](#open-questions)**
@@ -1249,6 +1253,107 @@ independently useful — they are what symptom abstraction reduces.
 Consequence for D6: whether an anomaly observation with no trust evidence counts
 as a meaningful update stays open until the feature space lands.
 
+## D36 — The anomaly feature space
+
+**Decided.**
+
+Per D18, features come before any algorithm. Every feature is derived from a
+bounded window of recent observations, and an observation is reduced to the least
+SG needs to measure shape:
+
+```
+ObservationTrace = { at: milliseconds, scope: string }
+```
+
+No payload, no identity, no request content — consistent with D19 and with the
+principle that data stays where the decision happens.
+
+### The features
+
+| Feature | Reads |
+|---|---|
+| `count` | Observations in the window |
+| `distinctScopes` | How many different things were touched |
+| `scopeEntropy` | Shannon entropy over scope frequency, normalised to `[0,1]` |
+| `interArrivalCv` | Standard deviation over mean of inter-arrival gaps |
+| `meanGapMs` | Mean gap, `undefined` below two observations |
+| `immediateRepeatRatio` | Fraction that repeated the preceding scope |
+
+`interArrivalCv` is the load-bearing one, and it is the design notes' own
+observation made numeric: *the tell is not the delay, it is the shape of the
+randomness*. Checked against synthetic timing:
+
+| Timing pattern | CV |
+|---|---|
+| Fixed 1000ms sleep | 0.00 |
+| 1000ms with 5% jitter | 0.03 |
+| Flat `uniform(1.2, 2.3)s` | 0.16 - 0.18 |
+| Human bursts and pauses | 1.1 - 1.6 |
+
+A flat uniform delay — the exact pattern named in the notes — sits an order of
+magnitude below human traffic, because humans are bursty and `random.uniform` is
+not. The threshold is set at `0.25`, between the two.
+
+### Diversity verdict
+
+`diversityConcurs()` returns the three-valued answer D37 needs. All conditions
+must hold, not any:
+
+```
+count          >= 8
+distinctScopes >= 2
+scopeEntropy   >= 0.35
+interArrivalCv >= 0.25
+```
+
+Below the observation minimum it returns `undefined` — too small to judge, which
+is not the same claim as monotonous.
+
+Verified: varied scopes with mechanical timing still fail. Varying *what* is
+touched while keeping a machine's rhythm is the cheaper half to fake, so passing
+on scope variety alone would have made the signal easy to defeat.
+
+### Thresholds are guesses, and deliberately lenient
+
+Every number here is unvalidated until D30. They lean permissive on purpose: a
+wrong threshold withholds escalation rather than manufacturing a false positive,
+which is the correct direction to be wrong in.
+
+### What this commits the code to
+
+- The window lives on `EntityState`, so one store round trip serves both
+  dimensions, and a purge (D22) or expiry (D6) removes behavioral history with
+  everything else instead of orphaning it. Asserted in `guard.test.ts`.
+- The window is bounded (20 by default) and drops oldest first, so per-entity
+  memory is constant.
+- `evaluate()` computes diversity from the entity's own window; `anomalyConcurs`
+  becomes an override for hosts holding a better signal, not the only source.
+
+---
+
+## D35 — An observation without evidence is not a meaningful update
+
+**Decided.**
+
+Deferred under D6 pending the feature space; D36 settles it.
+
+An observation that contributes no trust evidence advances `lastSeen`, which
+governs decay, and does **not** advance `lastMeaningfulUpdate`, which governs
+retention. Appending to the behavioral window does not count as meaningful either.
+
+### Why
+
+If mere observation refreshed the retention horizon, an attacker could keep state
+alive indefinitely with traffic carrying no evidence at all — which is precisely
+what D6 set out to prevent by measuring from meaningful updates rather than
+sighting. Behavioral features are derived data; they do not earn their own
+retention.
+
+The consequence is intended: an entity generating traffic that produces no
+evidence for seven days is expired, and its behavioral window goes with it.
+
+---
+
 ---
 
 # Part VI — Architecture and API
@@ -1439,6 +1544,43 @@ later.
   debugging responsibility" — by making it visible whether a decision came from
   local computation or from a prescription.
 
+## D31 — `Relationship : E x E -> R` is deferred out of the PoC
+
+**Decided: deferred.**
+
+The signature appeared in D1 without semantics. Rather than guess at one, it is
+withheld from the formal model and excluded from the proof of concept.
+
+### Why deferral is the right answer rather than a definition
+
+Three readings are plausible — behavioral correlation, shared origin, coordination
+graph — and they are not variations on one feature. They differ in what SG would
+have to store, and one of them breaks a decision already made:
+
+| Reading | Storage consequence |
+|---|---|
+| Behavioral correlation | Comparable feature vectors, per entity. D36 already produces these. |
+| Shared origin | Requires an attribute SG deliberately does not hold, per D1. |
+| Coordination graph | Edges between entities. Key-value is insufficient; D8 reopens. |
+
+The shared-origin reading is the most interesting one, and it is the one SG
+structurally cannot support: D1 makes the reference opaque, so SG has nothing from
+which to infer that two references share anything.
+
+Defining this now would therefore either pick the cheap reading by default, or
+quietly widen the storage contract to admit a graph. Both are worse than saying
+not yet.
+
+### Noted for when it returns
+
+The coordination reading is where the value likely sits — it is the natural answer
+to sybil churn, which D21 records as unresolved. It is also where the privacy cost
+is highest, since relating entities to one another is exactly the profiling D19
+and the non-goals rule out. That tension is the real decision, and it deserves to
+be made deliberately rather than absorbed into a signature.
+
+---
+
 ---
 
 # Part VIII — Project and tooling
@@ -1475,6 +1617,76 @@ to `docs/` later if needed.
 until they have real content and lifecycle. `REPOSITORIES.md` holds the plan
 meanwhile.
 
+## D34 — PoC target: HealthMe
+
+**Decided.**
+
+The proof of concept runs against **HealthMe** (`myhealth`), an existing personal
+health PWA, before any greenfield fixture.
+
+### Why it fits the D30 requirements
+
+D30 asked for stateful, authenticated-and-unauthenticated, security-sensitive
+flows. HealthMe has all three, and did not have them added for this purpose:
+
+| Requirement | In HealthMe |
+|---|---|
+| Stateful | A PIN-gated vault; core logic is not even fetched until unlock succeeds |
+| Auth boundary | Locked and unlocked are genuinely different application states |
+| Security-sensitive | Health data, plus a paid AI endpoint behind the same origin |
+| Real abuse surface | `api/chat.js` already carries hand-rolled defences |
+
+That last row is what makes it the right target rather than merely an available
+one. The existing protections are exactly the pattern SG argues against, written
+before SG existed:
+
+- 3-strike lockout with a 5-minute penalty, stored in `localStorage` — client
+  state an attacker controls, and a hard binary with no notion of how much
+  evidence there was.
+- IP rate limiting at 10 requests/hour in a `Map` that resets whenever the lambda
+  cold-starts, so the limit is porous by accident.
+- Origin allowlisting, which stops cURL and nothing that runs in a browser.
+
+So the comparison is not against a strawman. It is against what a competent
+developer actually ships under time pressure, which is the population SG is for.
+
+### The invariants it supplies for D16
+
+Declarable with confidence, and therefore `hard`:
+
+- Unlock attempted with no prior lock screen render — an impossible segment jump.
+- Vault content requested while the state is locked — an impossible action
+  prerequisite.
+- `api/chat.js` called before any unlock in that session — impossible temporal
+  order.
+- A form field populated with no corresponding interaction — the impossible idle
+  action already named in the design notes.
+
+Scoped narrowly on purpose, per D32: the unlock flow is small enough to enumerate
+completely, which is what a `hard` declaration asserts. Navigation inside the
+unlocked app is not, so it stays `soft` or undeclared.
+
+### What it cannot validate
+
+Stated plainly, because the temptation is to overclaim:
+
+- **Single-user traffic.** It cannot show that thresholds hold across a population,
+  and cannot validate D37 farming against a real adversary. It can show that a
+  legitimate user is never given friction, which is the claim most at risk.
+- **No server component.** Consistent with D20, and it leaves the protocol
+  untested — correctly, since D29 says those repositories do not exist yet.
+- **Thresholds stay provisional.** One application's rhythm is not a calibration
+  set. Every number in D36 remains a guess afterwards, just a less blind one.
+
+### Sequencing
+
+Integration is observational first: run SG alongside the existing lockout, record
+what it would have advised, change no behavior. The existing defences are what SG
+is being compared against, so removing them before there is evidence would destroy
+the comparison and the app's protection at once.
+
+---
+
 ## D30 — PoC must run against a real application flow
 
 **Decided.**
@@ -1487,27 +1699,27 @@ Follows necessarily from D16: invariants are declared from an actual application
 model, so a synthetic fixture would only prove the code runs, not that the
 declared invariants hold against real traffic.
 
-### Still needed
+### Settled
 
-Which application. The requirements are now specific enough to choose one, but no
-target is named yet, and the hard-constraint classes of D13 cannot be validated
-without it.
+The target is HealthMe. See D34 for why it satisfies these requirements, which
+invariants it supplies, and what it explicitly cannot validate.
 
 ---
 
 # Open questions
 
-All numbered questions 1-30 are answered. What remains open was raised *by* those
-answers:
+Every numbered question is answered. What remains is not a question but a
+dependency: the decisions below are recorded, and their *values* are unvalidated
+until the proof of concept meets real traffic.
 
-| Ref | Question | Blocks |
+| Ref | Recorded as | Still unvalidated |
 |---|---|---|
-| D31 | What is `Relationship : E x E -> R` — correlation, shared origin, or a coordination graph? | Nothing — declared out of scope for the PoC, and its signature is withheld from D1 until defined |
-| D34 | **Which real application is the PoC target?** Highest priority — not a closing task | D13 classes, D16 invariants, D30, and validating D37 against real traffic |
-| D35 | Does an anomaly observation with no trust evidence count as a meaningful update for retention? | D6 retention, blocked by D18 |
-| D36 | Which numeric features make up the anomaly feature space, including the diversity signal D37 requires? | Anomaly model, and closing the D37 saturation gap |
+| D36 | Feature space and diversity thresholds | Every threshold is a guess. Leniently set, so being wrong withholds escalation rather than manufacturing a false positive. |
+| D37 | Saturation guard via anomaly concurrence | Cannot be validated against a real adversary from single-user traffic (D34). |
+| D40 | Epistemic stage thresholds | `n >= 3` and `n >= 7` are tied to the D5 trajectory, not to observed populations. |
+| D3, D4 | `H = 24h`, weights `0.5` and `2.0` | Policy defaults. Locked as tests, so a revision is visible rather than silent. |
+| D31 | `Relationship : E x E -> R` | Deferred out of the PoC. The coordination reading is where the value and the privacy cost both sit, and that tension is a decision for later. |
 
-D34 is listed first deliberately. It was originally treated as a closing task,
-but D16 declares invariants from a real application model and D37 can only be
-validated against real traffic, so roughly half of this document cannot be
-confirmed until a target exists.
+The next step is not another decision. It is D34: run the guard alongside
+HealthMe's existing defences, change nothing, and record what it would have
+advised.

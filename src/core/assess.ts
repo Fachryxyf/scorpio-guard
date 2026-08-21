@@ -45,7 +45,7 @@ export function epistemicStage(
  *
  * The bands in D5 are named as pairs ("trusted / observe"), describing a range
  * rather than one rung. Read here as the least interventionist rung of each pair,
- * because a ceiling can only ever lower a decision \u2014 so starting at the gentler
+ * because a ceiling can only ever lower a decision — so starting at the gentler
  * end would make the ceiling unable to express itself.
  */
 const BAND_DECISION: Record<TrustBand, Decision> = {
@@ -67,7 +67,7 @@ const UNCERTAINTY_CEILING: Record<UncertaintyLevel, Decision> = {
  * The most severe treatment each epistemic stage permits on trust alone.
  *
  * An `unknown` entity contributes nothing: with no evidence, the trust dimension
- * has no standing to ask for anything. It does not force `ALLOW` either \u2014 an
+ * has no standing to ask for anything. It does not force `ALLOW` either — an
  * independent anomaly signal or hard-constraint violation still reaches the
  * decision layer on its own authority.
  */
@@ -101,7 +101,7 @@ export type AssessOptions = {
    * enough for low variance to be believed. D37.
    *
    * `undefined` means no anomaly data exists yet, which is the current state of
-   * the project \u2014 not an assertion that behavior is monotonous.
+   * the project — not an assertion that behavior is monotonous.
    */
   readonly anomalyConcurs?: boolean | undefined;
 
@@ -123,9 +123,9 @@ export type AssessOptions = {
  *
  * Three ceilings apply and the lowest binds:
  *
- * - epistemic stage \u2014 has enough evidence arrived to interpret the mean at all
- * - uncertainty \u2014 is the distribution tight enough to act on
- * - anomaly concurrence \u2014 is that tightness earned by varied behavior
+ * - epistemic stage — has enough evidence arrived to interpret the mean at all
+ * - uncertainty — is the distribution tight enough to act on
+ * - anomaly concurrence — is that tightness earned by varied behavior
  *
  * Advisory only; the host decides what to do with the result. D14.
  */
