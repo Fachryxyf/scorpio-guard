@@ -1410,6 +1410,35 @@ mode         async
 Note: still contingent on D31. If `Relationship : E x E -> R` requires a graph,
 key-value is not enough and this decision reopens.
 
+### The contract ships as runnable checks, not as prose
+
+`checkStoreConformance()` in `src/core/conformance.ts`. Eleven assertions any
+implementation must satisfy, framework-free so they run under `node:test`, in a
+browser, or from a bare script.
+
+The reasoning: a store that is subtly wrong produces a guard that is subtly wrong,
+silently, in production. Three of the checks exist because the mistakes are
+plausible rather than hypothetical:
+
+- **Millisecond precision.** A second-resolution timestamp column is an ordinary
+  schema choice and it corrupts both decay (D3) and retention (D6) invisibly.
+- **The observation window.** Persisting only the scalar columns is an easy
+  omission that disables the entire anomaly dimension (D36) with no error.
+- **Opaque keys.** Trimming or lower-casing a key looks harmless and silently
+  merges two distinct entities, which D1 forbids.
+
+Each is covered by a deliberately broken store in `conformance.test.ts`, so the kit
+is shown to catch the failure rather than merely to describe it.
+
+### It caught the reference implementation
+
+`memoryStore()` failed its own contract on first run: it returned the live stored
+object, so a caller could mutate trust state without going through `set`, making
+every write path a lie about what is held. Now frozen on write.
+
+That is the argument for shipping the kit — the reference store had the defect, and
+prose describing the contract would not have found it.
+
 ## D9 — `guard.evaluate({ entity, observation, context })`
 
 **Decided.**

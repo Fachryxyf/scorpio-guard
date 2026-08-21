@@ -29,8 +29,11 @@ export {
 } from './core/trust.ts';
 export type { EntityState } from './core/trust.ts';
 
-export { memoryStore } from './core/store.ts';
-export type { StateStore } from './core/store.ts';
+export { memoryStore, DEFAULT_SWEEP_EVERY } from './core/store.ts';
+export type { MemoryStore, MemoryStoreOptions, StateStore } from './core/store.ts';
+
+export { checkStoreConformance, assertConformant } from './core/conformance.ts';
+export type { ConformanceResult } from './core/conformance.ts';
 
 export { assessTrust, epistemicStage, trustBand, uncertaintyLevel } from './core/assess.ts';
 export type { AssessOptions, TrustAssessment } from './core/assess.ts';

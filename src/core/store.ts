@@ -99,7 +99,11 @@ export function memoryStore(options: MemoryStoreOptions = {}): MemoryStore {
     get: async (entity) => states.get(entity),
 
     set: async (entity, state) => {
-      states.set(entity, state);
+      // Frozen copy, not the caller's object. Handing back a live reference would
+      // let a caller mutate trust state without going through `set`, which makes
+      // every write path a lie about what is stored. Enforced by the conformance
+      // kit, which caught this store failing its own contract.
+      states.set(entity, freeze(state));
       writesSinceSweep += 1;
       if (writesSinceSweep >= sweepEvery) {
         writesSinceSweep = 0;
@@ -116,4 +120,8 @@ export function memoryStore(options: MemoryStoreOptions = {}): MemoryStore {
     size: () => states.size,
     sweep,
   };
+}
+
+function freeze(state: EntityState): EntityState {
+  return Object.freeze({ ...state, window: Object.freeze([...state.window]) });
 }

@@ -141,6 +141,7 @@ npm run build     # emits dist/
 - `behavior.ts` — the anomaly feature space, and the diversity signal it feeds.
 - `constraints.ts`, `transitions.ts` — declared invariants, and what a violation means.
 - `store.ts` — the `StateStore` interface and an in-memory implementation.
+- `conformance.ts` — runnable contract checks for any store you write.
 - `guard.ts` — `createGuard()` and `evaluate()`, composing the above.
 - `policy.ts`, `clock.ts` — tunable values in one place, and an injectable clock.
 
@@ -149,8 +150,22 @@ npm run build     # emits dist/
 `examples/healthme/` — the first integration target (D34), declared invariants and
 an observational harness that records advice without acting on it.
 
-Ninety-eight tests, which double as the record of every numeric and semantic
-property the design depends on.
+One hundred and five tests, which double as the record of every numeric and
+semantic property the design depends on.
+
+Writing your own store? Prove it works before trusting it:
+
+```js
+import { checkStoreConformance, assertConformant } from '@fachryxyf/scorpio-guard';
+
+assertConformant(await checkStoreConformance(() => myRedisStore()));
+```
+
+Eleven checks, no framework. They exist because a store that is subtly wrong
+produces a guard that is subtly wrong, silently — a second-resolution timestamp
+column breaks decay, dropping the observation window disables anomaly detection,
+and trimming a key merges two entities. The kit caught the reference in-memory
+store handing back a mutable object on its first run.
 
 ```js
 import { createGuard, transitionGraph } from '@fachryxyf/scorpio-guard';
