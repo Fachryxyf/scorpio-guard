@@ -137,17 +137,18 @@ npm run build     # emits dist/
 - `assess.ts` — trust and uncertainty bands, and the ceiling that caps escalation.
 - `decision.ts` — the five-rung decision spectrum.
 - `symptoms.ts` — the v1 symptom vocabulary and its boundary check.
+- `constraints.ts`, `transitions.ts` — declared invariants, and what a violation means.
 - `store.ts` — the `StateStore` interface and an in-memory implementation.
 - `policy.ts`, `clock.ts` — tunable values in one place, and an injectable clock.
 
-Thirty tests, which double as the record of every numeric property the design
-depends on.
+Thirty-nine tests, which double as the record of every numeric and semantic
+property the design depends on.
 
 ### What does not exist
 
-Signal collection, the anomaly model and its feature space, hard-constraint
-checking, the prescription client, and the `evaluate()` surface that composes
-them. Nothing has met real traffic yet.
+Signal collection, the anomaly model and its feature space, the prescription
+client, and the `evaluate()` surface that composes the pieces. Nothing has met
+real traffic yet.
 
 ## Roadmap
 

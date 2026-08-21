@@ -18,6 +18,15 @@ export const DEFAULT_WEIGHTS = {
   strong: 2,
 } as const;
 
+/**
+ * Mass contributed by a violated `soft` invariant. D38.
+ *
+ * Strong, not weak: the host deliberately declared that this should not happen.
+ * That it is not provable does not make it faint — weak weight is for signals SG
+ * inferred on its own.
+ */
+export const DEFAULT_SOFT_VIOLATION_WEIGHT = DEFAULT_WEIGHTS.strong;
+
 /** Trust bands over E[p], read as "at least this mean". D5. */
 export const DEFAULT_TRUST_BANDS = [
   { atLeast: 0.8, band: 'trusted' },
@@ -41,10 +50,12 @@ export type Policy = {
   readonly halfLifeHours: number;
   readonly retentionHours: number;
   readonly weights: { readonly weak: number; readonly strong: number };
+  readonly softViolationWeight: number;
 };
 
 export const DEFAULT_POLICY: Policy = {
   halfLifeHours: DEFAULT_HALF_LIFE_HOURS,
   retentionHours: DEFAULT_RETENTION_HOURS,
   weights: DEFAULT_WEIGHTS,
+  softViolationWeight: DEFAULT_SOFT_VIOLATION_WEIGHT,
 };

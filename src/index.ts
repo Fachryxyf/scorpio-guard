@@ -14,6 +14,7 @@ export {
   DEFAULT_WEIGHTS,
   DEFAULT_TRUST_BANDS,
   DEFAULT_UNCERTAINTY_BANDS,
+  DEFAULT_SOFT_VIOLATION_WEIGHT,
 } from './core/policy.ts';
 export type { Policy, TrustBand, UncertaintyLevel } from './core/policy.ts';
 
@@ -33,3 +34,15 @@ export type { StateStore } from './core/store.ts';
 
 export { assessTrust, trustBand, uncertaintyLevel } from './core/assess.ts';
 export type { AssessOptions, TrustAssessment } from './core/assess.ts';
+
+export {
+  CONSTRAINT_CLASSES,
+  checkInvariants,
+  hardViolations,
+  softViolations,
+  softViolationMass,
+} from './core/constraints.ts';
+export type { ConstraintClass, Invariant, Strength, Violation } from './core/constraints.ts';
+
+export { transitionGraph } from './core/transitions.ts';
+export type { Transition } from './core/transitions.ts';

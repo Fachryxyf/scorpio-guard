@@ -16,10 +16,10 @@ the answer given, and what that answer commits the implementation to.
   property is locked as a test in `src/core/trust.test.ts`. Values here are
   policy; the tests are what make a policy change visible.
 
-Status: all thirty original questions are answered, plus D33 and D37 arising from
-review. Five questions remain open. D34 — choosing the proof-of-concept target —
-is the highest priority among them, since several decisions cannot be validated
-without one.
+Status: all thirty original questions are answered, plus D32, D33, D37 and D38
+arising from review. Four questions remain open. D34 — choosing the
+proof-of-concept target — is the highest priority among them, since several
+decisions cannot be validated without one.
 
 Last updated: 2026-08-21
 
@@ -52,6 +52,8 @@ Last updated: 2026-08-21
 - [D14 — "Hard" describes certainty, not severity](#d14--hard-describes-certainty-not-severity)
 - [D15 — Hard constraints stay outside the Beta model](#d15--hard-constraints-stay-outside-the-beta-model)
 - [D16 — Invariants are declared, never learned](#d16--invariants-are-declared-never-learned)
+- [D32 — Declaring `hard` is itself a claim of completeness](#d32--declaring-hard-is-itself-a-claim-of-completeness)
+- [D38 — A violated `soft` invariant is strong negative trust evidence](#d38--a-violated-soft-invariant-is-strong-negative-trust-evidence)
 
 **Part V — Anomaly model**
 
@@ -901,6 +903,10 @@ observed transition `(vi, vj)` is a hard violation when:
 
 A transition that is merely statistically unlikely is not impossible.
 
+> Scoped by D32: the closed-world reading above applies **within a scope the host
+> declared as `hard`**, not to the whole application. Outside any declared scope,
+> an unlisted transition is unknown rather than forbidden.
+
 ### What this commits the code to
 
 - The host declares an application model — at minimum a transition graph `G`
@@ -911,11 +917,139 @@ A transition that is merely statistically unlikely is not impossible.
 - An incomplete declaration produces false positives — a legitimate edge the host
   forgot to declare reads as provably impossible. So the declaration is safety
   critical, and the API must make partial declarations obviously partial rather
-  than silently treating unlisted edges as forbidden. A strict and a permissive
-  mode is the likely shape; not yet decided.
+  than silently treating unlisted edges as forbidden. Settled in D32.
 - Constraint classes need a shared result type carrying which class fired, which
   invariant, and what was observed — required for D23-style explainability, since
   a violation claim must be inspectable to be trustworthy.
+
+---
+
+## D32 — Declaring `hard` is itself a claim of completeness
+
+**Decided.**
+
+SG distinguishes declared invariants from inferred behavior.
+
+- Only explicitly declared constraints may produce HARD violations.
+- An incomplete declaration does **not** imply that undeclared transitions are
+  impossible.
+- Inferred or statistically unusual behavior is soft evidence or anomaly, never a
+  hard constraint.
+
+Epistemic strength is declared by the host, per constraint:
+
+```
+hard  ->  deterministic violation
+soft  ->  probabilistic / anomalous evidence
+```
+
+### The contradiction this had to resolve
+
+Read literally, the second bullet cancels D16. D16 states that `(vi, vj) not in T`
+is a hard violation, which is a closed-world reading: unlisted means forbidden.
+"Incomplete declarations do not imply undeclared transitions are impossible" is an
+open-world reading. Taken together with no further qualification, D16's formula
+would have no domain in which it applies at all.
+
+### Resolution: `hard` declares a complete scope
+
+Declaring a constraint `hard` is not only a claim that violations are
+deterministic. It is also a claim of **completeness over the scope declared**:
+
+> Within this scope I have declared every legitimate case, so anything else inside
+> it is provably wrong.
+
+Both readings then hold without conflict:
+
+| Where | Reading | Consequence |
+|---|---|---|
+| Inside a scope declared `hard` | Closed world | `(vi, vj) not in T` is a hard violation. D16 stands. |
+| Outside every declared scope | Open world | Unknown, not forbidden. Falls to the probabilistic path. |
+
+This is written out because it is the load-bearing part and was otherwise
+implicit.
+
+### Why this is a better answer than a strict/permissive mode
+
+The earlier recommendation was a global permissive default with strict as opt-in.
+Per-constraint strength is stronger: a completeness claim is scoped to exactly the
+region the host actually understands, instead of being a single switch over the
+whole application. A host can be certain about payment-step ordering and
+uncertain about navigation, and say so.
+
+It also makes the claim of completeness something the host asserts **knowingly**.
+D16 already recorded that the declaration is safety critical; this makes the
+assertion visible. A false positive from a `hard` declaration with a missing edge
+is then plainly the host's error, in a place the host explicitly signed for — not
+a mystery surfacing from SG's defaults.
+
+### Generalisation beyond the transition graph
+
+Strength is per constraint, not per model, so all five classes in D13 are declared
+with a strength rather than only the transition graph. `soft` gives a host that is
+unsure of completeness a way to contribute a real invariant without claiming
+certainty — they are not forced to choose between silence and overreach.
+
+### As implemented
+
+`src/core/constraints.ts` and `src/core/transitions.ts`.
+
+`checkInvariants(observation, scope, invariants)` consults only invariants
+declared for that scope and returns `{ declared, violations }`. The `declared`
+flag is what distinguishes *nothing was wrong* from *nobody claimed anything
+here* — collapsing those two would erase the open-world reading.
+
+`transitionGraph()` requires `strength` explicitly rather than defaulting to
+`hard`, so a completeness claim cannot be made by omission.
+
+An invariant returns `holds: true` for observations it does not describe, so a
+transition rule stays silent about, say, an idle-action observation instead of
+failing it.
+
+---
+
+## D38 — A violated `soft` invariant is strong negative trust evidence
+
+**Decided, extending D32.**
+
+D32 introduced `soft` constraints without stating what a violation does to the
+model. Two questions had to be answered together.
+
+**Which weight?** `strong negative`, so mass `2.0` under D4.
+
+A declared-but-soft invariant is not the same as an ordinary weak signal. The host
+stated deliberately that this should not happen; that it is not *provable* does
+not make it *faint*. Weak weight is for signals SG inferred on its own; a human
+declaration carries more than that. The difference is four-fold, so it is recorded
+rather than left to a call site.
+
+**Which dimension?** `Trust`, as negative evidence — not `Anomaly`.
+
+In `pi(Trust, Anomaly, HardConstraints, Context)`, the `Anomaly` dimension is
+learned from observed behavior. A soft invariant is declared, so routing it
+through `Anomaly` would mix a stated expectation into a measured baseline, and
+would also let it participate in the D37 diversity check, which it has no business
+influencing.
+
+```
+hard violation  ->  HardConstraints dimension, no trust mass          (D15)
+soft violation  ->  Trust dimension, strong negative mass             (D38)
+learned rarity  ->  Anomaly dimension                                 (D18)
+```
+
+### Consequences
+
+- Unlike a hard violation, a soft violation **does** decay under D3. That is
+  correct: it is evidence, and D3 exists so that evidence stops being a permanent
+  sentence.
+- It counts as a meaningful update for retention under D6, since it moves `b`.
+- The weight is policy, configurable like every other weight in D4.
+
+### As implemented
+
+`softViolationMass(violations, weight?)` in `src/core/constraints.ts`, defaulting
+to `DEFAULT_SOFT_VIOLATION_WEIGHT` in `policy.ts`. Hard violations contribute
+zero mass by construction, which is asserted directly in `constraints.test.ts`.
 
 ---
 
@@ -1193,14 +1327,9 @@ answers:
 | Ref | Question | Blocks |
 |---|---|---|
 | D31 | What is `Relationship : E x E -> R` — correlation, shared origin, or a coordination graph? | Nothing — declared out of scope for the PoC, and its signature is withheld from D1 until defined |
-| D32 | With a partially declared flow, are undeclared edges forbidden (strict) or unknown and passed to the probabilistic path (permissive)? Which is the default? | Hard-constraint API |
 | D34 | **Which real application is the PoC target?** Highest priority — not a closing task | D13 classes, D16 invariants, D30, and validating D37 against real traffic |
 | D35 | Does an anomaly observation with no trust evidence count as a meaningful update for retention? | D6 retention, blocked by D18 |
 | D36 | Which numeric features make up the anomaly feature space, including the diversity signal D37 requires? | Anomaly model, and closing the D37 saturation gap |
-
-Recommendation on D32: permissive by default, strict as opt-in. A wrong default
-here manufactures false positives, and false positives are the stated central
-constraint.
 
 D34 is listed first deliberately. It was originally treated as a closing task,
 but D16 declares invariants from a real application model and D37 can only be
