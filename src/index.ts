@@ -92,7 +92,12 @@ export type {
   ObservationTrace,
 } from './core/behavior.ts';
 
-export { farmingSuspected, observationRate, DEFAULT_VELOCITY } from './core/behavior.ts';
+export {
+  farmingSuspected,
+  observationRate,
+  positiveCredit,
+  DEFAULT_VELOCITY,
+} from './core/behavior.ts';
 export type { VelocityThresholds } from './core/behavior.ts';
 
 export {

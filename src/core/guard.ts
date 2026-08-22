@@ -7,6 +7,7 @@ import {
   behaviorFeatures,
   diversityConcurs,
   farmingSuspected,
+  positiveCredit,
   pushObservation,
   type BehaviorFeatures,
   type DiversityThresholds,
@@ -120,8 +121,17 @@ export type GuardOptions = {
   readonly diversity?: DiversityThresholds;
   /** Observations retained per entity for behavioral features. D36. */
   readonly windowSize?: number;
-  /** Thresholds for the farming check. D50, D54. */
+  /** Thresholds for the farming check, and for the D55 positive discount. */
   readonly velocity?: VelocityThresholds;
+  /**
+   * Discount positive evidence earned with machine-regular gaps. D55.
+   *
+   * On by default: it is what closes the patient farmer, and it cannot advise worse
+   * than `OBSERVE` for a client that only earns positives. Turn it off for a
+   * deployment whose legitimate traffic is predominantly automated and whose
+   * operators would rather it accrue trust at full rate.
+   */
+  readonly discountRegularPositives?: boolean;
   /**
    * Use the anomaly classifier (D18) for the D37 concurrence instead of the three
    * threshold comparisons in `diversityConcurs`.
@@ -162,6 +172,7 @@ export function createGuard(options: GuardOptions = {}) {
   const diversityThresholds = options.diversity ?? DEFAULT_DIVERSITY;
   const velocityThresholds = options.velocity ?? DEFAULT_VELOCITY;
   const anomalyOptions = options.anomaly ?? {};
+  const discountPositives = options.discountRegularPositives ?? true;
   const windowSize = options.windowSize ?? DEFAULT_WINDOW_SIZE;
 
   /** Load state, treating absent and expired alike. D6. */
@@ -222,11 +233,30 @@ export function createGuard(options: GuardOptions = {}) {
         );
       }
 
-      const withEvidence = applyEvidence(state, { positive, negative }, now, policy.halfLifeHours);
-      const updated: EntityState = {
-        ...withEvidence,
-        window: pushObservation(state.window, { at: now, scope: scope ?? 'unscoped' }, windowSize),
-      };
+      // The window including this observation, needed before evidence is applied:
+      // D55 prices a positive by the shape of the gaps it arrived in.
+      const window = pushObservation(
+        state.window,
+        { at: now, scope: scope ?? 'unscoped' },
+        windowSize,
+      );
+
+      const credit = discountPositives ? positiveCredit(window, velocityThresholds) : 1;
+      const creditedPositive = positive * credit;
+
+      if (positive > 0 && credit < 1) {
+        trace.push(
+          `positive evidence discounted to ${(credit * 100).toFixed(0)}%: gaps are machine-regular (D55). Negative evidence is never discounted.`,
+        );
+      }
+
+      const withEvidence = applyEvidence(
+        state,
+        { positive: creditedPositive, negative },
+        now,
+        policy.halfLifeHours,
+      );
+      const updated: EntityState = { ...withEvidence, window };
       await store.set(input.entity, updated);
 
       // The anomaly dimension: features over this entity's own recent behavior.
@@ -254,17 +284,15 @@ export function createGuard(options: GuardOptions = {}) {
         );
       }
 
-      // D50, corrected by D54: farming is a high rate *and* a monotonous shape.
-      // Unlike diversity — which only gates believing low variance — this can raise
-      // the decision for a high-mean entity, which is what D49 said was required.
-      // Rate alone is not enough: humans are capable of being fast.
+      // Reported, not acted on. D55 supersedes the D54 floor: pricing the evidence at
+      // intake reaches the farmer without a floor that also lands on legitimate
+      // automation. This stays because "was this entity farming" is worth being able
+      // to read in the trace and in a host's own metrics.
       const farming = farmingSuspected(updated.window, velocityThresholds);
       if (farming === true) {
         trace.push(
-          `farming suspected: rate above ${velocityThresholds.maxObsPerHour}/hr with gaps too regular (CV ${behavior.interArrivalCv.toFixed(2)}) — a fast human is not enough (D54)`,
+          `farming shape observed: rate above ${velocityThresholds.maxObsPerHour}/hr with gaps too regular (CV ${behavior.interArrivalCv.toFixed(2)}). Priced at intake rather than escalated — see D55.`,
         );
-      } else if (farming === undefined) {
-        trace.push('farming undetermined: too few observations to measure a rate');
       }
 
       const trust = assessTrust(
@@ -296,16 +324,6 @@ export function createGuard(options: GuardOptions = {}) {
           );
         } else {
           trace.push(`hard violation recorded; trust already advises ${decision}`);
-        }
-      }
-
-      // The farming floor, applied after trust. A proven violation already decided,
-      // and farming is measurement rather than proof, so it does not compete with one.
-      if (farming === true && hard.length === 0) {
-        const farmingCeiling: Decision = 'INCREASE_FRICTION';
-        if (severity(decision) < severity(farmingCeiling)) {
-          decision = farmingCeiling;
-          trace.push(`farming ceiling raises decision to ${farmingCeiling}`);
         }
       }
 

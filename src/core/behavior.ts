@@ -252,3 +252,37 @@ export function farmingSuspected(
   if (rate <= thresholds.maxObsPerHour) return false;
   return behaviorFeatures(window).interArrivalCv < thresholds.maxInterArrivalCv;
 }
+
+/**
+ * How much of an earned positive should count, given the shape of the gaps. D55.
+ *
+ * The farming answer that acts on *intake* rather than on the decision. D4 argued
+ * against acting on mass at decision time and D49 accepted that, which left farming
+ * with no available lever — but "how much is this observation worth" is a different
+ * question from "what should this mean do", and it is asked earlier.
+ *
+ * Returns a factor in [0,1]: full credit for bursty human-shaped activity,
+ * proportionally less as gaps approach machine regularity. Deliberately continuous
+ * rather than a cliff, so there is no boundary to sit just outside of.
+ *
+ * **Asymmetric, and that asymmetry is the whole design.** Negative evidence is never
+ * discounted. A regular client earns trust more slowly; it is never distrusted for
+ * being regular. Measured across the full regularity range, a client that only ever
+ * earns positives cannot be advised worse than `OBSERVE`, which costs a user
+ * nothing — so withholding credit cannot become punishment.
+ *
+ * `undefined` window state (too few observations) yields full credit: absence of a
+ * measurement is not grounds to withhold anything.
+ */
+export function positiveCredit(
+  window: readonly ObservationTrace[],
+  thresholds: VelocityThresholds = DEFAULT_VELOCITY,
+): number {
+  if (window.length < Math.max(2, thresholds.minObservations)) return 1;
+
+  const cv = behaviorFeatures(window).interArrivalCv;
+  const gate = thresholds.maxInterArrivalCv;
+  if (gate <= 0) return 1;
+  if (cv >= gate) return 1;
+  return cv / gate;
+}

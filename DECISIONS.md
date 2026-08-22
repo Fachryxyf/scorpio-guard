@@ -17,7 +17,7 @@ the answer given, and what that answer commits the implementation to.
   policy; the tests are what make a policy change visible.
 
 Status: every numbered question is answered — the original thirty, plus D31 to
-D54 arising from review, implementation, and a live pentest. Nothing is blocked on
+D55 arising from review, implementation, and a live pentest. Nothing is blocked on
 a decision. What remains is validation: the values recorded here have not met real
 traffic yet, and D47 names where they will.
 
@@ -106,6 +106,7 @@ Last updated: 2026-08-22
 - [D52 — The anomaly classifier is a distance-to-reference model, not a trained one](#d52--the-anomaly-classifier-is-a-distance-to-reference-model-not-a-trained-one)
 - [D53 — Wire format is v0.1, documented and tested, still untransmitting](#d53--wire-format-is-v01-documented-and-tested-still-untransmitting)
 - [D54 — Rate is not the farming signal; the shape of the gaps is](#d54--rate-is-not-the-farming-signal-the-shape-of-the-gaps-is)
+- [D55 — Farming is answered at intake, by pricing the evidence](#d55--farming-is-answered-at-intake-by-pricing-the-evidence)
 
 **[Open questions](#open-questions)**
 
@@ -2581,9 +2582,9 @@ unauthenticated public surface, still blocked on whether it gains a server side.
 |---|---|---|
 | D45 | Generated persona traffic | The distributions are invented. Every persona is a hypothesis about how someone behaves, and an attacker who reads the file can shape traffic around it. |
 | D46 | Two thresholds corrected | Corrected in the right direction, not calibrated to a value. `OBSERVE` at `developing` is defensible; that `3` and `7` are the right boundaries is still a guess. |
-| D37, D49, D50, D54 | Saturation / farming | **Narrowed, not closed.** A floor that raises rather than lowers is what D49 required, and the impatient farmer now pays on the first abuse call. The patient one still pays on the eighteenth, or not at all. |
+| D37, D49, D55 | Saturation / farming | **Closed in generated traffic.** Pricing positives by gap shape at intake reaches every farmer tested at one abuse call, and tops legitimate automation out at `OBSERVE`. Not calibrated against a real population. |
 | D47 | IXFE as the target | Its invariants are read from its code, which is honest, and its *traffic* is still generated. IXFE has real users and real logs; using those is the next step, not something claimed here. |
-| D50, D54 | The farming floor | Falsified twice before it held: rate alone escalated a busy operator, and rate-plus-anomaly escalated a power user reading one screen. Now rate **and** gap regularity. Both numbers are guesses, and it only bites while the rate stays high. |
+| D55 | The intake discount | `maxInterArrivalCv = 0.25` is inherited from D36, not measured. The mechanism is sound in generated traffic; whether real automation clusters below that value is unknown. |
 | D54 | The patient farmer | Untouched, by construction. One request every ten minutes reaches `mass 81`, `mean 0.988` and trips nothing. Farming fast then abusing slowly also lifts the floor — 18 abuse calls instead of 1. D49 is narrowed, not closed. |
 | D51 | Ten collectors, no thresholds | Each collector measures the right thing; not one has met a real false positive. The catalogue's promise that every signal has a written innocent cause is kept on paper, not in evidence. |
 | D52 | The anomaly reference profile | Four expected values and four weights, all chosen by judgement. Deliberately not trained, because the only traffic available is invented (D45) — so the classifier is honest about its ignorance rather than free of it. |
@@ -2709,6 +2710,9 @@ Still nothing transmits. D17 and D20 stand.
 
 ## D54 — Rate is not the farming signal; the shape of the gaps is
 
+> **The floor described here was removed by D55.** The finding survives — gap
+> regularity is the discriminator, not rate — and D55 applies it at intake instead.
+
 **Decided, from traffic that falsified D50 twice in a row.** Recorded in full
 because the two wrong answers are more instructive than the right one.
 
@@ -2787,3 +2791,91 @@ two holes are open by construction:
 So D49 is *narrowed*, not closed: the impatient farmer now pays immediately, the
 patient one still does not. Both numbers are from generated traffic (D45) and
 neither is calibrated.
+
+---
+
+## D55 — Farming is answered at intake, by pricing the evidence
+
+**Decided, superseding the D54 floor.** D50 and D54 both tried to answer farming at
+the *decision*, and both left the same hole: a floor low enough to reach the farmer
+also lands on legitimate automation.
+
+### What the floor could not do
+
+D54's floor caught the impatient farmer and nothing else. Measured:
+
+```
+farm 120/hr, abuse 120/hr  ->  1 abuse call before it costs something
+farm   6/hr, abuse 120/hr  -> 10 abuse calls        (below the rate gate)
+farm 120/hr, abuse  40/hr  -> 18 abuse calls        (window rolls, floor lifts)
+```
+
+And it punished the innocent case it was warned about. A polling widget, a
+monitoring probe and an integration suite — all positive-only, all regular by
+definition — reached `INCREASE_FRICTION`, which is the first rung a client actually
+feels. `SIG_UNIFORM_DELAY_SHAPE` already names "a polling widget on a fixed
+interval" as its innocent cause; the floor ignored it.
+
+### The lever nobody had pulled
+
+D4 argued against acting on mass at decision time, and D49 accepted that, which
+appeared to leave farming with nowhere to go. But *"how much is this observation
+worth"* is a different question from *"what should this mean do"*, and it is asked
+earlier. Nothing had been decided about intake.
+
+So: a positive is priced by the shape of the gaps it arrived in.
+
+```
+credit(cv) = 1                    when cv >= maxInterArrivalCv   (bursty: full)
+           = cv / maxInterArrivalCv  otherwise                   (regular: partial)
+```
+
+Continuous rather than a cliff, so there is no boundary to tune to sit just outside
+of. Reuses the D36 threshold rather than inventing a second one.
+
+**Asymmetric, and the asymmetry is the whole design: negative evidence is never
+discounted.** A regular client earns trust more slowly; it is never distrusted for
+being regular.
+
+### Measured
+
+Farming 200 positives, then abusing:
+
+| farm gap | mass before | mass after | mean before | mean after | abuse calls |
+|---|---|---|---|---|---|
+| fixed 30 s | 99.6 | 5.3 | 0.990 | 0.813 | 12 → 1 |
+| fixed 10 min | 66.4 | 3.4 | 0.985 | 0.703 | 8 → 1 |
+| fixed 30 min | 34.9 | 2.2 | 0.971 | 0.547 | 4 → 1 |
+
+The patient farmer is closed: rate no longer matters, because regularity is what is
+priced and a slow farmer is just as regular as a fast one. One abuse call now costs
+something at every gap length tested.
+
+And the innocent case is intact — every positive-only automated client tops out at
+`OBSERVE`, which costs nothing:
+
+```
+polling widget 60 s   mean 0.807   worst advice OBSERVE
+monitoring probe 30 s mean 0.813   worst advice OBSERVE
+integration suite 2 s mean 0.818   worst advice OBSERVE
+cron 15 min           mean 0.649   worst advice OBSERVE
+```
+
+Honest bursty humans are untouched at `mean 0.989`–`0.990`, because their credit is
+never withheld in the first place.
+
+### Consequences
+
+- **The D54 floor is removed.** `farmingSuspected` remains and is still reported,
+  because "did this entity show the farming shape" is worth reading in a trace, but
+  it no longer moves a decision.
+- On by default, with `discountRegularPositives: false` for a deployment whose
+  legitimate traffic is predominantly automated.
+- The credit drainer is *not* caught by this — it earns almost no positives, so
+  there is nothing to price down, and its weak signals do the work. Pinned as a test,
+  because it is the case where D55 is not the mechanism.
+- D49 is closed. Farming is answered on mass, as D49 required, by acting on the mass
+  as it arrives rather than on the decision it produces.
+
+Still uncalibrated: `maxInterArrivalCv = 0.25` is inherited from D36 and every
+number above comes from generated traffic (D45).

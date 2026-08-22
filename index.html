@@ -548,9 +548,9 @@
           <tr><th data-lang="en">Licence</th><th data-lang="id">Lisensi</th>
               <td>MIT</td></tr>
           <tr><th data-lang="en">Tests</th><th data-lang="id">Test</th>
-              <td>201</td></tr>
+              <td>209</td></tr>
           <tr><th data-lang="en">Decisions</th><th data-lang="id">Keputusan</th>
-              <td><a href="#decisions">57</a></td></tr>
+              <td><a href="#decisions">58</a></td></tr>
           <tr><th data-lang="en">Network</th><th data-lang="id">Jaringan</th>
               <td data-lang="en">none, by design</td><td data-lang="id">tidak ada, by design</td></tr>
           <tr><th data-lang="en">Calibrated</th><th data-lang="id">Terkalibrasi</th>
@@ -698,7 +698,7 @@
         <h3 data-lang="id">Rujukan</h3>
         <ol>
           <li><a href="#glossary" data-lang="en">Glossary</a><a href="#glossary" data-lang="id">Glosarium</a><span data-lang="en">seventeen terms used in a narrow sense</span><span data-lang="id">tujuh belas istilah dalam arti sempit</span></li>
-          <li><a href="#decisions" data-lang="en">Decision index</a><a href="#decisions" data-lang="id">Indeks keputusan</a><span data-lang="en">all 57, and the file each became</span><span data-lang="id">semua 57, dan file tempatnya menjelma</span></li>
+          <li><a href="#decisions" data-lang="en">Decision index</a><a href="#decisions" data-lang="id">Indeks keputusan</a><span data-lang="en">all 58, and the file each became</span><span data-lang="id">semua 58, dan file tempatnya menjelma</span></li>
           <li><a href="#context" data-lang="en">Context</a><a href="#context" data-lang="id">Konteks</a><span data-lang="en">the same trust, read differently per endpoint</span><span data-lang="id">trust yang sama, dibaca beda per endpoint</span></li>
           <li><a href="#principles" data-lang="en">Principles</a><a href="#principles" data-lang="id">Prinsip</a><span data-lang="en">what the guard actually claims</span><span data-lang="id">apa yang sebenarnya diklaim guard</span></li>
           <li><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/CONTRIBUTING.md" data-lang="en">Contributing</a><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/CONTRIBUTING.md" data-lang="id">Berkontribusi</a><span data-lang="en">what helps most, and the house rules</span><span data-lang="id">yang paling membantu, dan aturan rumahnya</span></li>
@@ -1746,8 +1746,8 @@ const guard = createGuard({ store: sqliteStore({ path: './trust.db' }) });</pre>
     <p class="num"><span data-lang="en">The library</span><span data-lang="id">Library-nya</span></p>
     <h2 data-lang="en">What is actually built</h2>
     <h2 data-lang="id">Apa yang benar-benar sudah dibangun</h2>
-    <p data-lang="en">The model exists as TypeScript with no platform dependencies: Beta-Bernoulli trust, half-life decay over real elapsed time, retention, the decision bands with their ceilings, declared invariants, and the anomaly feature space. Two hundred and one tests, most of which exist to pin a number the design argues for.</p>
-    <p data-lang="id">Modelnya sudah ada sebagai TypeScript tanpa ketergantungan platform: trust Beta-Bernoulli, decay half-life atas waktu nyata, retensi, band keputusan beserta batasnya, invariant terdeklarasi, dan ruang fitur anomali. Dua ratus satu test, sebagian besar ada untuk memaku angka yang didebatkan desain ini.</p>
+    <p data-lang="en">The model exists as TypeScript with no platform dependencies: Beta-Bernoulli trust, half-life decay over real elapsed time, retention, the decision bands with their ceilings, declared invariants, and the anomaly feature space. Two hundred and nine tests, most of which exist to pin a number the design argues for.</p>
+    <p data-lang="id">Modelnya sudah ada sebagai TypeScript tanpa ketergantungan platform: trust Beta-Bernoulli, decay half-life atas waktu nyata, retensi, band keputusan beserta batasnya, invariant terdeklarasi, dan ruang fitur anomali. Dua ratus sembilan test, sebagian besar ada untuk memaku angka yang didebatkan desain ini.</p>
     <pre>const guard = createGuard({ invariants: [checkoutOrder] });
 
 const result = await guard.evaluate({
@@ -2036,7 +2036,7 @@ pending-freeloader     adversary  RESTRICT           @1/15     established  as i
         </tr>
         <tr>
           <td data-lang="en">Core model in TypeScript</td><td data-lang="id">Model core dalam TypeScript</td>
-          <td data-lang="en">Built and tested — 201 tests, live traffic against IXFE has falsified four claims and corrected two thresholds</td><td data-lang="id">Sudah dibangun dan diuji — 201 test, trafik langsung terhadap IXFE memfalsifikasi empat klaim dan mengoreksi dua ambang</td>
+          <td data-lang="en">Built and tested — 209 tests, live traffic against IXFE has falsified four claims and corrected two thresholds</td><td data-lang="id">Sudah dibangun dan diuji — 209 test, trafik langsung terhadap IXFE memfalsifikasi empat klaim dan mengoreksi dua ambang</td>
         </tr>
         <tr>
           <td data-lang="en">State store and its conformance kit</td><td data-lang="id">State store dan kit conformance-nya</td>
@@ -2052,7 +2052,7 @@ pending-freeloader     adversary  RESTRICT           @1/15     established  as i
         </tr>
         <tr>
           <td data-lang="en">Farming resistance</td><td data-lang="id">Ketahanan terhadap farming</td>
-          <td data-lang="en"><strong>Narrowed, not closed</strong> — the impatient farmer pays on the first abuse call, the patient one still does not (D54)</td><td data-lang="id"><strong>Dipersempit, belum tertutup</strong> — farmer yang tak sabar membayar di panggilan penyalahgunaan pertama, yang sabar masih belum (D54)</td>
+          <td data-lang="en">Closed in generated traffic — positives priced by gap shape at intake; every farmer tested pays on the first abuse call (D55)</td><td data-lang="id">Tertutup di trafik buatan — evidence positif dihargai menurut bentuk jeda saat masuk; tiap farmer yang diuji membayar di panggilan penyalahgunaan pertama (D55)</td>
         </tr>
         <tr>
           <td data-lang="en">Proof of concept</td><td data-lang="id">Proof of concept</td>
@@ -2080,7 +2080,7 @@ pending-freeloader     adversary  RESTRICT           @1/15     established  as i
     <p class="muted" data-lang="id">Selesai: model core, kontrak store beserta implementasi tahan restart, satu integrasi observasional pada alur nyata, tiga tugas pendaftaran, trafik persona buatan, pentest langsung terhadap IXFE dengan observasi sisi server bersamaan, dan empat klaim difalsifikasi. Setelah itu: farming dijawab lewat ceiling velocity (D50), collector untuk tiap sinyal di katalog (D51), classifier anomali dibangun sebagai jarak ke rujukan alih-alih hasil training (D52), dan format wire v0.1 dengan aturan degradasinya teruji (D53). Yang tersisa — dan semuanya butuh trafik nyata:</p>
     <ol class="road" data-lang="en">
       <li>Use IXFE&#8217;s real logs, which exist. Generated traffic falsifies; only real traffic calibrates, and this is the shortest path to a real population.</li>
-      <li>Close the patient farmer, and calibrate the floor. <code>60/hr</code> with regular gaps catches the impatient one; below that rate nothing bites, and farming fast then abusing slowly lifts the floor (D54).</li>
+      <li>Calibrate the intake discount. <code>maxInterArrivalCv = 0.25</code> is inherited from D36, not measured — whether real automation clusters below it decides how much trust a legitimate machine client is denied (D55).</li>
       <li>Calibrate the anomaly reference profile, and decide from measurement whether the classifier or the threshold conjunction should drive the D37 concurrence.</li>
       <li>Give each collector its false-positive story from real traffic before any of them earns a production threshold.</li>
       <li>Move the wire format to its own repository and build a server that speaks it. Nothing transmits until then.</li>
@@ -2088,7 +2088,7 @@ pending-freeloader     adversary  RESTRICT           @1/15     established  as i
     </ol>
     <ol class="road" data-lang="id">
       <li>Pakai log nyata IXFE, yang sudah ada. Trafik buatan memfalsifikasi; hanya trafik nyata yang mengkalibrasi, dan ini jalan terpendek ke populasi nyata.</li>
-      <li>Tutup farmer yang sabar, dan kalibrasi floor-nya. <code>60/jam</code> dengan jeda teratur menangkap yang tak sabar; di bawah rate itu tak ada yang menggigit, dan farming cepat lalu menyalahgunakan lambat mengangkat floor-nya (D54).</li>
+      <li>Kalibrasi diskon intake-nya. <code>maxInterArrivalCv = 0.25</code> diwarisi dari D36, bukan diukur — apakah automation nyata berkumpul di bawahnya menentukan seberapa banyak trust yang ditolak dari klien mesin yang sah (D55).</li>
       <li>Kalibrasi profil rujukan anomali, dan putuskan dari pengukuran apakah classifier atau konjungsi ambang yang sebaiknya menggerakkan concurrence D37.</li>
       <li>Beri tiap collector cerita false-positive-nya dari trafik nyata sebelum ada yang layak dapat ambang produksi.</li>
       <li>Pindahkan format wire ke repositorinya sendiri dan bangun server yang bicara dengannya. Sampai itu, tidak ada yang dikirim.</li>
@@ -2357,6 +2357,9 @@ The prescription travels; the patient does not.</pre>
         <tr><td><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md#d53--wire-format-is-v01-documented-and-tested-still-untransmitting">D53</a></td>
           <td data-lang="en">The v0.1 wire format is documented and tested, and still transmits nothing</td><td data-lang="id">Format wire v0.1 sudah didokumentasikan dan diuji, dan tetap tidak mengirim apa pun</td>
           <td><code>PROTOCOL.md</code>, <code>protocol.ts</code></td></tr>
+        <tr><td><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md#d55--farming-is-answered-at-intake-by-pricing-the-evidence">D55</a></td>
+          <td data-lang="en">Farming is answered at intake: a positive is priced by the shape of the gaps it arrived in, and negatives never are</td><td data-lang="id">Farming dijawab saat masuk: evidence positif dihargai menurut bentuk jeda kedatangannya, dan yang negatif tidak pernah</td>
+          <td><code>behavior.ts</code>, <code>guard.ts</code></td></tr>
         <tr><td><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md#d54--rate-is-not-the-farming-signal-the-shape-of-the-gaps-is">D54</a></td>
           <td data-lang="en">Rate is not the farming signal — falsified twice before gap regularity held</td><td data-lang="id">Rate bukan sinyal farming — difalsifikasi dua kali sebelum keregularan jeda bertahan</td>
           <td><code>behavior.ts</code></td></tr>

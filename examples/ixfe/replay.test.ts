@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 
 import { PROOF_SOURCES, PROOF_SOURCE_OF } from '../../src/core/constraints.ts';
 import { replayAll, replayPersona } from '../harness/replay.ts';
-import { ixfeInvariants } from './invariants.ts';
+import { WORK_SCOPE, ixfeInvariants } from './invariants.ts';
 import {
   IXFE_ADVERSARIES,
   IXFE_LEGITIMATE,
@@ -129,13 +129,51 @@ test('D54: no legitimate IXFE persona trips the farming floor', async () => {
   assert.deepEqual(tripped, [], 'speed is not the signal; regular gaps are');
 });
 
-test('D54: the credit drainer trips it, because a fixed sleep is what it is', async () => {
-  // Machine-paced with jitter, one action repeated: the farming shape exactly.
+test('D54: the credit drainer shows the farming shape, and is caught anyway', async () => {
+  // Machine-paced with jitter, one action repeated. The shape is reported, but the
+  // intake discount is not what catches this one: the drainer earns almost no
+  // positive evidence, so there is nothing to price down. Its weak signals do the
+  // work. Worth pinning, because it is the case where D55 is *not* the mechanism.
   const result = await replayPersona(creditDrainer(40), withInvariants);
 
-  assert.equal(result.farmingSeen, true);
+  assert.equal(result.farmingSeen, true, 'the shape is observed');
   assert.ok(
-    result.records.some((record) => record.trace.some((line) => line.includes('farming suspected'))),
-    'the trace has to say why',
+    result.records.every((record) => !record.hardViolated),
+    'nothing here is provable, or it tests nothing',
   );
+  assert.equal(result.walkedThrough, false, 'and it is still escalated');
+});
+
+test('D55: a farmer that earns real positives has them priced down', async () => {
+  // The case D55 exists for: an authorised account building a large positive mass at
+  // machine pace, so that later abuse is absorbed. IXFE's working-customer flow, run
+  // at a fixed interval instead of a human one.
+  const farmer = {
+    id: 'trust-farmer',
+    legitimate: false,
+    what: 'authorised account accruing positive evidence at machine pace before abusing it',
+    steps: Array.from({ length: 60 }, () => ({
+      afterMs: 30_000,
+      event: 'discover run',
+      scope: WORK_SCOPE,
+      data: {
+        action: 'discover',
+        balance: 500,
+        cost: 1,
+        subscription: 'active' as const,
+        authenticated: true,
+      },
+      hostDid: 'allowed' as const,
+      evidence: { positive: 'weak' as const },
+    })),
+  };
+
+  const result = await replayPersona(farmer, withInvariants);
+  const last = result.records.at(-1)!;
+
+  assert.ok(
+    result.records.some((record) => record.trace.some((line) => line.includes('discounted'))),
+    'machine-regular positives are priced down',
+  );
+  assert.ok(last.mass < 10, `mass stayed at ${last.mass.toFixed(1)} instead of accumulating freely`);
 });

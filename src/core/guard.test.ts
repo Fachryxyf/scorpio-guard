@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import type { Clock } from './clock.ts';
+import { severity, type Decision } from './decision.ts';
 import { createGuard } from './guard.ts';
 import { DEFAULT_RETENTION_HOURS, DEFAULT_WEIGHTS } from './policy.ts';
 import { memoryStore } from './store.ts';
@@ -411,30 +412,105 @@ test('D41: per-class advice applies, and the strongest violated class wins', asy
   assert.equal(forged.decision, 'BLOCK', 'the declared per-class advice applies');
 });
 
-test('D50: farming raises the decision where D37\'s ceiling could not', async () => {
+test('D55: the farmer is reached by pricing intake, not by a floor', async () => {
   const clock = fakeClock();
   const guard = createGuard({ clock, windowSize: 20 });
 
-  // One scope, fixed 30s interval, all positive: the farming shape. The mean ends
-  // high, which under D49 meant nothing could touch it.
-  for (let i = 0; i < 20; i += 1) {
+  // One scope, fixed 30s interval, all positive: the farming shape. Under D49 this
+  // reached mean 0.99 and nothing could touch it.
+  for (let i = 0; i < 200; i += 1) {
     clock.advance(1 / 120);
     await guard.evaluate({
       entity: 'farmer',
-      observation: { scope: 'work', evidence: { positive: 'strong' } },
+      observation: { scope: 'work', evidence: { positive: 'weak' } },
+    });
+  }
+
+  const farmed = await guard.evaluate({
+    entity: 'farmer',
+    observation: { scope: 'work', evidence: { positive: 'weak' } },
+  });
+
+  assert.ok(farmed.trust.mass < 8, `mass stayed at ${farmed.trust.mass.toFixed(1)} instead of ~100`);
+  assert.ok(farmed.trust.mean < 0.85, 'the mean never reaches the top of the trusted band');
+  assert.equal(farmed.decision, 'ALLOW', 'and it still costs the farmer nothing yet');
+  assert.match(farmed.trace.join(' '), /discounted/);
+
+  // The point of the whole exercise: abuse is now cheap to catch.
+  clock.advance(1 / 40);
+  const abused = await guard.evaluate({
+    entity: 'farmer',
+    observation: { scope: 'work', evidence: { negative: 'strong' } },
+  });
+
+  assert.notEqual(abused.decision, 'ALLOW', 'one abuse call is enough after farming');
+});
+
+test('D55: negative evidence is never discounted', async () => {
+  const clock = fakeClock();
+  const guard = createGuard({ clock, windowSize: 20 });
+
+  // Machine-regular gaps, all negative. The discount must not soften any of it.
+  for (let i = 0; i < 12; i += 1) {
+    clock.advance(1 / 120);
+    await guard.evaluate({
+      entity: 'bot',
+      observation: { scope: 'work', evidence: { negative: 'weak' } },
+    });
+  }
+
+  const result = await guard.evaluate({
+    entity: 'bot',
+    observation: { scope: 'work', evidence: { negative: 'weak' } },
+  });
+
+  assert.ok(result.trust.mean < 0.2, `negatives accrued in full: mean ${result.trust.mean.toFixed(3)}`);
+  assert.ok(
+    !result.trace.some((line) => line.includes('discounted')),
+    'nothing is discounted when there is no positive to discount',
+  );
+});
+
+test('D55: legitimate automation is slowed, never punished', async () => {
+  const clock = fakeClock();
+  const guard = createGuard({ clock, windowSize: 20 });
+
+  // A polling widget: the innocent cause the catalogue already names for
+  // SIG_UNIFORM_DELAY_SHAPE. It only ever earns positives.
+  let worst: Decision = 'ALLOW';
+  for (let i = 0; i < 200; i += 1) {
+    clock.advance(1 / 60);
+    const result = await guard.evaluate({
+      entity: 'widget',
+      observation: { scope: 'health', evidence: { positive: 'weak' } },
+    });
+    if (severity(result.decision) > severity(worst)) worst = result.decision;
+  }
+
+  assert.ok(
+    severity(worst) < severity('INCREASE_FRICTION'),
+    `a positive-only client reached ${worst}, which a user would feel`,
+  );
+});
+
+test('D55: the discount can be turned off', async () => {
+  const clock = fakeClock();
+  const guard = createGuard({ clock, windowSize: 20, discountRegularPositives: false });
+
+  for (let i = 0; i < 40; i += 1) {
+    clock.advance(1 / 120);
+    await guard.evaluate({
+      entity: 'farmer',
+      observation: { scope: 'work', evidence: { positive: 'weak' } },
     });
   }
 
   const result = await guard.evaluate({
     entity: 'farmer',
-    observation: { scope: 'work', evidence: { positive: 'strong' } },
+    observation: { scope: 'work', evidence: { positive: 'weak' } },
   });
 
-  assert.ok(result.trust.mean > 0.9, 'the farmer has earned a high mean');
-  assert.equal(result.trust.decision, 'ALLOW', 'which is exactly what D49 said a ceiling cannot touch');
-  assert.equal(result.farming, true);
-  assert.equal(result.decision, 'INCREASE_FRICTION', 'the floor raises it anyway');
-  assert.match(result.trace.join(' '), /farming suspected/);
+  assert.ok(result.trust.mass > 15, 'mass accrues at full rate when the discount is off');
 });
 
 test('D54: a fast human with varied behavior is not treated as farming', async () => {
@@ -462,7 +538,7 @@ test('D54: a fast human with varied behavior is not treated as farming', async (
   assert.equal(result.decision, 'ALLOW');
 });
 
-test('D50: a proven violation outranks the farming floor', async () => {
+test('D15: a proven violation decides regardless of accumulated trust', async () => {
   const clock = fakeClock();
   const guard = createGuard({ clock, invariants: [checkout], windowSize: 20 });
 
@@ -477,7 +553,7 @@ test('D50: a proven violation outranks the farming floor', async () => {
   });
 
   assert.equal(result.hardViolated, true);
-  assert.equal(result.decision, 'RESTRICT', 'proof decides, not the statistical floor');
+  assert.equal(result.decision, 'RESTRICT', 'proof decides, whatever the statistics say');
 });
 
 test('D18: every evaluation reports an anomaly score without it driving the decision', async () => {

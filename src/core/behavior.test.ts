@@ -8,6 +8,7 @@ import {
   pushObservation,
   farmingSuspected,
   observationRate,
+  positiveCredit,
   type ObservationTrace,
 } from './behavior.ts';
 
@@ -229,5 +230,46 @@ test('D50: both halves of the threshold are policy', () => {
   assert.equal(
     farmingSuspected(window, { maxObsPerHour: 60, minObservations: 8, maxInterArrivalCv: 0.25 }),
     true,
+  );
+});
+
+test('D55: bursty activity earns full credit', () => {
+  let seed = 7;
+  const random = () => ((seed = (seed * 1664525 + 1013904223) >>> 0) / 4294967296);
+  let at = 0;
+  const bursty = Array.from({ length: 20 }, () => {
+    at += -Math.log(1 - random()) * 45_000;
+    return { at, scope: 'work' };
+  });
+
+  assert.equal(positiveCredit(bursty), 1);
+});
+
+test('D55: perfectly regular gaps earn no credit at all', () => {
+  const fixed = Array.from({ length: 20 }, (_, i) => ({ at: i * 30_000, scope: 'work' }));
+
+  assert.equal(positiveCredit(fixed), 0);
+});
+
+test('D55: credit is continuous, so there is no boundary to sit outside of', () => {
+  // A jittered sleep earns proportionally more than a fixed one, and proportionally
+  // less than human burstiness. A cliff would invite tuning to just clear it.
+  let seed = 3;
+  const random = () => ((seed = (seed * 1664525 + 1013904223) >>> 0) / 4294967296);
+  let at = 0;
+  const jittered = Array.from({ length: 20 }, () => {
+    at += 30_000 * (0.8 + random() * 0.4);
+    return { at, scope: 'work' };
+  });
+
+  const credit = positiveCredit(jittered);
+  assert.ok(credit > 0 && credit < 1, `expected partial credit, got ${credit}`);
+});
+
+test('D55: too little history earns full credit, because absence is not evidence', () => {
+  assert.equal(positiveCredit([]), 1);
+  assert.equal(
+    positiveCredit(Array.from({ length: 4 }, (_, i) => ({ at: i * 1000, scope: 'a' }))),
+    1,
   );
 });
