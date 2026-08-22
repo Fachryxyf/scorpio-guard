@@ -91,3 +91,20 @@ export type {
   DiversityThresholds,
   ObservationTrace,
 } from './core/behavior.ts';
+
+export { velocityExceeded, DEFAULT_VELOCITY } from './core/behavior.ts';
+export type { VelocityThresholds } from './core/behavior.ts';
+
+export {
+  anomalyScore,
+  anomalyConcurs,
+  DEFAULT_REFERENCE,
+  DEFAULT_ANOMALY_WEIGHTS,
+  MIN_OBSERVATIONS,
+} from './core/anomaly.ts';
+export type {
+  AnomalyOptions,
+  AnomalyReference,
+  AnomalyScore,
+  AnomalyWeights,
+} from './core/anomaly.ts';

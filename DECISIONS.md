@@ -17,11 +17,11 @@ the answer given, and what that answer commits the implementation to.
   policy; the tests are what make a policy change visible.
 
 Status: every numbered question is answered — the original thirty, plus D31 to
-D40 arising from review and implementation. Nothing is blocked on a decision.
-What remains is validation: the values recorded here have not met real traffic
-yet, and D34 names where they will.
+D53 arising from review, implementation, and a live pentest. Nothing is blocked on
+a decision. What remains is validation: the values recorded here have not met real
+traffic yet, and D47 names where they will.
 
-Last updated: 2026-08-21
+Last updated: 2026-08-22
 
 ---
 
@@ -101,6 +101,10 @@ Last updated: 2026-08-21
 - [D47 — Primary target: IXFE, because it has something to steal](#d47--primary-target-ixfe-because-it-has-something-to-steal)
 - [D48 — A stale client view is not a proof](#d48--a-stale-client-view-is-not-a-proof)
 - [D30 — PoC must run against a real application flow](#d30--poc-must-run-against-a-real-application-flow)
+- [D50 — Farming is answered on mass, through velocity](#d50--farming-is-answered-on-mass-through-velocity)
+- [D51 — Signal collectors exist for all seven uncovered catalogue entries](#d51--signal-collectors-exist-for-all-seven-uncovered-catalogue-entries)
+- [D52 — The anomaly classifier is a distance-to-reference model, not a trained one](#d52--the-anomaly-classifier-is-a-distance-to-reference-model-not-a-trained-one)
+- [D53 — Wire format is v0.1, documented and tested, still untransmitting](#d53--wire-format-is-v01-documented-and-tested-still-untransmitting)
 
 **[Open questions](#open-questions)**
 
@@ -2576,5 +2580,125 @@ unauthenticated public surface, still blocked on whether it gains a server side.
 |---|---|---|
 | D45 | Generated persona traffic | The distributions are invented. Every persona is a hypothesis about how someone behaves, and an attacker who reads the file can shape traffic around it. |
 | D46 | Two thresholds corrected | Corrected in the right direction, not calibrated to a value. `OBSERVE` at `developing` is defensible; that `3` and `7` are the right boundaries is still a guess. |
-| D37, D49 | Saturation / farming | **Reopened.** The gate does not mitigate farming, and 300 uniform positives absorb 17 strong negatives before leaving `ALLOW`. A real fix has to act on mass, which is what D4 argued against. |
+| D37, D49, D50 | Saturation / farming | **Answered, not validated.** D50 acts on mass through a velocity ceiling that raises rather than lowers, which is what D49 said was required. Whether `60/hr` separates a farmer from a power user is unknown, and only real traffic can say. |
 | D47 | IXFE as the target | Its invariants are read from its code, which is honest, and its *traffic* is still generated. IXFE has real users and real logs; using those is the next step, not something claimed here. |
+| D50 | The velocity threshold | `60/hr` over a 5-minute span stops farming in synthetic traffic. Nothing establishes that it clears a legitimate power user, an integration test suite, or a shared exit address behind one entity key. |
+| D51 | Ten collectors, no thresholds | Each collector measures the right thing; not one has met a real false positive. The catalogue's promise that every signal has a written innocent cause is kept on paper, not in evidence. |
+| D52 | The anomaly reference profile | Four expected values and four weights, all chosen by judgement. Deliberately not trained, because the only traffic available is invented (D45) — so the classifier is honest about its ignorance rather than free of it. |
+| D53 | The v0.1 wire format | Encodes, decodes, and degrades correctly against its own tests. Never round-tripped against a server, because no server exists. The strategy vocabulary is still empty. |
+
+---
+
+## D50 — Farming is answered on mass, through velocity
+
+**Decided, from D49.** D49 established that a real fix has to act on **mass**
+rather than on the uncertainty ceiling, and left the tension open. This closes it.
+
+Farming needs *volume* to move the mean. Volume arriving faster than a human
+sustains is therefore the farming shape itself, and it is observable without
+touching the trust arithmetic D4 defends.
+
+The mechanism: a bounded window of recent observations already exists (D36). The
+span of that window over real elapsed time gives an observation rate. When the
+rate exceeds a configurable threshold (`maxObsPerHour`, default 60) over a
+minimum span (5 minutes — a short burst is normal), the guard applies a
+**farming ceiling** that *raises* the minimum decision to `INCREASE_FRICTION`.
+
+Why it works where D37 failed:
+
+- D37 was a ceiling: it could only *lower* a decision. Farming produces high mean
+  which proposes `ALLOW`, and there is nothing for a ceiling to lower.
+- The velocity ceiling *raises* the decision: it can override the high mean with a
+  floor, which is what "act on mass" means.
+- It is gated behind a span threshold, so a legitimate burst (refreshing a form,
+  rapid page transitions) does not trigger it. Only sustained machine-rate traffic
+  does.
+
+Implements as: `velocityExceeded` in `src/core/behavior.ts`, wired in `guard.ts`
+after trust assessment. 5 tests in `behavior.test.ts`, 1 in `guard.test.ts`.
+
+---
+
+## D51 — Signal collectors exist for all seven uncovered catalogue entries
+
+**Decided.**
+
+D42 named ten signals and marked three as `computed: true` — derived from
+`behaviorFeatures` (interArrivalCv → `SIG_UNIFORM_DELAY_SHAPE`, scopeEntropy →
+`SIG_REPEATED_PATTERN`, immediateRepeatRatio → `SIG_IMMEDIATE_REPEAT`). The other
+seven need something to produce their observations. That something now exists:
+
+| Signal | Collector | File |
+|---|---|---|
+| `SIG_SUBHUMAN_LATENCY` | `measureLatency` | `src/collect/timing.ts` |
+| `SIG_OFF_WINDOW_ACCESS` | `checkAccessWindow` | `src/collect/timing.ts` |
+| `SIG_UNINTERACTED_INPUT` | `watchInteraction` (existing) | `src/collect/interaction.ts` |
+| `SIG_BREADTH_OF_TARGET` | `trackBreadth` | `src/collect/target.ts` |
+| `SIG_SENSITIVE_TARGET` | `assessSensitiveTargets` | `src/collect/target.ts` |
+| `SIG_UNUSUAL_SEQUENCE` | `checkSequence` | `src/collect/sequence.ts` |
+| `SIG_ENVIRONMENT_MISMATCH` | `checkEnvironment` | `src/collect/sequence.ts` |
+
+A signal aggregator (`collectSignalIds` in `src/collect/signals.ts`) takes all
+collector outputs and returns the catalogue IDs that `guard.evaluate` accepts.
+12 tests in `collectors.test.ts`.
+
+Every collector returns a typed observation struct. None contains a threshold —
+thresholds remain in the host's policy, per the D42 principle. Each still needs a
+false-positive story told against real traffic before it earns a production
+threshold.
+
+---
+
+## D52 — The anomaly classifier is a distance-to-reference model, not a trained one
+
+**Decided.**
+
+D18 deferred the choice of algorithm until the feature space settled. It has.
+
+**Chosen: weighted one-sided Manhattan distance against a fixed reference profile.**
+
+Why not a learned model:
+
+- A learned classifier needs labelled traffic. D34 records that none exists.
+- Generated personas (D45) are hypotheses, not ground truth. Training on them
+  produces a model that has learned the author's assumptions and reports them back
+  as findings.
+- An interpretable distance where every weight is policy preserves the property
+  the rest of the library has: nothing here is a discovered threshold presented as
+  a fact.
+
+One-sided per feature: only deviation in the *suspicious* direction counts.
+Browsing more diversely than the reference is not anomalous, and a symmetric
+distance would report it as such. The `interArrivalCv` feature carries 40% of the
+weight because gap shape is what the design notes single out as hardest to fake.
+
+The classifier does not replace `diversityConcurs` (D37) by default. Both are
+reported on every evaluation: the classifier as `.anomaly.score`, the conjunction
+in `.diversity`. Setting `useAnomalyClassifier: true` makes the classifier drive
+the D37 concurrence instead.
+
+Implements as: `anomalyScore`, `anomalyConcurs` in `src/core/anomaly.ts`.
+8 tests in `anomaly.test.ts`, 2 integration tests in `guard.test.ts`.
+
+---
+
+## D53 — Wire format is v0.1, documented and tested, still untransmitting
+
+**Decided.**
+
+`PROTOCOL.md` defines what travels and what must not, and the document has an
+executable counterpart in `src/core/protocol.ts` that encodes, decodes, and
+applies all six degradation rules. 13 tests in `protocol.test.ts`.
+
+Key decisions crystallised by writing it:
+
+- Requests are unauthenticated and carry no instance identity — because a report
+  that could be attributed to an instance is a report about a population.
+- Entity counts are bucketed (`one | few | several | many`), never exact — because
+  an exact count is identifying in a small deployment.
+- The strategy vocabulary in responses is intentionally left open. Inventing tokens
+  before a server exists would be guessing.
+- The format has no field in which raw observation, identity, or trust state would
+  fit. That is the privacy argument made structural rather than documented.
+
+Still nothing transmits. D17 and D20 stand.

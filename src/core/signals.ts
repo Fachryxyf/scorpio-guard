@@ -91,7 +91,13 @@ export type WeakSignal = {
   readonly measures: string;
   /** Why a legitimate user might trigger it. The honest false-positive path. */
   readonly innocentCause: string;
-  /** Whether `behaviorFeatures` (D36) already computes this. */
+  /**
+   * Whether `behaviorFeatures` (D36) derives this server-side.
+   *
+   * `false` does not mean uncollectable: D51 added a collector for every entry in
+   * this catalogue. It means the observation arrives from `./collect` or from the
+   * host rather than being derived from the retained window.
+   */
   readonly computed: boolean;
 };
 
@@ -101,8 +107,8 @@ export type WeakSignal = {
  * The first four entries are drawn from the design notes §6B, which came from the
  * author's own scraping experience; the rest close the enumeration over
  * `SIGNAL_SOURCES`. `computed: true` marks the ones the anomaly feature space
- * (D36) already derives — the others describe what a host must supply, and exist
- * here so that "known weak signals" is a written list rather than folklore.
+ * (D36) derives from the retained window; the rest arrive from `./collect`, which
+ * has a collector for each of them since D51.
  */
 export const WEAK_SIGNALS: readonly WeakSignal[] = [
   {

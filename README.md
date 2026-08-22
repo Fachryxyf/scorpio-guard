@@ -118,12 +118,12 @@ This removes the single point of failure, lets compliance-sensitive adopters sel
 
 Named honestly, not hidden.
 
-- **Symptom vocabulary** — the two-tier *structure* is settled (D43) and the detail list is a first pass. What remains is the wire format, which belongs to `scorpio-guard-protocol`, and the fact that nothing has been round-tripped against a real server because nothing transmits.
+- **Symptom vocabulary** — the two-tier structure is settled (D43) and the v0.1 wire format is now drafted in [PROTOCOL.md](PROTOCOL.md) with its degradation rules tested (D53). What remains is a server: nothing has been round-tripped, because nothing transmits.
 - **Signal encoding** — the transmitted representation should be decodable *only* by the server, even though the library's source is public. Edges into one-way embeddings and server-issued transformation recipes. Research direction, not a resolved design.
 - **Cold start & sybil churn** — history-based trust is gamed by attackers who simply discard identities. Now measured rather than feared: the floor is one request per identity, at which point nothing accumulates at all. Two requests per identity and the guard engages.
 - **Root of trust** — explicitly outside the library. It accepts an entity reference as a basis for measurement, never as proof of identity. If the host supplies a reference that is cheap to discard, every history-based defence goes with it — and that is the host's responsibility, not the library's.
 - **Poisoning resistance** — gradual baseline shifts where every individual step looks legitimate. Bounded, not solved: ten honest days buy roughly eleven abuse calls before `RESTRICT`.
-- **Saturation / farming** — reopened by D49. Uniform high volume still converges on a large positive mass that resists negative evidence, and the decision-layer gate that was recorded as the fix cannot reach it. A real fix has to act on mass, which is what the trust model's own reasoning argued against.
+- **Saturation / farming** — answered by D50, not yet validated. A velocity ceiling acts on mass and *raises* the decision, which is what D49 established was required; whether `60/hr` separates a farmer from a power user is unknown until real traffic says so.
 - **Privacy/legal basis** — behavioral history is personal data under GDPR and Indonesia's UU PDP.
 - **Sequencing** — is a durable public protocol worth designing *before* a proof-of-concept exists?
 
@@ -309,7 +309,7 @@ sources, and personas read off IXFE's own defences.
 `examples/healthme/` — the first target (D34), kept as the small-application
 regression: two scopes, one user.
 
-One hundred and fifty-two tests, which double as the record of every numeric and
+One hundred and ninety-three tests, which double as the record of every numeric and
 semantic property the design depends on.
 
 Writing your own store? Prove it works before trusting it:
@@ -485,13 +485,21 @@ sources (D41), the weak-signal catalogue (D42), the two-tier symptom vocabulary
 corrected it four times (D45–D49).
 
 Generated persona traffic against IXFE exercises the statistical layer and has
-falsified four claims so far. What remains, in order:
+falsified four claims so far.
 
-1. Reopen saturation: farming needs a fix that acts on mass, and the personas can now measure whether a candidate works.
-2. IXFE's real logs, which exist. Generated traffic falsifies; only real traffic calibrates, and this is the shortest path to a real population.
-3. Collectors for the seven catalogued signals that nothing computes yet — most need host cooperation, and each needs a false-positive story before it earns a threshold.
-4. Choose an anomaly algorithm over the settled feature space, using the personas to compare candidates.
-5. Publish the symptom vocabulary as a `scorpio-guard-protocol` v0.1 wire spec — the structure is settled, the format is not.
+
+Since then, four things that needed no traffic: farming answered on mass through a
+velocity ceiling (D50), a collector for every catalogued signal (D51), the anomaly
+classifier built as distance-to-reference rather than trained (D52), and a v0.1 wire
+format with its degradation rules tested (D53).
+
+What remains needs real traffic, in order:
+
+1. IXFE's real logs, which exist. Generated traffic falsifies; only real traffic calibrates, and this is the shortest path to a real population.
+2. Calibrate the velocity threshold. `60/hr` stops farming in synthetic traffic; whether it clears a legitimate power user is unknown.
+3. Calibrate the anomaly reference profile, and decide from measurement whether the classifier or the threshold conjunction should drive the D37 concurrence.
+4. Give each collector its false-positive story from real traffic before any of them earns a production threshold.
+5. Move the wire format to its own repository and build a server that speaks it.
 6. Only then: investigate encoding schemes for symptom transmission.
 
 ## Contributing

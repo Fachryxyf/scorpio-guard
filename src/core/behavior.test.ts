@@ -6,6 +6,7 @@ import {
   behaviorFeatures,
   diversityConcurs,
   pushObservation,
+  velocityExceeded,
   type ObservationTrace,
 } from './behavior.ts';
 
@@ -132,4 +133,39 @@ test('D46: a lopsided window reads low even though two scopes were seen', () => 
   assert.equal(features.distinctScopes, 2);
   assert.ok(features.scopeEntropy < DEFAULT_DIVERSITY.minScopeEntropy);
   assert.equal(diversityConcurs(features), false);
+});
+
+test('D49: velocity undetermined with fewer than two observations', () => {
+  assert.equal(velocityExceeded([]), undefined);
+  assert.equal(velocityExceeded([{ at: 0, scope: 'a' }]), undefined);
+});
+
+test('D49: velocity undetermined when window span too short', () => {
+  const burst = [{ at: 0, scope: 'a' }, { at: 1_000, scope: 'b' }];
+  assert.equal(velocityExceeded(burst), undefined);
+});
+
+test('D49: sustained high velocity detected', () => {
+  const window = Array.from({ length: 20 }, (_, i) => ({
+    at: i * 30_000,
+    scope: `s${i % 3}`,
+  }));
+  assert.equal(velocityExceeded(window), true);
+});
+
+test('D49: human-paced traffic not flagged', () => {
+  const window = Array.from({ length: 10 }, (_, i) => ({
+    at: i * 12 * 60_000,
+    scope: `s${i % 4}`,
+  }));
+  assert.equal(velocityExceeded(window), false);
+});
+
+test('D49: velocity threshold configurable', () => {
+  const window = Array.from({ length: 10 }, (_, i) => ({
+    at: i * 60_000,
+    scope: 'a',
+  }));
+  assert.equal(velocityExceeded(window, { maxObsPerHour: 30, minWindowSpanMs: 60_000 }), true);
+  assert.equal(velocityExceeded(window, { maxObsPerHour: 120, minWindowSpanMs: 60_000 }), false);
 });

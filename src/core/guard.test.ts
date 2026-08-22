@@ -410,3 +410,69 @@ test('D41: per-class advice applies, and the strongest violated class wins', asy
   });
   assert.equal(forged.decision, 'BLOCK', 'the declared per-class advice applies');
 });
+
+test('D49: farming ceiling raises decision for high-velocity entity', async () => {
+  const clock = fakeClock(1_000_000);
+  const guard = createGuard({
+    clock,
+    velocity: { maxObsPerHour: 10, minWindowSpanMs: 60_000 },
+    windowSize: 20,
+  });
+
+  // Build up a window that spans > 1 minute with many observations
+  for (let i = 0; i < 15; i++) {
+    clock.advance(1 / 60); // 1 minute each
+    await guard.evaluate({
+      entity: 'farmer',
+      observation: { scope: 'checkout', evidence: { positive: 'strong' } },
+    });
+  }
+
+  // After sustained high velocity, the entity should hit INCREASE_FRICTION
+  const result = await guard.evaluate({
+    entity: 'farmer',
+    observation: { scope: 'checkout', evidence: { positive: 'strong' } },
+  });
+
+  // Mean is high (lots of positive evidence), but velocity ceiling should fire
+  assert.equal(result.farming, true);
+  assert.ok(
+    result.trace.some((t) => t.includes('velocity exceeded') || t.includes('farming ceiling')),
+    'trace should mention farming'
+  );
+});
+
+test('D18: every evaluation reports an anomaly score without it driving the decision', async () => {
+  const clock = fakeClock();
+  const guard = createGuard({ clock });
+
+  // Below the classifier's minimum window: unscored, not scored zero.
+  const first = await guard.evaluate({ entity: 'visitor', observation: { scope: 'home' } });
+  assert.equal(first.anomaly.score, undefined);
+
+  for (let i = 0; i < 6; i += 1) {
+    clock.advance(0.25);
+    await guard.evaluate({ entity: 'visitor', observation: { scope: `scope-${i % 3}` } });
+  }
+
+  const scored = await guard.evaluate({ entity: 'visitor', observation: { scope: 'home' } });
+  assert.notEqual(scored.anomaly.score, undefined, 'the score is reported once the window fills');
+  assert.match(scored.trace.join(' '), /anomaly score .*reported only/);
+});
+
+test('D18: the classifier can replace the threshold conjunction for D37 concurrence', async () => {
+  const clock = fakeClock();
+  const guard = createGuard({ clock, useAnomalyClassifier: true });
+
+  // One scope, fixed interval: monotonous by both readings.
+  for (let i = 0; i < 8; i += 1) {
+    clock.advance(1);
+    await guard.evaluate({ entity: 'robot', observation: { scope: 'poll' } });
+  }
+
+  const result = await guard.evaluate({ entity: 'robot', observation: { scope: 'poll' } });
+
+  assert.equal(result.diversity, false, 'the classifier withholds concurrence');
+  assert.ok(result.anomaly.score! > 0.5);
+  assert.match(result.trace.join(' '), /drives concurrence/);
+});

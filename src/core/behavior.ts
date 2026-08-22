@@ -176,3 +176,43 @@ function coefficientOfVariation(values: readonly number[]): number {
   // not a sample from which to infer a wider population.
   return Math.sqrt(sumSquares / values.length) / average;
 }
+
+
+/**
+ * Velocity: observations per hour over the window. D49 farming fix.
+ *
+ * Farming needs volume to shift the mean, and volume at a rate no human sustains
+ * is itself a signal. Unlike diversity (which gates *believing* low variance),
+ * velocity gates *believing* high volume — so it can restrict entities whose mean
+ * is already high, which is exactly where D37's ceiling was powerless.
+ */
+export type VelocityThresholds = {
+  /** Observations per hour above which velocity is suspicious. */
+  readonly maxObsPerHour: number;
+  /** Minimum window span (ms) before velocity is judged. Short bursts are normal. */
+  readonly minWindowSpanMs: number;
+};
+
+export const DEFAULT_VELOCITY: VelocityThresholds = {
+  // ponytail: 60/hr = 1/min sustained. Generous for a human on one flow.
+  // Upgrade path: calibrate against IXFE real logs when available.
+  maxObsPerHour: 60,
+  minWindowSpanMs: 5 * 60_000, // 5 minutes minimum span
+};
+
+/**
+ * Is the entity accumulating observations faster than plausible? D49 fix.
+ *
+ * Returns `undefined` when the window is too short to judge (burst),
+ * `true` when velocity exceeds threshold, `false` otherwise.
+ */
+export function velocityExceeded(
+  window: readonly ObservationTrace[],
+  thresholds: VelocityThresholds = DEFAULT_VELOCITY,
+): boolean | undefined {
+  if (window.length < 2) return undefined;
+  const span = window[window.length - 1]!.at - window[0]!.at;
+  if (span < thresholds.minWindowSpanMs) return undefined;
+  const obsPerHour = (window.length / span) * 3_600_000;
+  return obsPerHour > thresholds.maxObsPerHour;
+}

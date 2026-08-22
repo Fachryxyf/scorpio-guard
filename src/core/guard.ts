@@ -1,12 +1,16 @@
+import { anomalyConcurs, anomalyScore, type AnomalyOptions, type AnomalyScore } from './anomaly.ts';
 import { assessTrust, type TrustAssessment } from './assess.ts';
 import {
   DEFAULT_DIVERSITY,
+  DEFAULT_VELOCITY,
   DEFAULT_WINDOW_SIZE,
   behaviorFeatures,
   diversityConcurs,
   pushObservation,
+  velocityExceeded,
   type BehaviorFeatures,
   type DiversityThresholds,
+  type VelocityThresholds,
 } from './behavior.ts';
 import { systemClock, type Clock } from './clock.ts';
 import {
@@ -80,6 +84,19 @@ export type Assessment = {
    * `undefined` when the window is too small to judge.
    */
   readonly diversity: boolean | undefined;
+  /**
+   * Whether evidence is accumulating faster than plausible. D49.
+   * `undefined` when window span is too short to judge.
+   */
+  readonly farming: boolean | undefined;
+  /**
+   * Distance from the reference behavior profile. D18.
+   *
+   * Reported on every evaluation whether or not it drives the decision, so an
+   * adopter can compare the classifier against the threshold conjunction on their
+   * own traffic before switching.
+   */
+  readonly anomaly: AnomalyScore;
   readonly violations: readonly Violation[];
   /** True when a proven violation set the outcome, bypassing the trust ceiling. */
   readonly hardViolated: boolean;
@@ -101,6 +118,19 @@ export type GuardOptions = {
   readonly diversity?: DiversityThresholds;
   /** Observations retained per entity for behavioral features. D36. */
   readonly windowSize?: number;
+  /** Velocity thresholds for farming detection. D49. */
+  readonly velocity?: VelocityThresholds;
+  /**
+   * Use the anomaly classifier (D18) for the D37 concurrence instead of the three
+   * threshold comparisons in `diversityConcurs`.
+   *
+   * Defaults to `false`: the classifier is new, the conjunction is what the D37 gate
+   * was reasoned against, and which reads better against a real population is not
+   * something generated traffic can settle. The score is reported either way.
+   */
+  readonly useAnomalyClassifier?: boolean;
+  /** Reference profile and weights for the classifier. D18. */
+  readonly anomaly?: AnomalyOptions;
   /** Override the weak-signal catalogue. D42. Defaults to the published one. */
   readonly signals?: readonly WeakSignal[];
 };
@@ -128,6 +158,8 @@ export function createGuard(options: GuardOptions = {}) {
   const policy: Policy = { ...DEFAULT_POLICY, ...options.policy };
   const invariants = options.invariants ?? [];
   const diversityThresholds = options.diversity ?? DEFAULT_DIVERSITY;
+  const velocityThresholds = options.velocity ?? DEFAULT_VELOCITY;
+  const anomalyOptions = options.anomaly ?? {};
   const windowSize = options.windowSize ?? DEFAULT_WINDOW_SIZE;
 
   /** Load state, treating absent and expired alike. D6. */
@@ -198,7 +230,17 @@ export function createGuard(options: GuardOptions = {}) {
       // The anomaly dimension: features over this entity's own recent behavior.
       // Computed from the updated window so the current interaction counts. D36.
       const behavior = behaviorFeatures(updated.window);
-      const diversity = input.anomalyConcurs ?? diversityConcurs(behavior, diversityThresholds);
+      const anomaly = anomalyScore(behavior, anomalyOptions);
+      const derived = options.useAnomalyClassifier
+        ? anomalyConcurs(behavior, 0.5, anomalyOptions)
+        : diversityConcurs(behavior, diversityThresholds);
+      const diversity = input.anomalyConcurs ?? derived;
+
+      if (anomaly.score !== undefined) {
+        trace.push(
+          `anomaly score ${anomaly.score.toFixed(2)}${anomaly.dominant ? `, dominated by ${anomaly.dominant}` : ''}${options.useAnomalyClassifier ? ' (drives concurrence)' : ' (reported only)'}`,
+        );
+      }
 
       if (diversity === undefined) {
         trace.push(
@@ -208,6 +250,18 @@ export function createGuard(options: GuardOptions = {}) {
         trace.push(
           `diversity ${diversity ? 'concurs' : 'withheld'}: ${behavior.distinctScopes} scope(s), entropy ${behavior.scopeEntropy.toFixed(2)}, gap CV ${behavior.interArrivalCv.toFixed(2)}`,
         );
+      }
+
+      // D49 farming fix: velocity ceiling. Unlike diversity (which only gates
+      // believing low variance), velocity can actively RESTRICT a high-mean entity
+      // that is accumulating evidence too fast.
+      const farming = velocityExceeded(updated.window, velocityThresholds);
+      if (farming === true) {
+        trace.push(
+          `velocity exceeded: ${behavior.count} obs in window, rate above ${velocityThresholds.maxObsPerHour}/hr — farming ceiling applied`,
+        );
+      } else if (farming === undefined) {
+        trace.push('velocity undetermined: window too short to judge');
       }
 
       const trust = assessTrust(
@@ -242,12 +296,24 @@ export function createGuard(options: GuardOptions = {}) {
         }
       }
 
+      // D49: farming ceiling. Applied after trust but before returning. A proven
+      // violation (hard) still wins — farming is statistical, not proof.
+      if (farming === true && !hard.length) {
+        const farmingCeiling: Decision = 'INCREASE_FRICTION';
+        if (severity(decision) < severity(farmingCeiling)) {
+          decision = farmingCeiling;
+          trace.push(`farming ceiling raises decision to ${farmingCeiling}`);
+        }
+      }
+
       return {
         entity: input.entity,
         decision,
         trust,
         behavior,
         diversity,
+        farming,
+        anomaly,
         violations: checked.violations,
         hardViolated: hard.length > 0,
         coldStart,
