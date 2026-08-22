@@ -123,7 +123,7 @@ Named honestly, not hidden.
 - **Cold start & sybil churn** — history-based trust is gamed by attackers who simply discard identities. Now measured rather than feared: the floor is one request per identity, at which point nothing accumulates at all. Two requests per identity and the guard engages.
 - **Root of trust** — explicitly outside the library. It accepts an entity reference as a basis for measurement, never as proof of identity. If the host supplies a reference that is cheap to discard, every history-based defence goes with it — and that is the host's responsibility, not the library's.
 - **Poisoning resistance** — gradual baseline shifts where every individual step looks legitimate. Bounded, not solved: ten honest days buy roughly eleven abuse calls before `RESTRICT`.
-- **Saturation / farming** — answered by D50, not yet validated. A velocity ceiling acts on mass and *raises* the decision, which is what D49 established was required; whether `60/hr` separates a farmer from a power user is unknown until real traffic says so.
+- **Saturation / farming** — narrowed by D50 and D54, not closed. A floor that raises rather than lowers is what D49 required, and it fires on high rate *and* machine-regular gaps — rate alone escalated a busy operator, which falsified the first attempt. The patient farmer, one request every ten minutes, is untouched by construction.
 - **Privacy/legal basis** — behavioral history is personal data under GDPR and Indonesia's UU PDP.
 - **Sequencing** — is a durable public protocol worth designing *before* a proof-of-concept exists?
 
@@ -309,7 +309,7 @@ sources, and personas read off IXFE's own defences.
 `examples/healthme/` — the first target (D34), kept as the small-application
 regression: two scopes, one user.
 
-One hundred and ninety-three tests, which double as the record of every numeric and
+Two hundred and one tests, which double as the record of every numeric and
 semantic property the design depends on.
 
 Writing your own store? Prove it works before trusting it:
@@ -496,7 +496,7 @@ format with its degradation rules tested (D53).
 What remains needs real traffic, in order:
 
 1. IXFE's real logs, which exist. Generated traffic falsifies; only real traffic calibrates, and this is the shortest path to a real population.
-2. Calibrate the velocity threshold. `60/hr` stops farming in synthetic traffic; whether it clears a legitimate power user is unknown.
+2. Calibrate the farming floor, and close the patient farmer. `60/hr` with regular gaps catches the impatient one; below the rate threshold nothing bites, and farming fast then abusing slowly lifts the floor.
 3. Calibrate the anomaly reference profile, and decide from measurement whether the classifier or the threshold conjunction should drive the D37 concurrence.
 4. Give each collector its false-positive story from real traffic before any of them earns a production threshold.
 5. Move the wire format to its own repository and build a server that speaks it.

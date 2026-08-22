@@ -17,7 +17,7 @@ the answer given, and what that answer commits the implementation to.
   policy; the tests are what make a policy change visible.
 
 Status: every numbered question is answered — the original thirty, plus D31 to
-D53 arising from review, implementation, and a live pentest. Nothing is blocked on
+D54 arising from review, implementation, and a live pentest. Nothing is blocked on
 a decision. What remains is validation: the values recorded here have not met real
 traffic yet, and D47 names where they will.
 
@@ -105,6 +105,7 @@ Last updated: 2026-08-22
 - [D51 — Signal collectors exist for all seven uncovered catalogue entries](#d51--signal-collectors-exist-for-all-seven-uncovered-catalogue-entries)
 - [D52 — The anomaly classifier is a distance-to-reference model, not a trained one](#d52--the-anomaly-classifier-is-a-distance-to-reference-model-not-a-trained-one)
 - [D53 — Wire format is v0.1, documented and tested, still untransmitting](#d53--wire-format-is-v01-documented-and-tested-still-untransmitting)
+- [D54 — Rate is not the farming signal; the shape of the gaps is](#d54--rate-is-not-the-farming-signal-the-shape-of-the-gaps-is)
 
 **[Open questions](#open-questions)**
 
@@ -2580,9 +2581,10 @@ unauthenticated public surface, still blocked on whether it gains a server side.
 |---|---|---|
 | D45 | Generated persona traffic | The distributions are invented. Every persona is a hypothesis about how someone behaves, and an attacker who reads the file can shape traffic around it. |
 | D46 | Two thresholds corrected | Corrected in the right direction, not calibrated to a value. `OBSERVE` at `developing` is defensible; that `3` and `7` are the right boundaries is still a guess. |
-| D37, D49, D50 | Saturation / farming | **Answered, not validated.** D50 acts on mass through a velocity ceiling that raises rather than lowers, which is what D49 said was required. Whether `60/hr` separates a farmer from a power user is unknown, and only real traffic can say. |
+| D37, D49, D50, D54 | Saturation / farming | **Narrowed, not closed.** A floor that raises rather than lowers is what D49 required, and the impatient farmer now pays on the first abuse call. The patient one still pays on the eighteenth, or not at all. |
 | D47 | IXFE as the target | Its invariants are read from its code, which is honest, and its *traffic* is still generated. IXFE has real users and real logs; using those is the next step, not something claimed here. |
-| D50 | The velocity threshold | `60/hr` over a 5-minute span stops farming in synthetic traffic. Nothing establishes that it clears a legitimate power user, an integration test suite, or a shared exit address behind one entity key. |
+| D50, D54 | The farming floor | Falsified twice before it held: rate alone escalated a busy operator, and rate-plus-anomaly escalated a power user reading one screen. Now rate **and** gap regularity. Both numbers are guesses, and it only bites while the rate stays high. |
+| D54 | The patient farmer | Untouched, by construction. One request every ten minutes reaches `mass 81`, `mean 0.988` and trips nothing. Farming fast then abusing slowly also lifts the floor — 18 abuse calls instead of 1. D49 is narrowed, not closed. |
 | D51 | Ten collectors, no thresholds | Each collector measures the right thing; not one has met a real false positive. The catalogue's promise that every signal has a written innocent cause is kept on paper, not in evidence. |
 | D52 | The anomaly reference profile | Four expected values and four weights, all chosen by judgement. Deliberately not trained, because the only traffic available is invented (D45) — so the classifier is honest about its ignorance rather than free of it. |
 | D53 | The v0.1 wire format | Encodes, decodes, and degrades correctly against its own tests. Never round-tripped against a server, because no server exists. The strategy vocabulary is still empty. |
@@ -2702,3 +2704,86 @@ Key decisions crystallised by writing it:
   fit. That is the privacy argument made structural rather than documented.
 
 Still nothing transmits. D17 and D20 stand.
+
+---
+
+## D54 — Rate is not the farming signal; the shape of the gaps is
+
+**Decided, from traffic that falsified D50 twice in a row.** Recorded in full
+because the two wrong answers are more instructive than the right one.
+
+### First attempt: rate alone
+
+D50 shipped a pure rate check — sustained observations per hour above a threshold
+applies a floor of `INCREASE_FRICTION`. Generated traffic falsified it immediately:
+
+```
+busy operator, 1 action per 45s   ->  80/hr  ->  FALSE POSITIVE at step 8
+power user,    1 action per 20s   -> 180/hr  ->  FALSE POSITIVE at step 16
+```
+
+Both are legitimate. Humans are simply capable of being fast, and a rate threshold
+low enough to catch a farmer is low enough to catch them. This is exactly the false
+positive the central constraint forbids, so the check as shipped was wrong.
+
+It was also *accidentally* quiet for the fastest traffic: a 20-observation window at
+one per 5 seconds spans 1.6 minutes, below the 5-minute span gate, so an integration
+test suite slipped through while a busy human did not. A check whose coverage is an
+artifact of window arithmetic is not a check.
+
+### Second attempt: rate and the anomaly score
+
+The obvious fix was to require the anomaly classifier (D52) to agree. That
+falsified too, on HealthMe's own `power-user`:
+
+```
+power-user: 20 reads of one scope, bursty, 12s apart -> anomaly 0.56 -> FALSE POSITIVE at step 22
+```
+
+The composite score penalises narrow attention (`distinctScopes`, `scopeEntropy`)
+as well as regular timing, and **using one feature repeatedly is legitimate
+behavior**. A vault app has one screen worth reading. Requiring the composite to
+agree imports its breadth terms into a question that is not about breadth.
+
+### What actually separates them
+
+Neither speed nor breadth. The *shape of the gaps* — which is the one thing the
+design notes single out, and the discriminator the feature space already has:
+
+| | rate/hr | gap CV | farming? |
+|---|---|---|---|
+| power user, one scope, bursty 12s | 386 | 0.86 | no |
+| busy operator, five scopes, 45s | 67 | 1.02 | no |
+| farmer, fixed 30s | 126 | 0.00 | yes |
+| farmer, jittered 30s ±10% | 125 | 0.05 | yes |
+
+So: `rate > maxObsPerHour` **and** `interArrivalCv < maxInterArrivalCv`, reusing the
+D36 threshold rather than inventing a second one. Bursty human activity sits above
+`1.0`; a jittered fixed sleep still reads at `0.05`. Escaping this means giving up
+the regularity, and the regularity is what the volume depends on.
+
+The span gate is gone. `minObservations` replaces it, because the question "is there
+enough here to measure" is about sample size, not about elapsed time.
+
+### What this does and does not fix
+
+Measured, farming 300 uniform positives then abusing:
+
+```
+farm 120/hr, abuse 120/hr  ->  1 abuse call before it costs something
+farm 120/hr, abuse  40/hr  -> 18 abuse calls
+farm   6/hr, abuse 120/hr  -> 10 abuse calls
+```
+
+The floor works **while the rate is high**. It does not fix farming in general, and
+two holes are open by construction:
+
+1. **A patient farmer below the rate threshold is untouched.** One request every ten
+   minutes builds `mass 81` and `mean 0.988` and never trips anything. D49's
+   original complaint stands for anyone willing to be slow.
+2. **Farm fast, abuse slow.** The window rolls forward, the rate falls, the floor
+   lifts. 18 abuse calls instead of 1.
+
+So D49 is *narrowed*, not closed: the impatient farmer now pays immediately, the
+patient one still does not. Both numbers are from generated traffic (D45) and
+neither is calibrated.

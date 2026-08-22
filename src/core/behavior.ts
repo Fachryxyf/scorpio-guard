@@ -179,40 +179,76 @@ function coefficientOfVariation(values: readonly number[]): number {
 
 
 /**
- * Velocity: observations per hour over the window. D49 farming fix.
- *
- * Farming needs volume to shift the mean, and volume at a rate no human sustains
- * is itself a signal. Unlike diversity (which gates *believing* low variance),
- * velocity gates *believing* high volume — so it can restrict entities whose mean
- * is already high, which is exactly where D37's ceiling was powerless.
+ * Thresholds for the farming check. D50, corrected twice by D54.
  */
 export type VelocityThresholds = {
-  /** Observations per hour above which velocity is suspicious. */
+  /** Observations per hour above which the rate is worth a second look. */
   readonly maxObsPerHour: number;
-  /** Minimum window span (ms) before velocity is judged. Short bursts are normal. */
-  readonly minWindowSpanMs: number;
+  /** Observations needed before a rate is measured at all. */
+  readonly minObservations: number;
+  /**
+   * How regular the gaps must also be — coefficient of variation *below* this —
+   * before a high rate is read as farming rather than as a fast human.
+   */
+  readonly maxInterArrivalCv: number;
 };
 
 export const DEFAULT_VELOCITY: VelocityThresholds = {
-  // ponytail: 60/hr = 1/min sustained. Generous for a human on one flow.
-  // Upgrade path: calibrate against IXFE real logs when available.
+  // ponytail: 60/hr sustained, and gaps regular enough to be machine-produced.
+  // Both are guesses; the conjunction is what makes being wrong on either one
+  // survivable. Upgrade path: calibrate against IXFE real logs.
   maxObsPerHour: 60,
-  minWindowSpanMs: 5 * 60_000, // 5 minutes minimum span
+  minObservations: 8,
+  maxInterArrivalCv: DEFAULT_DIVERSITY.minInterArrivalCv,
 };
 
 /**
- * Is the entity accumulating observations faster than plausible? D49 fix.
+ * Observations per hour over the window, or `undefined` when there is too little
+ * to measure.
  *
- * Returns `undefined` when the window is too short to judge (burst),
- * `true` when velocity exceeds threshold, `false` otherwise.
+ * Exported because it is the measurement: a host that wants the number should not
+ * have to infer it from a boolean. On its own it is **not** a farming signal.
  */
-export function velocityExceeded(
+export function observationRate(
+  window: readonly ObservationTrace[],
+  minObservations: number = DEFAULT_VELOCITY.minObservations,
+): number | undefined {
+  if (window.length < Math.max(2, minObservations)) return undefined;
+  const span = window[window.length - 1]!.at - window[0]!.at;
+  if (span <= 0) return undefined;
+  return (window.length / span) * 3_600_000;
+}
+
+/**
+ * Is this entity farming trust? D50, corrected by D54.
+ *
+ * A conjunction of rate and *gap regularity*, and the history of both halves is
+ * worth keeping:
+ *
+ * 1. D50 shipped a pure rate check. Generated traffic falsified it immediately — a
+ *    busy operator at one action per 45 seconds and a power user at one per 20
+ *    seconds both tripped it. Humans are simply capable of being fast, so rate
+ *    alone is exactly the false positive the central constraint forbids.
+ * 2. The first correction added the anomaly score (D52) as the second half. That
+ *    falsified too: HealthMe's `power-user` reads one scope repeatedly and scores
+ *    0.56, because the composite penalises narrow attention as well as regular
+ *    timing. Legitimate people do use one feature over and over.
+ *
+ * What actually separates a farmer from a fast human is neither speed nor breadth
+ * but the *shape of the gaps* — which is the one thing the design notes single out,
+ * and the one thing a farmer cannot fix without giving up the volume it needs. A
+ * jittered fixed sleep still reads at `cv ~= 0.05`; bursty human activity sits above
+ * `1.0`.
+ *
+ * Returns `undefined` when the window cannot support the judgement, which is not the
+ * same claim as "not farming".
+ */
+export function farmingSuspected(
   window: readonly ObservationTrace[],
   thresholds: VelocityThresholds = DEFAULT_VELOCITY,
 ): boolean | undefined {
-  if (window.length < 2) return undefined;
-  const span = window[window.length - 1]!.at - window[0]!.at;
-  if (span < thresholds.minWindowSpanMs) return undefined;
-  const obsPerHour = (window.length / span) * 3_600_000;
-  return obsPerHour > thresholds.maxObsPerHour;
+  const rate = observationRate(window, thresholds.minObservations);
+  if (rate === undefined) return undefined;
+  if (rate <= thresholds.maxObsPerHour) return false;
+  return behaviorFeatures(window).interArrivalCv < thresholds.maxInterArrivalCv;
 }

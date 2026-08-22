@@ -411,35 +411,73 @@ test('D41: per-class advice applies, and the strongest violated class wins', asy
   assert.equal(forged.decision, 'BLOCK', 'the declared per-class advice applies');
 });
 
-test('D49: farming ceiling raises decision for high-velocity entity', async () => {
-  const clock = fakeClock(1_000_000);
-  const guard = createGuard({
-    clock,
-    velocity: { maxObsPerHour: 10, minWindowSpanMs: 60_000 },
-    windowSize: 20,
-  });
+test('D50: farming raises the decision where D37\'s ceiling could not', async () => {
+  const clock = fakeClock();
+  const guard = createGuard({ clock, windowSize: 20 });
 
-  // Build up a window that spans > 1 minute with many observations
-  for (let i = 0; i < 15; i++) {
-    clock.advance(1 / 60); // 1 minute each
+  // One scope, fixed 30s interval, all positive: the farming shape. The mean ends
+  // high, which under D49 meant nothing could touch it.
+  for (let i = 0; i < 20; i += 1) {
+    clock.advance(1 / 120);
     await guard.evaluate({
       entity: 'farmer',
-      observation: { scope: 'checkout', evidence: { positive: 'strong' } },
+      observation: { scope: 'work', evidence: { positive: 'strong' } },
     });
   }
 
-  // After sustained high velocity, the entity should hit INCREASE_FRICTION
   const result = await guard.evaluate({
     entity: 'farmer',
-    observation: { scope: 'checkout', evidence: { positive: 'strong' } },
+    observation: { scope: 'work', evidence: { positive: 'strong' } },
   });
 
-  // Mean is high (lots of positive evidence), but velocity ceiling should fire
+  assert.ok(result.trust.mean > 0.9, 'the farmer has earned a high mean');
+  assert.equal(result.trust.decision, 'ALLOW', 'which is exactly what D49 said a ceiling cannot touch');
   assert.equal(result.farming, true);
-  assert.ok(
-    result.trace.some((t) => t.includes('velocity exceeded') || t.includes('farming ceiling')),
-    'trace should mention farming'
-  );
+  assert.equal(result.decision, 'INCREASE_FRICTION', 'the floor raises it anyway');
+  assert.match(result.trace.join(' '), /farming suspected/);
+});
+
+test('D54: a fast human with varied behavior is not treated as farming', async () => {
+  const clock = fakeClock();
+  const guard = createGuard({ clock, windowSize: 20 });
+  const scopes = ['dashboard', 'search', 'detail', 'export', 'settings'];
+  let seed = 7;
+  const random = () => ((seed = (seed * 1664525 + 1013904223) >>> 0) / 4294967296);
+
+  // ~80/hr, past the rate threshold, but bursty across five scopes.
+  for (let i = 0; i < 24; i += 1) {
+    clock.advance((-Math.log(1 - random()) * 45) / 3600);
+    await guard.evaluate({
+      entity: 'operator',
+      observation: { scope: scopes[i % scopes.length]!, evidence: { positive: 'weak' } },
+    });
+  }
+
+  const result = await guard.evaluate({
+    entity: 'operator',
+    observation: { scope: 'dashboard', evidence: { positive: 'weak' } },
+  });
+
+  assert.equal(result.farming, false, 'speed is not the signal; shape is');
+  assert.equal(result.decision, 'ALLOW');
+});
+
+test('D50: a proven violation outranks the farming floor', async () => {
+  const clock = fakeClock();
+  const guard = createGuard({ clock, invariants: [checkout], windowSize: 20 });
+
+  for (let i = 0; i < 20; i += 1) {
+    clock.advance(1 / 120);
+    await guard.evaluate({ entity: 'farmer', observation: { scope: 'work' } });
+  }
+
+  const result = await guard.evaluate({
+    entity: 'farmer',
+    observation: { scope: 'checkout', data: { from: 'cart', to: 'payment' } },
+  });
+
+  assert.equal(result.hardViolated, true);
+  assert.equal(result.decision, 'RESTRICT', 'proof decides, not the statistical floor');
 });
 
 test('D18: every evaluation reports an anomaly score without it driving the decision', async () => {

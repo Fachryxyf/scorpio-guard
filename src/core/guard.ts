@@ -6,8 +6,8 @@ import {
   DEFAULT_WINDOW_SIZE,
   behaviorFeatures,
   diversityConcurs,
+  farmingSuspected,
   pushObservation,
-  velocityExceeded,
   type BehaviorFeatures,
   type DiversityThresholds,
   type VelocityThresholds,
@@ -85,8 +85,10 @@ export type Assessment = {
    */
   readonly diversity: boolean | undefined;
   /**
-   * Whether evidence is accumulating faster than plausible. D49.
-   * `undefined` when window span is too short to judge.
+   * Whether this entity looks like it is farming trust: a high observation rate
+   * *and* a monotonous shape. D50, corrected by D54.
+   *
+   * `undefined` when there is too little in the window to measure a rate.
    */
   readonly farming: boolean | undefined;
   /**
@@ -118,7 +120,7 @@ export type GuardOptions = {
   readonly diversity?: DiversityThresholds;
   /** Observations retained per entity for behavioral features. D36. */
   readonly windowSize?: number;
-  /** Velocity thresholds for farming detection. D49. */
+  /** Thresholds for the farming check. D50, D54. */
   readonly velocity?: VelocityThresholds;
   /**
    * Use the anomaly classifier (D18) for the D37 concurrence instead of the three
@@ -252,16 +254,17 @@ export function createGuard(options: GuardOptions = {}) {
         );
       }
 
-      // D49 farming fix: velocity ceiling. Unlike diversity (which only gates
-      // believing low variance), velocity can actively RESTRICT a high-mean entity
-      // that is accumulating evidence too fast.
-      const farming = velocityExceeded(updated.window, velocityThresholds);
+      // D50, corrected by D54: farming is a high rate *and* a monotonous shape.
+      // Unlike diversity — which only gates believing low variance — this can raise
+      // the decision for a high-mean entity, which is what D49 said was required.
+      // Rate alone is not enough: humans are capable of being fast.
+      const farming = farmingSuspected(updated.window, velocityThresholds);
       if (farming === true) {
         trace.push(
-          `velocity exceeded: ${behavior.count} obs in window, rate above ${velocityThresholds.maxObsPerHour}/hr — farming ceiling applied`,
+          `farming suspected: rate above ${velocityThresholds.maxObsPerHour}/hr with gaps too regular (CV ${behavior.interArrivalCv.toFixed(2)}) — a fast human is not enough (D54)`,
         );
       } else if (farming === undefined) {
-        trace.push('velocity undetermined: window too short to judge');
+        trace.push('farming undetermined: too few observations to measure a rate');
       }
 
       const trust = assessTrust(
@@ -296,9 +299,9 @@ export function createGuard(options: GuardOptions = {}) {
         }
       }
 
-      // D49: farming ceiling. Applied after trust but before returning. A proven
-      // violation (hard) still wins — farming is statistical, not proof.
-      if (farming === true && !hard.length) {
+      // The farming floor, applied after trust. A proven violation already decided,
+      // and farming is measurement rather than proof, so it does not compete with one.
+      if (farming === true && hard.length === 0) {
         const farmingCeiling: Decision = 'INCREASE_FRICTION';
         if (severity(decision) < severity(farmingCeiling)) {
           decision = farmingCeiling;

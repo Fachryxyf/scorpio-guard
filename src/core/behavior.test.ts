@@ -6,7 +6,8 @@ import {
   behaviorFeatures,
   diversityConcurs,
   pushObservation,
-  velocityExceeded,
+  farmingSuspected,
+  observationRate,
   type ObservationTrace,
 } from './behavior.ts';
 
@@ -135,37 +136,98 @@ test('D46: a lopsided window reads low even though two scopes were seen', () => 
   assert.equal(diversityConcurs(features), false);
 });
 
-test('D49: velocity undetermined with fewer than two observations', () => {
-  assert.equal(velocityExceeded([]), undefined);
-  assert.equal(velocityExceeded([{ at: 0, scope: 'a' }]), undefined);
+test('D50: a rate needs enough observations before it means anything', () => {
+  assert.equal(observationRate([]), undefined);
+  assert.equal(observationRate([{ at: 0, scope: 'a' }]), undefined);
+
+  const four = Array.from({ length: 4 }, (_, i) => ({ at: i * 60_000, scope: 'a' }));
+  assert.equal(observationRate(four), undefined, 'four is below the default minimum');
 });
 
-test('D49: velocity undetermined when window span too short', () => {
-  const burst = [{ at: 0, scope: 'a' }, { at: 1_000, scope: 'b' }];
-  assert.equal(velocityExceeded(burst), undefined);
+test('D50: the rate is observations per hour over the window span', () => {
+  // Ten observations one minute apart: nine minutes of span, so 66.7/hr.
+  const window = Array.from({ length: 10 }, (_, i) => ({ at: i * 60_000, scope: 'a' }));
+  assert.ok(Math.abs(observationRate(window)! - 66.67) < 0.1);
 });
 
-test('D49: sustained high velocity detected', () => {
-  const window = Array.from({ length: 20 }, (_, i) => ({
-    at: i * 30_000,
-    scope: `s${i % 3}`,
-  }));
-  assert.equal(velocityExceeded(window), true);
+test('D54: a fast human is not farming, because gap shape is what separates them', () => {
+  // The first falsification: a busy operator at one action per 45 seconds runs at
+  // 80/hr, well past the rate threshold, and must not be touched.
+  let seed = 7;
+  const random = () => ((seed = (seed * 1664525 + 1013904223) >>> 0) / 4294967296);
+  let at = 0;
+  const bursty = Array.from({ length: 20 }, (_, i) => {
+    at += -Math.log(1 - random()) * 45_000;
+    return { at, scope: `s${i % 5}` };
+  });
+
+  assert.ok(observationRate(bursty)! > 60, 'the rate alone would fire');
+  assert.equal(farmingSuspected(bursty), false, 'bursty gaps clear it');
 });
 
-test('D49: human-paced traffic not flagged', () => {
-  const window = Array.from({ length: 10 }, (_, i) => ({
-    at: i * 12 * 60_000,
-    scope: `s${i % 4}`,
-  }));
-  assert.equal(velocityExceeded(window), false);
+test('D54: repeating one scope quickly is not farming either', () => {
+  // The second falsification: HealthMe's power-user reads one scope over and over
+  // and scores 0.56 on the composite anomaly measure. Narrow attention is not the
+  // signal — regular timing is.
+  let seed = 5;
+  const random = () => ((seed = (seed * 1664525 + 1013904223) >>> 0) / 4294967296);
+  let at = 0;
+  const oneScope = Array.from({ length: 20 }, () => {
+    at += -Math.log(1 - random()) * 12_000;
+    return { at, scope: 'api' };
+  });
+
+  assert.ok(observationRate(oneScope)! > 60);
+  assert.equal(farmingSuspected(oneScope), false, 'one feature used heavily is legitimate');
 });
 
-test('D49: velocity threshold configurable', () => {
-  const window = Array.from({ length: 10 }, (_, i) => ({
-    at: i * 60_000,
-    scope: 'a',
-  }));
-  assert.equal(velocityExceeded(window, { maxObsPerHour: 30, minWindowSpanMs: 60_000 }), true);
-  assert.equal(velocityExceeded(window, { maxObsPerHour: 120, minWindowSpanMs: 60_000 }), false);
+test('D54: a high rate with machine-regular gaps is farming', () => {
+  const fixed = Array.from({ length: 20 }, (_, i) => ({ at: i * 30_000, scope: 'work' }));
+
+  assert.equal(farmingSuspected(fixed), true);
+});
+
+test('D54: jittering a fixed sleep does not hide it', () => {
+  // +-10% around 30s still reads at CV ~0.05. Escaping this means giving up the
+  // regularity, and regularity is what the volume depends on.
+  let seed = 3;
+  const random = () => ((seed = (seed * 1664525 + 1013904223) >>> 0) / 4294967296);
+  let at = 0;
+  const jittered = Array.from({ length: 20 }, () => {
+    at += 30_000 * (0.9 + random() * 0.2);
+    return { at, scope: 'work' };
+  });
+
+  assert.equal(farmingSuspected(jittered), true);
+});
+
+test('D54: regular gaps at a human rate are not farming', () => {
+  // Both halves are required. A slow bot is a different problem, and the diversity
+  // gate of D37 is where it is read.
+  const slow = Array.from({ length: 20 }, (_, i) => ({ at: i * 10 * 60_000, scope: 'work' }));
+
+  assert.ok(observationRate(slow)! < 60);
+  assert.equal(farmingSuspected(slow), false);
+});
+
+test('D50: too few observations is undetermined, not cleared', () => {
+  assert.equal(farmingSuspected([]), undefined);
+  assert.equal(
+    farmingSuspected(Array.from({ length: 4 }, (_, i) => ({ at: i * 1000, scope: 'a' }))),
+    undefined,
+  );
+});
+
+test('D50: both halves of the threshold are policy', () => {
+  const window = Array.from({ length: 20 }, (_, i) => ({ at: i * 45_000, scope: 'work' }));
+
+  assert.equal(
+    farmingSuspected(window, { maxObsPerHour: 200, minObservations: 8, maxInterArrivalCv: 0.25 }),
+    false,
+    'raising the rate bar catches less',
+  );
+  assert.equal(
+    farmingSuspected(window, { maxObsPerHour: 60, minObservations: 8, maxInterArrivalCv: 0.25 }),
+    true,
+  );
 });

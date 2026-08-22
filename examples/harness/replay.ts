@@ -11,6 +11,7 @@
 import type { Invariant } from '../../src/core/constraints.ts';
 import { severity, type Decision } from '../../src/core/decision.ts';
 import { createGuard, type Assessment } from '../../src/core/guard.ts';
+import type { VelocityThresholds } from '../../src/core/behavior.ts';
 import type { Policy } from '../../src/core/policy.ts';
 import type { StateStore } from '../../src/core/store.ts';
 import type { HostOutcome, Persona } from './persona.ts';
@@ -27,6 +28,10 @@ export type Observed = {
   readonly mean: number;
   readonly mass: number;
   readonly diversity: boolean | undefined;
+  /** Whether the velocity ceiling engaged. D50. */
+  readonly farming: boolean | undefined;
+  /** Distance from the reference behavior profile, or `undefined` when unscored. D52. */
+  readonly anomaly: number | undefined;
   readonly hardViolated: boolean;
   readonly trace: readonly string[];
 };
@@ -46,6 +51,10 @@ export type PersonaResult = {
   readonly walkedThrough: boolean;
   readonly finalStage: string;
   readonly finalMean: number;
+  /** True when the velocity ceiling engaged on any step. D50. */
+  readonly farmingSeen: boolean;
+  /** Highest anomaly score reached, or `undefined` if never scored. D52. */
+  readonly peakAnomaly: number | undefined;
   readonly records: readonly Observed[];
 };
 
@@ -67,6 +76,10 @@ export type ReplayOptions = {
    * step — only pass and reject — should count friction as agreement with passing.
    */
   readonly permits?: (advice: Decision) => boolean;
+  /** Velocity thresholds for the farming ceiling. D50. */
+  readonly velocity?: VelocityThresholds;
+  /** Let the anomaly classifier drive the D37 concurrence instead of the conjunction. D52. */
+  readonly useAnomalyClassifier?: boolean;
 };
 
 const defaultPermits = (advice: Decision): boolean => severity(advice) < severity('RESTRICT');
@@ -83,6 +96,8 @@ export async function replayPersona(
     ...(options.invariants ? { invariants: options.invariants } : {}),
     ...(options.store ? { store: options.store } : {}),
     ...(options.policy ? { policy: options.policy } : {}),
+    ...(options.velocity ? { velocity: options.velocity } : {}),
+    ...(options.useAnomalyClassifier ? { useAnomalyClassifier: true } : {}),
   });
 
   const records: Observed[] = [];
@@ -114,6 +129,8 @@ export async function replayPersona(
       mean: assessment.trust.mean,
       mass: assessment.trust.mass,
       diversity: assessment.diversity,
+      farming: assessment.farming,
+      anomaly: assessment.anomaly.score,
       hardViolated: assessment.hardViolated,
       trace: assessment.trace,
     });
@@ -137,6 +154,8 @@ export async function replayPersona(
     walkedThrough: !persona.legitimate && severity(worst) < severity(FELT),
     finalStage: last?.stage ?? 'unknown',
     finalMean: last?.mean ?? 0.5,
+    farmingSeen: records.some((record) => record.farming === true),
+    peakAnomaly: peakOf(records),
     records,
   };
 }
@@ -168,6 +187,8 @@ export function formatResults(results: readonly PersonaResult[]): string {
     ['at', 9],
     ['stage', 12],
     ['mean', 7],
+    ['anom', 6],
+    ['vel', 5],
     ['verdict', 0],
   ] as const;
 
@@ -188,6 +209,8 @@ export function formatResults(results: readonly PersonaResult[]): string {
       at,
       result.finalStage,
       result.finalMean.toFixed(3),
+      result.peakAnomaly === undefined ? '-' : result.peakAnomaly.toFixed(2),
+      result.farmingSeen ? 'yes' : '-',
       verdict,
     ]
       .map((cell, index) => cell.padEnd(columns[index]![1]))
@@ -195,4 +218,13 @@ export function formatResults(results: readonly PersonaResult[]): string {
   });
 
   return [header, '-'.repeat(header.length), ...rows].join('\n');
+}
+
+function peakOf(records: readonly Observed[]): number | undefined {
+  let peak: number | undefined;
+  for (const record of records) {
+    if (record.anomaly === undefined) continue;
+    if (peak === undefined || record.anomaly > peak) peak = record.anomaly;
+  }
+  return peak;
 }

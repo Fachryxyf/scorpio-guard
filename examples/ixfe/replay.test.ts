@@ -114,3 +114,28 @@ test('D45: rotating the entity reference still costs two requests per identity',
   const onceEach = await replayPersona(rotatingShooter(20, 1), withInvariants);
   assert.equal(onceEach.walkedThrough, false, 'proof needs no history');
 });
+
+/**
+ * D54, both halves. The floor has to bite the farmer without touching the operator,
+ * and IXFE's own personas are where that gets tested rather than asserted.
+ */
+test('D54: no legitimate IXFE persona trips the farming floor', async () => {
+  const results = await replayAll(IXFE_LEGITIMATE, withInvariants);
+
+  const tripped = results
+    .filter((result) => result.farmingSeen)
+    .map((result) => result.persona);
+
+  assert.deepEqual(tripped, [], 'speed is not the signal; regular gaps are');
+});
+
+test('D54: the credit drainer trips it, because a fixed sleep is what it is', async () => {
+  // Machine-paced with jitter, one action repeated: the farming shape exactly.
+  const result = await replayPersona(creditDrainer(40), withInvariants);
+
+  assert.equal(result.farmingSeen, true);
+  assert.ok(
+    result.records.some((record) => record.trace.some((line) => line.includes('farming suspected'))),
+    'the trace has to say why',
+  );
+});
