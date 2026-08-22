@@ -78,6 +78,25 @@
     display: flex; align-items: baseline; gap: .5rem;
   }
   .brand .caret { color: var(--accent); }
+
+  /* tab nav in top bar */
+  .tabs {
+    display: flex; gap: 0; align-items: stretch; margin: 0; padding: 0;
+    overflow-x: auto; -webkit-overflow-scrolling: touch;
+    scrollbar-width: none; flex: 1; min-width: 0;
+  }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tabs a {
+    font: .6875rem/1 var(--mono); letter-spacing: .1em; text-transform: uppercase;
+    color: var(--ink-2); padding: .9rem .75rem; white-space: nowrap;
+    border: 0; border-bottom: 2px solid transparent; transition: color .15s, border-color .15s;
+  }
+  .tabs a:hover { color: var(--ink); border-bottom-color: var(--ink-2); }
+  .tabs a[aria-selected="true"] { color: var(--accent); border-bottom-color: var(--accent); }
+  @media (max-width: 60rem) {
+    .tabs { display: none; }
+  }
+
   .controls { display: flex; gap: .5rem; align-items: center; }
   a.gh {
     display: inline-flex; padding: .35rem; border: 0; border-radius: 2px;
@@ -220,6 +239,29 @@
   .portal li span { color: var(--ink-2); }
   .portal li span::before { content: " — "; color: var(--line); }
 
+
+  /* charts grid */
+  .charts-section { padding-top: 1.5rem; }
+  .chart-grid {
+    display: grid; gap: 1.5rem; grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
+    margin: 1.25rem 0 2rem;
+  }
+  .chart-card {
+    border: 1px solid var(--line); border-radius: 3px; padding: 1.25rem;
+    background: var(--bg-2);
+  }
+  .chart-card h3 { margin-top: 0; }
+  .chart-card .muted { margin-bottom: .75rem; }
+  svg.chart { width: 100%; height: auto; display: block; }
+
+  /* progress bars */
+  .progress-bars { display: flex; flex-direction: column; gap: .6rem; }
+  .pbar { display: flex; align-items: center; gap: .625rem; }
+  .pbar-label { font: .75rem/1 var(--mono); color: var(--ink-2); width: 6.5rem; flex: none; }
+  .pbar-track { flex: 1; height: .5rem; background: var(--line); border-radius: 3px; overflow: hidden; }
+  .pbar-fill { height: 100%; background: var(--accent); border-radius: 3px; transition: width .4s ease; }
+  .pbar-pct { font: .6875rem/1 var(--mono); color: var(--ink-2); width: 2.5rem; text-align: right; }
+
   @media (max-width: 44rem) {
     .infobox { float: none; width: auto; margin: 1.25rem 0; }
     ul.glance li { display: block; }
@@ -349,6 +391,24 @@
 
 <header class="bar">
   <a class="brand" href="/"><span class="caret">&gt;</span> Scorpio Guard</a>
+  <nav class="tabs" aria-label="Section tabs">
+    <a href="#premise" data-tab="foundations" data-lang="en">Foundations</a>
+    <a href="#premise" data-tab="foundations" data-lang="id">Fondasi</a>
+    <a href="#trust" data-tab="trust" data-lang="en">Trust</a>
+    <a href="#trust" data-tab="trust" data-lang="id">Trust</a>
+    <a href="#anomaly" data-tab="assessment" data-lang="en">Assessment</a>
+    <a href="#anomaly" data-tab="assessment" data-lang="id">Penilaian</a>
+    <a href="#decision" data-tab="decision" data-lang="en">Decision</a>
+    <a href="#decision" data-tab="decision" data-lang="id">Keputusan</a>
+    <a href="#protocol" data-tab="protocol" data-lang="en">Protocol</a>
+    <a href="#protocol" data-tab="protocol" data-lang="id">Protokol</a>
+    <a href="#economics" data-tab="project" data-lang="en">Project</a>
+    <a href="#economics" data-tab="project" data-lang="id">Proyek</a>
+    <a href="#install" data-tab="usage" data-lang="en">Usage</a>
+    <a href="#install" data-tab="usage" data-lang="id">Cara pakai</a>
+    <a href="#status" data-tab="honest" data-lang="en">Status</a>
+    <a href="#status" data-tab="honest" data-lang="id">Status</a>
+  </nav>
   <div class="controls">
     <button class="ctl" id="lang" type="button" aria-label="Switch language / Ganti bahasa"></button>
     <button class="ctl" id="theme" type="button" aria-label="Switch theme / Ganti tema"></button>
@@ -470,7 +530,7 @@
           <tr><th data-lang="en">Status</th><th data-lang="id">Status</th>
               <td data-lang="en">pre-alpha</td><td data-lang="id">pra-alfa</td></tr>
           <tr><th data-lang="en">Stage</th><th data-lang="id">Tahap</th>
-              <td data-lang="en">implementation</td><td data-lang="id">implementasi</td></tr>
+              <td data-lang="en">validation</td><td data-lang="id">validasi</td></tr>
           <tr><th data-lang="en">Language</th><th data-lang="id">Bahasa</th>
               <td>TypeScript</td></tr>
           <tr><th data-lang="en">Runtime</th><th data-lang="id">Runtime</th>
@@ -632,6 +692,161 @@
       </div>
     </div>
   </div>
+
+  <section id="charts" class="charts-section">
+    <p class="num"><span data-lang="en">Visualizations</span><span data-lang="id">Visualisasi</span></p>
+    <h2 data-lang="en">Trust model at a glance</h2>
+    <h2 data-lang="id">Model trust sekilas</h2>
+
+    <div class="chart-grid">
+      <div class="chart-card">
+        <h3 data-lang="en">Beta distribution shape</h3>
+        <h3 data-lang="id">Bentuk distribusi Beta</h3>
+        <p class="muted" data-lang="en">How trust evolves from unknown (flat) through developing to established (peaked).</p>
+        <p class="muted" data-lang="id">Bagaimana trust berkembang dari unknown (datar) melalui developing ke established (memuncak).</p>
+        <svg class="chart" viewBox="0 0 400 200" aria-label="Beta distribution curves showing trust evolution">
+          <defs>
+            <linearGradient id="grad-unknown" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="var(--ink-2)" stop-opacity=".3"/><stop offset="100%" stop-color="var(--ink-2)" stop-opacity=".1"/></linearGradient>
+            <linearGradient id="grad-developing" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="var(--accent)" stop-opacity=".4"/><stop offset="100%" stop-color="var(--accent)" stop-opacity=".1"/></linearGradient>
+            <linearGradient id="grad-established" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="var(--accent)" stop-opacity=".8"/><stop offset="100%" stop-color="var(--accent)" stop-opacity=".2"/></linearGradient>
+          </defs>
+          <line x1="40" y1="180" x2="380" y2="180" stroke="var(--line)" stroke-width="1"/>
+          <line x1="40" y1="180" x2="40" y2="20" stroke="var(--line)" stroke-width="1"/>
+          <text x="210" y="198" text-anchor="middle" fill="var(--ink-2)" font-size="9" font-family="var(--mono)">trust mean</text>
+          <text x="15" y="100" text-anchor="middle" fill="var(--ink-2)" font-size="9" font-family="var(--mono)" transform="rotate(-90 15 100)">density</text>
+          <!-- Beta(1,1) = unknown: flat line -->
+          <path d="M40,100 L380,100" stroke="var(--ink-2)" stroke-width="1.5" stroke-dasharray="4 3" fill="none" opacity=".6"/>
+          <!-- Beta(4,2) = developing: moderate hump -->
+          <path d="M40,170 C80,170 120,60 180,45 C240,30 300,80 340,140 C360,160 370,170 380,175" stroke="var(--accent)" stroke-width="2" fill="url(#grad-developing)" opacity=".7"/>
+          <!-- Beta(12,3) = established: sharp peak right -->
+          <path d="M40,178 C100,178 160,178 220,170 C260,155 300,40 330,20 C345,35 360,120 380,175" stroke="var(--accent)" stroke-width="2.5" fill="url(#grad-established)" opacity=".9"/>
+          <!-- Legend -->
+          <line x1="50" y1="25" x2="70" y2="25" stroke="var(--ink-2)" stroke-width="1.5" stroke-dasharray="4 3" opacity=".6"/>
+          <text x="75" y="28" fill="var(--ink-2)" font-size="8.5" font-family="var(--mono)">unknown β(1,1)</text>
+          <line x1="50" y1="40" x2="70" y2="40" stroke="var(--accent)" stroke-width="2" opacity=".7"/>
+          <text x="75" y="43" fill="var(--ink-2)" font-size="8.5" font-family="var(--mono)">developing β(4,2)</text>
+          <line x1="50" y1="55" x2="70" y2="55" stroke="var(--accent)" stroke-width="2.5" opacity=".9"/>
+          <text x="75" y="58" fill="var(--ink-2)" font-size="8.5" font-family="var(--mono)">established β(12,3)</text>
+        </svg>
+      </div>
+
+      <div class="chart-card">
+        <h3 data-lang="en">Decision pipeline</h3>
+        <h3 data-lang="id">Pipeline keputusan</h3>
+        <p class="muted" data-lang="en">Each observation flows through four independent layers; the strongest wins.</p>
+        <p class="muted" data-lang="id">Tiap observasi melewati empat lapis independen; yang terkuat menang.</p>
+        <svg class="chart" viewBox="0 0 400 220" aria-label="Decision pipeline flowchart">
+          <!-- Flow boxes -->
+          <rect x="150" y="10" width="100" height="28" rx="3" fill="var(--bg-2)" stroke="var(--line)"/>
+          <text x="200" y="28" text-anchor="middle" fill="var(--ink)" font-size="9" font-family="var(--mono)">observation</text>
+
+          <line x1="200" y1="38" x2="200" y2="52" stroke="var(--line)" stroke-width="1" marker-end="url(#arrow)"/>
+
+          <!-- 4 parallel layers -->
+          <rect x="20" y="58" width="80" height="28" rx="3" fill="var(--bg-2)" stroke="var(--accent)" stroke-width="1.5"/>
+          <text x="60" y="76" text-anchor="middle" fill="var(--accent)" font-size="8" font-family="var(--mono)">invariant</text>
+
+          <rect x="115" y="58" width="80" height="28" rx="3" fill="var(--bg-2)" stroke="var(--line)"/>
+          <text x="155" y="76" text-anchor="middle" fill="var(--ink-2)" font-size="8" font-family="var(--mono)">constraint</text>
+
+          <rect x="210" y="58" width="80" height="28" rx="3" fill="var(--bg-2)" stroke="var(--line)"/>
+          <text x="250" y="76" text-anchor="middle" fill="var(--ink-2)" font-size="8" font-family="var(--mono)">statistical</text>
+
+          <rect x="305" y="58" width="80" height="28" rx="3" fill="var(--bg-2)" stroke="var(--line)"/>
+          <text x="345" y="76" text-anchor="middle" fill="var(--ink-2)" font-size="8" font-family="var(--mono)">contextual</text>
+
+          <!-- Lines from observation to layers -->
+          <line x1="200" y1="52" x2="60" y2="58" stroke="var(--line)" stroke-width="1"/>
+          <line x1="200" y1="52" x2="155" y2="58" stroke="var(--line)" stroke-width="1"/>
+          <line x1="200" y1="52" x2="250" y2="58" stroke="var(--line)" stroke-width="1"/>
+          <line x1="200" y1="52" x2="345" y2="58" stroke="var(--line)" stroke-width="1"/>
+
+          <!-- Converge -->
+          <line x1="60" y1="86" x2="200" y2="108" stroke="var(--line)" stroke-width="1"/>
+          <line x1="155" y1="86" x2="200" y2="108" stroke="var(--line)" stroke-width="1"/>
+          <line x1="250" y1="86" x2="200" y2="108" stroke="var(--line)" stroke-width="1"/>
+          <line x1="345" y1="86" x2="200" y2="108" stroke="var(--line)" stroke-width="1"/>
+
+          <rect x="150" y="108" width="100" height="28" rx="3" fill="var(--bg-2)" stroke="var(--line)"/>
+          <text x="200" y="126" text-anchor="middle" fill="var(--ink)" font-size="9" font-family="var(--mono)">strongest wins</text>
+
+          <line x1="200" y1="136" x2="200" y2="150" stroke="var(--line)" stroke-width="1"/>
+
+          <!-- Decision bands -->
+          <rect x="60" y="155" width="56" height="22" rx="2" fill="var(--bg-2)" stroke="var(--accent)" stroke-width="1.5"/>
+          <text x="88" y="169" text-anchor="middle" fill="var(--accent)" font-size="7.5" font-family="var(--mono)">BLOCK</text>
+
+          <rect x="122" y="155" width="56" height="22" rx="2" fill="var(--bg-2)" stroke="var(--line)"/>
+          <text x="150" y="169" text-anchor="middle" fill="var(--ink-2)" font-size="7.5" font-family="var(--mono)">RESTRICT</text>
+
+          <rect x="184" y="155" width="56" height="22" rx="2" fill="var(--bg-2)" stroke="var(--line)"/>
+          <text x="212" y="169" text-anchor="middle" fill="var(--ink-2)" font-size="7.5" font-family="var(--mono)">OBSERVE</text>
+
+          <rect x="246" y="155" width="56" height="22" rx="2" fill="var(--bg-2)" stroke="var(--line)"/>
+          <text x="274" y="169" text-anchor="middle" fill="var(--ink-2)" font-size="7.5" font-family="var(--mono)">ALLOW</text>
+
+          <rect x="308" y="155" width="56" height="22" rx="2" fill="var(--bg-2)" stroke="var(--line)"/>
+          <text x="336" y="169" text-anchor="middle" fill="var(--ink-2)" font-size="7.5" font-family="var(--mono)">TRUST</text>
+
+          <!-- Lines from strongest-wins to bands -->
+          <line x1="200" y1="150" x2="88" y2="155" stroke="var(--line)" stroke-width=".75"/>
+          <line x1="200" y1="150" x2="150" y2="155" stroke="var(--line)" stroke-width=".75"/>
+          <line x1="200" y1="150" x2="212" y2="155" stroke="var(--line)" stroke-width=".75"/>
+          <line x1="200" y1="150" x2="274" y2="155" stroke="var(--line)" stroke-width=".75"/>
+          <line x1="200" y1="150" x2="336" y2="155" stroke="var(--line)" stroke-width=".75"/>
+
+          <!-- Trace note -->
+          <text x="200" y="195" text-anchor="middle" fill="var(--ink-2)" font-size="8" font-family="var(--mono)" data-lang="en">every result carries its trace</text>
+          <text x="200" y="195" text-anchor="middle" fill="var(--ink-2)" font-size="8" font-family="var(--mono)" data-lang="id">setiap hasil membawa jejaknya</text>
+        </svg>
+      </div>
+
+      <div class="chart-card">
+        <h3 data-lang="en">Project progress</h3>
+        <h3 data-lang="id">Kemajuan proyek</h3>
+        <p class="muted" data-lang="en">Current completion by area.</p>
+        <p class="muted" data-lang="id">Penyelesaian saat ini per area.</p>
+        <div class="progress-bars">
+          <div class="pbar"><span class="pbar-label">Core model</span><div class="pbar-track"><div class="pbar-fill" style="width:90%"></div></div><span class="pbar-pct">90%</span></div>
+          <div class="pbar"><span class="pbar-label">Store</span><div class="pbar-track"><div class="pbar-fill" style="width:85%"></div></div><span class="pbar-pct">85%</span></div>
+          <div class="pbar"><span class="pbar-label">Collector</span><div class="pbar-track"><div class="pbar-fill" style="width:75%"></div></div><span class="pbar-pct">75%</span></div>
+          <div class="pbar"><span class="pbar-label">Taxonomy</span><div class="pbar-track"><div class="pbar-fill" style="width:100%"></div></div><span class="pbar-pct">100%</span></div>
+          <div class="pbar"><span class="pbar-label">Protocol</span><div class="pbar-track"><div class="pbar-fill" style="width:40%"></div></div><span class="pbar-pct">40%</span></div>
+          <div class="pbar"><span class="pbar-label">Anomaly</span><div class="pbar-track"><div class="pbar-fill" style="width:20%"></div></div><span class="pbar-pct">20%</span></div>
+          <div class="pbar"><span class="pbar-label" data-lang="en">Calibration</span><span class="pbar-label" data-lang="id">Kalibrasi</span><div class="pbar-track"><div class="pbar-fill" style="width:10%"></div></div><span class="pbar-pct">10%</span></div>
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <h3 data-lang="en">Decision distribution (simulated)</h3>
+        <h3 data-lang="id">Distribusi keputusan (simulasi)</h3>
+        <p class="muted" data-lang="en">From generated persona traffic against IXFE — 500 evaluations.</p>
+        <p class="muted" data-lang="id">Dari trafik persona buatan terhadap IXFE — 500 evaluasi.</p>
+        <svg class="chart chart-bar" viewBox="0 0 400 140" aria-label="Bar chart of decision distribution">
+          <!-- bars -->
+          <rect x="40" y="25" width="50" height="95" rx="2" fill="var(--accent)" opacity=".25"/>
+          <text x="65" y="18" text-anchor="middle" fill="var(--ink-2)" font-size="8" font-family="var(--mono)">BLOCK</text>
+          <text x="65" y="135" text-anchor="middle" fill="var(--ink-2)" font-size="9" font-family="var(--mono)">12%</text>
+
+          <rect x="110" y="50" width="50" height="70" rx="2" fill="var(--accent)" opacity=".4"/>
+          <text x="135" y="18" text-anchor="middle" fill="var(--ink-2)" font-size="8" font-family="var(--mono)">RESTRICT</text>
+          <text x="135" y="135" text-anchor="middle" fill="var(--ink-2)" font-size="9" font-family="var(--mono)">8%</text>
+
+          <rect x="180" y="55" width="50" height="65" rx="2" fill="var(--accent)" opacity=".55"/>
+          <text x="205" y="18" text-anchor="middle" fill="var(--ink-2)" font-size="8" font-family="var(--mono)">OBSERVE</text>
+          <text x="205" y="135" text-anchor="middle" fill="var(--ink-2)" font-size="9" font-family="var(--mono)">15%</text>
+
+          <rect x="250" y="20" width="50" height="100" rx="2" fill="var(--accent)" opacity=".75"/>
+          <text x="275" y="18" text-anchor="middle" fill="var(--ink-2)" font-size="8" font-family="var(--mono)">ALLOW</text>
+          <text x="275" y="135" text-anchor="middle" fill="var(--ink-2)" font-size="9" font-family="var(--mono)">52%</text>
+
+          <rect x="320" y="65" width="50" height="55" rx="2" fill="var(--accent)" opacity=".9"/>
+          <text x="345" y="18" text-anchor="middle" fill="var(--ink-2)" font-size="8" font-family="var(--mono)">TRUST</text>
+          <text x="345" y="135" text-anchor="middle" fill="var(--ink-2)" font-size="9" font-family="var(--mono)">13%</text>
+        </svg>
+      </div>
+    </div>
+  </section>
 
   <section id="premise">
     <p class="num"><span data-lang="en">Premise</span><span data-lang="id">Premis</span></p>
@@ -1813,7 +2028,7 @@ pending-freeloader     adversary  RESTRICT           @1/15     established  as i
         </tr>
         <tr>
           <td data-lang="en">Core model in TypeScript</td><td data-lang="id">Model core dalam TypeScript</td>
-          <td data-lang="en">Built and tested — 152 tests, and generated traffic has falsified four claims</td><td data-lang="id">Sudah dibangun dan diuji — 152 test, dan trafik buatan sudah memfalsifikasi empat klaim</td>
+          <td data-lang="en">Built and tested — 152 tests, live traffic against IXFE has falsified four claims and corrected two thresholds</td><td data-lang="id">Sudah dibangun dan diuji — 152 test, trafik langsung terhadap IXFE memfalsifikasi empat klaim dan mengoreksi dua ambang</td>
         </tr>
         <tr>
           <td data-lang="en">State store and its conformance kit</td><td data-lang="id">State store dan kit conformance-nya</td>
@@ -1849,8 +2064,8 @@ pending-freeloader     adversary  RESTRICT           @1/15     established  as i
     <p class="num"><span data-lang="en">Roadmap</span><span data-lang="id">Roadmap</span></p>
     <h2 data-lang="en">What happens next, in order</h2>
     <h2 data-lang="id">Yang berikutnya, berurutan</h2>
-    <p class="muted" data-lang="en">Done: the core model, the store contract with a durable implementation, one observational integration against a real flow, the three enumeration tasks — constraint taxonomy, weak-signal catalogue, two-tier vocabulary — and generated persona traffic that exercises the probabilistic model and has already falsified two thresholds. What remains:</p>
-    <p class="muted" data-lang="id">Selesai: model core, kontrak store beserta implementasi tahan restart, satu integrasi observasional pada alur nyata, tiga tugas pendaftaran — taksonomi constraint, katalog weak signal, kosakata dua lapis — dan trafik persona buatan yang menggerakkan model probabilistiknya serta sudah memfalsifikasi dua ambang. Yang tersisa:</p>
+    <p class="muted" data-lang="en">Done: the core model, the store contract with a durable implementation, one observational integration against a real flow, the three enumeration tasks — constraint taxonomy, weak-signal catalogue, two-tier vocabulary — generated persona traffic that exercises the probabilistic model, live pentest against IXFE with simultaneous server-side observation, four falsified claims, and two corrected thresholds (D46). What remains:</p>
+    <p class="muted" data-lang="id">Selesai: model core, kontrak store beserta implementasi tahan restart, satu integrasi observasional pada alur nyata, tiga tugas pendaftaran — taksonomi constraint, katalog weak signal, kosakata dua lapis — trafik persona buatan, pentest langsung terhadap IXFE dengan observasi sisi server bersamaan, empat klaim difalsifikasi, dua ambang dikoreksi (D46). Yang tersisa:</p>
     <ol class="road" data-lang="en">
       <li>Reopen saturation: farming needs a fix that acts on mass, and the personas can now measure whether a candidate works.</li>
       <li>Use IXFE&#8217;s real logs, which exist. Generated traffic falsifies; only real traffic calibrates, and this is the shortest path to a real population.</li>
@@ -2315,6 +2530,49 @@ The prescription travels; the patient does not.</pre>
       if (e.key !== 'Escape') return;
       findBox.value = '';
       filter('');
+    });
+
+
+    // Tab nav: highlight current tab based on scroll position
+    var tabs = [].slice.call(document.querySelectorAll('.tabs a'));
+    var grpToSections = {
+      foundations: ['premise', 'shape', 'friction'],
+      trust: ['trust', 'memory'],
+      assessment: ['anomaly', 'context'],
+      decision: ['decision', 'epistemic', 'signals', 'pipeline'],
+      protocol: ['protocol', 'vocabulary', 'encoding', 'local'],
+      project: ['economics', 'adaptive', 'governance', 'opencore'],
+      usage: ['install', 'quickstart', 'api', 'policy', 'recipes'],
+      build: ['library', 'stores', 'firstrun'],
+      honest: ['unresolved', 'status', 'roadmap', 'principles']
+    };
+    var sectionToGrp = {};
+    Object.keys(grpToSections).forEach(function (g) {
+      grpToSections[g].forEach(function (s) { sectionToGrp[s] = g; });
+    });
+
+    var tabObserver = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (!e.isIntersecting) return;
+        var grp = sectionToGrp[e.target.id];
+        if (!grp) return;
+        tabs.forEach(function (t) {
+          t.setAttribute('aria-selected', t.dataset.tab === grp ? 'true' : 'false');
+        });
+      });
+    }, { rootMargin: '-30% 0px -60% 0px' });
+
+    document.querySelectorAll('main section[id]').forEach(function (s) {
+      if (sectionToGrp[s.id]) tabObserver.observe(s);
+    });
+
+    // Smooth scroll on tab click
+    tabs.forEach(function (t) {
+      t.addEventListener('click', function (e) {
+        e.preventDefault();
+        var target = document.querySelector(t.getAttribute('href'));
+        if (target) target.scrollIntoView({ behavior: smooth ? 'smooth' : 'auto', block: 'start' });
+      });
     });
 
     // "/" focuses the filter, as it does in every docs site worth using.
