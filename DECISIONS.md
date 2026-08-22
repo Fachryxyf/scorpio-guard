@@ -47,6 +47,7 @@ Last updated: 2026-08-21
 - [D37 — Saturation guard belongs in the decision layer, not the trust model](#d37--saturation-guard-belongs-in-the-decision-layer-not-the-trust-model)
 - [D40 — An epistemic stage precedes trust and uncertainty](#d40--an-epistemic-stage-precedes-trust-and-uncertainty)
 - [D46 — Two thresholds the traffic falsified](#d46--two-thresholds-the-traffic-falsified)
+- [D49 — D37 does not do what it claims](#d49--d37-does-not-do-what-it-claims)
 - [D39 — The cold-start band contradicted the zero-friction goal](#d39--the-cold-start-band-contradicted-the-zero-friction-goal)
 
 **Part IV — Hard constraints**
@@ -97,6 +98,8 @@ Last updated: 2026-08-21
 - [D29 — No empty repositories](#d29--no-empty-repositories)
 - [D34 — PoC target: HealthMe, with its limits stated](#d34--poc-target-healthme-with-its-limits-stated)
 - [D45 — Generate the traffic; do not wait for it](#d45--generate-the-traffic-do-not-wait-for-it)
+- [D47 — Primary target: IXFE, because it has something to steal](#d47--primary-target-ixfe-because-it-has-something-to-steal)
+- [D48 — A stale client view is not a proof](#d48--a-stale-client-view-is-not-a-proof)
 - [D30 — PoC must run against a real application flow](#d30--poc-must-run-against-a-real-application-flow)
 
 **[Open questions](#open-questions)**
@@ -712,7 +715,10 @@ failing test rather than as silent drift.
 
 ## D37 — Saturation guard belongs in the decision layer, not the trust model
 
-**Decided.**
+**Decided. The mitigation claim below is withdrawn by D49** — traffic showed the gate
+cannot affect a farmed entity, because farming produces a high mean and a ceiling can
+only lower a decision. The reasoning about *where* the fix belongs is left standing;
+the conclusion that farming is therefore mitigated is not.
 
 D4 recorded a gap as a passing note: an entity interacting at high frequency
 converges on a large mass ceiling, drives `Var[p]` low, and unlocks the full
@@ -1038,6 +1044,89 @@ still read `false` because a single scope now scores exactly `0`.
 The thresholds in `DEFAULT_DIVERSITY` and the epistemic boundaries `3` and `7` are
 untouched. The traffic gave no reason to move them, and moving a number because a
 synthetic run suggested it would be exactly the overreach D45 warns against.
+
+---
+
+## D49 — D37 does not do what it claims
+
+**Decided, from the D47 traffic. This corrects a claim, not a number.**
+
+D37 records a fix for farming: a patient attacker interacts uniformly at high
+volume, drives `Var[p]` down, unlocks the full decision space, and becomes hard to
+move. The fix was to gate the uncertainty ceiling on the anomaly dimension
+concurring that behavior was varied.
+
+The IXFE personas made it possible to test that, and it does not hold.
+
+### The gate cannot affect the entity it was written for
+
+Farming produces a **high** mean. A high mean proposes `ALLOW` or `OBSERVE`. A
+ceiling can only ever *lower* a decision. So for every farmed entity the gate is
+unobservable — and this is not a threshold being slightly off, it is a structural
+consequence of where the gate sits:
+
+```
+mean 0.99  monotonous -> ALLOW    diverse -> ALLOW     gate changed nothing
+mean 0.85  monotonous -> ALLOW    diverse -> ALLOW     gate changed nothing
+mean 0.70  monotonous -> OBSERVE  diverse -> OBSERVE   gate changed nothing
+```
+
+D37 half-noticed this. Its closing paragraph says the guard "changes nothing" for a
+trusted entity, and that farming buys "protection against future escalation, not a
+treatment change now". That is right, and it is the whole story rather than a
+footnote: *the ceiling is not the mechanism that would deliver the protection
+either*. What actually protects a farmed entity is accumulated positive mass
+resisting negative evidence, which is D3 and D4 arithmetic and has nothing to do
+with the anomaly dimension.
+
+Measured: 300 uniform positive interactions, then strong negatives every 90s. It
+takes **17** to leave `ALLOW`, and 60 to reach friction. That is farming working
+exactly as feared, with the D37 gate in place and irrelevant to it.
+
+### Where the gate *is* observable, it inverts
+
+The gate only ever changes an outcome for `mean < 0.4` — an entity the model already
+distrusts — and there it withholds escalation *because* behavior was monotonous:
+
+```
+mean 0.10  monotonous -> INCREASE_FRICTION   diverse -> BLOCK
+mean 0.30  monotonous -> INCREASE_FRICTION   diverse -> RESTRICT
+```
+
+Read plainly: behaving mechanically earns a milder treatment than behaving variedly.
+For a deliberate bot that is backwards. The IXFE `credit-drainer` sits exactly here —
+authorised, machine-paced, spending real money on Google Places calls — and stops at
+`INCREASE_FRICTION` when varied behavior at the same mean would reach `RESTRICT`.
+
+### Why the behavior is left alone anyway
+
+An attempt was made to make the gate directional — engage only when `mean >= 0.5`,
+the farming side. It type-checks, it is arguably more honest, and it changes
+**nothing observable at all**, because that region proposes `ALLOW` or `OBSERVE`
+already. It was reverted: a rule with no effect is worse than no rule, since the next
+reader has to work out that it does nothing.
+
+More importantly, the same inversion that hurts the drainer *helps* the case the
+design says matters most. A broken-but-legitimate client — a cron with a stale token,
+retrying uniformly, failing every time — reaches `mean 0.003` with low variance, and
+the gate is what keeps it at `INCREASE_FRICTION` instead of `BLOCK`. False positives
+are the central constraint, and that is a false positive avoided.
+
+So one rule produces both effects, and which dominates is a question about real
+populations rather than about the mathematics. Changing it now would be picking a
+side from synthetic traffic, which is what D45 explicitly forbids.
+
+### What this commits to
+
+- The claim in D37 that farming is mitigated is **withdrawn**. Farming is an open
+  problem again, listed as such.
+- Both halves are asserted in `assess.test.ts` so the withdrawn claim cannot drift
+  back into the documentation: one test fixes that the gate cannot affect a
+  positive-dominant entity, another fixes that monotony earns the milder treatment
+  where it can.
+- The real fix, whatever it is, has to act on **mass** rather than on the ceiling —
+  which is what D4 argued against and D37 accepted. That tension is now on the table
+  with evidence, instead of settled by assumption.
 
 ---
 
@@ -2043,6 +2132,12 @@ health PWA, before any greenfield fixture.
 > by generated personas against these same invariants. That falsifies thresholds
 > (D46 records two) but still cannot calibrate them, so what follows stays true of
 > calibration and no longer true of *exercising the model at all*.
+>
+> **Superseded as the primary target by D47.** The deeper problem was never volume:
+> nothing behind a personal PIN screen is worth an attacker's time, so the adversary
+> had to be invented. IXFE has paid compute behind a public endpoint. HealthMe is kept
+> as the small-application regression — two scopes, one user — which is the case that
+> caught the D46 entropy bug.
 
 ### Why it fits the D30 requirements
 
@@ -2283,11 +2378,162 @@ small relative to the traffic that paid for it, and the bound is now asserted.
 
 ### As implemented
 
-`examples/healthme/personas.ts` and `replay.ts`, asserted in `replay.test.ts`, and
-readable as a table via `npm run replay`. The two claims that must not regress —
-no legitimate persona feels anything, no adversary walks through — are tests. The
-rest is output meant to be read, because a threshold gets argued about from numbers
-and not from prose.
+`examples/harness/` holds the application-independent parts — a persona is a sequence
+of interactions with the gaps between them, and the replay drives one through a guard.
+Targets supply their own invariants and personas: `examples/ixfe/` and
+`examples/healthme/`. Asserted in each target's `replay.test.ts`, readable as tables
+via `npm run replay`.
+
+The two claims that must not regress — no legitimate persona feels anything, no
+adversary walks through — are tests. The rest is output meant to be read, because a
+threshold gets argued about from numbers and not from prose.
+
+Deliberately outside `src/`: this generates *test* traffic. Shipping it in the library
+would put a traffic generator in an adopter's bundle, and blur the line the design
+rests on — SG observes, it never produces.
+
+---
+
+## D47 — Primary target: IXFE, because it has something to steal
+
+**Decided, superseding D34 as the primary target.**
+
+HealthMe was chosen because it was real and available. It is a PIN-gated personal
+health app with one user, and the honest reason it cannot validate the thesis is not
+the traffic volume — it is that **nothing behind the PIN is worth an attacker's
+time**. An adversary needs a motive, and HealthMe supplies none.
+
+IXFE (`ixfe.pro`) does. It is a competitor-intelligence platform: three deployables,
+a public pre-launch funnel with no authentication in front of it, and a credit ledger
+where a single request spends money — `marketplace_global` costs 12 credits and makes
+one Google Places call per market, billed to the operator whether or not the caller
+was legitimate.
+
+| Property | HealthMe | IXFE |
+|---|---|---|
+| Unauthenticated surface | none | `/api/waitlist`, `/api/order`, `/api/auth/*`, the Xendit webhook |
+| Worth stealing | one person's health notes | paid compute, competitor data, a payment path |
+| Cost of an abusive request | a wasted lambda invocation | real money, per request |
+| Scopes | 2 | 5 |
+| Proof sources reachable | 4 of 6 | all 6 |
+| Threat model | hypothetical | written into its own defences |
+
+### Its own defences are the threat model
+
+This is what makes IXFE a better target than a hypothetical one. Every mitigation in
+`landing-service/` and `server/index.js` records an attack its author expected, so the
+adversary personas are not invented — they are read off:
+
+| IXFE defence | Persona it names |
+|---|---|
+| honeypot field, absorbed silently | `honeypot-filler` |
+| `dwell` time-trap | `endpoint-shooter` |
+| per-code OTP attempt cap | `otp-grinder` |
+| 404 on unknown `external_id` | `webhook-forger` |
+| `activation_consumed` primary key | `activation-replayer` |
+| 410 after launch | `post-launch-replayer` |
+| `provisionPending()` granting zero credits | `pending-freeloader` |
+| `CF-Connecting-IP` rate limiting | `rotating-shooter` |
+| *(none — every request is authorised)* | `credit-drainer` |
+
+That last row is the point of the whole exercise. The `credit-drainer` breaks no
+invariant, holds a valid session, and every request is correctly authorised. It has to
+be caught by the statistical layer or not at all — and it is what the model was built
+for, finally represented by something with money attached.
+
+### All six proof sources, which HealthMe could not reach
+
+D41 closed the constraint taxonomy over six kinds of fact a host can prove from.
+HealthMe could express four. IXFE reaches all six, and `replay.test.ts` fails if a
+source has no declared invariant:
+
+| Proof source | IXFE invariant |
+|---|---|
+| `reachability` | the pre-order funnel, and the auth flow |
+| `precondition` | paid work requires credits, and an active subscription |
+| `causality` | a submission with no `dwell` did not come from the form |
+| `order` | a code cannot be submitted before it was requested |
+| `issuance` | activation `jti`, `order_id`, invoice `external_id` |
+| `exclusivity` | joining a waiting list for a product that is already live |
+
+`issuance` and `exclusivity` are the two classes D41 *added*, and IXFE has three
+instances of the first and a clean instance of the second. That is the closure
+argument being exercised rather than asserted.
+
+### What IXFE adds that HealthMe could not show
+
+**A 404 is not a memory.** IXFE already answers correctly at every one of these
+endpoints — 410, 403, 404, silent absorption. What it does not do is *remember*: the
+`webhook-forger` can guess `external_id` forever, and each refusal is a discarded log
+line. The guard turns each refusal into accumulating evidence about the caller, which
+is the argument for the library stated in a place where it is checkable.
+
+**Silent absorption costs the defender.** IXFE answers `{ slot: 0 }` to a bot so it
+cannot tell it failed. Good for confusing the bot, and it leaves IXFE with no record
+of who did it. The missing `dwell` is a *proof*, so SG reaches `RESTRICT` on request
+one — no history required.
+
+**Proof beats churn.** D45 measured that rotating identities defeats accumulated
+evidence below two requests per identity. Against IXFE that floor disappears wherever
+the violation is provable: `rotating-shooter` at one request per identity is still
+caught, because a proof needs no history. That is a concrete answer to the churn
+problem for the subset of cases a host can declare — and it says nothing about the
+rest, which stays open.
+
+### HealthMe is kept
+
+Not deleted, demoted — and for a reason found the hard way. HealthMe is the
+*small-application* case: two scopes, one user. That is what caught the entropy
+denominator in D46, because a two-scope application could not reach the diversity
+threshold at all. A harness that only ran against a five-scope surface would not have
+found it, so HealthMe stays as the small-surface regression.
+
+### What is unchanged
+
+IXFE traffic is still **generated**, so D45's limit applies exactly as before: this
+falsifies, it does not calibrate. IXFE has real users and real logs, and using those
+would be a different and better exercise — recorded as the next step rather than
+claimed here.
+
+---
+
+## D48 — A stale client view is not a proof
+
+**Decided, from the first IXFE run.**
+
+The first draft of `workRequiresCredits` was declared `hard`: paid work requires a
+balance that covers it, and `requireCredits()` already returns 402. The traffic
+immediately produced a false positive — `ran-out-of-credits`, a paying customer who
+hits a zero balance, is refused once, and tops up. `RESTRICT` on request three.
+
+D32 is what was violated. Declaring `hard` asserts **completeness** over the scope:
+that no legitimate client ever asks for work it cannot afford. That claim is false,
+and not marginally so — the client's view of its own balance is stale *by
+construction*:
+
+- jobs are queued and billed asynchronously, so the balance moves after the response;
+- another tab or another device may have spent the difference;
+- a lapsed subscription changes the answer without the open page hearing about it.
+
+So one refused request is how a person discovers their balance. A hundred is a script.
+That is exactly the shape of evidence rather than proof, and `soft` is the honest
+declaration — it contributes strong negative mass (D38) and lets the accumulation
+decide.
+
+### The general lesson, which is the reason this is recorded
+
+*Being enforced by the server does not make something provable.* `requireCredits()`
+returning 402 proves the server refused; it does not prove the caller was
+illegitimate. The two get conflated because both produce an error response, and D14
+already separates them — certainty is not severity — but nothing had connected that to
+`strength` until traffic forced it.
+
+The counterexample in the same file is `workRequiresActiveSubscription`, which stays
+`hard`: `provisionPending()` writes zero credits, so a pending subscription holding a
+balance means something is genuinely wrong. Worth naming that a violation there proves
+*something* is wrong and not necessarily that the **caller** did it — an internal
+accounting bug looks identical. `RESTRICT` is right either way, since withholding paid
+compute until a human looks is correct whichever cause it turns out to be.
 
 ---
 
@@ -2312,14 +2558,23 @@ library works against a real flow, and its production traffic — one user — c
 exercise the probabilistic model.
 
 D45 changes what follows from that. The flow is drivable even though the traffic is
-not, so the statistical layer is now exercised by generated personas rather than by
+not, so the statistical layer is exercised by generated personas rather than by
 waiting: two thresholds were falsified immediately (D46), and identity churn is
-recorded as a measured floor rather than a worry. What generated traffic cannot do
-is calibrate, so the requirements in D34 still stand for a real target — Pusaka
-remains the candidate, blocked on whether it gains a server side rather than on
-effort.
+recorded as a measured floor rather than a worry.
+
+D47 then moved the primary target to **IXFE**, which has what HealthMe never did —
+paid compute behind an unauthenticated endpoint, so an attacker has a motive and the
+threat model is written into the application's own defences. That surfaced two further
+corrections: a `hard` declaration that was not provable (D48), and the discovery that
+D37 never mitigated farming (D49).
+
+What generated traffic still cannot do is calibrate. The next step is IXFE's real
+logs rather than another synthetic target; Pusaka remains a candidate for a genuinely
+unauthenticated public surface, still blocked on whether it gains a server side.
 
 | Ref | Recorded as | Still unvalidated |
 |---|---|---|
 | D45 | Generated persona traffic | The distributions are invented. Every persona is a hypothesis about how someone behaves, and an attacker who reads the file can shape traffic around it. |
 | D46 | Two thresholds corrected | Corrected in the right direction, not calibrated to a value. `OBSERVE` at `developing` is defensible; that `3` and `7` are the right boundaries is still a guess. |
+| D37, D49 | Saturation / farming | **Reopened.** The gate does not mitigate farming, and 300 uniform positives absorb 17 strong negatives before leaving `ALLOW`. A real fix has to act on mass, which is what D4 argued against. |
+| D47 | IXFE as the target | Its invariants are read from its code, which is honest, and its *traffic* is still generated. IXFE has real users and real logs; using those is the next step, not something claimed here. |

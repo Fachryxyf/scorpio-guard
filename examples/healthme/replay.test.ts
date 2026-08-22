@@ -1,7 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import { replayAll, replayPersona } from './replay.ts';
+import { replayAll, replayPersona } from '../harness/replay.ts';
+import { healthmeInvariants } from './invariants.ts';
 import {
   ADVERSARY_PERSONAS,
   LEGITIMATE_PERSONAS,
@@ -12,6 +13,15 @@ import {
 } from './personas.ts';
 
 /**
+ * HealthMe counts friction as agreement with allowing: it has no friction step, only
+ * pass and lockout, so anything short of RESTRICT is closer to pass.
+ */
+const options = {
+  invariants: healthmeInvariants,
+  permits: (advice: string) => advice !== 'RESTRICT' && advice !== 'BLOCK',
+} as const;
+
+/**
  * The central constraint, as an assertion. D45.
  *
  * The design states false positives are unacceptable at product scale; this is
@@ -19,7 +29,7 @@ import {
  * usage may ever be advised anything a user would feel.
  */
 test('D45: no legitimate persona is ever given friction', async () => {
-  const results = await replayAll(LEGITIMATE_PERSONAS);
+  const results = await replayAll(LEGITIMATE_PERSONAS, options);
 
   const offenders = results
     .filter((result) => result.falsePositive)
@@ -30,7 +40,7 @@ test('D45: no legitimate persona is ever given friction', async () => {
 });
 
 test('D45: every adversary persona costs something', async () => {
-  const results = await replayAll(ADVERSARY_PERSONAS);
+  const results = await replayAll(ADVERSARY_PERSONAS, options);
 
   const walkedThrough = results
     .filter((result) => result.walkedThrough)
@@ -42,8 +52,8 @@ test('D45: every adversary persona costs something', async () => {
 test('D45: a fixed sleep and uniform jitter are equally unconvincing', async () => {
   // The design notes claim the tell is the shape of the randomness rather than the
   // delay. If jitter bought an attacker anything, this is where it would show.
-  const [fixed] = await replayAll([scriptedBruteForce(30)]);
-  const [jittered] = await replayAll([jitteredBruteForce(30)]);
+  const [fixed] = await replayAll([scriptedBruteForce(30)], options);
+  const [jittered] = await replayAll([jitteredBruteForce(30)], options);
 
   assert.equal(jittered!.worst, fixed!.worst);
   assert.ok(
@@ -53,7 +63,7 @@ test('D45: a fixed sleep and uniform jitter are equally unconvincing', async () 
 });
 
 test('D46: the slow poisoner is caught, and how long it takes is recorded', async () => {
-  const result = await replayPersona(slowPoisoner(10, 40));
+  const result = await replayPersona(slowPoisoner(10, 40), options);
 
   const abuseStart = result.records.findIndex((record) => record.event.startsWith('abuse'));
   assert.ok(abuseStart > 0, 'the honest phase must come first');
@@ -79,7 +89,7 @@ test('D46: the slow poisoner is caught, and how long it takes is recorded', asyn
  * asserting it away — the number is the finding.
  */
 test('D45: churning identities defeats accumulation, and the floor is two requests', async () => {
-  const churned = await replayAll(churningBruteForce(30, 3));
+  const churned = await replayAll(churningBruteForce(30, 3), options);
   const escalated = churned.filter(
     (result) => result.worst !== 'ALLOW' && result.worst !== 'OBSERVE',
   );
@@ -91,7 +101,7 @@ test('D45: churning identities defeats accumulation, and the floor is two reques
   // One attempt per identity is the actual hole: nothing accumulates, because
   // nothing is asked twice. No amount of trust modelling fixes that; it is the
   // root-of-trust problem, and it belongs to the host.
-  const singleUse = await replayAll(churningBruteForce(30, 1));
+  const singleUse = await replayAll(churningBruteForce(30, 1), options);
   const everFelt = singleUse.filter(
     (result) => result.worst !== 'ALLOW' && result.worst !== 'OBSERVE',
   );
@@ -99,7 +109,7 @@ test('D45: churning identities defeats accumulation, and the floor is two reques
 });
 
 test('D45: the honest daily user reaches established trust without ever being touched', async () => {
-  const result = await replayPersona(LEGITIMATE_PERSONAS[0]!);
+  const result = await replayPersona(LEGITIMATE_PERSONAS[0]!, options);
 
   assert.equal(result.persona, 'daily-ritual');
   assert.equal(result.finalStage, 'established');

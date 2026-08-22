@@ -1,69 +1,27 @@
 /**
  * Traffic for HealthMe. D45.
  *
- * D34 recorded that HealthMe cannot validate the thesis because it has one user.
- * That is true of its *production* traffic and not of its *flow* — the flow is
- * real, declared, and can be driven by more than one kind of visitor. So rather
- * than wait for an unauthenticated target to appear, this generates the traffic
- * the statistical layer needs, against the same invariants the real app supplied.
+ * Kept after D47 moved the primary target to IXFE, because it is the smaller case:
+ * two scopes, one user, a PIN screen. That is what caught the entropy denominator
+ * bug in D46 — a two-scope application could not reach the diversity threshold at
+ * all — and a harness that only ever runs against a large surface would not have
+ * found it. So this stays as the small-application regression.
  *
- * What this can settle, and what it cannot:
- *
- * - It **can** falsify. If a persona built from HealthMe's own honest usage gets
- *   escalated, a threshold is wrong, and that is a finding regardless of where the
- *   traffic came from. Same for an adversary that walks through untouched.
- * - It **cannot** calibrate. Real populations are not drawn from these
- *   distributions, and an attacker who reads this file can shape traffic around
- *   it. Numbers derived here are hypotheses to test against a real population,
- *   never conclusions.
- *
- * Every persona is seeded, so a run is reproducible and a regression is a diff
- * rather than an anecdote.
+ * What it can settle is unchanged from D45: it **falsifies** and it does not
+ * calibrate. Real populations are not drawn from these distributions, and an
+ * attacker who reads the file can shape traffic around it.
  */
+import {
+  DAY,
+  HOUR,
+  MINUTE,
+  SECOND,
+  burstyGap,
+  seeded,
+  type Persona,
+  type Step,
+} from '../harness/persona.ts';
 import { API_SCOPE, UNLOCK_SCOPE, type ApiCall } from './invariants.ts';
-
-const SECOND = 1000;
-const MINUTE = 60 * SECOND;
-const HOUR = 60 * MINUTE;
-const DAY = 24 * HOUR;
-
-/**
- * Deterministic PRNG. `Math.random()` would make a failing run impossible to
- * reproduce, which is the one thing a traffic generator must not be.
- */
-export function seeded(seed: number): () => number {
-  let state = seed >>> 0;
-  return () => {
-    state = (state * 1664525 + 1013904223) >>> 0;
-    return state / 4294967296;
-  };
-}
-
-/** Exponential gaps: bursty, which is what human activity actually looks like. */
-function burstyGap(random: () => number, meanMs: number): number {
-  return -Math.log(1 - random()) * meanMs;
-}
-
-export type Step = {
-  /** Milliseconds to wait *before* this step. */
-  readonly afterMs: number;
-  readonly event: string;
-  readonly scope: typeof UNLOCK_SCOPE | typeof API_SCOPE;
-  readonly data: ApiCall | { from: string; to: string };
-  /** What HealthMe's own defences do with it. */
-  readonly hostDid: 'allowed' | 'rejected' | 'locked-out' | 'rate-limited';
-  readonly evidence?: { positive?: 'weak' | 'strong'; negative?: 'weak' | 'strong' };
-  /** Weak signals a collector would have reported. D42. */
-  readonly signals?: readonly string[];
-};
-
-export type Persona = {
-  readonly id: string;
-  /** True when this traffic is legitimate and must never be escalated. */
-  readonly legitimate: boolean;
-  readonly what: string;
-  readonly steps: readonly Step[];
-};
 
 /* ------------------------------------------------------------------ *
  * Legitimate personas. Escalating any of these is a false positive,

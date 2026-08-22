@@ -21,7 +21,8 @@ decided will be closed with a pointer to the entry.
 | A weak signal, with its innocent cause | D42 requires the plausible legitimate path to triggering it. A signal whose false-positive story cannot be written down is not understood well enough to weigh. Thresholds are deliberately not part of the catalogue. |
 | A store implementation | Run `checkStoreConformance()` against it and paste the result. Eleven checks, and two implementations already pass them. |
 | A threshold that is wrong on real traffic | The whole model is reasoned guesses. Say what you observed and how much of it. |
-| A persona the generator is missing | `npm run replay` drives seeded personas through a real declared flow (D45). A legitimate usage pattern that gets escalated is a bug in the thresholds; an adversary that walks through is a gap in the model. Either is worth more than a patch. |
+| A persona the generator is missing | `npm run replay` drives seeded personas through two declared targets (D45, D47). A legitimate usage pattern that gets escalated is a bug in the thresholds; an adversary that walks through is a gap in the model. Either is worth more than a patch. |
+| An application with something worth stealing | The best target has unauthenticated endpoints and real cost behind them — that is why IXFE replaced a personal app as the primary one (D47). Declared invariants from a flow nobody would bother attacking prove very little. |
 
 ## What is not useful yet
 
@@ -65,10 +66,15 @@ House rules, in order of how likely they are to get a change sent back:
 5. **A deliberate simplification is marked `ponytail:`**, naming its ceiling and
    the upgrade path. An unmarked shortcut reads as an oversight — and a marked one
    is a debt, so removing it counts as a contribution.
-6. **No threshold goes in `signals.ts`.** The catalogue names what is measured,
+6. **`hard` needs an enumeration, not an error code.** Declaring `hard` asserts the
+   legitimate set is complete for that scope. That the server already refuses the
+   request is not evidence of completeness — see D48, where "paid work requires
+   enough credits" turned out to be `soft` because the client's view of its balance
+   is stale by construction.
+7. **No threshold goes in `signals.ts`.** The catalogue names what is measured,
    never when it fires: the library is public, so a published number is a target to
    route around. Thresholds live in policy an adopter overrides.
-7. **The guard advises. It never enforces.** Any API that acts on its own belongs
+8. **The guard advises. It never enforces.** Any API that acts on its own belongs
    in the host application, not here.
 
 ## Reporting a false positive

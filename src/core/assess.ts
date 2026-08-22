@@ -185,7 +185,29 @@ export function assessTrust(
   };
 }
 
-/** D37: low variance earned by monotonous volume is not evidence of anything. */
+/**
+ * D37: low variance earned by monotonous volume is not evidence of anything.
+ *
+ * **What this actually does, corrected by D49.** D37 was written to stop a patient
+ * attacker farming uniform volume into believable confidence. Traffic showed it does
+ * not do that, and cannot: farming produces a high mean, a high mean proposes
+ * `ALLOW`, and a ceiling can only ever *lower* a decision. So the gate is
+ * unobservable for exactly the entity it was designed to catch.
+ *
+ * Where it is observable is the mirror image — `mean < 0.4`, an entity the model
+ * already distrusts — and there it withholds escalation *because* behavior was
+ * monotonous. That is a real effect with a real tradeoff, and it is not the one
+ * recorded in D37:
+ *
+ * - it protects a broken-but-legitimate client (a cron with a stale token retrying
+ *   uniformly) from `BLOCK`, which is the central constraint working;
+ * - it also leaves a deliberate bot at `INCREASE_FRICTION` instead of `RESTRICT`,
+ *   because behaving mechanically is what withholds the escalation.
+ *
+ * Both follow from one rule, and which one dominates is a question about real
+ * populations. So the behavior is left alone and the claim is corrected: D37 does not
+ * mitigate farming, and that problem is reopened. See D49.
+ */
 function anomalyCeiling(
   level: UncertaintyLevel,
   options: AssessOptions,

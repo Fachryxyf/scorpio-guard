@@ -76,6 +76,7 @@ The core design breakthrough: these are not blended into one score.
 | Role | Stable **skeleton** — always on, precise | **Reinforcement** — only meaningful in combination |
 | Learned? | Never | Yes, statistically |
 | Enumerated | Seven classes, closed (D41) | Ten signals over six sources (D42) |
+| Test of a `hard` claim | can you enumerate the legitimate set? Being *enforced* is not the same as being *provable* (D48) | n/a — a signal never claims completeness |
 | Reaches a decision | On its own authority | Never — only as trust mass |
 | Examples | Form filled with zero corresponding interaction; a reference the system never issued | Repeated identical patterns, *too*-uniform randomized delays, breadth of enumeration |
 
@@ -122,6 +123,7 @@ Named honestly, not hidden.
 - **Cold start & sybil churn** — history-based trust is gamed by attackers who simply discard identities. Now measured rather than feared: the floor is one request per identity, at which point nothing accumulates at all. Two requests per identity and the guard engages.
 - **Root of trust** — explicitly outside the library. It accepts an entity reference as a basis for measurement, never as proof of identity. If the host supplies a reference that is cheap to discard, every history-based defence goes with it — and that is the host's responsibility, not the library's.
 - **Poisoning resistance** — gradual baseline shifts where every individual step looks legitimate. Bounded, not solved: ten honest days buy roughly eleven abuse calls before `RESTRICT`.
+- **Saturation / farming** — reopened by D49. Uniform high volume still converges on a large positive mass that resists negative evidence, and the decision-layer gate that was recorded as the fix cannot reach it. A real fix has to act on mass, which is what the trust model's own reasoning argued against.
 - **Privacy/legal basis** — behavioral history is personal data under GDPR and Indonesia's UU PDP.
 - **Sequencing** — is a durable public protocol worth designing *before* a proof-of-concept exists?
 
@@ -142,7 +144,7 @@ the answer, the reasoning, and what each answer commits the implementation to.
 Read it before proposing a change to the model — several obvious-looking
 alternatives were considered and rejected there for reasons worth knowing.
 
-Forty-nine entries is more than anyone reads front to back, so the site carries a
+Fifty-two entries is more than anyone reads front to back, so the site carries a
 [decision index](https://scorpio-guard.fachryxyf.com/#decisions) — every entry
 grouped by what it decides, with the file it turned into — and a
 [glossary](https://scorpio-guard.fachryxyf.com/#glossary) for the terms used in a
@@ -297,11 +299,17 @@ standard library. The in-memory default is process-local, so every restart is a 
 start; this one survives a restart and is shared across processes on one host. Both
 pass the same conformance kit.
 
-`examples/healthme/` — the first integration target (D34), declared invariants and
-an observational harness that records advice without acting on it, plus the seeded
-personas (D45) that drive it and the replay that reports what happened.
+`examples/harness/` — the application-independent parts: a persona is a sequence of
+interactions with the gaps between them, and the replay drives one through a guard.
+Outside `src/` on purpose, since it generates *test* traffic.
 
-One hundred and forty-three tests, which double as the record of every numeric and
+`examples/ixfe/` — the primary target (D47): invariants declared across all six proof
+sources, and personas read off IXFE's own defences.
+
+`examples/healthme/` — the first target (D34), kept as the small-application
+regression: two scopes, one user.
+
+One hundred and fifty-two tests, which double as the record of every numeric and
 semantic property the design depends on.
 
 Writing your own store? Prove it works before trusting it:
@@ -373,9 +381,14 @@ scraping, and a real adversary. See D34 in the design record.
 
 ## Generated Traffic
 
-HealthMe has one user, so its production traffic cannot exercise the statistical
-layer. Its *flow* can. Rather than wait for an adversarial target to appear, seeded
-personas drive that flow through the same declared invariants:
+The primary target is **IXFE** (`ixfe.pro`), a competitor-intelligence platform with
+three deployables, an unauthenticated pre-launch funnel, and a credit ledger where one
+request spends real money — `marketplace_global` costs 12 credits and makes a Google
+Places call per market, billed to the operator whether or not the caller was
+legitimate. An attacker needs a motive, and that is one.
+
+Its production traffic is one operator's, so the traffic is generated: seeded personas
+driven through the invariants declared from IXFE's own flow.
 
 ```
 npm run replay
@@ -383,70 +396,103 @@ npm run replay
 
 ```
 persona                kind       worst advice       at        stage        verdict
-daily-ritual           legit      OBSERVE            @4/79     established  as intended
-fat-finger             legit      OBSERVE            @3/3      developing   as intended
-password-manager       legit      OBSERVE            @1/2      developing   as intended
-session-restore        legit      OBSERVE            @3/6      developing   as intended
-power-user             legit      OBSERVE            @4/26     established  as intended
-forged-api-call        adversary  RESTRICT           @1/1      unknown      as intended
-scripted-brute-force   adversary  INCREASE_FRICTION  @2/30     established  as intended
-jittered-brute-force   adversary  INCREASE_FRICTION  @2/30     established  as intended
-slow-poisoner          adversary  RESTRICT           @32/60    established  as intended
+preorder-buyer         legit      OBSERVE            @5/6      developing   as intended
+typo-retry             legit      OBSERVE            @4/4      developing   as intended
+working-customer       legit      OBSERVE            @4/82     established  as intended
+ran-out-of-credits     legit      OBSERVE            @3/4      developing   as intended
+activated-founder      legit      OBSERVE            @3/4      developing   as intended
+endpoint-shooter       adversary  RESTRICT           @1/30     established  as intended
+honeypot-filler        adversary  INCREASE_FRICTION  @3/20     established  as intended
+otp-grinder            adversary  RESTRICT           @7/35     established  as intended
+webhook-forger         adversary  RESTRICT           @1/25     established  as intended
+activation-replayer    adversary  RESTRICT           @2/10     developing   as intended
+credit-drainer         adversary  INCREASE_FRICTION  @12/42    established  as intended
+post-launch-replayer   adversary  RESTRICT           @1/12     developing   as intended
+pending-freeloader     adversary  RESTRICT           @1/15     established  as intended
 ```
 
-Two claims are asserted as tests: no legitimate persona is ever advised anything a
-user would feel, and no adversary walks through untouched. The rest is output meant
-to be read, because a threshold gets argued about from numbers rather than prose.
+The adversaries are not invented. Every mitigation already in IXFE's code records an
+attack its author expected, so each persona is read off a real defence: the honeypot
+field, the `dwell` time-trap, the per-code OTP cap, the 404 on an unknown
+`external_id`, the `activation_consumed` primary key, the 410 after launch. One
+persona has no matching defence — `credit-drainer` holds a valid session and every
+request is correctly authorised — which is exactly why it has to be caught by the
+statistical layer or not at all.
+
+HealthMe is kept as the small-application regression: two scopes, one user. That is
+what caught the entropy bug below, and a harness that only ran against a large surface
+would have missed it.
+
+Two claims are asserted as tests: no legitimate persona is ever advised anything a user
+would feel, and no adversary walks through untouched. The rest is output meant to be
+read, because a threshold gets argued about from numbers rather than prose.
 
 **This falsifies; it does not calibrate.** If a persona built from honest usage gets
 escalated, a threshold is wrong regardless of where the traffic came from. But real
-populations are not drawn from these distributions, and an attacker who reads the
-file can shape traffic around it — so numbers derived here are hypotheses, never
+populations are not drawn from these distributions, and an attacker who reads the file
+can shape traffic around it — so numbers derived here are hypotheses, never
 conclusions.
 
-It found two wrong numbers immediately, both erring toward friction for legitimate
-users:
+### What it falsified
 
-- **The `developing` stage ceiling was one rung too high.** Two mistyped PINs, and
-  an autofilled password manager, were both advised `INCREASE_FRICTION`. The middle
-  stage is meant to let trust *influence* a treatment without *driving* it, and
-  `OBSERVE` is the only rung that does that. The old value also made the stage
-  boundary a cliff: silence at `n = 2.9`, friction at `n = 3`.
+- **The `developing` stage ceiling was one rung too high.** Two mistyped PINs, and an
+  autofilled password manager, were both advised `INCREASE_FRICTION`. The middle stage
+  is meant to let trust *influence* a treatment without *driving* it, and `OBSERVE` is
+  the only rung that does that. The old value also made the stage boundary a cliff:
+  silence at `n = 2.9`, friction at `n = 3`.
 - **Scope entropy was normalised against the window size**, which made it depend on
   how many scopes the *application* has rather than how varied the *entity* was. A
-  two-scope app like HealthMe could not reach the diversity threshold at all, so its
-  most honest user was scored monotonous for the entire run. Now normalised against
-  the scopes actually observed, so it measures balance while `distinctScopes`
-  measures breadth.
+  two-scope app could not reach the diversity threshold at all, so its most honest
+  user was scored monotonous for the entire run. Now normalised against the scopes
+  actually observed, so it measures balance while `distinctScopes` measures breadth.
+- **A `hard` declaration that was not provable.** "Paid work requires enough credits"
+  looks provable and is not: the client's view of its balance is stale by construction,
+  since jobs bill asynchronously and another tab may have spent the difference. One
+  refused request is how a person discovers their balance; a hundred is a script. Now
+  `soft`. Being *enforced by the server* is not the same as being *provable*.
+- **The saturation guard does not do what it claimed.** `D37` was recorded as the fix
+  for an attacker farming uniform volume into unearned confidence. It cannot be:
+  farming produces a high mean, a high mean proposes `ALLOW`, and a ceiling can only
+  *lower* a decision — so the gate is unobservable for exactly the entity it targeted.
+  Measured: 300 uniform positives absorb **17** strong negatives before leaving
+  `ALLOW`. The claim is withdrawn and farming is an open problem again.
 
-Three findings are measurements rather than fixes:
+### What it measured, without fixing
 
 - **Uniform jitter buys an attacker nothing.** Fixed-sleep and `uniform(1.2s, 2.3s)`
   brute forces escalate at the same step, which is the design's own claim about the
   shape of randomness surviving its counterexample.
-- **Identity churn works, and the floor is two requests.** Three attempts per
-  identity and every identity is felt; **one** attempt per identity and none ever
-  is, because nothing accumulates when nothing is asked twice. That is the
-  root-of-trust problem, and it belongs to the host.
-- **Ten honest days buy about eleven abuse calls** before `RESTRICT`. That head
-  start is the price of having a memory; the bound is now asserted.
+- **Identity churn works against accumulation, and proof ignores it.** Against
+  accumulated evidence the floor is two requests per identity — at one, nothing ever
+  accumulates. But where a violation is *provable*, churn buys nothing at all:
+  IXFE's endpoint-shooter is caught on request one, with no history, because a missing
+  `dwell` is a proof rather than a guess.
+- **A 404 is not a memory.** IXFE already answers correctly at every one of these
+  endpoints. What it cannot do is remember — the webhook forger can guess `external_id`
+  forever and each refusal is a discarded log line. Turning refusals into accumulating
+  evidence about the caller is the argument for the library, in a place where it is
+  checkable.
+- **Ten honest days buy about eleven abuse calls** before `RESTRICT`. That head start
+  is the price of having a memory; the bound is now asserted.
 
 ## Roadmap
 
 Done: the core model, the pluggable store with its conformance kit and a durable
-SQLite implementation, the browser collector, one observational integration against
-a real flow, the three enumeration tasks — the constraint taxonomy closed over proof
+SQLite implementation, the browser collector, two integration targets with declared
+invariants, the three enumeration tasks — the constraint taxonomy closed over proof
 sources (D41), the weak-signal catalogue (D42), the two-tier symptom vocabulary
-(D43) — and generated persona traffic that exercises the probabilistic model (D45).
+(D43) — and generated persona traffic that exercises the probabilistic model and has
+corrected it four times (D45–D49).
 
-Generated persona traffic now exercises the statistical layer and has already
-falsified two thresholds. What remains, in order:
+Generated persona traffic against IXFE exercises the statistical layer and has
+falsified four claims so far. What remains, in order:
 
-1. Collectors for the seven catalogued signals that nothing computes yet — most need host cooperation, and each needs a false-positive story before it earns a threshold.
-2. Choose an anomaly algorithm over the settled feature space, using the personas to compare candidates.
-3. A real population to calibrate against: unauthenticated traffic, data worth scraping, a real adversary. Generated traffic falsifies; only real traffic calibrates.
-4. Publish the symptom vocabulary as a `scorpio-guard-protocol` v0.1 wire spec — the structure is settled, the format is not.
-5. Only then: investigate encoding schemes for symptom transmission.
+1. Reopen saturation: farming needs a fix that acts on mass, and the personas can now measure whether a candidate works.
+2. IXFE's real logs, which exist. Generated traffic falsifies; only real traffic calibrates, and this is the shortest path to a real population.
+3. Collectors for the seven catalogued signals that nothing computes yet — most need host cooperation, and each needs a false-positive story before it earns a threshold.
+4. Choose an anomaly algorithm over the settled feature space, using the personas to compare candidates.
+5. Publish the symptom vocabulary as a `scorpio-guard-protocol` v0.1 wire spec — the structure is settled, the format is not.
+6. Only then: investigate encoding schemes for symptom transmission.
 
 ## Contributing
 

@@ -480,9 +480,9 @@
           <tr><th data-lang="en">Licence</th><th data-lang="id">Lisensi</th>
               <td>MIT</td></tr>
           <tr><th data-lang="en">Tests</th><th data-lang="id">Test</th>
-              <td>143</td></tr>
+              <td>152</td></tr>
           <tr><th data-lang="en">Decisions</th><th data-lang="id">Keputusan</th>
-              <td><a href="#decisions">49</a></td></tr>
+              <td><a href="#decisions">52</a></td></tr>
           <tr><th data-lang="en">Network</th><th data-lang="id">Jaringan</th>
               <td data-lang="en">none, by design</td><td data-lang="id">tidak ada, by design</td></tr>
           <tr><th data-lang="en">Calibrated</th><th data-lang="id">Terkalibrasi</th>
@@ -531,8 +531,8 @@
       </li>
       <li>
         <span class="state yes" data-lang="en">Built</span><span class="state yes" data-lang="id">Sudah ada</span>
-        <span class="what" data-lang="en"><b>Generated traffic</b> — nine personas over a declared real flow. It has already falsified two thresholds. <a href="#firstrun">The table</a>.</span>
-        <span class="what" data-lang="id"><b>Trafik buatan</b> — sembilan persona di atas alur nyata yang terdeklarasi. Sudah memfalsifikasi dua ambang. <a href="#firstrun">Tabelnya</a>.</span>
+        <span class="what" data-lang="en"><b>Generated traffic</b> — thirteen personas over IXFE, a platform with paid compute behind a public endpoint. It has falsified four claims. <a href="#firstrun">The table</a>.</span>
+        <span class="what" data-lang="id"><b>Trafik buatan</b> — tiga belas persona di atas IXFE, platform dengan compute berbayar di balik endpoint publik. Sudah memfalsifikasi empat klaim. <a href="#firstrun">Tabelnya</a>.</span>
       </li>
       <li>
         <span class="state no" data-lang="en">Deferred</span><span class="state no" data-lang="id">Ditunda</span>
@@ -623,7 +623,7 @@
         <h3 data-lang="id">Rujukan</h3>
         <ol>
           <li><a href="#glossary" data-lang="en">Glossary</a><a href="#glossary" data-lang="id">Glosarium</a><span data-lang="en">seventeen terms used in a narrow sense</span><span data-lang="id">tujuh belas istilah dalam arti sempit</span></li>
-          <li><a href="#decisions" data-lang="en">Decision index</a><a href="#decisions" data-lang="id">Indeks keputusan</a><span data-lang="en">all 49, and the file each became</span><span data-lang="id">semua 49, dan file tempatnya menjelma</span></li>
+          <li><a href="#decisions" data-lang="en">Decision index</a><a href="#decisions" data-lang="id">Indeks keputusan</a><span data-lang="en">all 52, and the file each became</span><span data-lang="id">semua 52, dan file tempatnya menjelma</span></li>
           <li><a href="#context" data-lang="en">Context</a><a href="#context" data-lang="id">Konteks</a><span data-lang="en">the same trust, read differently per endpoint</span><span data-lang="id">trust yang sama, dibaca beda per endpoint</span></li>
           <li><a href="#principles" data-lang="en">Principles</a><a href="#principles" data-lang="id">Prinsip</a><span data-lang="en">what the guard actually claims</span><span data-lang="id">apa yang sebenarnya diklaim guard</span></li>
           <li><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/CONTRIBUTING.md" data-lang="en">Contributing</a><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/CONTRIBUTING.md" data-lang="id">Berkontribusi</a><span data-lang="en">what helps most, and the house rules</span><span data-lang="id">yang paling membantu, dan aturan rumahnya</span></li>
@@ -1523,8 +1523,8 @@ const guard = createGuard({ store: sqliteStore({ path: './trust.db' }) });</pre>
     <p class="num"><span data-lang="en">The library</span><span data-lang="id">Library-nya</span></p>
     <h2 data-lang="en">What is actually built</h2>
     <h2 data-lang="id">Apa yang benar-benar sudah dibangun</h2>
-    <p data-lang="en">The model exists as TypeScript with no platform dependencies: Beta-Bernoulli trust, half-life decay over real elapsed time, retention, the decision bands with their ceilings, declared invariants, and the anomaly feature space. One hundred and forty-three tests, most of which exist to pin a number the design argues for.</p>
-    <p data-lang="id">Modelnya sudah ada sebagai TypeScript tanpa ketergantungan platform: trust Beta-Bernoulli, decay half-life atas waktu nyata, retensi, band keputusan beserta batasnya, invariant terdeklarasi, dan ruang fitur anomali. Seratus empat puluh tiga test, sebagian besar ada untuk memaku angka yang didebatkan desain ini.</p>
+    <p data-lang="en">The model exists as TypeScript with no platform dependencies: Beta-Bernoulli trust, half-life decay over real elapsed time, retention, the decision bands with their ceilings, declared invariants, and the anomaly feature space. One hundred and fifty-two tests, most of which exist to pin a number the design argues for.</p>
+    <p data-lang="id">Modelnya sudah ada sebagai TypeScript tanpa ketergantungan platform: trust Beta-Bernoulli, decay half-life atas waktu nyata, retensi, band keputusan beserta batasnya, invariant terdeklarasi, dan ruang fitur anomali. Seratus lima puluh dua test, sebagian besar ada untuk memaku angka yang didebatkan desain ini.</p>
     <pre>const guard = createGuard({ invariants: [checkoutOrder] });
 
 const result = await guard.evaluate({
@@ -1639,26 +1639,61 @@ assertConformant(await checkStoreConformance(() =&gt; myRedisStore()));</pre>
     <p class="muted" data-lang="en">So the replay of real usage is a smoke test, not a validated thesis. No threshold is calibrated by it.</p>
     <p class="muted" data-lang="id">Jadi replay pemakaian nyata itu smoke test, bukan tesis yang tervalidasi. Tidak ada ambang yang terkalibrasi darinya.</p>
 
-    <h3 data-lang="en">So the traffic is generated instead of waited for</h3>
-    <h3 data-lang="id">Jadi trafiknya dibuat, bukan ditunggu</h3>
-    <p data-lang="en">&#8220;One user&#8221; is a fact about the traffic, not about the flow. The flow is declared and drivable, so the statistical layer is exercised by seeded personas against the same invariants — five legitimate, four adversarial, plus an identity-churn population. <code>npm run replay</code> prints the table.</p>
-    <p data-lang="id">&#8220;Satu pengguna&#8221; adalah fakta tentang trafiknya, bukan tentang alurnya. Alurnya terdeklarasi dan bisa digerakkan, jadi lapis statistiknya digerakkan oleh persona berbenih di atas invariant yang sama — lima sah, empat lawan, ditambah populasi pergantian identitas. <code>npm run replay</code> mencetak tabelnya.</p>
+    <h3 data-lang="en">A better target, and generated traffic against it</h3>
+    <h3 data-lang="id">Target yang lebih baik, dan trafik buatan di atasnya</h3>
+    <p data-lang="en">The deeper problem with a PIN-gated personal app was never volume: <b>nothing behind that PIN is worth an attacker&#8217;s time</b>, so the adversary had to be invented. The primary target is now <b>IXFE</b> — a competitor-intelligence platform with three deployables, an unauthenticated pre-launch funnel, and a credit ledger where one request spends real money: its most expensive action costs 12 credits and makes a Google Places call per market, billed to the operator whether or not the caller was legitimate. That is a motive.</p>
+    <p data-lang="id">Masalah yang lebih dalam dari aplikasi pribadi berpagar PIN bukan soal volume: <b>tak ada apa pun di balik PIN itu yang layak dikejar penyerang</b>, jadi lawannya harus dikarang. Target utamanya sekarang <b>IXFE</b> — platform competitor-intelligence dengan tiga deployable, funnel pra-peluncuran tanpa autentikasi, dan ledger kredit di mana satu request menghabiskan uang sungguhan: aksi termahalnya 12 kredit dan memanggil Google Places per pasar, ditagihkan ke operator terlepas dari sah atau tidaknya pemanggil. Itu baru motif.</p>
+    <p data-lang="en">Its production traffic is one operator&#8217;s, so the traffic is generated: seeded personas driven through invariants declared from IXFE&#8217;s own flow. <code>npm run replay</code> prints the table.</p>
+    <p data-lang="id">Trafik produksinya milik satu operator, jadi trafiknya dibuat: persona berbenih digerakkan lewat invariant yang dideklarasikan dari alur IXFE sendiri. <code>npm run replay</code> mencetak tabelnya.</p>
     <pre>persona                kind       worst advice       at        stage        verdict
-daily-ritual           legit      OBSERVE            @4/79     established  as intended
-fat-finger             legit      OBSERVE            @3/3      developing   as intended
-password-manager       legit      OBSERVE            @1/2      developing   as intended
-session-restore        legit      OBSERVE            @3/6      developing   as intended
-power-user             legit      OBSERVE            @4/26     established  as intended
-forged-api-call        adversary  RESTRICT           @1/1      unknown      as intended
-scripted-brute-force   adversary  INCREASE_FRICTION  @2/30     established  as intended
-jittered-brute-force   adversary  INCREASE_FRICTION  @2/30     established  as intended
-slow-poisoner          adversary  RESTRICT           @32/60    established  as intended</pre>
+preorder-buyer         legit      OBSERVE            @5/6      developing   as intended
+typo-retry             legit      OBSERVE            @4/4      developing   as intended
+working-customer       legit      OBSERVE            @4/82     established  as intended
+ran-out-of-credits     legit      OBSERVE            @3/4      developing   as intended
+activated-founder      legit      OBSERVE            @3/4      developing   as intended
+endpoint-shooter       adversary  RESTRICT           @1/30     established  as intended
+honeypot-filler        adversary  INCREASE_FRICTION  @3/20     established  as intended
+otp-grinder            adversary  RESTRICT           @7/35     established  as intended
+webhook-forger         adversary  RESTRICT           @1/25     established  as intended
+activation-replayer    adversary  RESTRICT           @2/10     developing   as intended
+credit-drainer         adversary  INCREASE_FRICTION  @12/42    established  as intended
+post-launch-replayer   adversary  RESTRICT           @1/12     developing   as intended
+pending-freeloader     adversary  RESTRICT           @1/15     established  as intended</pre>
+    <p data-lang="en">The adversaries are not invented. Every mitigation already in IXFE&#8217;s code records an attack its author expected, so each persona is read off a real defence — the honeypot field, the <code>dwell</code> time-trap, the per-code OTP cap, the 404 on an unknown <code>external_id</code>, the single-use activation key, the 410 after launch. One persona has no matching defence: <b><code>credit-drainer</code></b> holds a valid session and every request is correctly authorised, which is exactly why it has to be caught by the statistical layer or not at all.</p>
+    <p data-lang="id">Lawannya bukan karangan. Setiap mitigasi yang sudah ada di kode IXFE adalah catatan serangan yang diantisipasi penulisnya, jadi tiap persona dibaca dari pertahanan nyata — field honeypot, time-trap <code>dwell</code>, batas percobaan per kode OTP, 404 untuk <code>external_id</code> tak dikenal, kunci aktivasi sekali pakai, 410 setelah launch. Satu persona tak punya pertahanan pasangannya: <b><code>credit-drainer</code></b> memegang sesi valid dan tiap request-nya sah, dan justru karena itu ia harus ditangkap lapis statistik atau tidak tertangkap sama sekali.</p>
+    <p class="muted" data-lang="en">HealthMe is kept as the small-application regression: two scopes, one user. That is the case that caught the entropy bug below, and a harness that only ran against a five-scope surface would have missed it.</p>
+    <p class="muted" data-lang="id">HealthMe tetap dipakai sebagai regresi aplikasi kecil: dua scope, satu pengguna. Itu kasus yang menangkap bug entropi di bawah, dan harness yang cuma jalan di permukaan lima scope akan melewatkannya.</p>
     <p data-lang="en">This <b>falsifies</b>; it does not calibrate. A persona built from honest usage that gets escalated means a threshold is wrong regardless of where the traffic came from. But real populations are not drawn from these distributions, and an attacker who reads the file can shape traffic around it — so numbers derived here are hypotheses, never conclusions.</p>
     <p data-lang="id">Ini <b>memfalsifikasi</b>, bukan mengkalibrasi. Persona yang dibangun dari pemakaian jujur tapi kena eskalasi berarti ada ambang yang salah, dari mana pun trafiknya datang. Tapi populasi nyata tidak ditarik dari distribusi ini, dan penyerang yang membaca file-nya bisa membentuk trafik di sekelilingnya — jadi angka dari sini adalah hipotesis, bukan kesimpulan.</p>
-    <p data-lang="en">It found two wrong numbers immediately, both erring toward friction for legitimate users. The <b>developing stage ceiling</b> was one rung too high: two mistyped PINs and an autofilled password manager were both advised <code>INCREASE_FRICTION</code>, and the stage boundary was a cliff — silence at <code>n = 2.9</code>, friction at <code>n = 3</code>. And <b>scope entropy</b> was normalised against the window size, which made it depend on how many scopes the <em>application</em> has rather than how varied the <em>entity</em> was: a two-scope app could not reach the diversity threshold at all, so its most honest user was scored monotonous for the entire run.</p>
-    <p data-lang="id">Ia langsung menemukan dua angka yang salah, keduanya salah ke arah friksi bagi pengguna sah. <b>Batas tahap developing</b> satu tingkat terlalu tinggi: dua PIN salah ketik dan password manager yang mengisi otomatis sama-sama disarankan <code>INCREASE_FRICTION</code>, dan batas tahapnya jadi jurang — hening di <code>n = 2.9</code>, friksi di <code>n = 3</code>. Dan <b>entropi scope</b> dinormalisasi terhadap ukuran window, yang membuatnya bergantung pada berapa banyak scope yang dimiliki <em>aplikasi</em>, bukan pada seberapa bervariasi <em>entity</em>-nya: aplikasi dua scope tidak akan pernah mencapai ambang diversity, jadi penggunanya yang paling jujur dinilai monoton sepanjang run.</p>
-    <p data-lang="en">Three results are measurements rather than fixes. <b>Uniform jitter buys nothing</b> — a fixed sleep and <code>uniform(1.2s, 2.3s)</code> escalate at the same step, so the claim that the tell is the shape of the randomness survives its own counterexample. <b>Identity churn works, and the floor is two requests</b>: three attempts per identity and every identity is felt, one attempt per identity and none ever is, because nothing accumulates when nothing is asked twice. And <b>ten honest days buy about eleven abuse calls</b> before <code>RESTRICT</code> — the price of having a memory, now bounded and asserted.</p>
-    <p data-lang="id">Tiga hasil lainnya adalah pengukuran, bukan perbaikan. <b>Jitter seragam tidak membeli apa pun</b> — sleep tetap dan <code>uniform(1.2s, 2.3s)</code> tereskalasi di langkah yang sama, jadi klaim bahwa tandanya ada di bentuk keacakan bertahan menghadapi contoh-lawannya sendiri. <b>Pergantian identitas berhasil, dan lantainya dua request</b>: tiga percobaan per identitas dan semua identitas terasa, satu percobaan per identitas dan tidak ada yang pernah terasa, karena tak ada yang menumpuk kalau tak ada yang ditanya dua kali. Dan <b>sepuluh hari jujur membeli sekitar sebelas panggilan penyalahgunaan</b> sebelum <code>RESTRICT</code> — harga dari punya memori, kini dibatasi dan diuji.</p>
+    <h3 data-lang="en">What it falsified</h3>
+    <h3 data-lang="id">Yang ia falsifikasi</h3>
+    <ul data-lang="en">
+      <li>The <b>developing stage ceiling</b> was one rung too high: two mistyped PINs and an autofilled password manager were both advised <code>INCREASE_FRICTION</code>. The stage boundary was also a cliff — silence at <code>n = 2.9</code>, friction at <code>n = 3</code>.</li>
+      <li><b>Scope entropy</b> was normalised against the window size, so it depended on how many scopes the <em>application</em> has rather than how varied the <em>entity</em> was. A two-scope app could not reach the diversity threshold at all.</li>
+      <li>A <b><code>hard</code> declaration that was not provable</b>. &#8220;Paid work requires enough credits&#8221; looks provable and is not: the client&#8217;s view of its balance is stale by construction, since jobs bill asynchronously and another tab may have spent the difference. Being <em>enforced by the server</em> is not the same as being <em>provable</em>.</li>
+      <li>The <b>saturation guard does not do what it claimed</b>. It was recorded as the fix for an attacker farming uniform volume into unearned confidence. It cannot be: farming produces a high mean, a high mean proposes <code>ALLOW</code>, and a ceiling can only ever <em>lower</em> a decision. Measured: 300 uniform positives absorb <b>17</b> strong negatives before leaving <code>ALLOW</code>. The claim is withdrawn and farming is an open problem again.</li>
+    </ul>
+    <ul data-lang="id">
+      <li><b>Batas tahap developing</b> satu tingkat terlalu tinggi: dua PIN salah ketik dan password manager yang mengisi otomatis sama-sama disarankan <code>INCREASE_FRICTION</code>. Batas tahapnya juga jadi jurang — hening di <code>n = 2.9</code>, friksi di <code>n = 3</code>.</li>
+      <li><b>Entropi scope</b> dinormalisasi terhadap ukuran window, jadi ia bergantung pada berapa scope yang dimiliki <em>aplikasi</em>, bukan seberapa bervariasi <em>entity</em>-nya. Aplikasi dua scope tak akan pernah mencapai ambang diversity.</li>
+      <li>Sebuah deklarasi <b><code>hard</code> yang sebenarnya tak bisa dibuktikan</b>. &#8220;Kerja berbayar butuh kredit yang cukup&#8221; tampak bisa dibuktikan, padahal tidak: pandangan klien atas saldonya usang secara struktural, karena job ditagih asinkron dan tab lain bisa sudah memakai selisihnya. <em>Ditegakkan server</em> bukan berarti <em>bisa dibuktikan</em>.</li>
+      <li><b>Saturation guard tidak melakukan yang diklaimnya</b>. Ia dicatat sebagai perbaikan untuk penyerang yang menanam volume seragam jadi kepercayaan tak berhak. Ia tak bisa: farming menghasilkan mean tinggi, mean tinggi mengusulkan <code>ALLOW</code>, dan ceiling hanya bisa <em>menurunkan</em> keputusan. Terukur: 300 positif seragam menyerap <b>17</b> negatif kuat sebelum keluar dari <code>ALLOW</code>. Klaimnya ditarik dan farming kembali jadi masalah terbuka.</li>
+    </ul>
+
+    <h3 data-lang="en">What it measured, without fixing</h3>
+    <h3 data-lang="id">Yang ia ukur, tanpa memperbaiki</h3>
+    <ul data-lang="en">
+      <li><b>Uniform jitter buys nothing.</b> A fixed sleep and <code>uniform(1.2s, 2.3s)</code> escalate at the same step, so the claim that the tell is the shape of the randomness survives its own counterexample.</li>
+      <li><b>Identity churn works against accumulation, and proof ignores it.</b> Against accumulated evidence the floor is two requests per identity; at one, nothing ever accumulates. Where a violation is <em>provable</em>, churn buys nothing — IXFE&#8217;s endpoint shooter is caught on request one, with no history.</li>
+      <li><b>A 404 is not a memory.</b> IXFE already answers correctly at every one of these endpoints. What it cannot do is remember — the webhook forger can guess <code>external_id</code> forever and each refusal is a discarded log line.</li>
+      <li><b>Ten honest days buy about eleven abuse calls</b> before <code>RESTRICT</code> — the price of having a memory, now bounded and asserted.</li>
+    </ul>
+    <ul data-lang="id">
+      <li><b>Jitter seragam tidak membeli apa pun.</b> Sleep tetap dan <code>uniform(1.2s, 2.3s)</code> tereskalasi di langkah yang sama, jadi klaim bahwa tandanya ada di bentuk keacakan bertahan menghadapi contoh-lawannya sendiri.</li>
+      <li><b>Pergantian identitas mengalahkan akumulasi, dan bukti mengabaikannya.</b> Terhadap evidence yang menumpuk, lantainya dua request per identitas; di satu request, tak ada yang pernah menumpuk. Di mana pelanggarannya <em>bisa dibuktikan</em>, pergantian identitas tak membeli apa pun — endpoint shooter IXFE tertangkap di request pertama, tanpa riwayat.</li>
+      <li><b>404 bukan memori.</b> IXFE sudah menjawab benar di tiap endpoint itu. Yang tak bisa ia lakukan adalah mengingat — pemalsu webhook bisa menebak <code>external_id</code> selamanya dan tiap penolakan hanya jadi baris log yang dibuang.</li>
+      <li><b>Sepuluh hari jujur membeli sekitar sebelas panggilan penyalahgunaan</b> sebelum <code>RESTRICT</code> — harga dari punya memori, kini dibatasi dan diuji.</li>
+    </ul>
     <p class="muted" data-lang="en">What generated traffic still cannot do is calibrate. That needs a real population: unauthenticated traffic, data worth scraping, and a public lookup whose legitimate order can be declared.</p>
     <p class="muted" data-lang="id">Yang tetap tidak bisa dilakukan trafik buatan adalah kalibrasi. Itu butuh populasi nyata: trafik tanpa autentikasi, data yang layak diambil, dan pencarian publik yang urutan sahnya bisa dideklarasikan.</p>
     <p class="seealso">
@@ -1698,6 +1733,11 @@ slow-poisoner          adversary  RESTRICT           @32/60    established  as i
       <dt data-lang="id">Akar kepercayaan</dt>
       <dd data-lang="en">If behavior alone is not the anchor, what is? Without one, the system measures consistency, not authenticity.</dd>
       <dd data-lang="id">Kalau bukan perilaku yang jadi jangkar, lalu apa? Tanpa itu, sistem mengukur konsistensi, bukan keaslian.</dd>
+
+      <dt data-lang="en">Saturation and farming</dt>
+      <dt data-lang="id">Saturasi dan farming</dt>
+      <dd data-lang="en">Reopened. Uniform high volume converges on a large positive mass that resists negative evidence — 300 uniform positives absorb seventeen strong negatives before the advice changes at all. The decision-layer gate recorded as the fix cannot reach it: farming produces a high mean, and a ceiling only ever lowers a decision. A real fix has to act on mass, which the trust model&#8217;s own reasoning argued against.</dd>
+      <dd data-lang="id">Dibuka lagi. Volume tinggi yang seragam mengumpul jadi massa positif besar yang tahan terhadap evidence negatif — 300 positif seragam menyerap tujuh belas negatif kuat sebelum sarannya berubah sama sekali. Gerbang di lapis keputusan yang dicatat sebagai perbaikannya tak bisa menjangkaunya: farming menghasilkan mean tinggi, dan ceiling hanya pernah menurunkan keputusan. Perbaikan sungguhan harus bekerja pada massanya, dan itu yang ditolak oleh penalaran model trust sendiri.</dd>
 
       <dt data-lang="en">Poisoning resistance</dt>
       <dt data-lang="id">Ketahanan terhadap poisoning</dt>
@@ -1773,7 +1813,7 @@ slow-poisoner          adversary  RESTRICT           @32/60    established  as i
         </tr>
         <tr>
           <td data-lang="en">Core model in TypeScript</td><td data-lang="id">Model core dalam TypeScript</td>
-          <td data-lang="en">Built and tested — 143 tests, and generated traffic has falsified two thresholds</td><td data-lang="id">Sudah dibangun dan diuji — 143 test, dan trafik buatan sudah memfalsifikasi dua ambang</td>
+          <td data-lang="en">Built and tested — 152 tests, and generated traffic has falsified four claims</td><td data-lang="id">Sudah dibangun dan diuji — 152 test, dan trafik buatan sudah memfalsifikasi empat klaim</td>
         </tr>
         <tr>
           <td data-lang="en">State store and its conformance kit</td><td data-lang="id">State store dan kit conformance-nya</td>
@@ -1789,7 +1829,7 @@ slow-poisoner          adversary  RESTRICT           @32/60    established  as i
         </tr>
         <tr>
           <td data-lang="en">Proof of concept</td><td data-lang="id">Proof of concept</td>
-          <td data-lang="en">Runs against one real flow, and generated personas now exercise the statistical layer</td><td data-lang="id">Berjalan pada satu alur nyata, dan persona buatan kini menggerakkan lapis statistiknya</td>
+          <td data-lang="en">Two declared targets; generated personas over IXFE exercise the statistical layer</td><td data-lang="id">Dua target terdeklarasi; persona buatan di atas IXFE menggerakkan lapis statistiknya</td>
         </tr>
         <tr>
           <td data-lang="en">Calibration against real traffic</td><td data-lang="id">Kalibrasi terhadap trafik nyata</td>
@@ -1812,16 +1852,18 @@ slow-poisoner          adversary  RESTRICT           @32/60    established  as i
     <p class="muted" data-lang="en">Done: the core model, the store contract with a durable implementation, one observational integration against a real flow, the three enumeration tasks — constraint taxonomy, weak-signal catalogue, two-tier vocabulary — and generated persona traffic that exercises the probabilistic model and has already falsified two thresholds. What remains:</p>
     <p class="muted" data-lang="id">Selesai: model core, kontrak store beserta implementasi tahan restart, satu integrasi observasional pada alur nyata, tiga tugas pendaftaran — taksonomi constraint, katalog weak signal, kosakata dua lapis — dan trafik persona buatan yang menggerakkan model probabilistiknya serta sudah memfalsifikasi dua ambang. Yang tersisa:</p>
     <ol class="road" data-lang="en">
+      <li>Reopen saturation: farming needs a fix that acts on mass, and the personas can now measure whether a candidate works.</li>
+      <li>Use IXFE&#8217;s real logs, which exist. Generated traffic falsifies; only real traffic calibrates, and this is the shortest path to a real population.</li>
       <li>Build collectors for the seven catalogued signals nothing computes yet. Most need host cooperation, and each needs its false-positive story before it earns a threshold.</li>
       <li>Pick an anomaly algorithm over the settled feature space, using the personas to compare candidates.</li>
-      <li>Find a real population to calibrate against — unauthenticated traffic, data worth scraping, a real adversary. Generated traffic falsifies; only real traffic calibrates.</li>
       <li>Publish the vocabulary as a <code>scorpio-guard-protocol</code> v0.1 wire spec — the structure is settled, the format is not.</li>
       <li>Only then investigate encoding schemes for symptom transmission.</li>
     </ol>
     <ol class="road" data-lang="id">
+      <li>Buka lagi saturasi: farming butuh perbaikan yang bekerja pada massanya, dan persona-nya kini bisa mengukur apakah sebuah kandidat berhasil.</li>
+      <li>Pakai log nyata IXFE, yang sudah ada. Trafik buatan memfalsifikasi; hanya trafik nyata yang mengkalibrasi, dan ini jalan terpendek ke populasi nyata.</li>
       <li>Bangun collector untuk tujuh sinyal di katalog yang belum dihitung apa pun. Sebagian besar butuh kerja sama host, dan tiap sinyal butuh cerita false-positive-nya sebelum layak dapat ambang.</li>
       <li>Pilih algoritma anomali di atas ruang fitur yang sudah disepakati, pakai persona-nya untuk membandingkan kandidat.</li>
-      <li>Cari populasi nyata untuk dikalibrasi — trafik tanpa autentikasi, data yang layak di-scrape, penyerang nyata. Trafik buatan memfalsifikasi; hanya trafik nyata yang mengkalibrasi.</li>
       <li>Terbitkan kosakatanya sebagai spesifikasi wire <code>scorpio-guard-protocol</code> v0.1 — strukturnya selesai, formatnya belum.</li>
       <li>Baru setelah itu, teliti skema encoding untuk pengiriman symptom.</li>
     </ol>
@@ -2070,6 +2112,15 @@ The prescription travels; the patient does not.</pre>
         <tr><td><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md#d45--generate-the-traffic-do-not-wait-for-it">D45</a></td>
           <td data-lang="en">Generate the traffic rather than wait for it — the flow is drivable even when the traffic is one user</td><td data-lang="id">Buat trafiknya, jangan ditunggu — alurnya bisa digerakkan meski trafiknya cuma satu pengguna</td>
           <td><code>examples/healthme/personas.ts</code></td></tr>
+        <tr><td><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md#d47--primary-target-ixfe-because-it-has-something-to-steal">D47</a></td>
+          <td data-lang="en">Primary target is IXFE — an attacker needs a motive, and paid compute behind a public endpoint is one</td><td data-lang="id">Target utamanya IXFE — penyerang butuh motif, dan compute berbayar di balik endpoint publik adalah motif</td>
+          <td><code>examples/ixfe/</code></td></tr>
+        <tr><td><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md#d48--a-stale-client-view-is-not-a-proof">D48</a></td>
+          <td data-lang="en">A stale client view is not a proof — being enforced by the server is not being provable</td><td data-lang="id">Pandangan klien yang usang bukan bukti — ditegakkan server bukan berarti bisa dibuktikan</td>
+          <td><code>examples/ixfe/invariants.ts</code></td></tr>
+        <tr><td><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md#d49--d37-does-not-do-what-it-claims">D49</a></td>
+          <td data-lang="en">D37 does not mitigate farming; the claim is withdrawn and the problem reopened</td><td data-lang="id">D37 tidak menangkal farming; klaimnya ditarik dan masalahnya dibuka lagi</td>
+          <td><code>assess.ts</code></td></tr>
         <tr><td><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md#d46--two-thresholds-the-traffic-falsified">D46</a></td>
           <td data-lang="en">Two thresholds the traffic falsified: the developing ceiling, and the entropy denominator</td><td data-lang="id">Dua ambang yang difalsifikasi trafiknya: batas developing, dan penyebut entropinya</td>
           <td><code>assess.ts</code>, <code>behavior.ts</code></td></tr>

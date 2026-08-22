@@ -68,6 +68,17 @@ estimate rather than a service level.
   signal id being treated as suspicious rather than ignored.
 - SQL injection through any value or identifier reaching the SQLite store.
 
+### Known, and recorded rather than fixed
+
+- **Saturation / farming.** Uniform high-volume interaction converges on a large
+  positive evidence mass that resists negative evidence: 300 uniform positives absorb
+  seventeen strong negatives before the advice changes. The decision-layer gate that
+  was recorded as the mitigation cannot reach it, and that claim is withdrawn — see
+  D49. Reports demonstrating this are welcome but will be closed as duplicates of D49.
+- **Identity churn.** At one request per identity reference, nothing accumulates and
+  no history-based defence can engage. That is the root-of-trust problem, and the
+  reference is the host's to make expensive.
+
 ### Out of scope
 
 - Thresholds being avoidable. They are public and uncalibrated; see above.

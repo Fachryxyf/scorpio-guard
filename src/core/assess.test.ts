@@ -1,6 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
+import { severity } from './decision.ts';
+
 import { assessTrust, epistemicStage, trustBand, uncertaintyLevel } from './assess.ts';
 
 /** Mass high enough that the epistemic stage is not the binding ceiling. */
@@ -138,4 +140,31 @@ test('D23: every assessment carries its inputs and a reason', () => {
     assert.equal(result.variance, variance);
     assert.equal(result.mass, mass);
   }
+});
+
+test('D49: the D37 gate cannot affect the farming case it was written for', () => {
+  // Farming produces a high mean; a high mean proposes ALLOW; a ceiling can only
+  // lower a decision. So the gate is unobservable for exactly the entity D37 aimed
+  // at. Asserted so the claim cannot quietly drift back into the docs.
+  for (const mean of [0.5, 0.6, 0.8, 0.95, 0.99]) {
+    const monotonous = assessTrust(mean, 0.002, ESTABLISHED, { anomalyConcurs: false });
+    const diverse = assessTrust(mean, 0.002, ESTABLISHED, { anomalyConcurs: true });
+    assert.equal(
+      monotonous.decision,
+      diverse.decision,
+      `at mean ${mean} the diversity verdict changed the outcome, which D49 says it cannot`,
+    );
+  }
+});
+
+test('D49: where the gate is observable, monotony earns the milder treatment', () => {
+  // The mirror image of what D37 intended, and the tradeoff is real: this protects
+  // a broken-but-legitimate uniform client from BLOCK, and equally protects a
+  // deliberate bot from RESTRICT. Recorded as a measurement, not asserted as right.
+  const monotonous = assessTrust(0.1, 0.002, ESTABLISHED, { anomalyConcurs: false });
+  const diverse = assessTrust(0.1, 0.002, ESTABLISHED, { anomalyConcurs: true });
+
+  assert.equal(monotonous.decision, 'INCREASE_FRICTION');
+  assert.equal(diverse.decision, 'BLOCK');
+  assert.ok(severity(monotonous.decision) < severity(diverse.decision));
 });

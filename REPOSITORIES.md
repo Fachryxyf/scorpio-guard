@@ -30,10 +30,12 @@ Layout, per D7 in the design record — one package, several entry points, with
 `src/core/` free of platform APIs so the same model serves both sides:
 
 ```
-src/core/     the model: trust, decay, decision, constraints, signals, storage contract
-src/collect/  browser-side observation, exported as ./collect
-src/store/    platform-backed stores, exported as ./sqlite
-examples/     the first integration target, observational only
+src/core/       the model: trust, decay, decision, constraints, signals, storage contract
+src/collect/    browser-side observation, exported as ./collect
+src/store/      platform-backed stores, exported as ./sqlite
+examples/harness/  application-independent persona traffic and replay
+examples/ixfe/     primary target: invariants across all six proof sources
+examples/healthme/ small-application regression: two scopes, one user
 ```
 
 Not built yet: an anomaly classifier over the feature space, the prescription
@@ -44,6 +46,10 @@ until an adapter is written.
 `src/store/` is the one deliberate exception to "no platform APIs", and it is why
 platform code lives in its own directory rather than in `src/core/`: a durable store
 needs a filesystem, and the model still has to run in a browser.
+
+`examples/` stays outside the published package entirely. It generates *test* traffic,
+and shipping a traffic generator in an adopter's bundle would blur the line the design
+rests on — SG observes, it never produces.
 
 ---
 
