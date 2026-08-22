@@ -36,8 +36,16 @@ export type BehaviorFeatures = {
   /** Distinct scopes seen. Low values mean repetitive attention. */
   readonly distinctScopes: number;
   /**
-   * Shannon entropy over scope frequency, in bits, normalised to [0,1] against
-   * the maximum the window size allows. 0 means every observation was identical.
+   * Shannon entropy over scope frequency, normalised to [0,1] against the maximum
+   * the *observed* scopes allow. Read it as evenness: 1 means attention was spread
+   * perfectly evenly over whatever scopes were visited, 0 means every observation
+   * landed in the same one.
+   *
+   * Normalised against `log2(distinctScopes)` rather than `log2(count)` — see D46.
+   * The window-size denominator made this a proxy for `distinctScopes` and tied
+   * the value to how many scopes the *application* has, so the same behavior
+   * scored differently in a small app than in a large one. Breadth is
+   * `distinctScopes`'s job; this measures balance.
    */
   readonly scopeEntropy: number;
   /**
@@ -81,9 +89,10 @@ export function behaviorFeatures(window: readonly ObservationTrace[]): BehaviorF
     const p = seen / count;
     entropy -= p * Math.log2(p);
   }
-  // Maximum entropy for `count` observations is log2(count); one observation
-  // carries no information about variety either way, so it reads as 0.
-  const maxEntropy = count > 1 ? Math.log2(count) : 0;
+  // Maximum entropy over `k` observed scopes is log2(k), reached when attention is
+  // spread evenly across them. A single scope admits no balance either way, so it
+  // reads as 0 rather than as perfectly balanced. D46.
+  const maxEntropy = frequency.size > 1 ? Math.log2(frequency.size) : 0;
 
   const gaps: number[] = [];
   for (let i = 1; i < window.length; i += 1) {

@@ -119,9 +119,9 @@ Named honestly, not hidden.
 
 - **Symptom vocabulary** — the two-tier *structure* is settled (D43) and the detail list is a first pass. What remains is the wire format, which belongs to `scorpio-guard-protocol`, and the fact that nothing has been round-tripped against a real server because nothing transmits.
 - **Signal encoding** — the transmitted representation should be decodable *only* by the server, even though the library's source is public. Edges into one-way embeddings and server-issued transformation recipes. Research direction, not a resolved design.
-- **Cold start & sybil churn** — history-based trust is gamed by attackers who simply discard identities.
+- **Cold start & sybil churn** — history-based trust is gamed by attackers who simply discard identities. Now measured rather than feared: the floor is one request per identity, at which point nothing accumulates at all. Two requests per identity and the guard engages.
 - **Root of trust** — explicitly outside the library. It accepts an entity reference as a basis for measurement, never as proof of identity. If the host supplies a reference that is cheap to discard, every history-based defence goes with it — and that is the host's responsibility, not the library's.
-- **Poisoning resistance** — gradual baseline shifts where every individual step looks legitimate.
+- **Poisoning resistance** — gradual baseline shifts where every individual step looks legitimate. Bounded, not solved: ten honest days buy roughly eleven abuse calls before `RESTRICT`.
 - **Privacy/legal basis** — behavioral history is personal data under GDPR and Indonesia's UU PDP.
 - **Sequencing** — is a durable public protocol worth designing *before* a proof-of-concept exists?
 
@@ -142,7 +142,7 @@ the answer, the reasoning, and what each answer commits the implementation to.
 Read it before proposing a change to the model — several obvious-looking
 alternatives were considered and rejected there for reasons worth knowing.
 
-Forty-seven entries is more than anyone reads front to back, so the site carries a
+Forty-nine entries is more than anyone reads front to back, so the site carries a
 [decision index](https://scorpio-guard.fachryxyf.com/#decisions) — every entry
 grouped by what it decides, with the file it turned into — and a
 [glossary](https://scorpio-guard.fachryxyf.com/#glossary) for the terms used in a
@@ -268,6 +268,7 @@ Requires Node 22.6 or newer — tests run TypeScript directly, with no build ste
 ```
 npm install
 npm test          # node:test, no framework
+npm run replay    # persona traffic against the HealthMe flow
 npm run typecheck
 npm run build     # emits dist/
 ```
@@ -297,9 +298,10 @@ start; this one survives a restart and is shared across processes on one host. B
 pass the same conformance kit.
 
 `examples/healthme/` — the first integration target (D34), declared invariants and
-an observational harness that records advice without acting on it.
+an observational harness that records advice without acting on it, plus the seeded
+personas (D45) that drive it and the replay that reports what happened.
 
-One hundred and thirty-four tests, which double as the record of every numeric and
+One hundred and forty-three tests, which double as the record of every numeric and
 semantic property the design depends on.
 
 Writing your own store? Prove it works before trusting it:
@@ -369,22 +371,82 @@ Stated plainly, because the temptation is to read more into this than it carries
 A target that can validate the thesis needs unauthenticated traffic, data worth
 scraping, and a real adversary. See D34 in the design record.
 
+## Generated Traffic
+
+HealthMe has one user, so its production traffic cannot exercise the statistical
+layer. Its *flow* can. Rather than wait for an adversarial target to appear, seeded
+personas drive that flow through the same declared invariants:
+
+```
+npm run replay
+```
+
+```
+persona                kind       worst advice       at        stage        verdict
+daily-ritual           legit      OBSERVE            @4/79     established  as intended
+fat-finger             legit      OBSERVE            @3/3      developing   as intended
+password-manager       legit      OBSERVE            @1/2      developing   as intended
+session-restore        legit      OBSERVE            @3/6      developing   as intended
+power-user             legit      OBSERVE            @4/26     established  as intended
+forged-api-call        adversary  RESTRICT           @1/1      unknown      as intended
+scripted-brute-force   adversary  INCREASE_FRICTION  @2/30     established  as intended
+jittered-brute-force   adversary  INCREASE_FRICTION  @2/30     established  as intended
+slow-poisoner          adversary  RESTRICT           @32/60    established  as intended
+```
+
+Two claims are asserted as tests: no legitimate persona is ever advised anything a
+user would feel, and no adversary walks through untouched. The rest is output meant
+to be read, because a threshold gets argued about from numbers rather than prose.
+
+**This falsifies; it does not calibrate.** If a persona built from honest usage gets
+escalated, a threshold is wrong regardless of where the traffic came from. But real
+populations are not drawn from these distributions, and an attacker who reads the
+file can shape traffic around it — so numbers derived here are hypotheses, never
+conclusions.
+
+It found two wrong numbers immediately, both erring toward friction for legitimate
+users:
+
+- **The `developing` stage ceiling was one rung too high.** Two mistyped PINs, and
+  an autofilled password manager, were both advised `INCREASE_FRICTION`. The middle
+  stage is meant to let trust *influence* a treatment without *driving* it, and
+  `OBSERVE` is the only rung that does that. The old value also made the stage
+  boundary a cliff: silence at `n = 2.9`, friction at `n = 3`.
+- **Scope entropy was normalised against the window size**, which made it depend on
+  how many scopes the *application* has rather than how varied the *entity* was. A
+  two-scope app like HealthMe could not reach the diversity threshold at all, so its
+  most honest user was scored monotonous for the entire run. Now normalised against
+  the scopes actually observed, so it measures balance while `distinctScopes`
+  measures breadth.
+
+Three findings are measurements rather than fixes:
+
+- **Uniform jitter buys an attacker nothing.** Fixed-sleep and `uniform(1.2s, 2.3s)`
+  brute forces escalate at the same step, which is the design's own claim about the
+  shape of randomness surviving its counterexample.
+- **Identity churn works, and the floor is two requests.** Three attempts per
+  identity and every identity is felt; **one** attempt per identity and none ever
+  is, because nothing accumulates when nothing is asked twice. That is the
+  root-of-trust problem, and it belongs to the host.
+- **Ten honest days buy about eleven abuse calls** before `RESTRICT`. That head
+  start is the price of having a memory; the bound is now asserted.
+
 ## Roadmap
 
 Done: the core model, the pluggable store with its conformance kit and a durable
 SQLite implementation, the browser collector, one observational integration against
-a real flow, and the three enumeration tasks — the constraint taxonomy closed over
-proof sources (D41), the weak-signal catalogue (D42), and the two-tier symptom
-vocabulary (D43).
+a real flow, the three enumeration tasks — the constraint taxonomy closed over proof
+sources (D41), the weak-signal catalogue (D42), the two-tier symptom vocabulary
+(D43) — and generated persona traffic that exercises the probabilistic model (D45).
 
-What remains is what traffic gates, in order:
+Generated persona traffic now exercises the statistical layer and has already
+falsified two thresholds. What remains, in order:
 
-1. An integration target that can exercise the statistical layer — unauthenticated traffic, data worth scraping, a real adversary. Little below this is worth much before it.
-2. Collectors for the seven catalogued signals that nothing computes yet — most need host cooperation, and each needs a false-positive story before it earns a threshold.
-3. Choose an anomaly algorithm over the settled feature space, once there is traffic to choose it against.
-4. Calibrate: every threshold in the model is still a reasoned guess.
-5. Publish the symptom vocabulary as a `scorpio-guard-protocol` v0.1 wire spec — the structure is settled, the format is not.
-6. Only then: investigate encoding schemes for symptom transmission.
+1. Collectors for the seven catalogued signals that nothing computes yet — most need host cooperation, and each needs a false-positive story before it earns a threshold.
+2. Choose an anomaly algorithm over the settled feature space, using the personas to compare candidates.
+3. A real population to calibrate against: unauthenticated traffic, data worth scraping, a real adversary. Generated traffic falsifies; only real traffic calibrates.
+4. Publish the symptom vocabulary as a `scorpio-guard-protocol` v0.1 wire spec — the structure is settled, the format is not.
+5. Only then: investigate encoding schemes for symptom transmission.
 
 ## Contributing
 

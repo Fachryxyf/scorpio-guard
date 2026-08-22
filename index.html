@@ -480,9 +480,9 @@
           <tr><th data-lang="en">Licence</th><th data-lang="id">Lisensi</th>
               <td>MIT</td></tr>
           <tr><th data-lang="en">Tests</th><th data-lang="id">Test</th>
-              <td>134</td></tr>
+              <td>143</td></tr>
           <tr><th data-lang="en">Decisions</th><th data-lang="id">Keputusan</th>
-              <td><a href="#decisions">47</a></td></tr>
+              <td><a href="#decisions">49</a></td></tr>
           <tr><th data-lang="en">Network</th><th data-lang="id">Jaringan</th>
               <td data-lang="en">none, by design</td><td data-lang="id">tidak ada, by design</td></tr>
           <tr><th data-lang="en">Calibrated</th><th data-lang="id">Terkalibrasi</th>
@@ -530,9 +530,14 @@
         <span class="what" data-lang="id"><b>Collector browser</b> yang menghitung interaksi dan tidak mencatat isinya. <a href="#recipes">Pakai</a>.</span>
       </li>
       <li>
+        <span class="state yes" data-lang="en">Built</span><span class="state yes" data-lang="id">Sudah ada</span>
+        <span class="what" data-lang="en"><b>Generated traffic</b> — nine personas over a declared real flow. It has already falsified two thresholds. <a href="#firstrun">The table</a>.</span>
+        <span class="what" data-lang="id"><b>Trafik buatan</b> — sembilan persona di atas alur nyata yang terdeklarasi. Sudah memfalsifikasi dua ambang. <a href="#firstrun">Tabelnya</a>.</span>
+      </li>
+      <li>
         <span class="state no" data-lang="en">Deferred</span><span class="state no" data-lang="id">Ditunda</span>
-        <span class="what" data-lang="en">The <b>anomaly algorithm</b>. The feature space is settled; the algorithm waits for traffic to choose it against. <a href="#anomaly">Why</a>.</span>
-        <span class="what" data-lang="id"><b>Algoritma anomali</b>. Ruang fiturnya sudah; algoritmanya menunggu trafik untuk memilihnya. <a href="#anomaly">Kenapa</a>.</span>
+        <span class="what" data-lang="en">The <b>anomaly algorithm</b>. The feature space is settled, and the personas now give candidates something to be compared against. <a href="#anomaly">Why</a>.</span>
+        <span class="what" data-lang="id"><b>Algoritma anomali</b>. Ruang fiturnya sudah, dan persona-nya kini memberi kandidat sesuatu untuk dibandingkan. <a href="#anomaly">Kenapa</a>.</span>
       </li>
       <li>
         <span class="state no" data-lang="en">Structure only</span><span class="state no" data-lang="id">Baru strukturnya</span>
@@ -546,8 +551,8 @@
       </li>
       <li>
         <span class="state no" data-lang="en">Never</span><span class="state no" data-lang="id">Belum pernah</span>
-        <span class="what" data-lang="en">Met <b>real adversarial traffic</b>. Every threshold is a reasoned guess, set leniently so being wrong withholds escalation. <a href="#status">Read this first</a>.</span>
-        <span class="what" data-lang="id">Bertemu <b>trafik lawan yang nyata</b>. Tiap ambang masih dugaan beralasan, disetel longgar supaya kalau salah ia menahan eskalasi. <a href="#status">Baca ini dulu</a>.</span>
+        <span class="what" data-lang="en">Met <b>real adversarial traffic</b>. Generated traffic falsifies a threshold; only a real population calibrates one. <a href="#status">Read this first</a>.</span>
+        <span class="what" data-lang="id">Bertemu <b>trafik lawan yang nyata</b>. Trafik buatan memfalsifikasi ambang; hanya populasi nyata yang mengkalibrasinya. <a href="#status">Baca ini dulu</a>.</span>
       </li>
     </ul>
 
@@ -618,7 +623,7 @@
         <h3 data-lang="id">Rujukan</h3>
         <ol>
           <li><a href="#glossary" data-lang="en">Glossary</a><a href="#glossary" data-lang="id">Glosarium</a><span data-lang="en">seventeen terms used in a narrow sense</span><span data-lang="id">tujuh belas istilah dalam arti sempit</span></li>
-          <li><a href="#decisions" data-lang="en">Decision index</a><a href="#decisions" data-lang="id">Indeks keputusan</a><span data-lang="en">all 47, and the file each became</span><span data-lang="id">semua 47, dan file tempatnya menjelma</span></li>
+          <li><a href="#decisions" data-lang="en">Decision index</a><a href="#decisions" data-lang="id">Indeks keputusan</a><span data-lang="en">all 49, and the file each became</span><span data-lang="id">semua 49, dan file tempatnya menjelma</span></li>
           <li><a href="#context" data-lang="en">Context</a><a href="#context" data-lang="id">Konteks</a><span data-lang="en">the same trust, read differently per endpoint</span><span data-lang="id">trust yang sama, dibaca beda per endpoint</span></li>
           <li><a href="#principles" data-lang="en">Principles</a><a href="#principles" data-lang="id">Prinsip</a><span data-lang="en">what the guard actually claims</span><span data-lang="id">apa yang sebenarnya diklaim guard</span></li>
           <li><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/CONTRIBUTING.md" data-lang="en">Contributing</a><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/CONTRIBUTING.md" data-lang="id">Berkontribusi</a><span data-lang="en">what helps most, and the house rules</span><span data-lang="id">yang paling membantu, dan aturan rumahnya</span></li>
@@ -1518,8 +1523,8 @@ const guard = createGuard({ store: sqliteStore({ path: './trust.db' }) });</pre>
     <p class="num"><span data-lang="en">The library</span><span data-lang="id">Library-nya</span></p>
     <h2 data-lang="en">What is actually built</h2>
     <h2 data-lang="id">Apa yang benar-benar sudah dibangun</h2>
-    <p data-lang="en">The model exists as TypeScript with no platform dependencies: Beta-Bernoulli trust, half-life decay over real elapsed time, retention, the decision bands with their ceilings, declared invariants, and the anomaly feature space. One hundred and thirty-four tests, most of which exist to pin a number the design argues for.</p>
-    <p data-lang="id">Modelnya sudah ada sebagai TypeScript tanpa ketergantungan platform: trust Beta-Bernoulli, decay half-life atas waktu nyata, retensi, band keputusan beserta batasnya, invariant terdeklarasi, dan ruang fitur anomali. Seratus tiga puluh empat test, sebagian besar ada untuk memaku angka yang didebatkan desain ini.</p>
+    <p data-lang="en">The model exists as TypeScript with no platform dependencies: Beta-Bernoulli trust, half-life decay over real elapsed time, retention, the decision bands with their ceilings, declared invariants, and the anomaly feature space. One hundred and forty-three tests, most of which exist to pin a number the design argues for.</p>
+    <p data-lang="id">Modelnya sudah ada sebagai TypeScript tanpa ketergantungan platform: trust Beta-Bernoulli, decay half-life atas waktu nyata, retensi, band keputusan beserta batasnya, invariant terdeklarasi, dan ruang fitur anomali. Seratus empat puluh tiga test, sebagian besar ada untuk memaku angka yang didebatkan desain ini.</p>
     <pre>const guard = createGuard({ invariants: [checkoutOrder] });
 
 const result = await guard.evaluate({
@@ -1631,8 +1636,31 @@ assertConformant(await checkStoreConformance(() =&gt; myRedisStore()));</pre>
     <h3 data-lang="id">Yang belum dibuktikan</h3>
     <p data-lang="en">The finding above came from the declared-invariant layer, which is the least novel part of the design — set membership, expressible as one <code>if</code>. The parts that are actually new describe behavior over populations and over time: trust as a distribution, half-life decay, the epistemic stage, the diversity signal. One person unlocking an app a few times a day cannot move any of them into a regime where they matter.</p>
     <p data-lang="id">Temuan di atas datang dari lapis invariant terdeklarasi, bagian yang paling tidak baru dari desain ini — keanggotaan himpunan, bisa ditulis satu <code>if</code>. Bagian yang benar-benar baru menggambarkan perilaku lintas populasi dan lintas waktu: trust sebagai distribusi, decay half-life, tahap epistemik, sinyal diversity. Satu orang membuka aplikasi beberapa kali sehari tidak bisa menggerakkan satu pun dari itu ke wilayah di mana mereka berarti.</p>
-    <p class="muted" data-lang="en">So this is a smoke test, not a validated thesis. No threshold is calibrated by it, and the saturation guard cannot be tested without a patient adversary. A target that could settle the question needs unauthenticated traffic, data worth scraping, and a public lookup whose legitimate order can be declared.</p>
-    <p class="muted" data-lang="id">Jadi ini smoke test, bukan tesis yang tervalidasi. Tidak ada ambang yang terkalibrasi darinya, dan saturation guard tidak bisa diuji tanpa penyerang yang sabar. Target yang bisa menuntaskan pertanyaannya butuh trafik tanpa autentikasi, data yang layak diambil, dan pencarian publik yang urutan sahnya bisa dideklarasikan.</p>
+    <p class="muted" data-lang="en">So the replay of real usage is a smoke test, not a validated thesis. No threshold is calibrated by it.</p>
+    <p class="muted" data-lang="id">Jadi replay pemakaian nyata itu smoke test, bukan tesis yang tervalidasi. Tidak ada ambang yang terkalibrasi darinya.</p>
+
+    <h3 data-lang="en">So the traffic is generated instead of waited for</h3>
+    <h3 data-lang="id">Jadi trafiknya dibuat, bukan ditunggu</h3>
+    <p data-lang="en">&#8220;One user&#8221; is a fact about the traffic, not about the flow. The flow is declared and drivable, so the statistical layer is exercised by seeded personas against the same invariants — five legitimate, four adversarial, plus an identity-churn population. <code>npm run replay</code> prints the table.</p>
+    <p data-lang="id">&#8220;Satu pengguna&#8221; adalah fakta tentang trafiknya, bukan tentang alurnya. Alurnya terdeklarasi dan bisa digerakkan, jadi lapis statistiknya digerakkan oleh persona berbenih di atas invariant yang sama — lima sah, empat lawan, ditambah populasi pergantian identitas. <code>npm run replay</code> mencetak tabelnya.</p>
+    <pre>persona                kind       worst advice       at        stage        verdict
+daily-ritual           legit      OBSERVE            @4/79     established  as intended
+fat-finger             legit      OBSERVE            @3/3      developing   as intended
+password-manager       legit      OBSERVE            @1/2      developing   as intended
+session-restore        legit      OBSERVE            @3/6      developing   as intended
+power-user             legit      OBSERVE            @4/26     established  as intended
+forged-api-call        adversary  RESTRICT           @1/1      unknown      as intended
+scripted-brute-force   adversary  INCREASE_FRICTION  @2/30     established  as intended
+jittered-brute-force   adversary  INCREASE_FRICTION  @2/30     established  as intended
+slow-poisoner          adversary  RESTRICT           @32/60    established  as intended</pre>
+    <p data-lang="en">This <b>falsifies</b>; it does not calibrate. A persona built from honest usage that gets escalated means a threshold is wrong regardless of where the traffic came from. But real populations are not drawn from these distributions, and an attacker who reads the file can shape traffic around it — so numbers derived here are hypotheses, never conclusions.</p>
+    <p data-lang="id">Ini <b>memfalsifikasi</b>, bukan mengkalibrasi. Persona yang dibangun dari pemakaian jujur tapi kena eskalasi berarti ada ambang yang salah, dari mana pun trafiknya datang. Tapi populasi nyata tidak ditarik dari distribusi ini, dan penyerang yang membaca file-nya bisa membentuk trafik di sekelilingnya — jadi angka dari sini adalah hipotesis, bukan kesimpulan.</p>
+    <p data-lang="en">It found two wrong numbers immediately, both erring toward friction for legitimate users. The <b>developing stage ceiling</b> was one rung too high: two mistyped PINs and an autofilled password manager were both advised <code>INCREASE_FRICTION</code>, and the stage boundary was a cliff — silence at <code>n = 2.9</code>, friction at <code>n = 3</code>. And <b>scope entropy</b> was normalised against the window size, which made it depend on how many scopes the <em>application</em> has rather than how varied the <em>entity</em> was: a two-scope app could not reach the diversity threshold at all, so its most honest user was scored monotonous for the entire run.</p>
+    <p data-lang="id">Ia langsung menemukan dua angka yang salah, keduanya salah ke arah friksi bagi pengguna sah. <b>Batas tahap developing</b> satu tingkat terlalu tinggi: dua PIN salah ketik dan password manager yang mengisi otomatis sama-sama disarankan <code>INCREASE_FRICTION</code>, dan batas tahapnya jadi jurang — hening di <code>n = 2.9</code>, friksi di <code>n = 3</code>. Dan <b>entropi scope</b> dinormalisasi terhadap ukuran window, yang membuatnya bergantung pada berapa banyak scope yang dimiliki <em>aplikasi</em>, bukan pada seberapa bervariasi <em>entity</em>-nya: aplikasi dua scope tidak akan pernah mencapai ambang diversity, jadi penggunanya yang paling jujur dinilai monoton sepanjang run.</p>
+    <p data-lang="en">Three results are measurements rather than fixes. <b>Uniform jitter buys nothing</b> — a fixed sleep and <code>uniform(1.2s, 2.3s)</code> escalate at the same step, so the claim that the tell is the shape of the randomness survives its own counterexample. <b>Identity churn works, and the floor is two requests</b>: three attempts per identity and every identity is felt, one attempt per identity and none ever is, because nothing accumulates when nothing is asked twice. And <b>ten honest days buy about eleven abuse calls</b> before <code>RESTRICT</code> — the price of having a memory, now bounded and asserted.</p>
+    <p data-lang="id">Tiga hasil lainnya adalah pengukuran, bukan perbaikan. <b>Jitter seragam tidak membeli apa pun</b> — sleep tetap dan <code>uniform(1.2s, 2.3s)</code> tereskalasi di langkah yang sama, jadi klaim bahwa tandanya ada di bentuk keacakan bertahan menghadapi contoh-lawannya sendiri. <b>Pergantian identitas berhasil, dan lantainya dua request</b>: tiga percobaan per identitas dan semua identitas terasa, satu percobaan per identitas dan tidak ada yang pernah terasa, karena tak ada yang menumpuk kalau tak ada yang ditanya dua kali. Dan <b>sepuluh hari jujur membeli sekitar sebelas panggilan penyalahgunaan</b> sebelum <code>RESTRICT</code> — harga dari punya memori, kini dibatasi dan diuji.</p>
+    <p class="muted" data-lang="en">What generated traffic still cannot do is calibrate. That needs a real population: unauthenticated traffic, data worth scraping, and a public lookup whose legitimate order can be declared.</p>
+    <p class="muted" data-lang="id">Yang tetap tidak bisa dilakukan trafik buatan adalah kalibrasi. Itu butuh populasi nyata: trafik tanpa autentikasi, data yang layak diambil, dan pencarian publik yang urutan sahnya bisa dideklarasikan.</p>
     <p class="seealso">
       <b data-lang="en">See also</b><b data-lang="id">Lihat juga</b>
       <a href="#status" data-lang="en">Where it stands</a><a href="#status" data-lang="id">Posisi saat ini</a>
@@ -1663,8 +1691,8 @@ assertConformant(await checkStoreConformance(() =&gt; myRedisStore()));</pre>
 
       <dt data-lang="en">Cold start and identity churn</dt>
       <dt data-lang="id">Cold start dan pergantian identitas</dt>
-      <dd data-lang="en">A history-based model is gameable by an attacker who simply keeps starting fresh.</dd>
-      <dd data-lang="id">Model berbasis riwayat bisa diakali penyerang yang tinggal terus memulai dari nol.</dd>
+      <dd data-lang="en">A history-based model is gameable by an attacker who simply keeps starting fresh. Now measured rather than feared: with two or more requests per identity the guard engages every time, and with exactly one it never can, because nothing accumulates when nothing is asked twice. That floor is the root-of-trust problem, and it belongs to the host.</dd>
+      <dd data-lang="id">Model berbasis riwayat bisa diakali penyerang yang tinggal terus memulai dari nol. Kini terukur, bukan cuma dikhawatirkan: dengan dua request atau lebih per identitas guard selalu bereaksi, dan dengan tepat satu ia tak akan pernah bisa, karena tak ada yang menumpuk kalau tak ada yang ditanya dua kali. Lantai itu adalah masalah root of trust, dan itu milik host.</dd>
 
       <dt data-lang="en">Root of trust</dt>
       <dt data-lang="id">Akar kepercayaan</dt>
@@ -1673,8 +1701,8 @@ assertConformant(await checkStoreConformance(() =&gt; myRedisStore()));</pre>
 
       <dt data-lang="en">Poisoning resistance</dt>
       <dt data-lang="id">Ketahanan terhadap poisoning</dt>
-      <dd data-lang="en">Slow, incremental, individually-legitimate steps that shift the baseline. Hard to catch precisely because each step looks normal.</dd>
-      <dd data-lang="id">Langkah lambat, bertahap, yang masing-masing terlihat sah tapi menggeser baseline. Sulit ditangkap justru karena tiap langkahnya normal.</dd>
+      <dd data-lang="en">Slow, incremental, individually-legitimate steps that shift the baseline. Hard to catch precisely because each step looks normal. Bounded rather than solved: ten days of honest traffic buy roughly eleven abuse calls before <code>RESTRICT</code>, which is the price of having a memory at all.</dd>
+      <dd data-lang="id">Langkah lambat, bertahap, yang masing-masing terlihat sah tapi menggeser baseline. Sulit ditangkap justru karena tiap langkahnya normal. Dibatasi, bukan diselesaikan: sepuluh hari trafik jujur membeli sekitar sebelas panggilan penyalahgunaan sebelum <code>RESTRICT</code>, dan itu harga dari punya memori.</dd>
 
       <dt data-lang="en">Cost of near-zero friction</dt>
       <dt data-lang="id">Biaya friksi mendekati nol</dt>
@@ -1745,7 +1773,7 @@ assertConformant(await checkStoreConformance(() =&gt; myRedisStore()));</pre>
         </tr>
         <tr>
           <td data-lang="en">Core model in TypeScript</td><td data-lang="id">Model core dalam TypeScript</td>
-          <td data-lang="en">Built and tested — 134 tests, no threshold calibrated</td><td data-lang="id">Sudah dibangun dan diuji — 134 test, belum ada threshold terkalibrasi</td>
+          <td data-lang="en">Built and tested — 143 tests, and generated traffic has falsified two thresholds</td><td data-lang="id">Sudah dibangun dan diuji — 143 test, dan trafik buatan sudah memfalsifikasi dua ambang</td>
         </tr>
         <tr>
           <td data-lang="en">State store and its conformance kit</td><td data-lang="id">State store dan kit conformance-nya</td>
@@ -1761,11 +1789,11 @@ assertConformant(await checkStoreConformance(() =&gt; myRedisStore()));</pre>
         </tr>
         <tr>
           <td data-lang="en">Proof of concept</td><td data-lang="id">Proof of concept</td>
-          <td data-lang="en">Runs against one real flow — a smoke test, not a validated thesis</td><td data-lang="id">Berjalan pada satu alur nyata — smoke test, bukan tesis tervalidasi</td>
+          <td data-lang="en">Runs against one real flow, and generated personas now exercise the statistical layer</td><td data-lang="id">Berjalan pada satu alur nyata, dan persona buatan kini menggerakkan lapis statistiknya</td>
         </tr>
         <tr>
           <td data-lang="en">Calibration against real traffic</td><td data-lang="id">Kalibrasi terhadap trafik nyata</td>
-          <td data-lang="en"><strong>None</strong> — every number is still a reasoned guess</td><td data-lang="id"><strong>Belum ada</strong> — tiap angka masih dugaan beralasan</td>
+          <td data-lang="en"><strong>None</strong> — generated traffic falsifies a threshold, it never calibrates one</td><td data-lang="id"><strong>Belum ada</strong> — trafik buatan memfalsifikasi ambang, tidak pernah mengkalibrasinya</td>
         </tr>
       </tbody>
     </table>
@@ -1781,21 +1809,19 @@ assertConformant(await checkStoreConformance(() =&gt; myRedisStore()));</pre>
     <p class="num"><span data-lang="en">Roadmap</span><span data-lang="id">Roadmap</span></p>
     <h2 data-lang="en">What happens next, in order</h2>
     <h2 data-lang="id">Yang berikutnya, berurutan</h2>
-    <p class="muted" data-lang="en">Done: the core model, the store contract with a durable implementation, one observational integration against a real flow, and the three enumeration tasks — the constraint taxonomy, the weak-signal catalogue, and the two-tier vocabulary. What remains is what traffic gates:</p>
-    <p class="muted" data-lang="id">Selesai: model core, kontrak store beserta implementasi tahan restart, satu integrasi observasional pada alur nyata, dan tiga tugas pendaftaran — taksonomi constraint, katalog weak signal, dan kosakata dua lapis. Yang tersisa adalah yang menunggu trafik:</p>
+    <p class="muted" data-lang="en">Done: the core model, the store contract with a durable implementation, one observational integration against a real flow, the three enumeration tasks — constraint taxonomy, weak-signal catalogue, two-tier vocabulary — and generated persona traffic that exercises the probabilistic model and has already falsified two thresholds. What remains:</p>
+    <p class="muted" data-lang="id">Selesai: model core, kontrak store beserta implementasi tahan restart, satu integrasi observasional pada alur nyata, tiga tugas pendaftaran — taksonomi constraint, katalog weak signal, kosakata dua lapis — dan trafik persona buatan yang menggerakkan model probabilistiknya serta sudah memfalsifikasi dua ambang. Yang tersisa:</p>
     <ol class="road" data-lang="en">
-      <li>Find an integration target that can actually exercise the statistical layer — unauthenticated traffic, data worth scraping, a real adversary. Nothing below is worth much before this.</li>
       <li>Build collectors for the seven catalogued signals nothing computes yet. Most need host cooperation, and each needs its false-positive story before it earns a threshold.</li>
-      <li>Pick an anomaly algorithm over the settled feature space, once there is traffic to choose it against.</li>
-      <li>Calibrate. Every threshold in the model is still a reasoned guess.</li>
+      <li>Pick an anomaly algorithm over the settled feature space, using the personas to compare candidates.</li>
+      <li>Find a real population to calibrate against — unauthenticated traffic, data worth scraping, a real adversary. Generated traffic falsifies; only real traffic calibrates.</li>
       <li>Publish the vocabulary as a <code>scorpio-guard-protocol</code> v0.1 wire spec — the structure is settled, the format is not.</li>
       <li>Only then investigate encoding schemes for symptom transmission.</li>
     </ol>
     <ol class="road" data-lang="id">
-      <li>Cari target integrasi yang benar-benar bisa menggerakkan lapis statistiknya — trafik tanpa autentikasi, data yang layak di-scrape, penyerang nyata. Tanpa ini, semua di bawah tak banyak berarti.</li>
       <li>Bangun collector untuk tujuh sinyal di katalog yang belum dihitung apa pun. Sebagian besar butuh kerja sama host, dan tiap sinyal butuh cerita false-positive-nya sebelum layak dapat ambang.</li>
-      <li>Pilih algoritma anomali di atas ruang fitur yang sudah disepakati, begitu ada trafik untuk memilihnya.</li>
-      <li>Kalibrasi. Tiap ambang di modelnya masih dugaan beralasan.</li>
+      <li>Pilih algoritma anomali di atas ruang fitur yang sudah disepakati, pakai persona-nya untuk membandingkan kandidat.</li>
+      <li>Cari populasi nyata untuk dikalibrasi — trafik tanpa autentikasi, data yang layak di-scrape, penyerang nyata. Trafik buatan memfalsifikasi; hanya trafik nyata yang mengkalibrasi.</li>
       <li>Terbitkan kosakatanya sebagai spesifikasi wire <code>scorpio-guard-protocol</code> v0.1 — strukturnya selesai, formatnya belum.</li>
       <li>Baru setelah itu, teliti skema encoding untuk pengiriman symptom.</li>
     </ol>
@@ -2041,6 +2067,12 @@ The prescription travels; the patient does not.</pre>
           <td data-lang="en">deferred</td><td data-lang="id">ditunda</td></tr>
 
         <tr class="grouprow"><td colspan="3" data-lang="en">Proving any of it</td><td colspan="3" data-lang="id">Membuktikan semuanya</td></tr>
+        <tr><td><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md#d45--generate-the-traffic-do-not-wait-for-it">D45</a></td>
+          <td data-lang="en">Generate the traffic rather than wait for it — the flow is drivable even when the traffic is one user</td><td data-lang="id">Buat trafiknya, jangan ditunggu — alurnya bisa digerakkan meski trafiknya cuma satu pengguna</td>
+          <td><code>examples/healthme/personas.ts</code></td></tr>
+        <tr><td><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md#d46--two-thresholds-the-traffic-falsified">D46</a></td>
+          <td data-lang="en">Two thresholds the traffic falsified: the developing ceiling, and the entropy denominator</td><td data-lang="id">Dua ambang yang difalsifikasi trafiknya: batas developing, dan penyebut entropinya</td>
+          <td><code>assess.ts</code>, <code>behavior.ts</code></td></tr>
         <tr><td><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md#d30--poc-must-run-against-a-real-application-flow">D30</a></td>
           <td data-lang="en">The PoC must run against a real application flow, not a synthetic fixture</td><td data-lang="id">PoC harus jalan pada alur aplikasi nyata, bukan fixture sintetis</td>
           <td><code>examples/healthme/</code></td></tr>

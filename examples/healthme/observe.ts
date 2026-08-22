@@ -28,6 +28,10 @@ export type Record = {
   readonly hostDid: HostOutcome;
   readonly agrees: boolean;
   readonly stage: string;
+  /** Kept so a replay can measure how much evidence produced an outcome. */
+  readonly mean: number;
+  readonly mass: number;
+  readonly diversity: boolean | undefined;
   readonly trace: readonly string[];
 };
 
@@ -66,6 +70,8 @@ export function createObserver(options: ObserverOptions = {}) {
     readonly hostDid: HostOutcome;
     /** Evidence the host attributes to this interaction, if any. */
     readonly evidence?: { positive?: 'weak' | 'strong'; negative?: 'weak' | 'strong' };
+    /** Weak signals a collector reported for this interaction. D42. */
+    readonly signals?: readonly string[];
   }): Promise<Assessment> {
     const assessment = await guard.evaluate({
       entity: input.entity,
@@ -73,6 +79,7 @@ export function createObserver(options: ObserverOptions = {}) {
         scope: input.scope,
         data: input.data,
         ...(input.evidence ? { evidence: input.evidence } : {}),
+        ...(input.signals ? { signals: input.signals } : {}),
       },
     });
 
@@ -84,6 +91,9 @@ export function createObserver(options: ObserverOptions = {}) {
       hostDid: input.hostDid,
       agrees: permits(assessment.decision) === (input.hostDid === 'allowed'),
       stage: assessment.trust.stage,
+      mean: assessment.trust.mean,
+      mass: assessment.trust.mass,
+      diversity: assessment.diversity,
       trace: assessment.trace,
     });
 

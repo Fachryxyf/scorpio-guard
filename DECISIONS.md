@@ -46,6 +46,7 @@ Last updated: 2026-08-21
 - [D5 — Decision is a function of trust and uncertainty](#d5--decision-is-a-function-of-trust-and-uncertainty)
 - [D37 — Saturation guard belongs in the decision layer, not the trust model](#d37--saturation-guard-belongs-in-the-decision-layer-not-the-trust-model)
 - [D40 — An epistemic stage precedes trust and uncertainty](#d40--an-epistemic-stage-precedes-trust-and-uncertainty)
+- [D46 — Two thresholds the traffic falsified](#d46--two-thresholds-the-traffic-falsified)
 - [D39 — The cold-start band contradicted the zero-friction goal](#d39--the-cold-start-band-contradicted-the-zero-friction-goal)
 
 **Part IV — Hard constraints**
@@ -95,6 +96,7 @@ Last updated: 2026-08-21
 - [D28 — Site stays where it is](#d28--site-stays-where-it-is)
 - [D29 — No empty repositories](#d29--no-empty-repositories)
 - [D34 — PoC target: HealthMe, with its limits stated](#d34--poc-target-healthme-with-its-limits-stated)
+- [D45 — Generate the traffic; do not wait for it](#d45--generate-the-traffic-do-not-wait-for-it)
 - [D30 — PoC must run against a real application flow](#d30--poc-must-run-against-a-real-application-flow)
 
 **[Open questions](#open-questions)**
@@ -968,6 +970,74 @@ prior.
 means variance already mixes the mean with the mass, so no threshold on variance
 alone could separate *no evidence* from *balanced evidence*. Options 2 and 3 would
 each have left that conflation in place.
+
+---
+
+## D46 — Two thresholds the traffic falsified
+
+**Decided, from the D45 replay.**
+
+Two numbers were wrong. Both were found by running traffic rather than by
+argument, which is the whole point of D45 — and both were wrong in the direction
+the design says matters most: they manufactured friction for legitimate users.
+
+### The `developing` ceiling was one rung too high
+
+D40 describes the middle stage as one where trust may *influence* the treatment
+without *driving* it, and the code read that as `INCREASE_FRICTION`. Two personas
+built from HealthMe's own honest usage were escalated by it:
+
+| Persona | What it does | Was advised | Now |
+|---|---|---|---|
+| `fat-finger` | mistypes the PIN twice, then succeeds | `INCREASE_FRICTION` | `OBSERVE` |
+| `password-manager` | autofill: populated field, zero keystrokes, correct PIN | `INCREASE_FRICTION` | `OBSERVE` |
+
+The mistake was reading "influence" as "may cost the user a little". Friction is
+the *first rung a legitimate user actually feels*; `OBSERVE` costs nothing and
+still tells the host something, so it is the only rung that influences without
+driving.
+
+Worse, the old value made the `unknown` → `developing` boundary a cliff: at
+`n = 2.9` the guard was silent, and at `n = 3` it could ask for friction. A single
+additional observation should never be able to do that. `STAGE_CEILING.developing`
+is now `OBSERVE`, and the absence of a cliff is asserted directly.
+
+Note what this does *not* weaken. A hard violation still reaches the decision
+layer on its own authority, so `fat-finger` being quiet does not make a forged API
+call quiet — the replay confirms that unchanged.
+
+### Scope entropy was normalised against the wrong denominator
+
+`scopeEntropy` divided by `log2(count)`, the maximum entropy the *window size*
+allows. That made the value depend on how many scopes the **application** has,
+not on how varied the **entity** was:
+
+```
+same behavior, attention spread perfectly evenly
+  in a 2-scope app  ->  0.23   (below the 0.35 threshold)
+  in a 5-scope app  ->  0.54   (above it)
+```
+
+So a small application could not reach the diversity threshold at all, no matter
+how its users behaved. HealthMe has two scopes, and its most honest persona —
+fourteen days of daily use — was scored monotonous for the lifetime of the run.
+The consequence was not friction, since D37 only withholds escalation, but it was
+silent and wrong: the guard could never have escalated that entity later, however
+it behaved.
+
+Normalising against `log2(distinctScopes)` makes the feature mean *balance* rather
+than breadth, which is what the diversity check already wanted from it — breadth
+is `distinctScopes`'s own job, and pairing the two is what makes the conjunction
+in `diversityConcurs()` meaningful instead of redundant.
+
+After the change the daily user reads `diversity: true`, and the brute-forcers
+still read `false` because a single scope now scores exactly `0`.
+
+### What did not change
+
+The thresholds in `DEFAULT_DIVERSITY` and the epistemic boundaries `3` and `7` are
+untouched. The traffic gave no reason to move them, and moving a number because a
+synthetic run suggested it would be exactly the overreach D45 warns against.
 
 ---
 
@@ -1963,11 +2033,16 @@ The proof of concept runs against **HealthMe** (`myhealth`), an existing persona
 health PWA, before any greenfield fixture.
 
 > **What this target can and cannot settle.** HealthMe validates that the library
-> works against a real flow, and it did find a real defect. It cannot validate the
-> thesis: it has one user, so there is no sustained abuse for asymmetric cost to
-> act against. The parts of the design that are genuinely novel are untouched by
-> it. Recorded here rather than discovered later by an adopter — see *What the
-> replay could not reach* below.
+> works against a real flow, and it did find a real defect. Its *production*
+> traffic — one user — cannot validate the thesis: there is no sustained abuse for
+> asymmetric cost to act against. Recorded here rather than discovered later by an
+> adopter — see *What the replay could not reach* below.
+>
+> **Narrowed again by D45.** "One user" is a fact about the traffic, not about the
+> flow. The flow is declared and drivable, so the statistical layer is now exercised
+> by generated personas against these same invariants. That falsifies thresholds
+> (D46 records two) but still cannot calibrate them, so what follows stays true of
+> calibration and no longer true of *exercising the model at all*.
 
 ### Why it fits the D30 requirements
 
@@ -2088,6 +2163,15 @@ flow rather than a fixture shaped to fit it, the zero-friction claim survived a
 week of normal use, and a genuine authorization defect surfaced that is worth
 fixing regardless of SG.
 
+**Three of those four are now reached, by D45.** Generated personas drive Beta
+trust to `established`, exercise decay across fourteen simulated days, move the
+epistemic stage through all three values, and put the diversity signal on both
+sides of its threshold — including the farming pattern D37 exists for, which turns
+out to be testable synthetically after all: the objection above was that a
+synthetic adversary shares the guard's assumptions, and that is true of *whether
+farming is realistic* but not of *whether the mechanism engages when it happens*.
+The fourth is unchanged: nothing here calibrates a threshold.
+
 ### What a thesis-validating target needs
 
 Unauthenticated public traffic, data worth scraping, a public search or lookup
@@ -2130,6 +2214,83 @@ invariants it supplies, and what it explicitly cannot validate.
 
 ---
 
+## D45 — Generate the traffic; do not wait for it
+
+**Decided, resolving the sequencing deadlock in D34.**
+
+D34 concluded that HealthMe cannot validate the thesis because it has one user, and
+the roadmap therefore waited on finding a target with adversarial traffic. That
+conclusion conflated two things: HealthMe's **production traffic** is one user, but
+HealthMe's **flow** is real, declared, and drivable by as many kinds of visitor as
+anyone cares to write.
+
+Waiting was also self-defeating. The thresholds cannot be argued about without
+traffic, no traffic was arriving, and every number stayed a guess indefinitely. So
+the traffic is generated: seeded personas driven through the same invariants the
+real application supplied, in `examples/healthme/personas.ts`.
+
+### What this can and cannot establish
+
+It **can falsify**, which is the point. If a persona built from HealthMe's own
+honest usage gets escalated, a threshold is wrong — and that finding does not
+depend on where the traffic came from. Same in reverse for an adversary that walks
+through untouched. D46 records two numbers this immediately falsified.
+
+It **cannot calibrate**. Real populations are not drawn from these distributions,
+and an attacker who reads the file can shape traffic around it. Numbers derived
+here are hypotheses to test against a real population, never conclusions. The
+distinction is the same one D34 draws, applied honestly rather than used as a
+reason to do nothing.
+
+### The personas, and why each exists
+
+Legitimate — escalating any of these is a false positive, the central constraint:
+
+| Persona | Why it is here |
+|---|---|
+| `daily-ritual` | fourteen days of the actual HealthMe usage pattern |
+| `fat-finger` | mistypes the PIN twice; HealthMe's 3-strike rule punishes this |
+| `password-manager` | produces the impossible-idle-action *shape* innocently, which is why that invariant is declared `soft` |
+| `session-restore` | HealthMe's own `sessionStorage` unlock, repeated |
+| `power-user` | heavy honest use, past HealthMe's 10/hour IP limit |
+
+Adversaries — walking through untouched is the finding:
+
+| Persona | Why it is here |
+|---|---|
+| `forged-api-call` | the real defect D34 found: HealthMe allows it |
+| `scripted-brute-force` | fixed sleep, clearing `localStorage` to reset the lockout |
+| `jittered-brute-force` | the same with `uniform(1.2s, 2.3s)` — the exact distribution the design notes name as the tell |
+| `slow-poisoner` | earns trust for ten days, then drains the paid endpoint |
+| `churningBruteForce` | a fresh identity every few attempts |
+
+### Two findings that are measurements, not fixes
+
+**Jitter buys nothing.** The fixed-sleep and uniform-jitter brute forces escalate
+at the same step. The notes' claim that the tell is the shape of the randomness
+rather than the delay survives contact with its own counterexample.
+
+**Churn works, and the floor is two requests.** With three attempts per identity,
+every identity is felt. With **one** attempt per identity, none ever is — nothing
+accumulates because nothing is asked twice. No amount of trust modelling fixes
+that: it is the root-of-trust problem (D1.1), and it belongs to the host. Recorded
+as a number rather than argued away.
+
+**The slow poisoner costs about eleven calls.** Ten honest days buy roughly six
+abuse calls before anything is felt and eleven before `RESTRICT`. That head start
+is the price of having a memory at all; what matters is that it is bounded and
+small relative to the traffic that paid for it, and the bound is now asserted.
+
+### As implemented
+
+`examples/healthme/personas.ts` and `replay.ts`, asserted in `replay.test.ts`, and
+readable as a table via `npm run replay`. The two claims that must not regress —
+no legitimate persona feels anything, no adversary walks through — are tests. The
+rest is output meant to be read, because a threshold gets argued about from numbers
+and not from prose.
+
+---
+
 # Open questions
 
 Every numbered question is answered. What remains is not a question but a
@@ -2147,8 +2308,18 @@ until the proof of concept meets real traffic.
 | D43 | Two-tier symptom vocabulary | The structure is settled; the detail list is a first pass, and the wire format belongs to `scorpio-guard-protocol`. Nothing transmits, so nothing has been round-tripped against a real server. |
 
 D34 has been run and is recorded with its limits: HealthMe establishes that the
-library works against a real flow, and establishes nothing about the probabilistic
-model, because one user cannot exercise it. Choosing a target that *can* is the
-open work — the requirements are written out in D34, and Pusaka is the candidate
-under consideration, blocked on whether it gains a server side rather than on
+library works against a real flow, and its production traffic — one user — cannot
+exercise the probabilistic model.
+
+D45 changes what follows from that. The flow is drivable even though the traffic is
+not, so the statistical layer is now exercised by generated personas rather than by
+waiting: two thresholds were falsified immediately (D46), and identity churn is
+recorded as a measured floor rather than a worry. What generated traffic cannot do
+is calibrate, so the requirements in D34 still stand for a real target — Pusaka
+remains the candidate, blocked on whether it gains a server side rather than on
 effort.
+
+| Ref | Recorded as | Still unvalidated |
+|---|---|---|
+| D45 | Generated persona traffic | The distributions are invented. Every persona is a hypothesis about how someone behaves, and an attacker who reads the file can shape traffic around it. |
+| D46 | Two thresholds corrected | Corrected in the right direction, not calibrated to a value. `OBSERVE` at `developing` is defensible; that `3` and `7` are the right boundaries is still a guess. |

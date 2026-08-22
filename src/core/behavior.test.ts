@@ -105,3 +105,31 @@ test('D36: the window is bounded, dropping oldest first', () => {
   assert.equal(window[0]?.scope, 's-10');
   assert.equal(window.at(-1)?.scope, 's-29');
 });
+
+test('D46: entropy measures balance, independently of how many scopes the app has', () => {
+  // The same behavior — attention spread perfectly evenly over whatever exists —
+  // must score the same in a two-scope app and a five-scope one. Normalising
+  // against the window size made this a proxy for `distinctScopes` instead, so a
+  // small application could not reach the diversity threshold at all.
+  const even = (scopes: readonly string[]) =>
+    behaviorFeatures(
+      Array.from({ length: 20 }, (_, i) => ({ at: i * 1000, scope: scopes[i % scopes.length]! })),
+    ).scopeEntropy;
+
+  assert.equal(even(['a', 'b']), 1);
+  assert.equal(even(['a', 'b', 'c', 'd', 'e']), 1);
+});
+
+test('D46: a lopsided window reads low even though two scopes were seen', () => {
+  // Breadth is `distinctScopes`'s job. Entropy has to disagree with it here, or
+  // one stray observation would buy a monotonous entity a diversity pass.
+  const lopsided = [
+    ...Array.from({ length: 19 }, (_, i) => ({ at: i * 1000, scope: 'api' })),
+    { at: 20_000, scope: 'unlock' },
+  ];
+
+  const features = behaviorFeatures(lopsided);
+  assert.equal(features.distinctScopes, 2);
+  assert.ok(features.scopeEntropy < DEFAULT_DIVERSITY.minScopeEntropy);
+  assert.equal(diversityConcurs(features), false);
+});

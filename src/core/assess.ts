@@ -70,10 +70,18 @@ const UNCERTAINTY_CEILING: Record<UncertaintyLevel, Decision> = {
  * has no standing to ask for anything. It does not force `ALLOW` either — an
  * independent anomaly signal or hard-constraint violation still reaches the
  * decision layer on its own authority.
+ *
+ * `developing` permits `OBSERVE` and no more. D40 describes the middle stage as
+ * one where trust may *influence* the treatment without *driving* it, and
+ * `OBSERVE` is the only rung that does that: it costs the user nothing and tells
+ * the host something. `INCREASE_FRICTION` is the first rung a legitimate user
+ * actually feels, so allowing it here made the `unknown` → `developing` boundary a
+ * cliff — a third observation could turn silence into friction. D46 records the
+ * traffic that found it.
  */
 const STAGE_CEILING: Record<EpistemicStage, Decision> = {
   unknown: 'ALLOW',
-  developing: 'INCREASE_FRICTION',
+  developing: 'OBSERVE',
   established: 'BLOCK',
 };
 

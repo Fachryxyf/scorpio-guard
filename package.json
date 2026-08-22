@@ -30,6 +30,7 @@
     "prepare": "tsc -p tsconfig.build.json",
     "typecheck": "tsc --noEmit && tsc -p examples --noEmit",
     "test": "node --experimental-strip-types --test \"src/**/*.test.ts\" \"examples/**/*.test.ts\"",
+    "replay": "node --experimental-strip-types scripts/replay.mjs",
     "smoke": "node scripts/smoke.mjs"
   },
   "devDependencies": {

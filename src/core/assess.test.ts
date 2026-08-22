@@ -59,12 +59,23 @@ test('D5: lack of evidence and balanced evidence are not the same state', () => 
   assert.equal(balanced.decision, 'INCREASE_FRICTION');
 });
 
-test('D5: developing evidence lets trust influence treatment, but not fully', () => {
+test('D46: developing evidence may inform the host, never cost the user', () => {
   const developing = assessTrust(0.1, 0.008, 5);
   assert.equal(developing.stage, 'developing');
   assert.equal(developing.proposed, 'BLOCK');
-  assert.equal(developing.decision, 'INCREASE_FRICTION');
+  // OBSERVE, not INCREASE_FRICTION: friction is the first rung a legitimate user
+  // feels, and the middle stage exists to influence without driving. Traffic in
+  // D46 showed the old ceiling turning two mistyped PINs into friction.
+  assert.equal(developing.decision, 'OBSERVE');
   assert.match(developing.reason, /developing evidence/);
+});
+
+test('D46: the unknown to developing boundary is not a cliff', () => {
+  // A third observation must not be able to turn silence into something felt.
+  const justUnknown = assessTrust(0.1, 0.008, 2.9);
+  const justDeveloping = assessTrust(0.1, 0.008, 3);
+  assert.equal(justUnknown.decision, 'ALLOW');
+  assert.equal(justDeveloping.decision, 'OBSERVE');
 });
 
 test('D5: high uncertainty caps treatment even when evidence is established', () => {

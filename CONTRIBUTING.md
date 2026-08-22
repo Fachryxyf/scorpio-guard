@@ -21,6 +21,7 @@ decided will be closed with a pointer to the entry.
 | A weak signal, with its innocent cause | D42 requires the plausible legitimate path to triggering it. A signal whose false-positive story cannot be written down is not understood well enough to weigh. Thresholds are deliberately not part of the catalogue. |
 | A store implementation | Run `checkStoreConformance()` against it and paste the result. Eleven checks, and two implementations already pass them. |
 | A threshold that is wrong on real traffic | The whole model is reasoned guesses. Say what you observed and how much of it. |
+| A persona the generator is missing | `npm run replay` drives seeded personas through a real declared flow (D45). A legitimate usage pattern that gets escalated is a bug in the thresholds; an adversary that walks through is a gap in the model. Either is worth more than a patch. |
 
 ## What is not useful yet
 
@@ -31,8 +32,9 @@ decided will be closed with a pointer to the entry.
   whole point of splitting it from the detail tier. A new **detail** under an
   existing category is welcome; a seventh category needs an argument that the guard
   can observe a kind of thing none of the six covers.
-- An anomaly algorithm. The feature space is settled; the algorithm is deliberately
-  deferred until there is traffic to choose it against.
+- An anomaly algorithm. The feature space is settled and the personas now give
+  candidates something to be compared against, but choosing one still wants a real
+  population — generated traffic can falsify a candidate, not rank it.
 - Framework middleware. The core API is still moving, and middleware is an adapter
   over it — never the other way around.
 
@@ -43,6 +45,7 @@ Requires Node 22.6 or newer. Tests run TypeScript directly, with no build step.
 ```
 npm install
 npm test          # node:test, no framework
+npm run replay    # persona traffic against the HealthMe flow
 npm run typecheck
 npm run build
 npm run smoke     # verifies the built package, not the source
