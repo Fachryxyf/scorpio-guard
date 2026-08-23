@@ -426,7 +426,7 @@ export function page({ file, titleEn, titleId, subtitleEn, subtitleId, sections,
       .join('\n');
     return `      <details class="dropdown"${active ? ' data-active' : ''}>
         <summary aria-haspopup="true">${t(segment.en, segment.id_)}</summary>
-        <nav class="drop" aria-label="${escape(t(segment.en + ' chapters', 'Bab ' + segment.id_))}">
+        <nav class="drop" aria-label="${escape(segment.en)}">
 ${links}
         </nav>
       </details>`;
