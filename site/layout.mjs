@@ -171,9 +171,9 @@ export const CSS = String.raw`
   h2 {
     font: 400 1.375rem/1.3 var(--serif); margin: 2.25rem 0 .6rem;
     padding-bottom: .25rem; border-bottom: 1px solid var(--line-2);
-    scroll-margin-top: 1rem; max-width: min(48rem, 100%);
+    scroll-margin-top: 7.5rem; max-width: min(48rem, 100%);
   }
-  h3 { font: 700 1rem/1.35 var(--sans); margin: 1.5rem 0 .4rem; scroll-margin-top: 1rem; }
+  h3 { font: 700 1rem/1.35 var(--sans); margin: 1.5rem 0 .4rem; scroll-margin-top: 7.5rem; }
   h4 {
     font: 700 .6875rem/1.4 var(--sans); letter-spacing: .09em; text-transform: uppercase;
     color: var(--ink-2); margin: 1.4rem 0 .35rem;
@@ -273,7 +273,7 @@ export const CSS = String.raw`
 
   /* ---- definition lists ---- */
   dl { margin: 0 0 1.1rem; }
-  dt { font-weight: 700; margin-top: .8rem; scroll-margin-top: 1rem; }
+  dt { font-weight: 700; margin-top: .8rem; scroll-margin-top: 7.5rem; }
   dt:first-child { margin-top: 0; }
   dd { margin: .1rem 0 0; color: var(--ink-2); }
   dl.compact dt { font: 700 .875rem/1.4 var(--mono); }
