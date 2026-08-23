@@ -142,7 +142,8 @@
   aside.toc ol > li > a::before {
     content: counter(toc, decimal-leading-zero); color: var(--ink-3);
     font-variant-numeric: tabular-nums; font-size: .6875rem;
-    display: inline-block; width: 1.4rem; text-align: right; margin-right: .45rem;
+    float: left; width: 1.5rem; margin-left: -1.5rem;
+    text-align: right; box-sizing: border-box; padding-right: .4rem;
   }
   aside.toc a {
     display: block; padding: .28rem 0; font-size: .8125rem; line-height: 1.45;
