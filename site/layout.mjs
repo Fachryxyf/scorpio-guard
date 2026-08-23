@@ -61,16 +61,16 @@ export const CSS = String.raw`
   /* ---- masthead: a title block over a segmented menu, not a hero ---- */
   header.mast { position: sticky; top: 0; z-index: 20; background: var(--paper); border-bottom: 1px solid var(--line); }
   .mast .row {
-    display: flex; align-items: baseline; gap: 1rem; flex-wrap: wrap;
-    padding: .8rem 2rem .55rem;
+    display: grid; grid-template-columns: 1fr auto 1fr; align-items: baseline;
+    padding: .8rem 2rem .55rem; gap: 1rem;
   }
   .mast .title {
-    font: 400 1.25rem/1.1 var(--serif); margin-right: auto;
+    font: 400 1.25rem/1.1 var(--serif); text-align: center; justify-self: center;
     text-decoration: none; color: var(--ink);
   }
   .mast .title b { font-weight: 700; }
   .mast .title span { color: var(--ink-3); font: italic 400 .875rem/1 var(--serif); }
-  .mast .crumb { display: flex; align-items: baseline; gap: .4rem; margin-right: auto; }
+  .mast .crumb { display: flex; align-items: baseline; gap: .4rem; justify-self: start; min-width: 0; }
   .mast .crumb-home {
     font: 700 .8125rem/1 var(--mono); letter-spacing: .08em;
     color: var(--ink); text-decoration: none; padding: .2rem .35rem;
@@ -80,7 +80,7 @@ export const CSS = String.raw`
   .mast .crumb-sep { color: var(--ink-3); font-size: .8125rem; }
   .mast .crumb-page { font: italic 400 .875rem/1.2 var(--serif); color: var(--ink-2); max-width: 14rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
-  .mast .tools { display: flex; gap: .4rem; }
+  .mast .tools { display: flex; gap: .4rem; justify-self: end; }
   .mast button {
     font: .75rem/1 var(--sans); color: var(--ink-2); background: var(--paper);
     border: 1px solid var(--line); border-radius: 2px; padding: .35rem .5rem; cursor: pointer;
