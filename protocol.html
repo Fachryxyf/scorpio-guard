@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Symptom and prescription — Scorpio Guard</title>
+<meta name="description" content="What may cross the wire, what structurally cannot, and why nothing transmits yet.">
+<meta name="color-scheme" content="light dark">
+<link rel="canonical" href="https://scorpio-guard.fachryxyf.com/protocol.html">
+<meta property="og:title" content="Symptom and prescription">
+<meta property="og:description" content="What may cross the wire, what structurally cannot, and why nothing transmits yet.">
+<meta property="og:url" content="https://scorpio-guard.fachryxyf.com/protocol.html">
+<meta property="og:type" content="article">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%23ffffff'/><text y='24' x='7' font-size='22' font-family='Georgia,serif'>S</text></svg>">
+<script>
+  (function () {
+    try {
+      var t = localStorage.getItem('sg-theme');
+      if (!t) t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      document.documentElement.dataset.theme = t;
+      var l = localStorage.getItem('sg-lang');
+      if (!l) l = (navigator.language || 'en').toLowerCase().startsWith('id') ? 'id' : 'en';
+      document.documentElement.lang = l;
+    } catch (e) {}
+  })();
+</script>
+<style>
+  :root {
+    --ink: #101010;
+    --ink-2: #4a4a4a;
+    --ink-3: #6f6f6f;
+    --paper: #ffffff;
+    --paper-2: #f5f5f5;
+    --paper-3: #ebebeb;
+    --line: #9c9c9c;
+    --line-2: #d6d6d6;
+    --serif: 'Linux Libertine', Georgia, 'Times New Roman', serif;
+    --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, system-ui, sans-serif;
+    --mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
+    --measure: 42rem;
+    --side: 15rem;
+  }
+  html[data-theme="dark"] {
+    --ink: #ededed;
+    --ink-2: #b4b4b4;
+    --ink-3: #8e8e8e;
+    --paper: #0d0d0d;
+    --paper-2: #171717;
+    --paper-3: #202020;
+    --line: #5e5e5e;
+    --line-2: #2e2e2e;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  html[lang="en"] [data-lang="id"], html[lang="id"] [data-lang="en"] { display: none; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font: 0.9375rem/1.65 var(--sans);
+  }
+  a { color: var(--ink); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 2px; }
+  a:hover { text-decoration-thickness: 2px; }
+  :focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+  code, pre, kbd, samp { font-family: var(--mono); font-size: 0.86em; }
+  code { background: var(--paper-2); padding: 0.06em 0.28em; border: 1px solid var(--line-2); border-radius: 2px; }
+  pre code { background: none; padding: 0; border: 0; font-size: 1em; }
+  .skip { position: absolute; left: -9999px; }
+  .skip:focus { left: 1rem; top: 1rem; background: var(--paper-2); padding: .6rem 1rem; z-index: 30; }
+
+  /* ---- masthead: a title block over a segmented menu, not a hero ---- */
+  header.mast { border-bottom: 1px solid var(--line); }
+  .mast .row {
+    display: flex; align-items: baseline; gap: 1rem; flex-wrap: wrap;
+    padding: .8rem 2rem .55rem;
+  }
+  .mast .title {
+    font: 400 1.25rem/1.1 var(--serif); margin-right: auto;
+    text-decoration: none; color: var(--ink);
+  }
+  .mast .title b { font-weight: 700; }
+  .mast .title span { color: var(--ink-3); font: italic 400 .875rem/1 var(--serif); }
+  .mast .tools { display: flex; gap: .4rem; }
+  .mast button {
+    font: .75rem/1 var(--sans); color: var(--ink-2); background: var(--paper);
+    border: 1px solid var(--line); border-radius: 2px; padding: .35rem .5rem; cursor: pointer;
+    min-width: 2.5rem; min-height: 1.9rem;
+  }
+  .mast button:hover { color: var(--ink); border-color: var(--ink); }
+
+  /* the segmented menu: groups named, chapters under them */
+  .mast nav.seg {
+    display: flex; gap: 0 2rem; flex-wrap: wrap;
+    padding: 0 2rem .55rem;
+    border-top: 1px solid var(--line-2);
+    padding-top: .5rem;
+  }
+  .mast nav.seg section { display: flex; align-items: baseline; gap: .7rem; }
+  .mast nav.seg h2 {
+    font: 700 .625rem/1.6 var(--sans); letter-spacing: .11em; text-transform: uppercase;
+    color: var(--ink-3); margin: 0; border: 0; padding: 0; white-space: nowrap;
+  }
+  .mast nav.seg a {
+    font: 400 .8125rem/1.6 var(--sans); color: var(--ink-2);
+    text-decoration: none; border-bottom: 2px solid transparent; padding-bottom: 1px;
+  }
+  .mast nav.seg a + a { margin-left: .7rem; }
+  .mast nav.seg a:hover { color: var(--ink); border-bottom-color: var(--line); }
+  .mast nav.seg a[aria-current="page"] { color: var(--ink); font-weight: 700; border-bottom-color: var(--ink); }
+
+  /* ---- body grid ---- */
+  .wrap { display: grid; grid-template-columns: var(--side) minmax(0, 1fr); gap: 0; align-items: start; }
+  aside.toc {
+    position: sticky; top: 0; align-self: start;
+    padding: 1.75rem 1.25rem 3rem; border-right: 1px solid var(--line-2);
+    max-height: 100vh; overflow-y: auto;
+  }
+  aside.toc .lbl {
+    font: 700 .625rem/1 var(--sans); letter-spacing: .11em; text-transform: uppercase;
+    color: var(--ink-3); margin: 0 0 .6rem;
+  }
+  aside.toc ol { list-style: none; margin: 0 0 1.5rem; padding: 0; counter-reset: toc; }
+  aside.toc li { counter-increment: toc; margin: 0; }
+  aside.toc ol > li > a::before {
+    content: counter(toc) ". "; color: var(--ink-3); font-variant-numeric: tabular-nums;
+  }
+  aside.toc a {
+    display: block; padding: .22rem 0; font-size: .8125rem; line-height: 1.4;
+    color: var(--ink-2); text-decoration: none;
+  }
+  aside.toc a:hover { color: var(--ink); text-decoration: underline; }
+  aside.toc a[aria-current="true"] { color: var(--ink); font-weight: 700; }
+  aside.toc ul { list-style: none; margin: 0 0 0 .9rem; padding: 0; }
+  aside.toc ul a { font-size: .78125rem; color: var(--ink-3); }
+  aside.toc .seg { border-top: 1px solid var(--line-2); padding-top: .9rem; margin-top: .25rem; }
+  aside.toc .seg + .seg { margin-top: 1rem; }
+
+  main { padding: 1.75rem 2.5rem 4.5rem; min-width: 0; }
+  main > * { max-width: var(--measure); }
+  main > .wide, main > figure, main > table, main > .eq, main > pre, main > .tnote { max-width: min(48rem, 100%); }
+
+  h1 { font: 400 1.875rem/1.2 var(--serif); margin: 0 0 .3rem; }
+  .subtitle {
+    font: 400 1rem/1.55 var(--sans); color: var(--ink-2);
+    margin: 0 0 1.4rem; padding-bottom: 1rem; border-bottom: 1px solid var(--line);
+    max-width: min(48rem, 100%);
+  }
+  h2 {
+    font: 400 1.375rem/1.3 var(--serif); margin: 2.25rem 0 .6rem;
+    padding-bottom: .25rem; border-bottom: 1px solid var(--line-2);
+    scroll-margin-top: 1rem; max-width: min(48rem, 100%);
+  }
+  h3 { font: 700 1rem/1.35 var(--sans); margin: 1.5rem 0 .4rem; scroll-margin-top: 1rem; }
+  h4 {
+    font: 700 .6875rem/1.4 var(--sans); letter-spacing: .09em; text-transform: uppercase;
+    color: var(--ink-2); margin: 1.4rem 0 .35rem;
+  }
+  h2 .n, h3 .n { color: var(--ink-3); font-variant-numeric: tabular-nums; }
+  p { margin: 0 0 .9rem; }
+  .lead { font-size: 1.0625rem; line-height: 1.6; }
+  ul, ol { margin: 0 0 .9rem; padding-left: 1.5rem; }
+  li { margin: 0 0 .3rem; }
+  li > ul, li > ol { margin-top: .3rem; }
+  strong, b { font-weight: 700; }
+
+  blockquote {
+    margin: 1.1rem 0; padding: .1rem 0 .1rem 1rem; border-left: 3px solid var(--line-2);
+    color: var(--ink-2);
+  }
+  hr { border: 0; border-top: 1px solid var(--line-2); margin: 2.25rem 0; }
+
+  pre {
+    background: var(--paper-2); border: 1px solid var(--line-2);
+    padding: .8rem .9rem; overflow-x: auto; margin: 0 0 1.1rem;
+    font-size: .8125rem; line-height: 1.55; color: var(--ink);
+  }
+
+  /* ---- tables: the reference-work table. Ruled, shaded header, no colour. ---- */
+  table {
+    border-collapse: collapse; margin: 0 0 .4rem; width: 100%;
+    font-size: .875rem; font-variant-numeric: tabular-nums;
+    border: 1px solid var(--line);
+  }
+  caption {
+    caption-side: top; text-align: left; margin-bottom: .4rem;
+    font: 700 .6875rem/1.4 var(--sans); letter-spacing: .07em; text-transform: uppercase;
+    color: var(--ink-2);
+  }
+  th, td { text-align: left; vertical-align: top; padding: .35rem .6rem; border: 1px solid var(--line-2); }
+  thead th { background: var(--paper-2); border-bottom: 1px solid var(--line); font: 700 .8125rem/1.35 var(--sans); }
+  tbody th { font: 400 .8125rem/1.4 var(--mono); background: var(--paper-2); }
+  td.num, th.num { text-align: right; }
+  tr.tot td, tr.tot th { border-top: 1px solid var(--line); font-weight: 700; }
+  .tnote { font-size: .8125rem; color: var(--ink-2); margin: 0 0 1.4rem; line-height: 1.55; }
+  .scroll { overflow-x: auto; max-width: min(48rem, 100%); margin-bottom: .4rem; }
+  .scroll table { margin-bottom: 0; }
+
+  /* ---- figures ---- */
+  figure { margin: 1.3rem 0; }
+  figure svg.chart { display: block; width: 100%; height: auto; max-width: 100%; }
+  figcaption {
+    font-size: .8125rem; color: var(--ink-2); margin-top: .45rem;
+    padding-top: .45rem; border-top: 1px solid var(--line-2); line-height: 1.55;
+  }
+  figcaption b { color: var(--ink); }
+  .chart .c-axis { stroke: var(--ink); stroke-width: 1; }
+  .chart .c-grid { stroke: var(--line-2); stroke-width: 1; stroke-dasharray: 2 3; }
+  .chart .c-hatch { stroke: var(--line); stroke-width: 1; }
+  .chart .c-line { stroke: var(--ink); }
+  .chart .c-dot { fill: var(--ink); }
+  .chart .c-dot-hollow { fill: var(--paper); stroke: var(--ink); stroke-width: 1; }
+  .chart .c-bar { fill: var(--ink); }
+  .chart .c-bar-hollow { fill: none; stroke: var(--ink); stroke-width: 1; }
+  .chart text { fill: var(--ink-2); }
+  .chart .c-tick { font-size: 10px; }
+  .chart .c-series { font-size: 11px; fill: var(--ink); font-style: italic; }
+  .chart .c-value { font-size: 10px; fill: var(--ink); }
+  .chart .c-band { font-size: 9px; fill: var(--ink-3); letter-spacing: .04em; }
+
+  /* ---- display formulas ---- */
+  .eq {
+    margin: 1.1rem 0; padding: .8rem 1rem; background: var(--paper-2);
+    border: 1px solid var(--line-2);
+    font-family: var(--mono); font-size: .875rem; line-height: 1.75;
+    overflow-x: auto;
+  }
+  .eq .where {
+    display: block; margin-top: .55rem; padding-top: .5rem;
+    border-top: 1px solid var(--line-2);
+    font: .75rem/1.6 var(--sans); color: var(--ink-2);
+  }
+  .eq-n { float: right; color: var(--ink-3); font-size: .8125rem; }
+
+  /* ---- infobox: the one wiki habit that earns its place ---- */
+  .infobox {
+    float: right; clear: right; width: 18rem; max-width: 100%;
+    margin: .2rem 0 1.1rem 1.5rem;
+    border: 1px solid var(--line); background: var(--paper-2);
+    font-size: .8125rem;
+  }
+  .infobox > .cap {
+    margin: 0; padding: .45rem .7rem; border-bottom: 1px solid var(--line);
+    font: 700 .8125rem/1.3 var(--sans); text-align: center; background: var(--paper-3);
+  }
+  .infobox table { margin: 0; border: 0; font-size: .8125rem; }
+  .infobox th, .infobox td { padding: .3rem .7rem; border: 0; border-top: 1px solid var(--line-2); }
+  .infobox tbody tr:first-child th, .infobox tbody tr:first-child td { border-top: 0; }
+  .infobox th { width: 7rem; font: 400 .75rem/1.4 var(--sans); color: var(--ink-2); background: none; }
+  .infobox td { font-family: var(--mono); font-size: .75rem; }
+
+  /* ---- definition lists ---- */
+  dl { margin: 0 0 1.1rem; }
+  dt { font-weight: 700; margin-top: .8rem; scroll-margin-top: 1rem; }
+  dt:first-child { margin-top: 0; }
+  dd { margin: .1rem 0 0; color: var(--ink-2); }
+  dl.compact dt { font: 700 .875rem/1.4 var(--mono); }
+
+  /* ---- the status ledger ---- */
+  table.ledger td:first-child { width: 55%; }
+  .yes::before { content: "\2713\00a0"; }
+  .no::before { content: "\2014\00a0"; }
+  .part::before { content: "\00bd\00a0"; }
+
+  /* ---- segmented chapter portals on the front page ---- */
+  .portals { display: grid; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); gap: 0 1.75rem; max-width: min(48rem, 100%); }
+  .portals section { margin: 0 0 1.25rem; }
+  .portals h3 {
+    margin: 0 0 .4rem; padding-bottom: .25rem; border-bottom: 1px solid var(--line-2);
+    font: 700 .6875rem/1.4 var(--sans); letter-spacing: .1em; text-transform: uppercase; color: var(--ink-2);
+  }
+  .portals ul { list-style: none; margin: 0; padding: 0; }
+  .portals li { margin: 0 0 .5rem; }
+  .portals a { font-weight: 700; text-decoration: none; }
+  .portals a:hover { text-decoration: underline; }
+  .portals .d { display: block; color: var(--ink-2); font-size: .8125rem; line-height: 1.5; }
+
+  /* ---- cross references ---- */
+  .seealso {
+    margin: 2rem 0 0; padding-top: .7rem; border-top: 1px solid var(--line-2);
+    font-size: .875rem; color: var(--ink-2); max-width: min(48rem, 100%);
+  }
+  .seealso b {
+    display: block; font: 700 .6875rem/1.4 var(--sans);
+    letter-spacing: .1em; text-transform: uppercase; margin-bottom: .2rem;
+  }
+  .seealso a + a::before { content: " \00b7 "; color: var(--line); text-decoration: none; }
+
+  /* ---- provenance line ---- */
+  .prov {
+    font-size: .75rem; color: var(--ink-3); line-height: 1.6;
+    border-top: 1px solid var(--line-2); padding-top: .6rem; margin-top: 2rem;
+    max-width: min(48rem, 100%);
+  }
+
+  footer {
+    border-top: 1px solid var(--line); margin-top: 3.5rem;
+    padding: 1.1rem 2.5rem 2.5rem;
+    font-size: .8125rem; color: var(--ink-2); line-height: 1.65;
+  }
+  footer a { color: var(--ink-2); }
+
+  @media (max-width: 62rem) {
+    .wrap { grid-template-columns: 1fr; }
+    aside.toc {
+      position: static; max-height: none; border-right: 0;
+      border-bottom: 1px solid var(--line-2); padding: 1rem 1.5rem;
+    }
+    aside.toc details > summary {
+      font: 700 .6875rem/1 var(--sans); letter-spacing: .1em; text-transform: uppercase;
+      color: var(--ink-2); cursor: pointer; padding: .3rem 0;
+    }
+    .mast .row, .mast nav.seg { padding-left: 1.5rem; padding-right: 1.5rem; }
+    .mast nav.seg { gap: 0 1.25rem; }
+    main { padding: 1.5rem 1.5rem 3rem; }
+    footer { padding: 1.1rem 1.5rem 2.5rem; }
+    .infobox { float: none; width: 100%; margin: 1.1rem 0; }
+  }
+  @media print {
+    aside.toc, .mast nav.seg, .mast .tools, footer { display: none; }
+    body { background: #fff; color: #000; font-size: 10pt; }
+    main { padding: 0; }
+    h2 { page-break-after: avoid; }
+    figure, table, pre { page-break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+<a class="skip" href="#main"><span data-lang="en">Skip to content</span><span data-lang="id">Lompat ke konten</span></a>
+
+<header class="mast">
+  <div class="row">
+    <a class="title" href="index.html"><b>Scorpio Guard</b> <span><span data-lang="en">adaptive trust evaluation</span><span data-lang="id">evaluasi trust adaptif</span></span></a>
+    <div class="tools">
+      <button id="lang" type="button" aria-label="Switch language / Ganti bahasa">ID</button>
+      <button id="theme" type="button" aria-label="Switch theme / Ganti tema">◐</button>
+    </div>
+  </div>
+  <nav class="seg" aria-label="Chapters">
+      <section><h2><span data-lang="en">Start</span><span data-lang="id">Mulai</span></h2><a href="index.html"><span data-lang="en">Overview</span><span data-lang="id">Ringkasan</span></a><a href="usage.html"><span data-lang="en">Usage</span><span data-lang="id">Pemakaian</span></a></section>
+      <section><h2><span data-lang="en">Theory</span><span data-lang="id">Teori</span></h2><a href="model.html"><span data-lang="en">Model</span><span data-lang="id">Model</span></a><a href="evidence.html"><span data-lang="en">Evidence</span><span data-lang="id">Evidence</span></a></section>
+      <section><h2><span data-lang="en">Findings</span><span data-lang="id">Temuan</span></h2><a href="results.html"><span data-lang="en">Results</span><span data-lang="id">Hasil</span></a><a href="limits.html"><span data-lang="en">Limits</span><span data-lang="id">Batas</span></a></section>
+      <section><h2><span data-lang="en">Reference</span><span data-lang="id">Rujukan</span></h2><a href="protocol.html" aria-current="page"><span data-lang="en">Protocol</span><span data-lang="id">Protokol</span></a><a href="record.html"><span data-lang="en">Record</span><span data-lang="id">Rekaman</span></a></section>
+  </nav>
+</header>
+
+<div class="wrap">
+  <aside class="toc" aria-label="Table of contents">
+    <details open>
+      <summary><span data-lang="en">Contents</span><span data-lang="id">Daftar isi</span></summary>
+      <p class="lbl"><span data-lang="en">On this page</span><span data-lang="id">Di halaman ini</span></p>
+      <ol>
+        <li><a href="#shape"><span data-lang="en">The shape</span><span data-lang="id">Bentuknya</span></a></li>
+        <li><a href="#vocabulary"><span data-lang="en">Two-tier vocabulary</span><span data-lang="id">Kosakata dua lapis</span></a></li>
+        <li><a href="#wire"><span data-lang="en">Wire format</span><span data-lang="id">Format wire</span></a></li>
+        <li><a href="#degrade"><span data-lang="en">Degradation rules</span><span data-lang="id">Aturan degradasi</span></a></li>
+        <li><a href="#conformance"><span data-lang="en">Conformance</span><span data-lang="id">Konformansi</span></a></li>
+      </ol>
+        <div class="seg"><p class="lbl"><span data-lang="en">Start</span><span data-lang="id">Mulai</span></p><ul><li><a href="index.html"><span data-lang="en">Overview</span><span data-lang="id">Ringkasan</span></a></li><li><a href="usage.html"><span data-lang="en">Usage</span><span data-lang="id">Pemakaian</span></a></li></ul></div>
+        <div class="seg"><p class="lbl"><span data-lang="en">Theory</span><span data-lang="id">Teori</span></p><ul><li><a href="model.html"><span data-lang="en">Model</span><span data-lang="id">Model</span></a></li><li><a href="evidence.html"><span data-lang="en">Evidence</span><span data-lang="id">Evidence</span></a></li></ul></div>
+        <div class="seg"><p class="lbl"><span data-lang="en">Findings</span><span data-lang="id">Temuan</span></p><ul><li><a href="results.html"><span data-lang="en">Results</span><span data-lang="id">Hasil</span></a></li><li><a href="limits.html"><span data-lang="en">Limits</span><span data-lang="id">Batas</span></a></li></ul></div>
+        <div class="seg"><p class="lbl"><span data-lang="en">Reference</span><span data-lang="id">Rujukan</span></p><ul><li><a href="protocol.html" aria-current="true"><span data-lang="en">Protocol</span><span data-lang="id">Protokol</span></a></li><li><a href="record.html"><span data-lang="en">Record</span><span data-lang="id">Rekaman</span></a></li></ul></div>
+    </details>
+  </aside>
+
+  <main id="main">
+    <h1><span data-lang="en">Symptom and prescription</span><span data-lang="id">Symptom dan prescription</span></h1>
+    <p class="subtitle"><span data-lang="en">What may cross the wire, what structurally cannot, and why nothing transmits yet.</span><span data-lang="id">Apa yang boleh lewat kabel, apa yang secara struktural tak bisa, dan kenapa belum ada yang dikirim.</span></p>
+
+    <p class="lead"><span data-lang="en">The protocol is the one part designed to outlive this library. It defines what may cross a network between deployments that share nothing but vocabulary — and it transmits nothing today, by design.</span><span data-lang="id">Protokol adalah satu bagian yang dirancang untuk hidup lebih lama dari library ini. Ia mendefinisikan apa yang boleh melintasi jaringan antar deployment yang tak berbagi apa pun kecuali kosakata — dan hari ini tidak mengirim apa pun, memang disengaja.</span></p>
+
+    <h2 id="shape"><span class="n">1.</span> <span data-lang="en">The shape</span><span data-lang="id">Bentuknya</span></h2>
+
+    <p><span data-lang="en">A deployment reports abstract shapes it observed; it receives strategies for handling that class of shape. The prescription travels; the patient does not. No entity key, no raw observation, no trust state, no free text. The constraint is structural rather than a policy: the message type has no field in which raw data would fit.</span><span data-lang="id">Sebuah deployment melaporkan bentuk abstrak yang ia observasi; ia menerima strategi untuk menangani kelas bentuk itu. Resepnya yang berpindah; pasiennya tidak. Tanpa kunci entitas, tanpa observasi mentah, tanpa state trust, tanpa teks bebas. Kendalanya struktural, bukan kebijakan: tipe pesannya tidak punya field tempat data mentah bisa muat.</span></p>
+
+    <pre>POST /v0/symptoms
+Content-Type: application/json
+
+{
+  "protocol": "sg/0.1",
+  "schema": 1,
+  "reports": [
+    { "category": "SYM_TIMING",
+      "detail": "SYM_UNIFORM_DELAY_SHAPE",
+      "entities": "few" }
+  ]
+}</pre>
+
+    <h2 id="vocabulary"><span class="n">2.</span> <span data-lang="en">Two-tier vocabulary</span><span data-lang="id">Kosakata dua lapis</span></h2>
+
+    <p><span data-lang="en">The category tier is stable and expected never to grow. The detail tier is free to grow release to release. An unrecognised detail degrades to its stated category rather than failing; an unrecognised category is rejected because there is nothing left to fall back to.</span><span data-lang="id">Lapis kategori stabil dan diharapkan tidak pernah bertambah. Lapis detail bebas bertambah setiap rilis. Detail yang tak dikenali turun ke kategori yang dinyatakan bersamanya alih-alih gagal; kategori yang tak dikenali ditolak karena tak ada lagi tempat jatuhnya.</span></p>
+
+    <table>
+      <caption><span data-lang="en">Stable categories and their current details (generated from source)</span><span data-lang="id">Kategori stabil dan detail terkininya (dibangkitkan dari sumber)</span></caption>
+      <thead>
+        <tr><th><span data-lang="en">Category — stable</span><span data-lang="id">Kategori — stabil</span></th><th><span data-lang="en">Details — evolve</span><span data-lang="id">Detail — berkembang</span></th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th><code>SYM_TIMING</code></th>
+          <td><code>SYM_REQUEST_BURST</code><br><code>SYM_HIGH_VELOCITY</code><br><code>SYM_UNIFORM_DELAY_SHAPE</code><br><code>SYM_OFF_WINDOW_ACCESS</code></td>
+        </tr>
+        <tr>
+          <th><code>SYM_REPETITION</code></th>
+          <td><code>SYM_REPEATED_PATTERN</code><br><code>SYM_LOW_VARIETY</code></td>
+        </tr>
+        <tr>
+          <th><code>SYM_INTERACTION</code></th>
+          <td><code>SYM_UNINTERACTED_INPUT</code><br><code>SYM_IDENTITY_DRIFT</code></td>
+        </tr>
+        <tr>
+          <th><code>SYM_SEQUENCE</code></th>
+          <td><code>SYM_UNUSUAL_SEQUENCE</code><br><code>SYM_NEW_BEHAVIOR</code></td>
+        </tr>
+        <tr>
+          <th><code>SYM_TARGET</code></th>
+          <td><code>SYM_BROAD_ENUMERATION</code><br><code>SYM_SENSITIVE_FOCUS</code></td>
+        </tr>
+        <tr>
+          <th><code>SYM_CONSTRAINT</code></th>
+          <td><code>SYM_DECLARED_VIOLATION</code></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3><span data-lang="en">Entity counts are buckets, not numbers</span><span data-lang="id">Hitungan entitas adalah bucket, bukan angka</span></h3>
+
+    <table>
+      <caption><span data-lang="en">Ordered labels, deliberately coarse</span><span data-lang="id">Label berurutan, sengaja kasar</span></caption>
+      <thead><tr><th><span data-lang="en">Bucket</span><span data-lang="id">Bucket</span></th><th><span data-lang="en">Meaning</span><span data-lang="id">Arti</span></th></tr></thead>
+      <tbody>
+        <tr><th><code>one</code></th><td><span data-lang="en">a sender-side bucketed count; boundaries unpublished</span><span data-lang="id">hitungan ber-bucket dari sisi pengirim; batasnya tidak dipublikasikan</span></td></tr>
+        <tr><th><code>few</code></th><td><span data-lang="en">a sender-side bucketed count; boundaries unpublished</span><span data-lang="id">hitungan ber-bucket dari sisi pengirim; batasnya tidak dipublikasikan</span></td></tr>
+        <tr><th><code>several</code></th><td><span data-lang="en">a sender-side bucketed count; boundaries unpublished</span><span data-lang="id">hitungan ber-bucket dari sisi pengirim; batasnya tidak dipublikasikan</span></td></tr>
+        <tr><th><code>many</code></th><td><span data-lang="en">a sender-side bucketed count; boundaries unpublished</span><span data-lang="id">hitungan ber-bucket dari sisi pengirim; batasnya tidak dipublikasikan</span></td></tr>
+      </tbody>
+    </table>
+
+    <h2 id="wire"><span class="n">3.</span> <span data-lang="en">Wire format</span><span data-lang="id">Format wire</span></h2>
+
+    <p><span data-lang="en">HTTP POST, JSON, one object per request. Boring on purpose: symptom reporting is low-rate, low-urgency, tolerant of loss. Requests are unauthenticated and idempotent; rate limiting is by transport-level address only.</span><span data-lang="id">HTTP POST, JSON, satu objek per request. Sengaja membosankan: pelaporan symptom bervolume rendah, rendah urgensi, toleran terhadap kehilangan. Request tanpa autentikasi dan idempoten; rate limiting hanya lewat alamat transport.</span></p>
+
+    <pre>{
+  "protocol": "sg/0.1",
+  "prescriptions": [
+    {
+      "category": "SYM_TIMING",
+      "detail": "SYM_UNIFORM_DELAY_SHAPE",
+      "strategy": "TIGHTEN_TIMING_TOLERANCE",
+      "confidence": "provisional"
+    }
+  ]
+}</pre>
+
+    <p><span data-lang="en">A prescription is advice about a class of shape, never a verdict about an entity — the server has never been told which entities were involved. A receiver must ignore an unrecognised strategy rather than escalate on it.</span><span data-lang="id">Resep adalah saran tentang kelas bentuk, bukan putusan tentang entitas — server tak pernah diberi tahu entitas mana yang terlibat. Penerima harus mengabaikan strategi yang tak dikenalinya alih-alih mengeskalasi karena itu.</span></p>
+
+    <h2 id="degrade"><span class="n">4.</span> <span data-lang="en">Degradation rules</span><span data-lang="id">Aturan degradasi</span></h2>
+
+    <table>
+      <caption><span data-lang="en">What a receiver must do</span><span data-lang="id">Apa yang harus dilakukan penerima</span></caption>
+      <thead><tr><th><span data-lang="en">Case</span><span data-lang="id">Kasus</span></th><th><span data-lang="en">Rule</span><span data-lang="id">Aturan</span></th></tr></thead>
+      <tbody>
+        <tr><th><span data-lang="en">Unknown detail, known category</span><span data-lang="id">Detail tak dikenal, kategori dikenal</span></th><td><span data-lang="en">accept, act on the category. Normal forward compatibility.</span><span data-lang="id">terima, bertindak atas kategorinya. Kompatibilitas maju normal.</span></td></tr>
+        <tr><th><span data-lang="en">Unknown category</span><span data-lang="id">Kategori tak dikenal</span></th><td><span data-lang="en">reject that report. Nothing left to fall back to.</span><span data-lang="id">tolak laporan itu. Tak ada lagi yang bisa jadi cadangan.</span></td></tr>
+        <tr><th><span data-lang="en">Newer schema number</span><span data-lang="id">Nomor skema lebih baru</span></th><td><span data-lang="en">accept. New details are already covered by rule one.</span><span data-lang="id">terima. Detail baru sudah tercakup aturan pertama.</span></td></tr>
+        <tr><th><span data-lang="en">Unknown protocol major</span><span data-lang="id">Protokol mayor tak dikenal</span></th><td><span data-lang="en">reject the whole message.</span><span data-lang="id">tolak seluruh pesan.</span></td></tr>
+        <tr><th><span data-lang="en">Unknown fields</span><span data-lang="id">Field tak dikenal</span></th><td><span data-lang="en">ignore them; reject only on missing required ones.</span><span data-lang="id">abaikan; tolak hanya jika yang wajib hilang.</span></td></tr>
+      </tbody>
+    </table>
+
+    <h2 id="conformance"><span class="n">5.</span> <span data-lang="en">Conformance</span><span data-lang="id">Konformansi</span></h2>
+
+    <p><span data-lang="en">An implementation conforms when it sends only tokens it shipped with, carries the category alongside every detail, buckets entity counts, applies every degradation rule, ignores unrecognised strategies, and includes no field carrying raw observation or identity. That last point is worth testing adversarially: it is the guarantee the privacy argument rests on, and the only one whose violation is invisible to the sender.</span><span data-lang="id">Implementasi konform ketika ia hanya mengirim token yang dikirimnya saat rilis, menyertakan kategori bersama setiap detail, membuat hitungan entitas jadi bucket, menerapkan semua aturan degradasi, mengabaikan strategi tak dikenal, dan tidak memuat field pembawa observasi mentah atau identitas. Poin terakhir layak diuji secara adversarial: itu jaminan tempat argumen privasi berdiri, dan satu-satunya yang pelanggarannya tak terlihat oleh pengirim.</span></p>
+
+    <p class="seealso"><b><span data-lang="en">See also</span><span data-lang="id">Lihat juga</span></b>
+      <a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/PROTOCOL.md"><span data-lang="en">Full protocol draft</span><span data-lang="id">Draf protokol lengkap</span></a>
+      <a href="evidence.html#catalogue"><span data-lang="en">Weak-signal catalogue</span><span data-lang="id">Katalog weak signal</span></a>
+      <a href="limits.html#wire"><span data-lang="en">What the protocol does not yet decide</span><span data-lang="id">Apa yang belum diputuskan protokol</span></a>
+    </p>
+  
+  </main>
+</div>
+
+<footer>
+  <p>
+    <span data-lang="en">Scorpio Guard is pre-alpha and calibrated against nothing. Every number on this site is generated from the code that produces it; none of it has met a real population.</span><span data-lang="id">Scorpio Guard masih pre-alpha dan belum dikalibrasi terhadap apa pun. Setiap angka di situs ini dihasilkan dari kode yang memproduksinya; belum ada satu pun yang bertemu populasi nyata.</span>
+  </p>
+  <p>
+    <a href="https://github.com/Fachryxyf/scorpio-guard"><span data-lang="en">Source</span><span data-lang="id">Sumber</span></a> ·
+    <a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md"><span data-lang="en">Design record</span><span data-lang="id">Rekaman desain</span></a> ·
+    <a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/PROTOCOL.md"><span data-lang="en">Protocol draft</span><span data-lang="id">Draf protokol</span></a> ·
+    <a href="https://github.com/Fachryxyf/scorpio-guard/issues"><span data-lang="en">Issues</span><span data-lang="id">Isu</span></a>
+    · MIT · <a href="https://github.com/Fachryxyf">@Fachryxyf</a>
+  </p>
+</footer>
+
+<script>
+  (function () {
+    var root = document.documentElement;
+    var langBtn = document.getElementById('lang');
+    var themeBtn = document.getElementById('theme');
+
+    function paintLang() { langBtn.textContent = root.lang === 'id' ? 'EN' : 'ID'; }
+    paintLang();
+    langBtn.addEventListener('click', function () {
+      root.lang = root.lang === 'id' ? 'en' : 'id';
+      try { localStorage.setItem('sg-lang', root.lang); } catch (e) {}
+      paintLang();
+    });
+    themeBtn.addEventListener('click', function () {
+      root.dataset.theme = root.dataset.theme === 'dark' ? 'light' : 'dark';
+      try { localStorage.setItem('sg-theme', root.dataset.theme); } catch (e) {}
+    });
+
+    // Mark the section being read. Progressive: the TOC works without it.
+    var links = [].slice.call(document.querySelectorAll('aside.toc ol a'));
+    if (!links.length || !('IntersectionObserver' in window)) return;
+    var byId = {};
+    links.forEach(function (a) { byId[a.getAttribute('href').slice(1)] = a; });
+    var observer = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (!entry.isIntersecting) return;
+        links.forEach(function (a) { a.removeAttribute('aria-current'); });
+        var current = byId[entry.target.id];
+        if (current) current.setAttribute('aria-current', 'true');
+      });
+    }, { rootMargin: '-10% 0px -75% 0px' });
+    Object.keys(byId).forEach(function (id) {
+      var el = document.getElementById(id);
+      if (el) observer.observe(el);
+    });
+  })();
+</script>
+</body>
+</html>

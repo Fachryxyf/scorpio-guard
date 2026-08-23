@@ -4,3 +4,9 @@ adaptive-trust-guard-pre-plan.md
 node_modules/
 dist/
 *.tsbuildinfo
+
+# Recorded live traffic and the observer's trust state (D56). Real visitors' shape;
+# never committed.
+live-traffic.jsonl
+sg-live.db
+sg-live.db-*

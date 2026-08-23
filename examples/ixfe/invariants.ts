@@ -178,6 +178,23 @@ export const submissionCameFromForm: Invariant = {
 };
 
 /**
+ * The same proof at the pre-order form. D56.
+ *
+ * `order.html` computes `dwell` at page load exactly as `index.html` does, and
+ * `/api/order` runs the same `looksAutomated()` check — so the claim is identical
+ * and the scope is not. Declared separately rather than by widening the scope of
+ * the one above, because an invariant names the scope it can prove completeness
+ * over (D32), and these are two forms that happen to agree.
+ */
+export const orderCameFromForm: Invariant = {
+  id: 'ixfe.order-came-from-form',
+  class: 'IMPOSSIBLE_IDLE_ACTION',
+  strength: 'hard',
+  scope: ORDER_SCOPE,
+  holds: submissionCameFromForm.holds,
+};
+
+/**
  * The honeypot: a field no rendered layout shows, so nothing that can see the page
  * fills it.
  *
@@ -195,6 +212,15 @@ export const honeypotUntouched: Invariant = {
     if (!isFormSubmission(observation)) return true;
     return observation.honeypot === '';
   },
+};
+
+/** The pre-order form carries the same hidden `website` field. D56. */
+export const orderHoneypotUntouched: Invariant = {
+  id: 'ixfe.order-honeypot-untouched',
+  class: 'IMPOSSIBLE_IDLE_ACTION',
+  strength: 'soft',
+  scope: ORDER_SCOPE,
+  holds: honeypotUntouched.holds,
 };
 
 /* ------------------------------------------------------------------ *
@@ -337,7 +363,9 @@ export const ixfeInvariants: readonly Invariant[] = [
   workRequiresCredits,
   workRequiresActiveSubscription,
   submissionCameFromForm,
+  orderCameFromForm,
   honeypotUntouched,
+  orderHoneypotUntouched,
   otpWasRequestedFirst,
   otpWithinAttemptCap,
   referenceWasIssued,

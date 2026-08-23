@@ -260,8 +260,8 @@ Every tunable number lives in `src/core/policy.ts` and is overridable per guard 
 half-life, retention, evidence weights, the epistemic stage thresholds, what a
 proven violation advises, the diversity thresholds. All of them are reasoned
 guesses set leniently, so being wrong withholds escalation rather than
-manufacturing a false positive. The [documentation site](https://scorpio-guard.fachryxyf.com)
-tabulates each one with what changing it means.
+manufacturing a false positive. The [documentation site](https://scorpio-guard.fachryxyf.com) tabulates each one
+with what changing it means, generated from source at build time (D58).
 
 ## Development
 
@@ -271,6 +271,10 @@ Requires Node 22.6 or newer — tests run TypeScript directly, with no build ste
 npm install
 npm test          # node:test, no framework
 npm run replay    # persona traffic against the HealthMe flow
+npm run observe   # observing proxy in front of a live origin (D56)
+npm run visitors  # drive a real browser at it (D57)
+npm run observed  # read what the observer recorded
+npm run site      # regenerate all 8 documentation pages from research data
 npm run typecheck
 npm run build     # emits dist/
 ```
@@ -309,7 +313,14 @@ sources, and personas read off IXFE's own defences.
 `examples/healthme/` — the first target (D34), kept as the small-application
 regression: two scopes, one user.
 
-Two hundred and nine tests, which double as the record of every numeric and
+`examples/ixfe/live/` — the observing proxy, a real-browser visitor generator, and
+their report (D56, D57). A transparent hop in front of a live IXFE deployment: the
+origin's response goes out untouched, and the guard is consulted afterwards, so a bug
+in SG costs a log line rather than a visitor's pre-order. `cdp.ts` is a ~180-line
+DevTools Protocol client over Node's `WebSocket` global, written instead of installing
+Puppeteer so the zero-dependency promise holds in the examples too.
+
+Two hundred and twenty-two tests, which double as the record of every numeric and
 semantic property the design depends on.
 
 Writing your own store? Prove it works before trusting it:
@@ -493,9 +504,22 @@ velocity ceiling (D50), a collector for every catalogued signal (D51), the anoma
 classifier built as distance-to-reference rather than trained (D52), and a v0.1 wire
 format with its degradation rules tested (D53).
 
+Since then, the instrument for real traffic exists (D56) and has been used (D57).
+Looking for IXFE's real logs found there were none to read — neither service records
+one row per request, and per-request rows are the only shape the behavioral window can
+be computed from — so an observing proxy now sits in front of the live origin and
+writes them. A real Chrome is then driven at it, because the site has no audience to
+wait for.
+
+That falsified four things, all of them in the integration rather than the model: a
+200 carrying the SPA fallback was being credited as a success, one scope for every
+page reproduced D46's entropy bug, weak signals on page views made the operator's own
+uptime check a false positive, and two harness bugs would have read as model
+behavior. See D57.
+
 What remains needs real traffic, in order:
 
-1. IXFE's real logs, which exist. Generated traffic falsifies; only real traffic calibrates, and this is the shortest path to a real population.
+1. A real population. Not visits — those can be produced — but their *distribution*: how many real clients look like each persona. This is the honest residue of D45 and the one thing generated traffic can never supply.
 2. Calibrate the intake discount. `maxInterArrivalCv = 0.25` is inherited from D36, and it decides how much trust a legitimate machine client is denied.
 3. Calibrate the anomaly reference profile, and decide from measurement whether the classifier or the threshold conjunction should drive the D37 concurrence.
 4. Give each collector its false-positive story from real traffic before any of them earns a production threshold.

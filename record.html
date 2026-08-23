@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Design record and glossary — Scorpio Guard</title>
+<meta name="description" content="Every numbered decision, the file it became, and the vocabulary this project uses narrowly.">
+<meta name="color-scheme" content="light dark">
+<link rel="canonical" href="https://scorpio-guard.fachryxyf.com/record.html">
+<meta property="og:title" content="Design record and glossary">
+<meta property="og:description" content="Every numbered decision, the file it became, and the vocabulary this project uses narrowly.">
+<meta property="og:url" content="https://scorpio-guard.fachryxyf.com/record.html">
+<meta property="og:type" content="article">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%23ffffff'/><text y='24' x='7' font-size='22' font-family='Georgia,serif'>S</text></svg>">
+<script>
+  (function () {
+    try {
+      var t = localStorage.getItem('sg-theme');
+      if (!t) t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      document.documentElement.dataset.theme = t;
+      var l = localStorage.getItem('sg-lang');
+      if (!l) l = (navigator.language || 'en').toLowerCase().startsWith('id') ? 'id' : 'en';
+      document.documentElement.lang = l;
+    } catch (e) {}
+  })();
+</script>
+<style>
+  :root {
+    --ink: #101010;
+    --ink-2: #4a4a4a;
+    --ink-3: #6f6f6f;
+    --paper: #ffffff;
+    --paper-2: #f5f5f5;
+    --paper-3: #ebebeb;
+    --line: #9c9c9c;
+    --line-2: #d6d6d6;
+    --serif: 'Linux Libertine', Georgia, 'Times New Roman', serif;
+    --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, system-ui, sans-serif;
+    --mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
+    --measure: 42rem;
+    --side: 15rem;
+  }
+  html[data-theme="dark"] {
+    --ink: #ededed;
+    --ink-2: #b4b4b4;
+    --ink-3: #8e8e8e;
+    --paper: #0d0d0d;
+    --paper-2: #171717;
+    --paper-3: #202020;
+    --line: #5e5e5e;
+    --line-2: #2e2e2e;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  html[lang="en"] [data-lang="id"], html[lang="id"] [data-lang="en"] { display: none; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font: 0.9375rem/1.65 var(--sans);
+  }
+  a { color: var(--ink); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 2px; }
+  a:hover { text-decoration-thickness: 2px; }
+  :focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+  code, pre, kbd, samp { font-family: var(--mono); font-size: 0.86em; }
+  code { background: var(--paper-2); padding: 0.06em 0.28em; border: 1px solid var(--line-2); border-radius: 2px; }
+  pre code { background: none; padding: 0; border: 0; font-size: 1em; }
+  .skip { position: absolute; left: -9999px; }
+  .skip:focus { left: 1rem; top: 1rem; background: var(--paper-2); padding: .6rem 1rem; z-index: 30; }
+
+  /* ---- masthead: a title block over a segmented menu, not a hero ---- */
+  header.mast { border-bottom: 1px solid var(--line); }
+  .mast .row {
+    display: flex; align-items: baseline; gap: 1rem; flex-wrap: wrap;
+    padding: .8rem 2rem .55rem;
+  }
+  .mast .title {
+    font: 400 1.25rem/1.1 var(--serif); margin-right: auto;
+    text-decoration: none; color: var(--ink);
+  }
+  .mast .title b { font-weight: 700; }
+  .mast .title span { color: var(--ink-3); font: italic 400 .875rem/1 var(--serif); }
+  .mast .tools { display: flex; gap: .4rem; }
+  .mast button {
+    font: .75rem/1 var(--sans); color: var(--ink-2); background: var(--paper);
+    border: 1px solid var(--line); border-radius: 2px; padding: .35rem .5rem; cursor: pointer;
+    min-width: 2.5rem; min-height: 1.9rem;
+  }
+  .mast button:hover { color: var(--ink); border-color: var(--ink); }
+
+  /* the segmented menu: groups named, chapters under them */
+  .mast nav.seg {
+    display: flex; gap: 0 2rem; flex-wrap: wrap;
+    padding: 0 2rem .55rem;
+    border-top: 1px solid var(--line-2);
+    padding-top: .5rem;
+  }
+  .mast nav.seg section { display: flex; align-items: baseline; gap: .7rem; }
+  .mast nav.seg h2 {
+    font: 700 .625rem/1.6 var(--sans); letter-spacing: .11em; text-transform: uppercase;
+    color: var(--ink-3); margin: 0; border: 0; padding: 0; white-space: nowrap;
+  }
+  .mast nav.seg a {
+    font: 400 .8125rem/1.6 var(--sans); color: var(--ink-2);
+    text-decoration: none; border-bottom: 2px solid transparent; padding-bottom: 1px;
+  }
+  .mast nav.seg a + a { margin-left: .7rem; }
+  .mast nav.seg a:hover { color: var(--ink); border-bottom-color: var(--line); }
+  .mast nav.seg a[aria-current="page"] { color: var(--ink); font-weight: 700; border-bottom-color: var(--ink); }
+
+  /* ---- body grid ---- */
+  .wrap { display: grid; grid-template-columns: var(--side) minmax(0, 1fr); gap: 0; align-items: start; }
+  aside.toc {
+    position: sticky; top: 0; align-self: start;
+    padding: 1.75rem 1.25rem 3rem; border-right: 1px solid var(--line-2);
+    max-height: 100vh; overflow-y: auto;
+  }
+  aside.toc .lbl {
+    font: 700 .625rem/1 var(--sans); letter-spacing: .11em; text-transform: uppercase;
+    color: var(--ink-3); margin: 0 0 .6rem;
+  }
+  aside.toc ol { list-style: none; margin: 0 0 1.5rem; padding: 0; counter-reset: toc; }
+  aside.toc li { counter-increment: toc; margin: 0; }
+  aside.toc ol > li > a::before {
+    content: counter(toc) ". "; color: var(--ink-3); font-variant-numeric: tabular-nums;
+  }
+  aside.toc a {
+    display: block; padding: .22rem 0; font-size: .8125rem; line-height: 1.4;
+    color: var(--ink-2); text-decoration: none;
+  }
+  aside.toc a:hover { color: var(--ink); text-decoration: underline; }
+  aside.toc a[aria-current="true"] { color: var(--ink); font-weight: 700; }
+  aside.toc ul { list-style: none; margin: 0 0 0 .9rem; padding: 0; }
+  aside.toc ul a { font-size: .78125rem; color: var(--ink-3); }
+  aside.toc .seg { border-top: 1px solid var(--line-2); padding-top: .9rem; margin-top: .25rem; }
+  aside.toc .seg + .seg { margin-top: 1rem; }
+
+  main { padding: 1.75rem 2.5rem 4.5rem; min-width: 0; }
+  main > * { max-width: var(--measure); }
+  main > .wide, main > figure, main > table, main > .eq, main > pre, main > .tnote { max-width: min(48rem, 100%); }
+
+  h1 { font: 400 1.875rem/1.2 var(--serif); margin: 0 0 .3rem; }
+  .subtitle {
+    font: 400 1rem/1.55 var(--sans); color: var(--ink-2);
+    margin: 0 0 1.4rem; padding-bottom: 1rem; border-bottom: 1px solid var(--line);
+    max-width: min(48rem, 100%);
+  }
+  h2 {
+    font: 400 1.375rem/1.3 var(--serif); margin: 2.25rem 0 .6rem;
+    padding-bottom: .25rem; border-bottom: 1px solid var(--line-2);
+    scroll-margin-top: 1rem; max-width: min(48rem, 100%);
+  }
+  h3 { font: 700 1rem/1.35 var(--sans); margin: 1.5rem 0 .4rem; scroll-margin-top: 1rem; }
+  h4 {
+    font: 700 .6875rem/1.4 var(--sans); letter-spacing: .09em; text-transform: uppercase;
+    color: var(--ink-2); margin: 1.4rem 0 .35rem;
+  }
+  h2 .n, h3 .n { color: var(--ink-3); font-variant-numeric: tabular-nums; }
+  p { margin: 0 0 .9rem; }
+  .lead { font-size: 1.0625rem; line-height: 1.6; }
+  ul, ol { margin: 0 0 .9rem; padding-left: 1.5rem; }
+  li { margin: 0 0 .3rem; }
+  li > ul, li > ol { margin-top: .3rem; }
+  strong, b { font-weight: 700; }
+
+  blockquote {
+    margin: 1.1rem 0; padding: .1rem 0 .1rem 1rem; border-left: 3px solid var(--line-2);
+    color: var(--ink-2);
+  }
+  hr { border: 0; border-top: 1px solid var(--line-2); margin: 2.25rem 0; }
+
+  pre {
+    background: var(--paper-2); border: 1px solid var(--line-2);
+    padding: .8rem .9rem; overflow-x: auto; margin: 0 0 1.1rem;
+    font-size: .8125rem; line-height: 1.55; color: var(--ink);
+  }
+
+  /* ---- tables: the reference-work table. Ruled, shaded header, no colour. ---- */
+  table {
+    border-collapse: collapse; margin: 0 0 .4rem; width: 100%;
+    font-size: .875rem; font-variant-numeric: tabular-nums;
+    border: 1px solid var(--line);
+  }
+  caption {
+    caption-side: top; text-align: left; margin-bottom: .4rem;
+    font: 700 .6875rem/1.4 var(--sans); letter-spacing: .07em; text-transform: uppercase;
+    color: var(--ink-2);
+  }
+  th, td { text-align: left; vertical-align: top; padding: .35rem .6rem; border: 1px solid var(--line-2); }
+  thead th { background: var(--paper-2); border-bottom: 1px solid var(--line); font: 700 .8125rem/1.35 var(--sans); }
+  tbody th { font: 400 .8125rem/1.4 var(--mono); background: var(--paper-2); }
+  td.num, th.num { text-align: right; }
+  tr.tot td, tr.tot th { border-top: 1px solid var(--line); font-weight: 700; }
+  .tnote { font-size: .8125rem; color: var(--ink-2); margin: 0 0 1.4rem; line-height: 1.55; }
+  .scroll { overflow-x: auto; max-width: min(48rem, 100%); margin-bottom: .4rem; }
+  .scroll table { margin-bottom: 0; }
+
+  /* ---- figures ---- */
+  figure { margin: 1.3rem 0; }
+  figure svg.chart { display: block; width: 100%; height: auto; max-width: 100%; }
+  figcaption {
+    font-size: .8125rem; color: var(--ink-2); margin-top: .45rem;
+    padding-top: .45rem; border-top: 1px solid var(--line-2); line-height: 1.55;
+  }
+  figcaption b { color: var(--ink); }
+  .chart .c-axis { stroke: var(--ink); stroke-width: 1; }
+  .chart .c-grid { stroke: var(--line-2); stroke-width: 1; stroke-dasharray: 2 3; }
+  .chart .c-hatch { stroke: var(--line); stroke-width: 1; }
+  .chart .c-line { stroke: var(--ink); }
+  .chart .c-dot { fill: var(--ink); }
+  .chart .c-dot-hollow { fill: var(--paper); stroke: var(--ink); stroke-width: 1; }
+  .chart .c-bar { fill: var(--ink); }
+  .chart .c-bar-hollow { fill: none; stroke: var(--ink); stroke-width: 1; }
+  .chart text { fill: var(--ink-2); }
+  .chart .c-tick { font-size: 10px; }
+  .chart .c-series { font-size: 11px; fill: var(--ink); font-style: italic; }
+  .chart .c-value { font-size: 10px; fill: var(--ink); }
+  .chart .c-band { font-size: 9px; fill: var(--ink-3); letter-spacing: .04em; }
+
+  /* ---- display formulas ---- */
+  .eq {
+    margin: 1.1rem 0; padding: .8rem 1rem; background: var(--paper-2);
+    border: 1px solid var(--line-2);
+    font-family: var(--mono); font-size: .875rem; line-height: 1.75;
+    overflow-x: auto;
+  }
+  .eq .where {
+    display: block; margin-top: .55rem; padding-top: .5rem;
+    border-top: 1px solid var(--line-2);
+    font: .75rem/1.6 var(--sans); color: var(--ink-2);
+  }
+  .eq-n { float: right; color: var(--ink-3); font-size: .8125rem; }
+
+  /* ---- infobox: the one wiki habit that earns its place ---- */
+  .infobox {
+    float: right; clear: right; width: 18rem; max-width: 100%;
+    margin: .2rem 0 1.1rem 1.5rem;
+    border: 1px solid var(--line); background: var(--paper-2);
+    font-size: .8125rem;
+  }
+  .infobox > .cap {
+    margin: 0; padding: .45rem .7rem; border-bottom: 1px solid var(--line);
+    font: 700 .8125rem/1.3 var(--sans); text-align: center; background: var(--paper-3);
+  }
+  .infobox table { margin: 0; border: 0; font-size: .8125rem; }
+  .infobox th, .infobox td { padding: .3rem .7rem; border: 0; border-top: 1px solid var(--line-2); }
+  .infobox tbody tr:first-child th, .infobox tbody tr:first-child td { border-top: 0; }
+  .infobox th { width: 7rem; font: 400 .75rem/1.4 var(--sans); color: var(--ink-2); background: none; }
+  .infobox td { font-family: var(--mono); font-size: .75rem; }
+
+  /* ---- definition lists ---- */
+  dl { margin: 0 0 1.1rem; }
+  dt { font-weight: 700; margin-top: .8rem; scroll-margin-top: 1rem; }
+  dt:first-child { margin-top: 0; }
+  dd { margin: .1rem 0 0; color: var(--ink-2); }
+  dl.compact dt { font: 700 .875rem/1.4 var(--mono); }
+
+  /* ---- the status ledger ---- */
+  table.ledger td:first-child { width: 55%; }
+  .yes::before { content: "\2713\00a0"; }
+  .no::before { content: "\2014\00a0"; }
+  .part::before { content: "\00bd\00a0"; }
+
+  /* ---- segmented chapter portals on the front page ---- */
+  .portals { display: grid; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); gap: 0 1.75rem; max-width: min(48rem, 100%); }
+  .portals section { margin: 0 0 1.25rem; }
+  .portals h3 {
+    margin: 0 0 .4rem; padding-bottom: .25rem; border-bottom: 1px solid var(--line-2);
+    font: 700 .6875rem/1.4 var(--sans); letter-spacing: .1em; text-transform: uppercase; color: var(--ink-2);
+  }
+  .portals ul { list-style: none; margin: 0; padding: 0; }
+  .portals li { margin: 0 0 .5rem; }
+  .portals a { font-weight: 700; text-decoration: none; }
+  .portals a:hover { text-decoration: underline; }
+  .portals .d { display: block; color: var(--ink-2); font-size: .8125rem; line-height: 1.5; }
+
+  /* ---- cross references ---- */
+  .seealso {
+    margin: 2rem 0 0; padding-top: .7rem; border-top: 1px solid var(--line-2);
+    font-size: .875rem; color: var(--ink-2); max-width: min(48rem, 100%);
+  }
+  .seealso b {
+    display: block; font: 700 .6875rem/1.4 var(--sans);
+    letter-spacing: .1em; text-transform: uppercase; margin-bottom: .2rem;
+  }
+  .seealso a + a::before { content: " \00b7 "; color: var(--line); text-decoration: none; }
+
+  /* ---- provenance line ---- */
+  .prov {
+    font-size: .75rem; color: var(--ink-3); line-height: 1.6;
+    border-top: 1px solid var(--line-2); padding-top: .6rem; margin-top: 2rem;
+    max-width: min(48rem, 100%);
+  }
+
+  footer {
+    border-top: 1px solid var(--line); margin-top: 3.5rem;
+    padding: 1.1rem 2.5rem 2.5rem;
+    font-size: .8125rem; color: var(--ink-2); line-height: 1.65;
+  }
+  footer a { color: var(--ink-2); }
+
+  @media (max-width: 62rem) {
+    .wrap { grid-template-columns: 1fr; }
+    aside.toc {
+      position: static; max-height: none; border-right: 0;
+      border-bottom: 1px solid var(--line-2); padding: 1rem 1.5rem;
+    }
+    aside.toc details > summary {
+      font: 700 .6875rem/1 var(--sans); letter-spacing: .1em; text-transform: uppercase;
+      color: var(--ink-2); cursor: pointer; padding: .3rem 0;
+    }
+    .mast .row, .mast nav.seg { padding-left: 1.5rem; padding-right: 1.5rem; }
+    .mast nav.seg { gap: 0 1.25rem; }
+    main { padding: 1.5rem 1.5rem 3rem; }
+    footer { padding: 1.1rem 1.5rem 2.5rem; }
+    .infobox { float: none; width: 100%; margin: 1.1rem 0; }
+  }
+  @media print {
+    aside.toc, .mast nav.seg, .mast .tools, footer { display: none; }
+    body { background: #fff; color: #000; font-size: 10pt; }
+    main { padding: 0; }
+    h2 { page-break-after: avoid; }
+    figure, table, pre { page-break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+<a class="skip" href="#main"><span data-lang="en">Skip to content</span><span data-lang="id">Lompat ke konten</span></a>
+
+<header class="mast">
+  <div class="row">
+    <a class="title" href="index.html"><b>Scorpio Guard</b> <span><span data-lang="en">adaptive trust evaluation</span><span data-lang="id">evaluasi trust adaptif</span></span></a>
+    <div class="tools">
+      <button id="lang" type="button" aria-label="Switch language / Ganti bahasa">ID</button>
+      <button id="theme" type="button" aria-label="Switch theme / Ganti tema">◐</button>
+    </div>
+  </div>
+  <nav class="seg" aria-label="Chapters">
+      <section><h2><span data-lang="en">Start</span><span data-lang="id">Mulai</span></h2><a href="index.html"><span data-lang="en">Overview</span><span data-lang="id">Ringkasan</span></a><a href="usage.html"><span data-lang="en">Usage</span><span data-lang="id">Pemakaian</span></a></section>
+      <section><h2><span data-lang="en">Theory</span><span data-lang="id">Teori</span></h2><a href="model.html"><span data-lang="en">Model</span><span data-lang="id">Model</span></a><a href="evidence.html"><span data-lang="en">Evidence</span><span data-lang="id">Evidence</span></a></section>
+      <section><h2><span data-lang="en">Findings</span><span data-lang="id">Temuan</span></h2><a href="results.html"><span data-lang="en">Results</span><span data-lang="id">Hasil</span></a><a href="limits.html"><span data-lang="en">Limits</span><span data-lang="id">Batas</span></a></section>
+      <section><h2><span data-lang="en">Reference</span><span data-lang="id">Rujukan</span></h2><a href="protocol.html"><span data-lang="en">Protocol</span><span data-lang="id">Protokol</span></a><a href="record.html" aria-current="page"><span data-lang="en">Record</span><span data-lang="id">Rekaman</span></a></section>
+  </nav>
+</header>
+
+<div class="wrap">
+  <aside class="toc" aria-label="Table of contents">
+    <details open>
+      <summary><span data-lang="en">Contents</span><span data-lang="id">Daftar isi</span></summary>
+      <p class="lbl"><span data-lang="en">On this page</span><span data-lang="id">Di halaman ini</span></p>
+      <ol>
+        <li><a href="#index"><span data-lang="en">Decision index</span><span data-lang="id">Indeks keputusan</span></a></li>
+        <li><a href="#glossary"><span data-lang="en">Glossary</span><span data-lang="id">Glosarium</span></a></li>
+      </ol>
+        <div class="seg"><p class="lbl"><span data-lang="en">Start</span><span data-lang="id">Mulai</span></p><ul><li><a href="index.html"><span data-lang="en">Overview</span><span data-lang="id">Ringkasan</span></a></li><li><a href="usage.html"><span data-lang="en">Usage</span><span data-lang="id">Pemakaian</span></a></li></ul></div>
+        <div class="seg"><p class="lbl"><span data-lang="en">Theory</span><span data-lang="id">Teori</span></p><ul><li><a href="model.html"><span data-lang="en">Model</span><span data-lang="id">Model</span></a></li><li><a href="evidence.html"><span data-lang="en">Evidence</span><span data-lang="id">Evidence</span></a></li></ul></div>
+        <div class="seg"><p class="lbl"><span data-lang="en">Findings</span><span data-lang="id">Temuan</span></p><ul><li><a href="results.html"><span data-lang="en">Results</span><span data-lang="id">Hasil</span></a></li><li><a href="limits.html"><span data-lang="en">Limits</span><span data-lang="id">Batas</span></a></li></ul></div>
+        <div class="seg"><p class="lbl"><span data-lang="en">Reference</span><span data-lang="id">Rujukan</span></p><ul><li><a href="protocol.html"><span data-lang="en">Protocol</span><span data-lang="id">Protokol</span></a></li><li><a href="record.html" aria-current="true"><span data-lang="en">Record</span><span data-lang="id">Rekaman</span></a></li></ul></div>
+    </details>
+  </aside>
+
+  <main id="main">
+    <h1><span data-lang="en">Design record and glossary</span><span data-lang="id">Rekaman desain dan glosarium</span></h1>
+    <p class="subtitle"><span data-lang="en">Every numbered decision, the file it became, and the vocabulary this project uses narrowly.</span><span data-lang="id">Setiap keputusan bernomor, file yang ia jadi, dan kosakata yang dipakai proyek ini secara sempit.</span></p>
+
+    <p class="lead"><span data-lang="en">60 numbered decisions, each with its reasoning, its answer, and what it commits the implementation to. This index points at the record rather than restating it.</span><span data-lang="id">60 keputusan bernomor, masing-masing dengan penalaran, jawabannya, dan komitmennya pada implementasi. Indeks ini menunjuk ke rekamannya alih-alih mengulanginya.</span></p>
+
+    <h2 id="index"><span class="n">1.</span> <span data-lang="en">Decision index</span><span data-lang="id">Indeks keputusan</span></h2>
+
+    <table>
+      <caption><span data-lang="en">Part</span><span data-lang="id">Bagian</span> I: Foundations</caption>
+      <thead><tr><th>#</th><th><span data-lang="en">Decision</span><span data-lang="id">Keputusan</span></th><th><span data-lang="en">Files</span><span data-lang="id">File</span></th></tr></thead>
+      <tbody>
+        <tr>
+          <th><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md#d1-entity-is-the-fundamental-reference-unit">D1</a></th>
+          <td>Entity is the fundamental reference unit</td>
+          <td><code>trust.ts, store.ts</code></td>
+        </tr>
+        <tr>
+          <th><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md#d11-root-of-trust-is-outside-sg">D1.1</a></th>
+          <td>Root of trust is outside SG</td>
+          <td><code>guard.forget(), store.ts</code></td>
+        </tr>
+        <tr>
+          <th><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md#d12-data-deletion-is-a-requirement">D1.2</a></th>
+          <td>Data deletion is a requirement</td>
+          <td><code>guard.forget(), store.ts</code></td>
+        </tr>
+        <tr>
+          <th><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md#d2-one-trust-state-per-entity-not-per-entity-endpoint">D2</a></th>
+          <td>One trust state per entity, not per entity-endpoint</td>
+          <td><code>guard.ts</code></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <table>
+      <caption><span data-lang="en">Part</span><span data-lang="id">Bagian</span> II: Trust model</caption>
+      <thead><tr><th>#</th><th><span data-lang="en">Decision</span><span data-lang="id">Keputusan</span></th><th><span data-lang="en">Files</span><span data-lang="id">File</span></th></tr></thead>
+      <tbody>
+        <tr>
+          <th><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md#d3-decay-is-a-half-life-over-real-elapsed-time">D3</a></th>
+          <td>Decay is a half-life over real elapsed time</td>
+          <td><code>trust.ts, policy.ts</code></td>
+        </tr>
+        <tr>
+          <th><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md#d4-evidence-weights-symmetric-41-strong-to-weak">D4</a></th>
+          <td>Evidence weights, symmetric, 4:1 strong to weak</td>
+          <td><code>policy.ts</code></td>
+        </tr>
+        <tr>
+          <th><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md#d6-expiration-is-a-retention-boundary-separate-from-decay">D6</a></th>
+          <td>Expiration is a retention boundary, separate from decay</td>
+          <td><code>trust.ts, store.ts</code></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <table>
+      <caption><span data-lang="en">Part</span><span data-lang="id">Bagian</span> III: Decision layer</caption>
+      <thead><tr><th>#</th><th><span data-lang="en">Decision</span><span data-lang="id">Keputusan</span></th><th><span data-lang="en">Files</span><span data-lang="id">File</span></th></tr></thead>
+      <tbody>
+        <tr>
+          <th><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md#d5-decision-is-a-function-of-trust-and-uncertainty">D5</a></th>
+          <td>Decision is a function of trust and uncertainty</td>
+          <td><code>assess.ts</code></td>
+        </tr>
+        <tr>
+          <th><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md#d37-saturation-guard-belongs-in-the-decision-layer-not-the-trust-model">D37</a></th>
+          <td>Saturation guard belongs in the decision layer, not the trust model</td>
+          <td><code>assess.ts, behavior.ts</code></td>
+        </tr>
+        <tr>
+          <th><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md#d40-an-epistemic-stage-precedes-trust-and-uncertainty">D40</a></th>
+          <td>An epistemic stage precedes trust and uncertainty</td>
+          <td><code>assess.ts, policy.ts</code></td>
+        </tr>
+        <tr>
+          <th><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md#d39-the-cold-start-band-contradicted-the-zero-friction-goal">D39</a></th>
+          <td>The cold-start band contradicted the zero-friction goal</td>
+          <td><code>assess.test.ts</code></td>
+        </tr>
+        <tr>
+          <th><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md#d46-two-thresholds-the-traffic-falsified">D46</a></th>
+          <td>Two thresholds the traffic falsified</td>
+          <td><code>assess.ts, behavior.ts</code></td>
+        </tr>
+        <tr>
+          <th><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md#d49-d37-does-not-do-what-it-claims">D49</a></th>
+          <td>D37 does not do what it claims</td>
+          <td><code>assess.ts</code></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <table>
+      <caption><span data-lang="en">Part</span><span data-lang="id">Bagian</span> IV: Hard constraints</caption>
+      <thead><tr><th>#</th><th><span data-lang="en">Decision</span><span data-lang="id">Keputusan</span></th><th><span data-lang="en">Files</span><span data-lang="id">File</span></th></tr></thead>
+      <tbody>
+        <tr>
+          <th><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md#d13-hard-constraints-are-violated-invariants-in-five-classes">D13</a></th>
+          <td>Hard constraints are violated invariants, in five classes</td>
+          <td><code>constraints.ts</code></td>
+        </tr>
+        <tr>
+          <th><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md#d14-hard-describes-certainty-not-severity">D14</a></th>
+          <td>"Hard" describes certainty, not severity</td>
+          <td><code>policy.ts</code></td>
+        </tr>
+        <tr>
+          <th><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md#d15-hard-constraints-stay-outside-the-beta-model">D15</a></th>
+          <td>Hard constraints stay outside the Beta model</td>
+          <td><code>guard.ts</code></td>
+        </tr>
+        <tr>
+          <th><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md#d16-invariants-are-declared-never-learned">D16</a></th>
+          <td>Invariants are declared, never learned</td>
+          <td><code>transitions.ts</code></td>
+        </tr>
+        <tr>
+          <th><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md#d32-declaring-hard-is-itself-a-claim-of-completeness">D32</a></th>
+          <td>Declaring `hard` is itself a claim of completeness</td>
+          <td><code>constraints.ts</code></td>
+        </tr>
+        <tr>
+          <th><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md#d38-a-violated-soft-invariant-is-strong-negative-trust-evidence">D38</a></th>
+          <td>A violated `soft` invariant is strong negative trust evidence</td>
+          <td><code>constraints.ts, policy.ts</code></td>
+        </tr>
+        <tr>
+          <th><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md#d41-the-constraint-taxonomy-is-closed-over-proof-sources-not-attacks">D41</a></th>
+          <td>The constraint taxonomy is closed over proof sources, not attacks</td>
+          <td><code>constraints.ts, policy.ts</code></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <table>
+      <caption><span data-lang="en">Part</span><span data-lang="id">Bagian</span> V: Anomaly model</caption>
+      <thead><tr><th>#</th><th><span data-lang="en">Decision</span><span data-lang="id">Keputusan</span></th><th><span data-lang="en">Files</span><span data-lang="id">File</span></th></tr></thead>
+      <tbody>
+        <tr>
+          <th><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md#d18-anomaly-feature-space-first-algorithm-later">D18</a></th>
+          <td>Anomaly: feature space first, algorithm later</td>
+          <td><code>anomaly.ts, behavior.ts</code></td>
+        </tr>
+        <tr>
+          <th><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md#d36-the-anomaly-feature-space">D36</a></th>
+          <td>The anomaly feature space</td>
+          <td><code>behavior.ts</code></td>
+        </tr>
+        <tr>
+          <th><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md#d35-an-observation-without-evidence-is-not-a-meaningful-update">D35</a></th>
+          <td>An observation without evidence is not a meaningful update</td>
+          <td><code>trust.ts</code></td>
+        </tr>
+        <tr>
+          <th><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md#d42-the-weak-signal-catalogue-with-no-thresholds-in-it">D42</a></th>
+          <td>The weak-signal catalogue, with no thresholds in it</td>
+          <td><code>signals.ts</code></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <table>
+      <caption><span data-lang="en">Part</span><span data-lang="id">Bagian</span> VI: Architecture and API</caption>
+      <thead><tr><th>#</th><th><span data-lang="en">Decision</span><span data-lang="id">Keputusan</span></th><th><span data-lang="en">Files</span><span data-lang="id">File</span></th></tr></thead>
+      <tbody>
+        <tr>
+          <th><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md#d7-one-package-multiple-entry-points">D7</a></th>
+          <td>One package, multiple entry points</td>
+          <td><code>package.json, src/collect/</code></td>
+        </tr>
+        <tr>
+          <th><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md#d8-pluggable-statestore-in-memory-default-async">D8</a></th>
+          <td>Pluggable `StateStore`, in-memory default, async</td>
+          <td><code>store.ts, conformance.ts</code></td>
+        </tr>
+        <tr>
+          <th><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md#d44-a-durable-store-ships-on-nodesqlite">D44</a></th>
+          <td>A durable store ships, on `node:sqlite`</td>
+          <td><code>src/store/sqlite.ts</code></td>
+        </tr>
+        <tr>
+          <th><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md#d9-guardevaluate-entity-observation-context">D9</a></th>
+          <td>`guard.evaluate({ entity, observation, context })`</td>
+          <td><code>guard.ts</code></td>
+        </tr>
+        <tr>
+          <th><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md#d10-all-public-evaluation-and-storage-apis-are-async">D10</a></th>
+          <td>All public evaluation and storage APIs are async</td>
+          <td><code>guard.ts, store.ts</code></td>
+        </tr>
+        <tr>
+          <th><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md#d11-time-is-injected-through-a-clock-interface">D11</a></th>
+          <td>Time is injected through a `Clock` interface</td>
+          <td><code>clock.ts</code></td>
+        </tr>
+        <tr>
+          <th><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md#d12-core-is-framework-agnostic">D12</a></th>
+          <td>Core is framework-agnostic</td>
+          <td><code>src/core/</code></td>
+        </tr>
+        <tr>
+          <th><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md#d20-a-serverless-guard-is-fully-functional">D20</a></th>
+          <td>A serverless guard is fully functional</td>
+          <td><code>store.ts, src/store/sqlite.ts</code></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <table>
+      <caption><span data-lang="en">Part</span><span data-lang="id">Bagian</span> VII: Protocol and privacy</caption>
+      <thead><tr><th>#</th><th><span data-lang="en">Decision</span><span data-lang="id">Keputusan</span></th><th><span data-lang="en">Files</span><span data-lang="id">File</span></th></tr></thead>
+      <tbody>
+        <tr>
+          <th><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md#d17-no-api-key-in-the-local-core">D17</a></th>
+          <td>No API key in the local core</td>
+          <td><code>symptoms.ts</code></td>
+        </tr>
+        <tr>
+          <th><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md#d19-symptoms-are-local-first-never-per-request">D19</a></th>
+          <td>Symptoms are local-first, never per request</td>
+          <td><code>symptoms.ts</code></td>
+        </tr>
+        <tr>
+          <th><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md#d43-the-symptom-vocabulary-is-two-tiers-split-by-rate-of-change">D43</a></th>
+          <td>The symptom vocabulary is two tiers, split by rate of change</td>
+          <td><code>symptoms.ts, PROTOCOL.md</code></td>
+        </tr>
+        <tr>
+          <th><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md#d21-cold-start-restated">D21</a></th>
+          <td>Cold start, restated</td>
+          <td><code>trust.ts, assess.ts</code></td>
+        </tr>
+        <tr>
+          <th><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md#d22-purge-primitive-from-the-start-consent-belongs-to-the-host">D22</a></th>
+          <td>Purge primitive from the start; consent belongs to the host</td>
+          <td><code>guard.forget(), store.ts</code></td>
+        </tr>
+        <tr>
+          <th><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md#d23-decision-trace-is-mandatory">D23</a></th>
+          <td>Decision trace is mandatory</td>
+          <td><code>guard.ts</code></td>
+        </tr>
+        <tr>
+          <th><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md#d31-relationship-e-x-e-r-is-deferred-out-of-the-poc">D31</a></th>
+          <td>`Relationship : E x E -> R` is deferred out of the PoC</td>
+          <td><code>examples/healthme/personas.ts</code></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <table>
+      <caption><span data-lang="en">Part</span><span data-lang="id">Bagian</span> VIII: Project and tooling</caption>
+      <thead><tr><th>#</th><th><span data-lang="en">Decision</span><span data-lang="id">Keputusan</span></th><th><span data-lang="en">Files</span><span data-lang="id">File</span></th></tr></thead>
+      <tbody>
+        <tr>
+          <th><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md#d24-licence-mit">D24</a></th>
+          <td>Licence: MIT</td>
+          <td><code>LICENSE</code></td>
+        </tr>
+        <tr>
+          <th><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md#d25-npm-fachryxyfscorpio-guard">D25</a></th>
+          <td>npm: `@fachryxyf/scorpio-guard`</td>
+          <td><code>package.json</code></td>
+        </tr>
+        <tr>
+          <th><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md#d26-node-floor-226">D26</a></th>
+          <td>Node floor: `>=22.6`</td>
+          <td><code>package.json, .github/workflows/ci.yml</code></td>
+        </tr>
+        <tr>
+          <th><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md#d27-ci-now-typecheck-and-test">D27</a></th>
+          <td>CI now: typecheck and test</td>
+          <td><code>.github/workflows/ci.yml</code></td>
+        </tr>
+        <tr>
+          <th><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md#d28-site-stays-where-it-is">D28</a></th>
+          <td>Site stays where it is</td>
+          <td><code>index.html, CNAME</code></td>
+        </tr>
+        <tr>
+          <th><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md#d281-the-site-indexes-the-record-it-does-not-restate-it">D28.1</a></th>
+          <td>The site indexes the record; it does not restate it</td>
+          <td><code>DECISIONS.md, index.html</code></td>
+        </tr>
+        <tr>
+          <th><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md#d29-no-empty-repositories">D29</a></th>
+          <td><s>No empty repositories</s> <em><span data-lang="en">superseded</span><span data-lang="id">digantikan</span></em></td>
+          <td><code>REPOSITORIES.md</code></td>
+        </tr>
+        <tr>
+          <th><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md#d34-poc-target-healthme-with-its-limits-stated">D34</a></th>
+          <td><s>PoC target: HealthMe, with its limits stated</s> <em><span data-lang="en">superseded</span><span data-lang="id">digantikan</span></em></td>
+          <td><code>examples/healthme/</code></td>
+        </tr>
+        <tr>
+          <th><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md#d30-poc-must-run-against-a-real-application-flow">D30</a></th>
+          <td>PoC must run against a real application flow</td>
+          <td><code>examples/healthme/</code></td>
+        </tr>
+        <tr>
+          <th><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md#d45-generate-the-traffic-do-not-wait-for-it">D45</a></th>
+          <td>Generate the traffic; do not wait for it</td>
+          <td><code>examples/harness/persona.ts</code></td>
+        </tr>
+        <tr>
+          <th><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md#d47-primary-target-ixfe-because-it-has-something-to-steal">D47</a></th>
+          <td>Primary target: IXFE, because it has something to steal</td>
+          <td><code>examples/ixfe/</code></td>
+        </tr>
+        <tr>
+          <th><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md#d48-a-stale-client-view-is-not-a-proof">D48</a></th>
+          <td>A stale client view is not a proof</td>
+          <td><code>examples/ixfe/invariants.ts</code></td>
+        </tr>
+        <tr>
+          <th><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md#d58-the-site-is-generated-from-the-library-not-hand-copied-from-it">D58</a></th>
+          <td>The site is generated from the library, not hand-copied from it</td>
+          <td><code>site/, scripts/research.mjs</code></td>
+        </tr>
+        <tr>
+          <th><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md#d50-farming-is-answered-on-mass-through-velocity">D50</a></th>
+          <td>Farming is answered on mass, through velocity</td>
+          <td><code>behavior.ts, guard.ts</code></td>
+        </tr>
+        <tr>
+          <th><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md#d51-signal-collectors-exist-for-all-seven-uncovered-catalogue-entries">D51</a></th>
+          <td>Signal collectors exist for all seven uncovered catalogue entries</td>
+          <td><code>collect/timing.ts, collect/target.ts, collect/sequence.ts</code></td>
+        </tr>
+        <tr>
+          <th><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md#d52-the-anomaly-classifier-is-a-distance-to-reference-model-not-a-trained-one">D52</a></th>
+          <td>The anomaly classifier is a distance-to-reference model, not a trained one</td>
+          <td><code>anomaly.ts</code></td>
+        </tr>
+        <tr>
+          <th><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md#d53-wire-format-is-v01-documented-and-tested-still-untransmitting">D53</a></th>
+          <td>Wire format is v0.1, documented and tested, still untransmitting</td>
+          <td><code>PROTOCOL.md, protocol.ts</code></td>
+        </tr>
+        <tr>
+          <th><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md#d54-rate-is-not-the-farming-signal-the-shape-of-the-gaps-is">D54</a></th>
+          <td><s>Rate is not the farming signal; the shape of the gaps is</s> <em><span data-lang="en">superseded</span><span data-lang="id">digantikan</span></em></td>
+          <td><code>behavior.ts</code></td>
+        </tr>
+        <tr>
+          <th><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md#d55-farming-is-answered-at-intake-by-pricing-the-evidence">D55</a></th>
+          <td>Farming is answered at intake, by pricing the evidence</td>
+          <td><code>behavior.ts, guard.ts</code></td>
+        </tr>
+        <tr>
+          <th><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md#d56-real-traffic-is-recorded-by-an-observing-proxy-not-by-reading-logs">D56</a></th>
+          <td>Real traffic is recorded by an observing proxy, not by reading logs</td>
+          <td><code>examples/ixfe/live/</code></td>
+        </tr>
+        <tr>
+          <th><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md#d57-drive-a-real-browser-because-a-real-audience-is-not-available">D57</a></th>
+          <td>Drive a real browser, because a real audience is not available</td>
+          <td><code>examples/ixfe/live/visitors.ts, cdp.ts</code></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2 id="glossary"><span class="n">2.</span> <span data-lang="en">Glossary</span><span data-lang="id">Glosarium</span></h2>
+
+    <dl class="compact">
+      <dt id="entity"><span data-lang="en">Entity</span><span data-lang="id">Entitas</span></dt>
+      <dd><span data-lang="en">The unit trust is measured against: an opaque string the host supplies. SG never interprets it and never treats it as proof of identity.</span><span data-lang="id">Satuan yang diukur trust-nya: string opaque yang disuplai host. SG tak pernah menafsirkannya dan tak pernah menganggapnya bukti identitas.</span></dd>
+      <dt id="root-of-trust"><span data-lang="en">Root of trust</span><span data-lang="id">Akar trust</span></dt>
+      <dd><span data-lang="en">Whatever makes an entity reference expensive to obtain or replace. Explicitly outside the library: supplying a strong one is the host’s responsibility.</span><span data-lang="id">Apa pun yang membuat referensi entitas mahal didapat atau diganti. Eksplisit di luar library: menyediakan yang kuat tanggung jawab host.</span></dd>
+      <dt id="observation"><span data-lang="en">Observation</span><span data-lang="id">Observasi</span></dt>
+      <dd><span data-lang="en">One interaction handed to evaluate(): a scope, whatever data the host’s invariants read, and optional attributed evidence. SG never inspects data itself.</span><span data-lang="id">Satu interaksi yang diberikan ke evaluate(): sebuah scope, data apa pun yang dibaca invariant host, dan evidence terkait opsional. SG tak pernah memeriksa datanya sendiri.</span></dd>
+      <dt id="scope"><span data-lang="en">Scope</span><span data-lang="id">Scope</span></dt>
+      <dd><span data-lang="en">The area a declaration covers, so a partial declaration is not silently global. An observation in an undeclared scope yields no violations: unknown, not forbidden.</span><span data-lang="id">Area yang dicakup sebuah deklarasi, agar deklarasi sebagian tidak diam-diam jadi global. Observasi di scope yang tak dideklarasikan tidak menghasilkan pelanggaran: belum diketahui, bukan dilarang.</span></dd>
+      <dt id="evidence-mass"><span data-lang="en">Evidence mass</span><span data-lang="id">Massa evidence</span></dt>
+      <dd><span data-lang="en">How much has accumulated, n = α + β after decay. Mass is the amount of belief; trust is its direction.</span><span data-lang="id">Seberapa banyak yang sudah terkumpul, n = α + β setelah decay. Massa adalah banyak keyakinan; trust adalah arahnya.</span></dd>
+      <dt id="stage"><span data-lang="en">Epistemic stage</span><span data-lang="id">Tahap epistemik</span></dt>
+      <dd><span data-lang="en">unknown, developing, established — how much do I know? — read before trust answers what do I believe?</span><span data-lang="id">unknown, developing, established — seberapa banyak saya tahu? — dibaca sebelum trust menjawab apa yang saya yakini?</span></dd>
+      <dt id="hard-constraint"><span data-lang="en">Hard constraint</span><span data-lang="id">Constraint hard</span></dt>
+      <dd><span data-lang="en">A violation that is a proof, not a probability. Declaring hard claims both determinism and completeness over its scope.</span><span data-lang="id">Pelanggaran yang merupakan bukti, bukan probabilitas. Mendeklarasikan hard menegaskan determinisme dan kelengkapan atas scope-nya sekaligus.</span></dd>
+      <dt id="weak-signal"><span data-lang="en">Weak signal</span><span data-lang="id">Weak signal</span></dt>
+      <dd><span data-lang="en">Unusual but not impossible; meaningful only in combination. Becomes negative evidence, subject to every ceiling, never acts alone.</span><span data-lang="id">Tak biasa tapi tak mustahil; berarti hanya dalam kombinasi. Menjadi evidence negatif, terkena semua ceiling, tak pernah bertindak sendiri.</span></dd>
+      <dt id="decision"><span data-lang="en">Decision</span><span data-lang="id">Keputusan</span></dt>
+      <dd><span data-lang="en">One of five rungs returned as advice. Strongest wins when layers disagree: a maximum, never an average.</span><span data-lang="id">Salah satu dari lima tingkat yang dikembalikan sebagai saran. Yang terkuat menang saat lapis berbeda: maksimum, bukan rata-rata.</span></dd>
+      <dt id="advisory"><span data-lang="en">Advisory</span><span data-lang="id">Advisory</span></dt>
+      <dd><span data-lang="en">The guard returns a decision and never performs one. The host owns the consequences, so the host owns the action.</span><span data-lang="id">Guard mengembalikan keputusan dan tak pernah melakukannya. Host memilik konsekuensinya, jadi host memilik tindakannya.</span></dd>
+    </dl>
+
+    <p class="seealso"><b><span data-lang="en">See also</span><span data-lang="id">Lihat juga</span></b>
+      <a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md"><span data-lang="en">Full design record</span><span data-lang="id">Rekaman desain lengkap</span></a>
+      <a href="limits.html#unvalidated"><span data-lang="en">What remains unvalidated</span><span data-lang="id">Yang belum tervalidasi</span></a>
+      <a href="usage.html#policy"><span data-lang="en">Policy defaults</span><span data-lang="id">Default policy</span></a>
+    </p>
+  
+  </main>
+</div>
+
+<footer>
+  <p>
+    <span data-lang="en">Scorpio Guard is pre-alpha and calibrated against nothing. Every number on this site is generated from the code that produces it; none of it has met a real population.</span><span data-lang="id">Scorpio Guard masih pre-alpha dan belum dikalibrasi terhadap apa pun. Setiap angka di situs ini dihasilkan dari kode yang memproduksinya; belum ada satu pun yang bertemu populasi nyata.</span>
+  </p>
+  <p>
+    <a href="https://github.com/Fachryxyf/scorpio-guard"><span data-lang="en">Source</span><span data-lang="id">Sumber</span></a> ·
+    <a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md"><span data-lang="en">Design record</span><span data-lang="id">Rekaman desain</span></a> ·
+    <a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/PROTOCOL.md"><span data-lang="en">Protocol draft</span><span data-lang="id">Draf protokol</span></a> ·
+    <a href="https://github.com/Fachryxyf/scorpio-guard/issues"><span data-lang="en">Issues</span><span data-lang="id">Isu</span></a>
+    · MIT · <a href="https://github.com/Fachryxyf">@Fachryxyf</a>
+  </p>
+</footer>
+
+<script>
+  (function () {
+    var root = document.documentElement;
+    var langBtn = document.getElementById('lang');
+    var themeBtn = document.getElementById('theme');
+
+    function paintLang() { langBtn.textContent = root.lang === 'id' ? 'EN' : 'ID'; }
+    paintLang();
+    langBtn.addEventListener('click', function () {
+      root.lang = root.lang === 'id' ? 'en' : 'id';
+      try { localStorage.setItem('sg-lang', root.lang); } catch (e) {}
+      paintLang();
+    });
+    themeBtn.addEventListener('click', function () {
+      root.dataset.theme = root.dataset.theme === 'dark' ? 'light' : 'dark';
+      try { localStorage.setItem('sg-theme', root.dataset.theme); } catch (e) {}
+    });
+
+    // Mark the section being read. Progressive: the TOC works without it.
+    var links = [].slice.call(document.querySelectorAll('aside.toc ol a'));
+    if (!links.length || !('IntersectionObserver' in window)) return;
+    var byId = {};
+    links.forEach(function (a) { byId[a.getAttribute('href').slice(1)] = a; });
+    var observer = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (!entry.isIntersecting) return;
+        links.forEach(function (a) { a.removeAttribute('aria-current'); });
+        var current = byId[entry.target.id];
+        if (current) current.setAttribute('aria-current', 'true');
+      });
+    }, { rootMargin: '-10% 0px -75% 0px' });
+    Object.keys(byId).forEach(function (id) {
+      var el = document.getElementById(id);
+      if (el) observer.observe(el);
+    });
+  })();
+</script>
+</body>
+</html>

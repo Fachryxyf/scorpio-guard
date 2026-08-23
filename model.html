@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The trust model — Scorpio Guard</title>
+<meta name="description" content="Beta-Bernoulli state, decay as a half-life, five rungs of advice, and the three ceilings that keep a tight distribution from being trusted too readily.">
+<meta name="color-scheme" content="light dark">
+<link rel="canonical" href="https://scorpio-guard.fachryxyf.com/model.html">
+<meta property="og:title" content="The trust model">
+<meta property="og:description" content="Beta-Bernoulli state, decay as a half-life, five rungs of advice, and the three ceilings that keep a tight distribution from being trusted too readily.">
+<meta property="og:url" content="https://scorpio-guard.fachryxyf.com/model.html">
+<meta property="og:type" content="article">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%23ffffff'/><text y='24' x='7' font-size='22' font-family='Georgia,serif'>S</text></svg>">
+<script>
+  (function () {
+    try {
+      var t = localStorage.getItem('sg-theme');
+      if (!t) t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      document.documentElement.dataset.theme = t;
+      var l = localStorage.getItem('sg-lang');
+      if (!l) l = (navigator.language || 'en').toLowerCase().startsWith('id') ? 'id' : 'en';
+      document.documentElement.lang = l;
+    } catch (e) {}
+  })();
+</script>
+<style>
+  :root {
+    --ink: #101010;
+    --ink-2: #4a4a4a;
+    --ink-3: #6f6f6f;
+    --paper: #ffffff;
+    --paper-2: #f5f5f5;
+    --paper-3: #ebebeb;
+    --line: #9c9c9c;
+    --line-2: #d6d6d6;
+    --serif: 'Linux Libertine', Georgia, 'Times New Roman', serif;
+    --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, system-ui, sans-serif;
+    --mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
+    --measure: 42rem;
+    --side: 15rem;
+  }
+  html[data-theme="dark"] {
+    --ink: #ededed;
+    --ink-2: #b4b4b4;
+    --ink-3: #8e8e8e;
+    --paper: #0d0d0d;
+    --paper-2: #171717;
+    --paper-3: #202020;
+    --line: #5e5e5e;
+    --line-2: #2e2e2e;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  html[lang="en"] [data-lang="id"], html[lang="id"] [data-lang="en"] { display: none; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font: 0.9375rem/1.65 var(--sans);
+  }
+  a { color: var(--ink); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 2px; }
+  a:hover { text-decoration-thickness: 2px; }
+  :focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+  code, pre, kbd, samp { font-family: var(--mono); font-size: 0.86em; }
+  code { background: var(--paper-2); padding: 0.06em 0.28em; border: 1px solid var(--line-2); border-radius: 2px; }
+  pre code { background: none; padding: 0; border: 0; font-size: 1em; }
+  .skip { position: absolute; left: -9999px; }
+  .skip:focus { left: 1rem; top: 1rem; background: var(--paper-2); padding: .6rem 1rem; z-index: 30; }
+
+  /* ---- masthead: a title block over a segmented menu, not a hero ---- */
+  header.mast { border-bottom: 1px solid var(--line); }
+  .mast .row {
+    display: flex; align-items: baseline; gap: 1rem; flex-wrap: wrap;
+    padding: .8rem 2rem .55rem;
+  }
+  .mast .title {
+    font: 400 1.25rem/1.1 var(--serif); margin-right: auto;
+    text-decoration: none; color: var(--ink);
+  }
+  .mast .title b { font-weight: 700; }
+  .mast .title span { color: var(--ink-3); font: italic 400 .875rem/1 var(--serif); }
+  .mast .tools { display: flex; gap: .4rem; }
+  .mast button {
+    font: .75rem/1 var(--sans); color: var(--ink-2); background: var(--paper);
+    border: 1px solid var(--line); border-radius: 2px; padding: .35rem .5rem; cursor: pointer;
+    min-width: 2.5rem; min-height: 1.9rem;
+  }
+  .mast button:hover { color: var(--ink); border-color: var(--ink); }
+
+  /* the segmented menu: groups named, chapters under them */
+  .mast nav.seg {
+    display: flex; gap: 0 2rem; flex-wrap: wrap;
+    padding: 0 2rem .55rem;
+    border-top: 1px solid var(--line-2);
+    padding-top: .5rem;
+  }
+  .mast nav.seg section { display: flex; align-items: baseline; gap: .7rem; }
+  .mast nav.seg h2 {
+    font: 700 .625rem/1.6 var(--sans); letter-spacing: .11em; text-transform: uppercase;
+    color: var(--ink-3); margin: 0; border: 0; padding: 0; white-space: nowrap;
+  }
+  .mast nav.seg a {
+    font: 400 .8125rem/1.6 var(--sans); color: var(--ink-2);
+    text-decoration: none; border-bottom: 2px solid transparent; padding-bottom: 1px;
+  }
+  .mast nav.seg a + a { margin-left: .7rem; }
+  .mast nav.seg a:hover { color: var(--ink); border-bottom-color: var(--line); }
+  .mast nav.seg a[aria-current="page"] { color: var(--ink); font-weight: 700; border-bottom-color: var(--ink); }
+
+  /* ---- body grid ---- */
+  .wrap { display: grid; grid-template-columns: var(--side) minmax(0, 1fr); gap: 0; align-items: start; }
+  aside.toc {
+    position: sticky; top: 0; align-self: start;
+    padding: 1.75rem 1.25rem 3rem; border-right: 1px solid var(--line-2);
+    max-height: 100vh; overflow-y: auto;
+  }
+  aside.toc .lbl {
+    font: 700 .625rem/1 var(--sans); letter-spacing: .11em; text-transform: uppercase;
+    color: var(--ink-3); margin: 0 0 .6rem;
+  }
+  aside.toc ol { list-style: none; margin: 0 0 1.5rem; padding: 0; counter-reset: toc; }
+  aside.toc li { counter-increment: toc; margin: 0; }
+  aside.toc ol > li > a::before {
+    content: counter(toc) ". "; color: var(--ink-3); font-variant-numeric: tabular-nums;
+  }
+  aside.toc a {
+    display: block; padding: .22rem 0; font-size: .8125rem; line-height: 1.4;
+    color: var(--ink-2); text-decoration: none;
+  }
+  aside.toc a:hover { color: var(--ink); text-decoration: underline; }
+  aside.toc a[aria-current="true"] { color: var(--ink); font-weight: 700; }
+  aside.toc ul { list-style: none; margin: 0 0 0 .9rem; padding: 0; }
+  aside.toc ul a { font-size: .78125rem; color: var(--ink-3); }
+  aside.toc .seg { border-top: 1px solid var(--line-2); padding-top: .9rem; margin-top: .25rem; }
+  aside.toc .seg + .seg { margin-top: 1rem; }
+
+  main { padding: 1.75rem 2.5rem 4.5rem; min-width: 0; }
+  main > * { max-width: var(--measure); }
+  main > .wide, main > figure, main > table, main > .eq, main > pre, main > .tnote { max-width: min(48rem, 100%); }
+
+  h1 { font: 400 1.875rem/1.2 var(--serif); margin: 0 0 .3rem; }
+  .subtitle {
+    font: 400 1rem/1.55 var(--sans); color: var(--ink-2);
+    margin: 0 0 1.4rem; padding-bottom: 1rem; border-bottom: 1px solid var(--line);
+    max-width: min(48rem, 100%);
+  }
+  h2 {
+    font: 400 1.375rem/1.3 var(--serif); margin: 2.25rem 0 .6rem;
+    padding-bottom: .25rem; border-bottom: 1px solid var(--line-2);
+    scroll-margin-top: 1rem; max-width: min(48rem, 100%);
+  }
+  h3 { font: 700 1rem/1.35 var(--sans); margin: 1.5rem 0 .4rem; scroll-margin-top: 1rem; }
+  h4 {
+    font: 700 .6875rem/1.4 var(--sans); letter-spacing: .09em; text-transform: uppercase;
+    color: var(--ink-2); margin: 1.4rem 0 .35rem;
+  }
+  h2 .n, h3 .n { color: var(--ink-3); font-variant-numeric: tabular-nums; }
+  p { margin: 0 0 .9rem; }
+  .lead { font-size: 1.0625rem; line-height: 1.6; }
+  ul, ol { margin: 0 0 .9rem; padding-left: 1.5rem; }
+  li { margin: 0 0 .3rem; }
+  li > ul, li > ol { margin-top: .3rem; }
+  strong, b { font-weight: 700; }
+
+  blockquote {
+    margin: 1.1rem 0; padding: .1rem 0 .1rem 1rem; border-left: 3px solid var(--line-2);
+    color: var(--ink-2);
+  }
+  hr { border: 0; border-top: 1px solid var(--line-2); margin: 2.25rem 0; }
+
+  pre {
+    background: var(--paper-2); border: 1px solid var(--line-2);
+    padding: .8rem .9rem; overflow-x: auto; margin: 0 0 1.1rem;
+    font-size: .8125rem; line-height: 1.55; color: var(--ink);
+  }
+
+  /* ---- tables: the reference-work table. Ruled, shaded header, no colour. ---- */
+  table {
+    border-collapse: collapse; margin: 0 0 .4rem; width: 100%;
+    font-size: .875rem; font-variant-numeric: tabular-nums;
+    border: 1px solid var(--line);
+  }
+  caption {
+    caption-side: top; text-align: left; margin-bottom: .4rem;
+    font: 700 .6875rem/1.4 var(--sans); letter-spacing: .07em; text-transform: uppercase;
+    color: var(--ink-2);
+  }
+  th, td { text-align: left; vertical-align: top; padding: .35rem .6rem; border: 1px solid var(--line-2); }
+  thead th { background: var(--paper-2); border-bottom: 1px solid var(--line); font: 700 .8125rem/1.35 var(--sans); }
+  tbody th { font: 400 .8125rem/1.4 var(--mono); background: var(--paper-2); }
+  td.num, th.num { text-align: right; }
+  tr.tot td, tr.tot th { border-top: 1px solid var(--line); font-weight: 700; }
+  .tnote { font-size: .8125rem; color: var(--ink-2); margin: 0 0 1.4rem; line-height: 1.55; }
+  .scroll { overflow-x: auto; max-width: min(48rem, 100%); margin-bottom: .4rem; }
+  .scroll table { margin-bottom: 0; }
+
+  /* ---- figures ---- */
+  figure { margin: 1.3rem 0; }
+  figure svg.chart { display: block; width: 100%; height: auto; max-width: 100%; }
+  figcaption {
+    font-size: .8125rem; color: var(--ink-2); margin-top: .45rem;
+    padding-top: .45rem; border-top: 1px solid var(--line-2); line-height: 1.55;
+  }
+  figcaption b { color: var(--ink); }
+  .chart .c-axis { stroke: var(--ink); stroke-width: 1; }
+  .chart .c-grid { stroke: var(--line-2); stroke-width: 1; stroke-dasharray: 2 3; }
+  .chart .c-hatch { stroke: var(--line); stroke-width: 1; }
+  .chart .c-line { stroke: var(--ink); }
+  .chart .c-dot { fill: var(--ink); }
+  .chart .c-dot-hollow { fill: var(--paper); stroke: var(--ink); stroke-width: 1; }
+  .chart .c-bar { fill: var(--ink); }
+  .chart .c-bar-hollow { fill: none; stroke: var(--ink); stroke-width: 1; }
+  .chart text { fill: var(--ink-2); }
+  .chart .c-tick { font-size: 10px; }
+  .chart .c-series { font-size: 11px; fill: var(--ink); font-style: italic; }
+  .chart .c-value { font-size: 10px; fill: var(--ink); }
+  .chart .c-band { font-size: 9px; fill: var(--ink-3); letter-spacing: .04em; }
+
+  /* ---- display formulas ---- */
+  .eq {
+    margin: 1.1rem 0; padding: .8rem 1rem; background: var(--paper-2);
+    border: 1px solid var(--line-2);
+    font-family: var(--mono); font-size: .875rem; line-height: 1.75;
+    overflow-x: auto;
+  }
+  .eq .where {
+    display: block; margin-top: .55rem; padding-top: .5rem;
+    border-top: 1px solid var(--line-2);
+    font: .75rem/1.6 var(--sans); color: var(--ink-2);
+  }
+  .eq-n { float: right; color: var(--ink-3); font-size: .8125rem; }
+
+  /* ---- infobox: the one wiki habit that earns its place ---- */
+  .infobox {
+    float: right; clear: right; width: 18rem; max-width: 100%;
+    margin: .2rem 0 1.1rem 1.5rem;
+    border: 1px solid var(--line); background: var(--paper-2);
+    font-size: .8125rem;
+  }
+  .infobox > .cap {
+    margin: 0; padding: .45rem .7rem; border-bottom: 1px solid var(--line);
+    font: 700 .8125rem/1.3 var(--sans); text-align: center; background: var(--paper-3);
+  }
+  .infobox table { margin: 0; border: 0; font-size: .8125rem; }
+  .infobox th, .infobox td { padding: .3rem .7rem; border: 0; border-top: 1px solid var(--line-2); }
+  .infobox tbody tr:first-child th, .infobox tbody tr:first-child td { border-top: 0; }
+  .infobox th { width: 7rem; font: 400 .75rem/1.4 var(--sans); color: var(--ink-2); background: none; }
+  .infobox td { font-family: var(--mono); font-size: .75rem; }
+
+  /* ---- definition lists ---- */
+  dl { margin: 0 0 1.1rem; }
+  dt { font-weight: 700; margin-top: .8rem; scroll-margin-top: 1rem; }
+  dt:first-child { margin-top: 0; }
+  dd { margin: .1rem 0 0; color: var(--ink-2); }
+  dl.compact dt { font: 700 .875rem/1.4 var(--mono); }
+
+  /* ---- the status ledger ---- */
+  table.ledger td:first-child { width: 55%; }
+  .yes::before { content: "\2713\00a0"; }
+  .no::before { content: "\2014\00a0"; }
+  .part::before { content: "\00bd\00a0"; }
+
+  /* ---- segmented chapter portals on the front page ---- */
+  .portals { display: grid; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); gap: 0 1.75rem; max-width: min(48rem, 100%); }
+  .portals section { margin: 0 0 1.25rem; }
+  .portals h3 {
+    margin: 0 0 .4rem; padding-bottom: .25rem; border-bottom: 1px solid var(--line-2);
+    font: 700 .6875rem/1.4 var(--sans); letter-spacing: .1em; text-transform: uppercase; color: var(--ink-2);
+  }
+  .portals ul { list-style: none; margin: 0; padding: 0; }
+  .portals li { margin: 0 0 .5rem; }
+  .portals a { font-weight: 700; text-decoration: none; }
+  .portals a:hover { text-decoration: underline; }
+  .portals .d { display: block; color: var(--ink-2); font-size: .8125rem; line-height: 1.5; }
+
+  /* ---- cross references ---- */
+  .seealso {
+    margin: 2rem 0 0; padding-top: .7rem; border-top: 1px solid var(--line-2);
+    font-size: .875rem; color: var(--ink-2); max-width: min(48rem, 100%);
+  }
+  .seealso b {
+    display: block; font: 700 .6875rem/1.4 var(--sans);
+    letter-spacing: .1em; text-transform: uppercase; margin-bottom: .2rem;
+  }
+  .seealso a + a::before { content: " \00b7 "; color: var(--line); text-decoration: none; }
+
+  /* ---- provenance line ---- */
+  .prov {
+    font-size: .75rem; color: var(--ink-3); line-height: 1.6;
+    border-top: 1px solid var(--line-2); padding-top: .6rem; margin-top: 2rem;
+    max-width: min(48rem, 100%);
+  }
+
+  footer {
+    border-top: 1px solid var(--line); margin-top: 3.5rem;
+    padding: 1.1rem 2.5rem 2.5rem;
+    font-size: .8125rem; color: var(--ink-2); line-height: 1.65;
+  }
+  footer a { color: var(--ink-2); }
+
+  @media (max-width: 62rem) {
+    .wrap { grid-template-columns: 1fr; }
+    aside.toc {
+      position: static; max-height: none; border-right: 0;
+      border-bottom: 1px solid var(--line-2); padding: 1rem 1.5rem;
+    }
+    aside.toc details > summary {
+      font: 700 .6875rem/1 var(--sans); letter-spacing: .1em; text-transform: uppercase;
+      color: var(--ink-2); cursor: pointer; padding: .3rem 0;
+    }
+    .mast .row, .mast nav.seg { padding-left: 1.5rem; padding-right: 1.5rem; }
+    .mast nav.seg { gap: 0 1.25rem; }
+    main { padding: 1.5rem 1.5rem 3rem; }
+    footer { padding: 1.1rem 1.5rem 2.5rem; }
+    .infobox { float: none; width: 100%; margin: 1.1rem 0; }
+  }
+  @media print {
+    aside.toc, .mast nav.seg, .mast .tools, footer { display: none; }
+    body { background: #fff; color: #000; font-size: 10pt; }
+    main { padding: 0; }
+    h2 { page-break-after: avoid; }
+    figure, table, pre { page-break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+<a class="skip" href="#main"><span data-lang="en">Skip to content</span><span data-lang="id">Lompat ke konten</span></a>
+
+<header class="mast">
+  <div class="row">
+    <a class="title" href="index.html"><b>Scorpio Guard</b> <span><span data-lang="en">adaptive trust evaluation</span><span data-lang="id">evaluasi trust adaptif</span></span></a>
+    <div class="tools">
+      <button id="lang" type="button" aria-label="Switch language / Ganti bahasa">ID</button>
+      <button id="theme" type="button" aria-label="Switch theme / Ganti tema">◐</button>
+    </div>
+  </div>
+  <nav class="seg" aria-label="Chapters">
+      <section><h2><span data-lang="en">Start</span><span data-lang="id">Mulai</span></h2><a href="index.html"><span data-lang="en">Overview</span><span data-lang="id">Ringkasan</span></a><a href="usage.html"><span data-lang="en">Usage</span><span data-lang="id">Pemakaian</span></a></section>
+      <section><h2><span data-lang="en">Theory</span><span data-lang="id">Teori</span></h2><a href="model.html" aria-current="page"><span data-lang="en">Model</span><span data-lang="id">Model</span></a><a href="evidence.html"><span data-lang="en">Evidence</span><span data-lang="id">Evidence</span></a></section>
+      <section><h2><span data-lang="en">Findings</span><span data-lang="id">Temuan</span></h2><a href="results.html"><span data-lang="en">Results</span><span data-lang="id">Hasil</span></a><a href="limits.html"><span data-lang="en">Limits</span><span data-lang="id">Batas</span></a></section>
+      <section><h2><span data-lang="en">Reference</span><span data-lang="id">Rujukan</span></h2><a href="protocol.html"><span data-lang="en">Protocol</span><span data-lang="id">Protokol</span></a><a href="record.html"><span data-lang="en">Record</span><span data-lang="id">Rekaman</span></a></section>
+  </nav>
+</header>
+
+<div class="wrap">
+  <aside class="toc" aria-label="Table of contents">
+    <details open>
+      <summary><span data-lang="en">Contents</span><span data-lang="id">Daftar isi</span></summary>
+      <p class="lbl"><span data-lang="en">On this page</span><span data-lang="id">Di halaman ini</span></p>
+      <ol>
+        <li><a href="#entity"><span data-lang="en">The entity</span><span data-lang="id">Entitasnya</span></a></li>
+        <li><a href="#distribution"><span data-lang="en">Trust as a distribution</span><span data-lang="id">Trust sebagai distribusi</span></a></li>
+        <li><a href="#evidence"><span data-lang="en">What one observation is worth</span><span data-lang="id">Nilai satu observasi</span></a></li>
+        <li><a href="#decay"><span data-lang="en">Decay, and the bound it implies</span><span data-lang="id">Decay, dan batas yang ia bawa</span></a></li>
+        <li><a href="#spectrum"><span data-lang="en">The decision spectrum</span><span data-lang="id">Spektrum keputusannya</span></a></li>
+        <li><a href="#ceilings"><span data-lang="en">Three ceilings</span><span data-lang="id">Tiga ceiling</span></a></li>
+        <li><a href="#trajectory"><span data-lang="en">What accumulation looks like</span><span data-lang="id">Bentuk akumulasinya</span></a></li>
+      </ol>
+        <div class="seg"><p class="lbl"><span data-lang="en">Start</span><span data-lang="id">Mulai</span></p><ul><li><a href="index.html"><span data-lang="en">Overview</span><span data-lang="id">Ringkasan</span></a></li><li><a href="usage.html"><span data-lang="en">Usage</span><span data-lang="id">Pemakaian</span></a></li></ul></div>
+        <div class="seg"><p class="lbl"><span data-lang="en">Theory</span><span data-lang="id">Teori</span></p><ul><li><a href="model.html" aria-current="true"><span data-lang="en">Model</span><span data-lang="id">Model</span></a></li><li><a href="evidence.html"><span data-lang="en">Evidence</span><span data-lang="id">Evidence</span></a></li></ul></div>
+        <div class="seg"><p class="lbl"><span data-lang="en">Findings</span><span data-lang="id">Temuan</span></p><ul><li><a href="results.html"><span data-lang="en">Results</span><span data-lang="id">Hasil</span></a></li><li><a href="limits.html"><span data-lang="en">Limits</span><span data-lang="id">Batas</span></a></li></ul></div>
+        <div class="seg"><p class="lbl"><span data-lang="en">Reference</span><span data-lang="id">Rujukan</span></p><ul><li><a href="protocol.html"><span data-lang="en">Protocol</span><span data-lang="id">Protokol</span></a></li><li><a href="record.html"><span data-lang="en">Record</span><span data-lang="id">Rekaman</span></a></li></ul></div>
+    </details>
+  </aside>
+
+  <main id="main">
+    <h1><span data-lang="en">The trust model</span><span data-lang="id">Model trust</span></h1>
+    <p class="subtitle"><span data-lang="en">Beta-Bernoulli state, decay as a half-life, five rungs of advice, and the three ceilings that keep a tight distribution from being trusted too readily.</span><span data-lang="id">State Beta-Bernoulli, decay sebagai half-life, lima tingkat saran, dan tiga ceiling yang menahan distribusi rapat agar tidak terlalu cepat dipercaya.</span></p>
+
+    <p class="lead"><span data-lang="en">The model has four dimensions and one output. This chapter is the arithmetic: what state is held per entity, how an observation changes it, how it fades, and how a distribution becomes advice. Every number quoted here is generated from the code that implements it.</span><span data-lang="id">Modelnya punya empat dimensi dan satu keluaran. Bab ini adalah aritmetikanya: state apa yang disimpan per entitas, bagaimana sebuah observasi mengubahnya, bagaimana ia memudar, dan bagaimana sebuah distribusi menjadi saran. Setiap angka di sini dihasilkan dari kode yang mengimplementasikannya.</span></p>
+
+    <h2 id="entity"><span class="n">1.</span> <span data-lang="en">The entity</span><span data-lang="id">Entitasnya</span></h2>
+
+    <p><span data-lang="en">The unit of reference is an <b>entity</b>, and the library never decides what one is. The host supplies an opaque key &mdash; a session id, an account id, a salted hash of whatever it considers stable &mdash; and the guard holds one state per key. That is deliberate: choosing the key is choosing who you are willing to be wrong about, and the host is the only party that can make that choice legitimately.</span><span data-lang="id">Unit rujukannya adalah <b>entity</b>, dan library ini tidak pernah menentukan apa itu. Host memberi kunci opaque &mdash; id sesi, id akun, hash bersalt dari apa pun yang dianggapnya stabil &mdash; dan guard menyimpan satu state per kunci. Itu disengaja: memilih kuncinya berarti memilih tentang siapa kamu bersedia salah, dan host adalah satu-satunya pihak yang bisa membuat pilihan itu secara sah.</span></p>
+
+    <p><span data-lang="en">One state per entity, not per entity-and-endpoint. Splitting it per endpoint would make an attacker’s first request to every endpoint free, which is the opposite of accumulation.</span><span data-lang="id">Satu state per entitas, bukan per entitas-dan-endpoint. Memecahnya per endpoint akan membuat request pertama penyerang ke setiap endpoint jadi gratis, yang justru kebalikan dari akumulasi.</span></p>
+
+    <p><span data-lang="en">The root of trust is outside the library. Scorpio Guard cannot verify that a key means what the host thinks it means; it measures behavior <i>attributed</i> to a key. A host that hands it a forgeable key gets measurements of a forgeable key.</span><span data-lang="id">Akar kepercayaannya di luar library. Scorpio Guard tidak bisa memverifikasi bahwa sebuah kunci berarti seperti yang host pikirkan; ia mengukur perilaku yang <i>diatribusikan</i> ke sebuah kunci. Host yang memberi kunci yang bisa dipalsukan akan mendapat pengukuran atas kunci yang bisa dipalsukan.</span></p>
+
+    <h2 id="distribution"><span class="n">2.</span> <span data-lang="en">Trust as a distribution, not a number</span><span data-lang="id">Trust sebagai distribusi, bukan angka</span></h2>
+
+    <p><span data-lang="en">Trust is stored as a Beta distribution and read as two numbers. A single scalar cannot distinguish <i>this party has behaved well fifty times</i> from <i>this party has never been seen</i>, and those two demand opposite treatments.</span><span data-lang="id">Trust disimpan sebagai distribusi Beta dan dibaca sebagai dua angka. Satu skalar tidak bisa membedakan <i>pihak ini sudah berperilaku baik lima puluh kali</i> dari <i>pihak ini belum pernah terlihat</i>, dan keduanya menuntut perlakuan yang berlawanan.</span></p>
+
+    <div class="eq"><span class="eq-n">(1)</span>
+      p ~ Beta(α, β),&nbsp;&nbsp; α = 1 + a,&nbsp;&nbsp; β = 1 + b<br>
+      E[p] = α / (α + β)<br>
+      Var[p] = αβ / ((α + β)² (α + β + 1))<br>
+      n = α + β
+      <span class="where"><span data-lang="en"><b>a</b>, <b>b</b> accumulated positive and negative evidence mass. The Beta(1,1) prior is <i>structural</i> and sits outside them, so a fresh entity is exactly (0, 0) and reads as exactly flat. <b>n</b> is evidence mass, which is how the model knows whether it knows anything.</span><span data-lang="id"><b>a</b>, <b>b</b> massa evidence positif dan negatif yang terakumulasi. Prior Beta(1,1) bersifat <i>struktural</i> dan berada di luar keduanya, jadi entitas baru tepat (0, 0) dan terbaca tepat rata. <b>n</b> adalah massa evidence, yaitu cara model tahu apakah ia tahu apa-apa.</span></span>
+    </div>
+
+    <p><span data-lang="en">A fresh entity therefore reads <code>E[p] = 0.5</code>, <code>Var[p] = 1/12 = 0.083333</code>, <code>n = 2</code>. Note what the mean does <i>not</i> say: 0.5 is not mild suspicion, it is the absence of information. The model distinguishes those through <code>n</code>, and the decision layer refuses to act on a mean until <code>n</code> justifies reading it.</span><span data-lang="id">Karena itu entitas baru terbaca <code>E[p] = 0.5</code>, <code>Var[p] = 1/12 = 0.083333</code>, <code>n = 2</code>. Perhatikan apa yang <i>tidak</i> dikatakan mean-nya: 0,5 bukan kecurigaan ringan, melainkan ketiadaan informasi. Model membedakan keduanya lewat <code>n</code>, dan lapis keputusan menolak bertindak atas sebuah mean sampai <code>n</code> membuatnya layak dibaca.</span></p>
+
+    <h2 id="evidence"><span class="n">3.</span> <span data-lang="en">What one observation is worth</span><span data-lang="id">Nilai satu observasi</span></h2>
+
+    <table>
+      <caption><span data-lang="en">A fresh entity, after exactly one observation</span><span data-lang="id">Entitas baru, setelah tepat satu observasi</span></caption>
+      <thead>
+        <tr>
+          <th><span data-lang="en">Observation</span><span data-lang="id">Observasi</span></th>
+          <th class="num"><span data-lang="en">mass</span><span data-lang="id">massa</span></th>
+          <th class="num">E[p]</th>
+          <th class="num">Var[p]</th>
+          <th class="num">n</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th><span data-lang="en">nothing yet (the prior)</span><span data-lang="id">belum ada (prior-nya)</span></th>
+          <td class="num">&mdash;</td>
+          <td class="num">0.5</td>
+          <td class="num">0.083333</td>
+          <td class="num">2</td>
+        </tr>
+        <tr>
+          <th>one weak positive</th>
+          <td class="num">0.5</td>
+          <td class="num">0.6</td>
+          <td class="num">0.068571</td>
+          <td class="num">2.5</td>
+        </tr>
+        <tr>
+          <th>one strong positive</th>
+          <td class="num">2</td>
+          <td class="num">0.75</td>
+          <td class="num">0.0375</td>
+          <td class="num">4</td>
+        </tr>
+        <tr>
+          <th>one weak negative</th>
+          <td class="num">0.5</td>
+          <td class="num">0.4</td>
+          <td class="num">0.068571</td>
+          <td class="num">2.5</td>
+        </tr>
+        <tr>
+          <th>one strong negative</th>
+          <td class="num">2</td>
+          <td class="num">0.25</td>
+          <td class="num">0.0375</td>
+          <td class="num">4</td>
+        </tr>
+        <tr>
+          <th>every weak signal at once</th>
+          <td class="num">0.5</td>
+          <td class="num">0.4</td>
+          <td class="num">0.068571</td>
+          <td class="num">2.5</td>
+        </tr>
+      </tbody>
+    </table>
+    <p class="tnote"><span data-lang="en">Weights are symmetric and 4:1 strong to weak. Symmetry is a claim: nothing is learned faster in the punishing direction than in the forgiving one. The last row is the guarantee that measurement cannot manufacture a verdict &mdash; an interaction that trips <i>every</i> signal in the catalogue contributes 0.5, which leaves n = 2.5, still inside the stage where the trust dimension asks for nothing.</span><span data-lang="id">Bobotnya simetris dan 4:1 antara strong dan weak. Simetri itu sebuah klaim: tak ada yang dipelajari lebih cepat ke arah menghukum daripada ke arah memaafkan. Baris terakhir adalah jaminan bahwa pengukuran tak bisa memproduksi putusan &mdash; interaksi yang memicu <i>semua</i> sinyal di katalog menyumbang 0.5, yang menyisakan n = 2.5, masih di dalam tahap di mana dimensi trust tidak menuntut apa pun.</span></p>
+
+    <h2 id="decay"><span class="n">4.</span> <span data-lang="en">Decay, and the bound it implies</span><span data-lang="id">Decay, dan batas yang ia bawa</span></h2>
+
+    <p><span data-lang="en">Evidence loses weight over <i>real elapsed time</i>, on a half-life. Not over a request count, because a party that goes quiet for a week has not been vouched for by its silence, and not on a fixed window, because a window has an edge that an attacker can wait behind.</span><span data-lang="id">Evidence kehilangan bobot seiring <i>waktu nyata yang berlalu</i>, dengan half-life. Bukan berdasarkan hitungan request, karena pihak yang diam seminggu tidak dijamin oleh kediamannya, dan bukan dengan window tetap, karena window punya tepi yang bisa ditunggui penyerang.</span></p>
+
+    <div class="eq"><span class="eq-n">(2)</span>
+      λ(Δt) = 2<sup>−Δt/H</sup>,&nbsp;&nbsp; H = 24h
+      <span class="where"><span data-lang="en">Composable: λ(Δt₁ + Δt₂) = λ(Δt₁)·λ(Δt₂). That is why decaying once across a whole gap is exact rather than an approximation, and why the store needs no timer.</span><span data-lang="id">Bisa dikomposisi: λ(Δt₁ + Δt₂) = λ(Δt₁)·λ(Δt₂). Itu sebabnya melakukan decay sekali untuk seluruh jeda bersifat eksak, bukan aproksimasi, dan sebabnya store tidak butuh timer.</span></span>
+    </div>
+
+    <figure>
+      <svg class="chart" viewBox="0 0 640 260" width="640" height="260" role="img" aria-label="Decay factor over 72 hours" preserveAspectRatio="xMidYMid meet">
+    <defs>
+      <pattern id="hatch" width="6" height="6" patternTransform="rotate(45)" patternUnits="userSpaceOnUse">
+        <line x1="0" y1="0" x2="0" y2="6" class="c-hatch"/>
+      </pattern>
+    </defs>
+    <line x1="44" y1="18" x2="44" y2="226" class="c-axis"/>
+    <line x1="44" y1="226" x2="544" y2="226" class="c-axis"/>
+    <line x1="40" y1="226" x2="44" y2="226" class="c-axis"/>
+    <text x="36" y="229.5" text-anchor="end" class="c-tick" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial,sans-serif">0.00</text>
+    <line x1="40" y1="174" x2="44" y2="174" class="c-axis"/>
+    <text x="36" y="177.5" text-anchor="end" class="c-tick" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial,sans-serif">0.25</text>
+    <line x1="40" y1="122" x2="44" y2="122" class="c-axis"/>
+    <text x="36" y="125.5" text-anchor="end" class="c-tick" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial,sans-serif">0.50</text>
+    <line x1="40" y1="70" x2="44" y2="70" class="c-axis"/>
+    <text x="36" y="73.5" text-anchor="end" class="c-tick" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial,sans-serif">0.75</text>
+    <line x1="40" y1="18" x2="44" y2="18" class="c-axis"/>
+    <text x="36" y="21.5" text-anchor="end" class="c-tick" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial,sans-serif">1.00</text>
+    <line x1="44" y1="226" x2="44" y2="230" class="c-axis"/>
+    <text x="44" y="242" text-anchor="middle" class="c-tick" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial,sans-serif">0</text>
+    <line x1="127.33" y1="226" x2="127.33" y2="230" class="c-axis"/>
+    <text x="127.33" y="242" text-anchor="middle" class="c-tick" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial,sans-serif">12</text>
+    <line x1="210.67" y1="226" x2="210.67" y2="230" class="c-axis"/>
+    <text x="210.67" y="242" text-anchor="middle" class="c-tick" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial,sans-serif">24</text>
+    <line x1="294" y1="226" x2="294" y2="230" class="c-axis"/>
+    <text x="294" y="242" text-anchor="middle" class="c-tick" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial,sans-serif">36</text>
+    <line x1="377.33" y1="226" x2="377.33" y2="230" class="c-axis"/>
+    <text x="377.33" y="242" text-anchor="middle" class="c-tick" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial,sans-serif">48</text>
+    <line x1="460.67" y1="226" x2="460.67" y2="230" class="c-axis"/>
+    <text x="460.67" y="242" text-anchor="middle" class="c-tick" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial,sans-serif">60</text>
+    <line x1="544" y1="226" x2="544" y2="230" class="c-axis"/>
+    <text x="544" y="242" text-anchor="middle" class="c-tick" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial,sans-serif">72</text>
+    <text x="44" y="12" class="c-tick" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial,sans-serif">λ</text>
+    <text x="544" y="256" text-anchor="end" class="c-tick" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial,sans-serif">hours elapsed</text>
+    <polyline points="44,18 50.94,23.93 57.89,29.67 64.83,35.26 71.78,40.69 78.72,45.98 85.67,51.09 92.61,56.06 99.56,60.91 106.5,65.61 113.44,70.17 120.39,74.62 127.33,78.92 134.28,83.1 141.22,87.18 148.17,91.13 155.11,94.96 162.06,98.7 169,102.32 175.94,105.84 182.89,109.27 189.83,112.58 196.78,115.82 203.72,118.94 210.67,122 217.61,124.95 224.56,127.84 231.5,130.63 238.44,133.36 245.39,135.98 252.33,138.56 259.28,141.03 266.22,143.44 273.17,145.8 280.11,148.08 287.06,150.31 294,152.45 300.94,154.55 307.89,156.59 314.83,158.57 321.78,160.48 328.72,162.35 335.67,164.16 342.61,165.93 349.56,167.64 356.5,169.3 363.44,170.9 370.39,172.48 377.33,174 384.28,175.48 391.22,176.91 398.17,178.31 405.11,179.68 412.06,180.99 419,182.28 425.94,183.53 432.89,184.73 439.83,185.9 446.78,187.04 453.72,188.14 460.67,189.23 467.61,190.29 474.56,191.28 481.5,192.28 488.44,193.24 495.39,194.18 502.33,195.07 509.28,195.96 516.22,196.82 523.17,197.65 530.11,198.46 537.06,199.23 544,200" fill="none" class="c-line" stroke-width="1.6"/>
+    <text x="550" y="203.5" class="c-series" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial,sans-serif">2^(−Δt/H)</text>
+  </svg>
+      <figcaption><span data-lang="en"><b>Figure 1.</b> The decay factor. At H = 24h a day-old observation is worth half of a fresh one, and a three-day-old observation 0.125 of it. Retention is a separate boundary: state with no meaningful update for 168h is deleted outright rather than decayed towards zero.</span><span data-lang="id"><b>Gambar 1.</b> Faktor decay-nya. Pada H = 24j, observasi berumur sehari bernilai setengah dari yang baru, dan yang berumur tiga hari 0.125 darinya. Retensi adalah batas terpisah: state tanpa pembaruan berarti selama 168j dihapus langsung, bukan didecay menuju nol.</span></figcaption>
+    </figure>
+
+    <p><span data-lang="en">Evidence is applied <i>decay-then-add</i>, and the order is load-bearing. It bounds accumulated mass for a party arriving at a steady interval, where add-then-decay-on-read would let it grow without limit &mdash; which is what would make trust farmable by patience alone.</span><span data-lang="id">Evidence diterapkan <i>decay-lalu-tambah</i>, dan urutannya menentukan. Itu membatasi massa terakumulasi untuk pihak yang datang pada interval tetap, sementara tambah-lalu-decay-saat-dibaca akan membuatnya tumbuh tanpa batas &mdash; yang justru membuat trust bisa di-farming hanya dengan kesabaran.</span></p>
+
+    <div class="eq"><span class="eq-n">(3)</span>
+      m<sub>∞</sub> = w / (1 − λ(T))
+      <span class="where"><span data-lang="en"><b>w</b> mass per arrival, <b>T</b> the interval between arrivals. Verified against the code rather than asserted: the table below simulates 500 arrivals and compares.</span><span data-lang="id"><b>w</b> massa per kedatangan, <b>T</b> jeda antar kedatangan. Diverifikasi terhadap kodenya, bukan sekadar dinyatakan: tabel di bawah menyimulasikan 500 kedatangan lalu membandingkannya.</span></span>
+    </div>
+
+    <table>
+      <caption><span data-lang="en">Mass ceiling for weak positives at a steady interval</span><span data-lang="id">Batas massa untuk weak positive pada interval tetap</span></caption>
+      <thead>
+        <tr>
+          <th class="num">T</th>
+          <th class="num">λ(T)</th>
+          <th class="num"><span data-lang="en">closed form</span><span data-lang="id">bentuk tertutup</span></th>
+          <th class="num"><span data-lang="en">simulated, 500 arrivals</span><span data-lang="id">simulasi, 500 kedatangan</span></th>
+          <th class="num"><span data-lang="en">ceiling E[p]</span><span data-lang="id">E[p] di batas</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="num">1h</td>
+          <td class="num">0.9715</td>
+          <td class="num">17.564</td>
+          <td class="num">17.564</td>
+          <td class="num">0.9489</td>
+        </tr>
+        <tr>
+          <td class="num">6h</td>
+          <td class="num">0.8409</td>
+          <td class="num">3.143</td>
+          <td class="num">3.143</td>
+          <td class="num">0.8055</td>
+        </tr>
+        <tr>
+          <td class="num">24h</td>
+          <td class="num">0.5</td>
+          <td class="num">1</td>
+          <td class="num">1</td>
+          <td class="num">0.6667</td>
+        </tr>
+        <tr>
+          <td class="num">72h</td>
+          <td class="num">0.125</td>
+          <td class="num">0.571</td>
+          <td class="num">0.571</td>
+          <td class="num">0.6111</td>
+        </tr>
+      </tbody>
+    </table>
+    <p class="tnote"><span data-lang="en">Closed form and simulation agree to three decimals at every interval, which is the only reason the formula is published here. A closed form that does not match the code it describes is worse than no closed form.</span><span data-lang="id">Bentuk tertutup dan simulasinya sepakat hingga tiga desimal di setiap interval, dan itu satu-satunya alasan rumusnya dipublikasikan di sini. Bentuk tertutup yang tidak cocok dengan kode yang ia gambarkan lebih buruk daripada tidak ada bentuk tertutup.</span></p>
+
+    <h2 id="spectrum"><span class="n">5.</span> <span data-lang="en">The decision spectrum</span><span data-lang="id">Spektrum keputusannya</span></h2>
+
+    <p><span data-lang="en">The output is one of five rungs. Not a boolean, because a boolean forces every uncertain case into one of two wrong answers, and the interesting cases are all uncertain.</span><span data-lang="id">Keluarannya salah satu dari lima tingkat. Bukan boolean, karena boolean memaksa setiap kasus tak pasti ke salah satu dari dua jawaban yang salah, dan kasus-kasus menariknya semua tak pasti.</span></p>
+
+    <dl class="compact">
+      <dt>ALLOW</dt><dd><span data-lang="en">Proceed. The default, and where a legitimate visitor should live permanently.</span><span data-lang="id">Lanjut. Default-nya, dan tempat pengunjung yang sah semestinya tinggal permanen.</span></dd>
+      <dt>OBSERVE</dt><dd><span data-lang="en">Proceed, and record. Costs the user nothing and tells the host something &mdash; the only rung that influences without intervening.</span><span data-lang="id">Lanjut, dan catat. Tidak memakan biaya pengguna dan memberi tahu host sesuatu &mdash; satu-satunya tingkat yang memengaruhi tanpa mengintervensi.</span></dd>
+      <dt>INCREASE_FRICTION</dt><dd><span data-lang="en">The first rung a real user would <i>feel</i>. It is therefore both the false-positive line and the line at which abuse starts to cost something &mdash; one threshold, read from two sides.</span><span data-lang="id">Tingkat pertama yang benar-benar <i>terasa</i> oleh pengguna nyata. Karena itu ia sekaligus garis false positive dan garis di mana penyalahgunaan mulai memakan biaya &mdash; satu ambang, dibaca dari dua sisi.</span></dd>
+      <dt>RESTRICT</dt><dd><span data-lang="en">Withhold the expensive or dangerous part, serve the rest.</span><span data-lang="id">Tahan bagian yang mahal atau berbahaya, layani sisanya.</span></dd>
+      <dt>BLOCK</dt><dd><span data-lang="en">Refuse. Advice only &mdash; the library has no mechanism to enforce it and is not entitled to one.</span><span data-lang="id">Tolak. Hanya saran &mdash; library ini tak punya mekanisme untuk menegakkannya dan tidak berhak atasnya.</span></dd>
+    </dl>
+
+    <table>
+      <caption><span data-lang="en">Trust bands over E[p], and what each proposes</span><span data-lang="id">Band trust atas E[p], dan apa yang diusulkan masing-masing</span></caption>
+      <thead>
+        <tr>
+          <th><span data-lang="en">Band</span><span data-lang="id">Band</span></th>
+          <th class="num"><span data-lang="en">E[p] at least</span><span data-lang="id">E[p] minimal</span></th>
+          <th><span data-lang="en">Proposes</span><span data-lang="id">Mengusulkan</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><th>trusted</th><td class="num">0.8</td><td><code>ALLOW</code></td></tr>
+        <tr><th>observe</th><td class="num">0.6</td><td><code>OBSERVE</code></td></tr>
+        <tr><th>friction</th><td class="num">0.4</td><td><code>INCREASE_FRICTION</code></td></tr>
+        <tr><th>restrict</th><td class="num">0.2</td><td><code>RESTRICT</code></td></tr>
+        <tr><th>deny</th><td class="num">0</td><td><code>BLOCK</code></td></tr>
+      </tbody>
+    </table>
+    <p class="tnote"><span data-lang="en">Each band is read at its <i>least</i> interventionist rung, because a ceiling can only lower a decision &mdash; starting at the gentler end is what leaves the ceilings able to express themselves at all.</span><span data-lang="id">Setiap band dibaca pada tingkat yang <i>paling sedikit</i> mengintervensi, karena ceiling hanya bisa menurunkan keputusan &mdash; memulai dari ujung yang lebih lunak itulah yang membuat ceiling masih bisa berbicara.</span></p>
+
+    <h2 id="ceilings"><span class="n">6.</span> <span data-lang="en">Three ceilings, and the lowest binds</span><span data-lang="id">Tiga ceiling, dan yang terendah yang mengikat</span></h2>
+
+    <p><span data-lang="en">What the band proposes is not what the guard advises. Three independent ceilings apply, and the lowest wins.</span><span data-lang="id">Apa yang diusulkan band bukanlah apa yang disarankan guard. Tiga ceiling independen berlaku, dan yang terendah menang.</span></p>
+
+    <table>
+      <caption><span data-lang="en">The epistemic stage: has enough arrived to read the mean at all</span><span data-lang="id">Tahap epistemik: sudah cukupkah yang datang untuk membaca mean-nya</span></caption>
+      <thead>
+        <tr><th><span data-lang="en">Stage</span><span data-lang="id">Tahap</span></th><th class="num">n <span data-lang="en">at least</span><span data-lang="id">minimal</span></th><th><span data-lang="en">Permits at most</span><span data-lang="id">Maksimal memperbolehkan</span></th></tr>
+      </thead>
+      <tbody>
+        <tr><th>unknown</th><td class="num">0</td><td><code>ALLOW</code></td></tr>
+        <tr><th>developing</th><td class="num">3</td><td><code>OBSERVE</code></td></tr>
+        <tr><th>established</th><td class="num">7</td><td><code>BLOCK</code></td></tr>
+      </tbody>
+    </table>
+    <p class="tnote"><span data-lang="en">An unknown entity contributes nothing: with no evidence, the trust dimension has no standing to ask for anything. It does not force <code>ALLOW</code> either &mdash; a proven violation still reaches the decision layer on its own authority. The <code>developing</code> ceiling was <code>INCREASE_FRICTION</code> until generated traffic gave two mistyped PINs and an autofilled password manager exactly that; see the Results chapter.</span><span data-lang="id">Entitas unknown tidak menyumbang apa pun: tanpa evidence, dimensi trust tak berhak menuntut apa pun. Ia juga tidak memaksa <code>ALLOW</code> &mdash; pelanggaran yang terbukti tetap sampai ke lapis keputusan atas otoritasnya sendiri. Ceiling <code>developing</code> dulunya <code>INCREASE_FRICTION</code> sampai trafik buatan memberikan tepat itu pada dua PIN salah ketik dan satu password manager yang autofill; lihat bab Hasil.</span></p>
+
+    <table>
+      <caption><span data-lang="en">Uncertainty: is the distribution tight enough to act on</span><span data-lang="id">Uncertainty: cukup rapatkah distribusinya untuk ditindaki</span></caption>
+      <thead>
+        <tr><th><span data-lang="en">Level</span><span data-lang="id">Tingkat</span></th><th class="num">Var[p] <span data-lang="en">at most</span><span data-lang="id">maksimal</span></th><th><span data-lang="en">Permits at most</span><span data-lang="id">Maksimal memperbolehkan</span></th></tr>
+      </thead>
+      <tbody>
+        <tr><th>low</th><td class="num">0.02</td><td><code>BLOCK</code></td></tr>
+        <tr><th>medium</th><td class="num">0.05</td><td><code>INCREASE_FRICTION</code></td></tr>
+        <tr><th>high</th><td class="num">&infin;</td><td><code>INCREASE_FRICTION</code></td></tr>
+      </tbody>
+    </table>
+
+    <p><span data-lang="en">The third ceiling is <b>anomaly concurrence</b>, and it exists because low variance is cheap to fake: uniform, high-volume traffic drives variance down while proving almost nothing. So low uncertainty only unlocks the full ceiling if observed behavior was varied enough to believe it. When it is not, escalation is withheld at <code>INCREASE_FRICTION</code>.</span><span data-lang="id">Ceiling ketiga adalah <b>concurrence anomali</b>, dan ia ada karena variance rendah murah untuk dipalsukan: trafik seragam bervolume tinggi menekan variance turun sambil membuktikan hampir tak ada apa-apa. Jadi uncertainty rendah hanya membuka ceiling penuh kalau perilaku yang terobservasi cukup bervariasi untuk dipercaya. Kalau tidak, eskalasi ditahan di <code>INCREASE_FRICTION</code>.</span></p>
+
+    <p><span data-lang="en">That rule has a consequence the project records rather than hides: it protects a broken-but-legitimate client &mdash; a cron with a stale token, retrying uniformly &mdash; from <code>BLOCK</code>, which is the central constraint working. It also leaves a deliberate bot at <code>INCREASE_FRICTION</code> instead of <code>RESTRICT</code>, <i>because</i> behaving mechanically is what withholds the escalation. Which effect dominates is a question about real populations, so the behavior is left alone and the claim it was introduced under has been withdrawn.</span><span data-lang="id">Aturan itu punya konsekuensi yang proyek ini catat, bukan sembunyikan: ia melindungi klien yang rusak-tapi-sah &mdash; cron dengan token kedaluwarsa yang mencoba ulang secara seragam &mdash; dari <code>BLOCK</code>, dan itu constraint utamanya bekerja. Ia juga meninggalkan bot yang sengaja di <code>INCREASE_FRICTION</code> alih-alih <code>RESTRICT</code>, <i>karena</i> berperilaku mekanis itulah yang menahan eskalasinya. Efek mana yang dominan adalah pertanyaan tentang populasi nyata, jadi perilakunya dibiarkan dan klaim yang menyertainya ditarik.</span></p>
+
+    <h2 id="trajectory"><span class="n">7.</span> <span data-lang="en">What accumulation actually looks like</span><span data-lang="id">Bentuk akumulasinya sebenarnya</span></h2>
+
+    <figure>
+      <svg class="chart" viewBox="0 0 640 260" width="640" height="260" role="img" aria-label="Trust mean over twenty interactions" preserveAspectRatio="xMidYMid meet">
+    <defs>
+      <pattern id="hatch" width="6" height="6" patternTransform="rotate(45)" patternUnits="userSpaceOnUse">
+        <line x1="0" y1="0" x2="0" y2="6" class="c-hatch"/>
+      </pattern>
+    </defs>
+    <rect x="44" y="18" width="500" height="41.6" fill="url(#hatch)" opacity="0.45"/>
+    <text x="540" y="41.8" text-anchor="end" class="c-band" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial,sans-serif">trusted</text>
+    <rect x="44" y="59.6" width="500" height="41.6" fill="url(#hatch)" opacity="0"/>
+    <text x="540" y="83.4" text-anchor="end" class="c-band" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial,sans-serif">observe</text>
+    <rect x="44" y="101.2" width="500" height="41.6" fill="url(#hatch)" opacity="0.45"/>
+    <text x="540" y="125" text-anchor="end" class="c-band" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial,sans-serif">friction</text>
+    <rect x="44" y="142.8" width="500" height="41.6" fill="url(#hatch)" opacity="0"/>
+    <text x="540" y="166.6" text-anchor="end" class="c-band" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial,sans-serif">restrict</text>
+    <rect x="44" y="184.4" width="500" height="41.6" fill="url(#hatch)" opacity="0.45"/>
+    <text x="540" y="208.2" text-anchor="end" class="c-band" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial,sans-serif">deny</text>
+    <line x1="44" y1="18" x2="44" y2="226" class="c-axis"/>
+    <line x1="44" y1="226" x2="544" y2="226" class="c-axis"/>
+    <line x1="40" y1="226" x2="44" y2="226" class="c-axis"/>
+    <text x="36" y="229.5" text-anchor="end" class="c-tick" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial,sans-serif">0.0</text>
+    <line x1="40" y1="184.4" x2="44" y2="184.4" class="c-axis"/>
+    <text x="36" y="187.9" text-anchor="end" class="c-tick" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial,sans-serif">0.2</text>
+    <line x1="40" y1="142.8" x2="44" y2="142.8" class="c-axis"/>
+    <text x="36" y="146.3" text-anchor="end" class="c-tick" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial,sans-serif">0.4</text>
+    <line x1="40" y1="101.2" x2="44" y2="101.2" class="c-axis"/>
+    <text x="36" y="104.7" text-anchor="end" class="c-tick" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial,sans-serif">0.6</text>
+    <line x1="40" y1="59.6" x2="44" y2="59.6" class="c-axis"/>
+    <text x="36" y="63.1" text-anchor="end" class="c-tick" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial,sans-serif">0.8</text>
+    <line x1="40" y1="18" x2="44" y2="18" class="c-axis"/>
+    <text x="36" y="21.5" text-anchor="end" class="c-tick" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial,sans-serif">1.0</text>
+    <line x1="44" y1="226" x2="44" y2="230" class="c-axis"/>
+    <text x="44" y="242" text-anchor="middle" class="c-tick" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial,sans-serif">1</text>
+    <line x1="149.26" y1="226" x2="149.26" y2="230" class="c-axis"/>
+    <text x="149.26" y="242" text-anchor="middle" class="c-tick" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial,sans-serif">5</text>
+    <line x1="280.84" y1="226" x2="280.84" y2="230" class="c-axis"/>
+    <text x="280.84" y="242" text-anchor="middle" class="c-tick" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial,sans-serif">10</text>
+    <line x1="412.42" y1="226" x2="412.42" y2="230" class="c-axis"/>
+    <text x="412.42" y="242" text-anchor="middle" class="c-tick" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial,sans-serif">15</text>
+    <line x1="544" y1="226" x2="544" y2="230" class="c-axis"/>
+    <text x="544" y="242" text-anchor="middle" class="c-tick" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial,sans-serif">20</text>
+    <text x="44" y="12" class="c-tick" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial,sans-serif">E[p]</text>
+    <text x="544" y="256" text-anchor="end" class="c-tick" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial,sans-serif">interaction n</text>
+    <polyline points="44,101.2 70.32,87.41 96.63,77.49 122.95,70.08 149.26,65.05 175.58,60.35 201.89,56.69 228.21,54 254.53,51.61 280.84,49.43 307.16,47.27 333.47,45.58 359.79,44.08 386.11,42.73 412.42,42.13 438.74,40.86 465.05,41.38 491.37,40.48 517.68,39.38 544,38.74" fill="none" class="c-line" stroke-width="1.6"/>
+    <circle cx="44" cy="101.2" r="2" class="c-dot"/>
+    <circle cx="70.32" cy="87.41" r="2" class="c-dot"/>
+    <circle cx="96.63" cy="77.49" r="2" class="c-dot"/>
+    <circle cx="122.95" cy="70.08" r="2" class="c-dot"/>
+    <circle cx="149.26" cy="65.05" r="2" class="c-dot"/>
+    <circle cx="175.58" cy="60.35" r="2" class="c-dot"/>
+    <circle cx="201.89" cy="56.69" r="2" class="c-dot"/>
+    <circle cx="228.21" cy="54" r="2" class="c-dot"/>
+    <circle cx="254.53" cy="51.61" r="2" class="c-dot"/>
+    <circle cx="280.84" cy="49.43" r="2" class="c-dot"/>
+    <circle cx="307.16" cy="47.27" r="2" class="c-dot"/>
+    <circle cx="333.47" cy="45.58" r="2" class="c-dot"/>
+    <circle cx="359.79" cy="44.08" r="2" class="c-dot"/>
+    <circle cx="386.11" cy="42.73" r="2" class="c-dot"/>
+    <circle cx="412.42" cy="42.13" r="2" class="c-dot"/>
+    <circle cx="438.74" cy="40.86" r="2" class="c-dot"/>
+    <circle cx="465.05" cy="41.38" r="2" class="c-dot"/>
+    <circle cx="491.37" cy="40.48" r="2" class="c-dot"/>
+    <circle cx="517.68" cy="39.38" r="2" class="c-dot"/>
+    <circle cx="544" cy="38.74" r="2" class="c-dot"/>
+    <text x="550" y="42.24" class="c-series" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial,sans-serif">honest</text>
+    <polyline points="44,142.8 70.32,156.51 96.63,166.2 122.95,173.44 149.26,179.03 175.58,183.51 201.89,187.15 228.21,190.16 254.53,192.72 280.84,194.9 307.16,196.8 333.47,198.44 359.79,199.9 386.11,201.19 412.42,202.35 438.74,203.37 465.05,204.31 491.37,205.16 517.68,205.95 544,206.66" fill="none" class="c-line" stroke-width="1.6" stroke-dasharray="5 3"/>
+    <circle cx="44" cy="142.8" r="2" class="c-dot-hollow"/>
+    <circle cx="70.32" cy="156.51" r="2" class="c-dot-hollow"/>
+    <circle cx="96.63" cy="166.2" r="2" class="c-dot-hollow"/>
+    <circle cx="122.95" cy="173.44" r="2" class="c-dot-hollow"/>
+    <circle cx="149.26" cy="179.03" r="2" class="c-dot-hollow"/>
+    <circle cx="175.58" cy="183.51" r="2" class="c-dot-hollow"/>
+    <circle cx="201.89" cy="187.15" r="2" class="c-dot-hollow"/>
+    <circle cx="228.21" cy="190.16" r="2" class="c-dot-hollow"/>
+    <circle cx="254.53" cy="192.72" r="2" class="c-dot-hollow"/>
+    <circle cx="280.84" cy="194.9" r="2" class="c-dot-hollow"/>
+    <circle cx="307.16" cy="196.8" r="2" class="c-dot-hollow"/>
+    <circle cx="333.47" cy="198.44" r="2" class="c-dot-hollow"/>
+    <circle cx="359.79" cy="199.9" r="2" class="c-dot-hollow"/>
+    <circle cx="386.11" cy="201.19" r="2" class="c-dot-hollow"/>
+    <circle cx="412.42" cy="202.35" r="2" class="c-dot-hollow"/>
+    <circle cx="438.74" cy="203.37" r="2" class="c-dot-hollow"/>
+    <circle cx="465.05" cy="204.31" r="2" class="c-dot-hollow"/>
+    <circle cx="491.37" cy="205.16" r="2" class="c-dot-hollow"/>
+    <circle cx="517.68" cy="205.95" r="2" class="c-dot-hollow"/>
+    <circle cx="544" cy="206.66" r="2" class="c-dot-hollow"/>
+    <text x="550" y="210.16" class="c-series" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial,sans-serif">adversary</text>
+    <polyline points="44,101.2 70.32,87.66 96.63,78.15 122.95,71.1 149.26,65.69 175.58,61.39 201.89,57.89 228.21,58.6 254.53,59.31 280.84,60.04 307.16,60.76 333.47,61.49 359.79,62.22 386.11,62.97 412.42,63.7 438.74,64.45 465.05,65.17 491.37,65.92 517.68,66.67 544,67.42" fill="none" class="c-line" stroke-width="1.6" stroke-dasharray="2 3"/>
+    <circle cx="44" cy="101.2" r="2" class="c-dot-hollow"/>
+    <circle cx="70.32" cy="87.66" r="2" class="c-dot-hollow"/>
+    <circle cx="96.63" cy="78.15" r="2" class="c-dot-hollow"/>
+    <circle cx="122.95" cy="71.1" r="2" class="c-dot-hollow"/>
+    <circle cx="149.26" cy="65.69" r="2" class="c-dot-hollow"/>
+    <circle cx="175.58" cy="61.39" r="2" class="c-dot-hollow"/>
+    <circle cx="201.89" cy="57.89" r="2" class="c-dot-hollow"/>
+    <circle cx="228.21" cy="58.6" r="2" class="c-dot-hollow"/>
+    <circle cx="254.53" cy="59.31" r="2" class="c-dot-hollow"/>
+    <circle cx="280.84" cy="60.04" r="2" class="c-dot-hollow"/>
+    <circle cx="307.16" cy="60.76" r="2" class="c-dot-hollow"/>
+    <circle cx="333.47" cy="61.49" r="2" class="c-dot-hollow"/>
+    <circle cx="359.79" cy="62.22" r="2" class="c-dot-hollow"/>
+    <circle cx="386.11" cy="62.97" r="2" class="c-dot-hollow"/>
+    <circle cx="412.42" cy="63.7" r="2" class="c-dot-hollow"/>
+    <circle cx="438.74" cy="64.45" r="2" class="c-dot-hollow"/>
+    <circle cx="465.05" cy="65.17" r="2" class="c-dot-hollow"/>
+    <circle cx="491.37" cy="65.92" r="2" class="c-dot-hollow"/>
+    <circle cx="517.68" cy="66.67" r="2" class="c-dot-hollow"/>
+    <circle cx="544" cy="67.42" r="2" class="c-dot-hollow"/>
+    <text x="550" y="70.92" class="c-series" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial,sans-serif">regular +</text>
+  </svg>
+      <figcaption><span data-lang="en"><b>Figure 2.</b> Three parties over twenty interactions. <i>honest</i> earns weak positives across three scopes with bursty gaps; <i>adversary</i> earns weak negatives in one scope; <i>regular +</i> earns the same positives as <i>honest</i> but at a perfectly regular interval. The gap between <i>honest</i> and <i>regular +</i> is the intake discount, drawn rather than asserted: a positive is priced by the shape of the gaps it arrived in. Shaded strips are the trust bands.</span><span data-lang="id"><b>Gambar 2.</b> Tiga pihak selama dua puluh interaksi. <i>honest</i> mendapat weak positive di tiga scope dengan jeda bursty; <i>adversary</i> mendapat weak negative di satu scope; <i>regular +</i> mendapat positive yang sama dengan <i>honest</i> tapi pada interval yang sempurna teratur. Jarak antara <i>honest</i> dan <i>regular +</i> adalah diskon intake, digambar alih-alih dinyatakan: sebuah positive dihargai menurut bentuk jeda kedatangannya. Strip berbayang adalah band trust.</span></figcaption>
+    </figure>
+
+    <figure>
+      <svg class="chart" viewBox="0 0 640 200" width="640" height="200" role="img" aria-label="Advice over twenty interactions" preserveAspectRatio="xMidYMid meet">
+    <defs>
+      <pattern id="hatch" width="6" height="6" patternTransform="rotate(45)" patternUnits="userSpaceOnUse">
+        <line x1="0" y1="0" x2="0" y2="6" class="c-hatch"/>
+      </pattern>
+    </defs>
+    <line x1="132" y1="166" x2="544" y2="166" class="c-grid"/>
+    <text x="124" y="169.5" text-anchor="end" class="c-tick" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial,sans-serif">ALLOW</text>
+    <line x1="132" y1="129" x2="544" y2="129" class="c-grid"/>
+    <text x="124" y="132.5" text-anchor="end" class="c-tick" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial,sans-serif">OBSERVE</text>
+    <line x1="132" y1="92" x2="544" y2="92" class="c-grid"/>
+    <text x="124" y="95.5" text-anchor="end" class="c-tick" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial,sans-serif">INCREASE_FRICTION</text>
+    <line x1="132" y1="55" x2="544" y2="55" class="c-grid"/>
+    <text x="124" y="58.5" text-anchor="end" class="c-tick" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial,sans-serif">RESTRICT</text>
+    <line x1="132" y1="18" x2="544" y2="18" class="c-grid"/>
+    <text x="124" y="21.5" text-anchor="end" class="c-tick" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial,sans-serif">BLOCK</text>
+    <text x="132" y="182" text-anchor="middle" class="c-tick" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial,sans-serif">1</text>
+    <text x="218.74" y="182" text-anchor="middle" class="c-tick" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial,sans-serif">5</text>
+    <text x="327.16" y="182" text-anchor="middle" class="c-tick" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial,sans-serif">10</text>
+    <text x="435.58" y="182" text-anchor="middle" class="c-tick" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial,sans-serif">15</text>
+    <text x="544" y="182" text-anchor="middle" class="c-tick" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial,sans-serif">20</text>
+    <path d="M 132 166 L 153.68 166 L 153.68 166 L 175.37 166 L 175.37 129 L 197.05 129 L 197.05 129 L 218.74 129 L 218.74 129 L 240.42 129 L 240.42 129 L 262.11 129 L 262.11 166 L 283.79 166 L 283.79 166 L 305.47 166 L 305.47 166 L 327.16 166 L 327.16 166 L 348.84 166 L 348.84 166 L 370.53 166 L 370.53 166 L 392.21 166 L 392.21 166 L 413.89 166 L 413.89 166 L 435.58 166 L 435.58 166 L 457.26 166 L 457.26 166 L 478.95 166 L 478.95 166 L 500.63 166 L 500.63 166 L 522.32 166 L 522.32 166 L 544 166 L 544 166" fill="none" class="c-line" stroke-width="1.6"/>
+    <text x="550" y="169.5" class="c-series" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial,sans-serif">honest</text>
+    <path d="M 132 166 L 153.68 166 L 153.68 166 L 175.37 166 L 175.37 129 L 197.05 129 L 197.05 129 L 218.74 129 L 218.74 129 L 240.42 129 L 240.42 129 L 262.11 129 L 262.11 129 L 283.79 129 L 283.79 129 L 305.47 129 L 305.47 129 L 327.16 129 L 327.16 129 L 348.84 129 L 348.84 92 L 370.53 92 L 370.53 92 L 392.21 92 L 392.21 92 L 413.89 92 L 413.89 92 L 435.58 92 L 435.58 92 L 457.26 92 L 457.26 92 L 478.95 92 L 478.95 92 L 500.63 92 L 500.63 92 L 522.32 92 L 522.32 92 L 544 92 L 544 92" fill="none" class="c-line" stroke-width="1.6" stroke-dasharray="5 3"/>
+    <text x="550" y="95.5" class="c-series" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial,sans-serif">adversary</text>
+    <path d="M 132 166 L 153.68 166 L 153.68 166 L 175.37 166 L 175.37 129 L 197.05 129 L 197.05 129 L 218.74 129 L 218.74 129 L 240.42 129 L 240.42 129 L 262.11 129 L 262.11 166 L 283.79 166 L 283.79 166 L 305.47 166 L 305.47 166 L 327.16 166 L 327.16 129 L 348.84 129 L 348.84 129 L 370.53 129 L 370.53 129 L 392.21 129 L 392.21 129 L 413.89 129 L 413.89 129 L 435.58 129 L 435.58 129 L 457.26 129 L 457.26 129 L 478.95 129 L 478.95 129 L 500.63 129 L 500.63 129 L 522.32 129 L 522.32 129 L 544 129 L 544 129" fill="none" class="c-line" stroke-width="1.6" stroke-dasharray="2 3"/>
+    <text x="550" y="132.5" class="c-series" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial,sans-serif">regular +</text>
+    <text x="544" y="196" text-anchor="end" class="c-tick" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial,sans-serif">interaction n</text>
+  </svg>
+      <figcaption><span data-lang="en"><b>Figure 3.</b> The same three parties, as advice. The staircase is the point: nothing is smooth, because the output is a rung. The adversary crosses into <code>INCREASE_FRICTION</code> at interaction 11, and neither positive-earning party ever leaves the gentle end.</span><span data-lang="id"><b>Gambar 3.</b> Tiga pihak yang sama, sebagai saran. Bentuk tangganya itulah intinya: tak ada yang mulus, karena keluarannya adalah tingkat. Adversary-nya menyeberang ke <code>INCREASE_FRICTION</code> pada interaksi 11, dan tak satu pun pihak yang mengumpulkan positive pernah meninggalkan ujung yang lunak.</span></figcaption>
+    </figure>
+
+    <p class="seealso"><b><span data-lang="en">See also</span><span data-lang="id">Lihat juga</span></b>
+      <a href="evidence.html"><span data-lang="en">Proof and measurement</span><span data-lang="id">Bukti dan pengukuran</span></a>
+      <a href="results.html"><span data-lang="en">Measurements</span><span data-lang="id">Pengukuran</span></a>
+      <a href="usage.html#policy"><span data-lang="en">Every tunable value</span><span data-lang="id">Semua nilai yang bisa disetel</span></a>
+      <a href="limits.html"><span data-lang="en">What is not known</span><span data-lang="id">Yang belum diketahui</span></a>
+    </p>
+  
+  </main>
+</div>
+
+<footer>
+  <p>
+    <span data-lang="en">Scorpio Guard is pre-alpha and calibrated against nothing. Every number on this site is generated from the code that produces it; none of it has met a real population.</span><span data-lang="id">Scorpio Guard masih pre-alpha dan belum dikalibrasi terhadap apa pun. Setiap angka di situs ini dihasilkan dari kode yang memproduksinya; belum ada satu pun yang bertemu populasi nyata.</span>
+  </p>
+  <p>
+    <a href="https://github.com/Fachryxyf/scorpio-guard"><span data-lang="en">Source</span><span data-lang="id">Sumber</span></a> ·
+    <a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md"><span data-lang="en">Design record</span><span data-lang="id">Rekaman desain</span></a> ·
+    <a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/PROTOCOL.md"><span data-lang="en">Protocol draft</span><span data-lang="id">Draf protokol</span></a> ·
+    <a href="https://github.com/Fachryxyf/scorpio-guard/issues"><span data-lang="en">Issues</span><span data-lang="id">Isu</span></a>
+    · MIT · <a href="https://github.com/Fachryxyf">@Fachryxyf</a>
+  </p>
+</footer>
+
+<script>
+  (function () {
+    var root = document.documentElement;
+    var langBtn = document.getElementById('lang');
+    var themeBtn = document.getElementById('theme');
+
+    function paintLang() { langBtn.textContent = root.lang === 'id' ? 'EN' : 'ID'; }
+    paintLang();
+    langBtn.addEventListener('click', function () {
+      root.lang = root.lang === 'id' ? 'en' : 'id';
+      try { localStorage.setItem('sg-lang', root.lang); } catch (e) {}
+      paintLang();
+    });
+    themeBtn.addEventListener('click', function () {
+      root.dataset.theme = root.dataset.theme === 'dark' ? 'light' : 'dark';
+      try { localStorage.setItem('sg-theme', root.dataset.theme); } catch (e) {}
+    });
+
+    // Mark the section being read. Progressive: the TOC works without it.
+    var links = [].slice.call(document.querySelectorAll('aside.toc ol a'));
+    if (!links.length || !('IntersectionObserver' in window)) return;
+    var byId = {};
+    links.forEach(function (a) { byId[a.getAttribute('href').slice(1)] = a; });
+    var observer = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (!entry.isIntersecting) return;
+        links.forEach(function (a) { a.removeAttribute('aria-current'); });
+        var current = byId[entry.target.id];
+        if (current) current.setAttribute('aria-current', 'true');
+      });
+    }, { rootMargin: '-10% 0px -75% 0px' });
+    Object.keys(byId).forEach(function (id) {
+      var el = document.getElementById(id);
+      if (el) observer.observe(el);
+    });
+  })();
+</script>
+</body>
+</html>

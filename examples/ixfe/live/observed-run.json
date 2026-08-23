@@ -1,0 +1,148 @@
+{
+  "summary": {
+    "total": 145,
+    "entities": 10,
+    "scored": 116,
+    "byAdvice": {
+      "ALLOW": 83,
+      "BLOCK": 10,
+      "INCREASE_FRICTION": 18,
+      "OBSERVE": 10,
+      "RESTRICT": 24
+    },
+    "byScope": {
+      "ixfe.order": 20,
+      "ixfe.page:/": 49,
+      "ixfe.page:/.aws/credentials": 2,
+      "ixfe.page:/.env": 2,
+      "ixfe.page:/.git/config": 2,
+      "ixfe.page:/api/launch-state": 10,
+      "ixfe.page:/backup.zip": 2,
+      "ixfe.page:/internal/stats": 2,
+      "ixfe.page:/order": 12,
+      "ixfe.page:/phpmyadmin/": 2,
+      "ixfe.page:/privacy": 6,
+      "ixfe.page:/terms": 4,
+      "ixfe.page:/wp-admin/": 2,
+      "ixfe.page:/wp-login.php": 2,
+      "ixfe.page:/xmlrpc.php": 2,
+      "ixfe.waitlist": 24,
+      "ixfe.work": 2
+    },
+    "belowVelocityGate": 44,
+    "cv": {
+      "p10": 0.0030344234129509604,
+      "p50": 2.9997867849628217,
+      "p90": 3.865392597651958
+    },
+    "anomaly": {
+      "p50": 0.5625,
+      "p90": 0.9610001542747035,
+      "max": 0.9612917676375619
+    },
+    "hardViolations": 24,
+    "falsePositiveCandidates": 0
+  },
+  "clients": [
+    {
+      "client": "7f93b443",
+      "requests": 4,
+      "worst": "ALLOW",
+      "worstAtRequest": null,
+      "hardViolations": 0,
+      "finalMean": 0.5,
+      "distinctPaths": 2,
+      "firstPath": "/"
+    },
+    {
+      "client": "12e4d9f3",
+      "requests": 6,
+      "worst": "ALLOW",
+      "worstAtRequest": null,
+      "hardViolations": 0,
+      "finalMean": 0.5,
+      "distinctPaths": 3,
+      "firstPath": "/api/launch-state"
+    },
+    {
+      "client": "41050a68",
+      "requests": 4,
+      "worst": "ALLOW",
+      "worstAtRequest": null,
+      "hardViolations": 0,
+      "finalMean": 0.5,
+      "distinctPaths": 2,
+      "firstPath": "/api/launch-state"
+    },
+    {
+      "client": "f58c31ce",
+      "requests": 2,
+      "worst": "ALLOW",
+      "worstAtRequest": null,
+      "hardViolations": 0,
+      "finalMean": 0.5,
+      "distinctPaths": 1,
+      "firstPath": "/api/launch-state"
+    },
+    {
+      "client": "aaf07d49",
+      "requests": 5,
+      "worst": "ALLOW",
+      "worstAtRequest": null,
+      "hardViolations": 0,
+      "finalMean": 0.5,
+      "distinctPaths": 3,
+      "firstPath": "/"
+    },
+    {
+      "client": "47c33bc6",
+      "requests": 40,
+      "worst": "ALLOW",
+      "worstAtRequest": null,
+      "hardViolations": 0,
+      "finalMean": 0.5,
+      "distinctPaths": 1,
+      "firstPath": "/"
+    },
+    {
+      "client": "30cc2b2f",
+      "requests": 24,
+      "worst": "RESTRICT",
+      "worstAtRequest": 1,
+      "hardViolations": 24,
+      "finalMean": 0.04421745419325042,
+      "distinctPaths": 1,
+      "firstPath": "/api/waitlist"
+    },
+    {
+      "client": "877ce0e9",
+      "requests": 20,
+      "worst": "INCREASE_FRICTION",
+      "worstAtRequest": 3,
+      "hardViolations": 0,
+      "finalMean": 0.01699295560897617,
+      "distinctPaths": 1,
+      "firstPath": "/api/order"
+    },
+    {
+      "client": "c164ac96",
+      "requests": 20,
+      "worst": "BLOCK",
+      "worstAtRequest": 11,
+      "hardViolations": 0,
+      "finalMean": 0.08699256540987148,
+      "distinctPaths": 10,
+      "firstPath": "/.env"
+    },
+    {
+      "client": "2be81f23",
+      "requests": 20,
+      "worst": "ALLOW",
+      "worstAtRequest": null,
+      "hardViolations": 0,
+      "finalMean": 0.5,
+      "distinctPaths": 4,
+      "firstPath": "/"
+    }
+  ]
+}

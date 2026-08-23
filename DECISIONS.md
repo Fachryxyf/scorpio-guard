@@ -17,11 +17,11 @@ the answer given, and what that answer commits the implementation to.
   policy; the tests are what make a policy change visible.
 
 Status: every numbered question is answered — the original thirty, plus D31 to
-D55 arising from review, implementation, and a live pentest. Nothing is blocked on
+D58 arising from review, implementation, and a live pentest. Nothing is blocked on
 a decision. What remains is validation: the values recorded here have not met real
 traffic yet, and D47 names where they will.
 
-Last updated: 2026-08-22
+Last updated: 2026-08-23
 
 ---
 
@@ -107,6 +107,9 @@ Last updated: 2026-08-22
 - [D53 — Wire format is v0.1, documented and tested, still untransmitting](#d53--wire-format-is-v01-documented-and-tested-still-untransmitting)
 - [D54 — Rate is not the farming signal; the shape of the gaps is](#d54--rate-is-not-the-farming-signal-the-shape-of-the-gaps-is)
 - [D55 — Farming is answered at intake, by pricing the evidence](#d55--farming-is-answered-at-intake-by-pricing-the-evidence)
+- [D56 — Real traffic is recorded by an observing proxy, not by reading logs](#d56--real-traffic-is-recorded-by-an-observing-proxy-not-by-reading-logs)
+- [D57 — Drive a real browser, because a real audience is not available](#d57--drive-a-real-browser-because-a-real-audience-is-not-available)
+- [D58 — The site is generated from the library, not hand-copied from it](#d58--the-site-is-generated-from-the-library-not-hand-copied-from-it)
 
 **[Open questions](#open-questions)**
 
@@ -2543,6 +2546,32 @@ compute until a human looks is correct whichever cause it turns out to be.
 
 ---
 
+## D58 — The site is generated from the library, not hand-copied from it
+
+**Decided.** The old front page was 2,600 lines of hand-written HTML carrying numbers
+copied out of the code. Every one of those was a slow-motion lie: the threshold moves
+and the page does not.
+
+The fix is structural rather than cosmetic:
+
+- `scripts/research.mjs` imports the library directly and emits every figure the
+  site publishes — decay curves, mass ceilings, farming tables, persona replays,
+  identity-churn counts, live-run summaries. A threshold change either appears on the
+  page or breaks the build.
+- `site/` generates eight chapters from that data at build time (`npm run site`).
+  No chart is an image, no table was typed by hand, no number has two homes.
+- Typography is reference-work: black on white, serif headings, sans body,
+  segmented navigation by question rather than eight equal tabs.
+- The falsified-claims count is `FALSIFICATIONS.length`, not a typed integer.
+
+### Consequences
+
+- Publishing a wrong number now requires breaking the build first.
+- The old single-page `index.html` is gone; the root file is build output.
+- Documentation and landing page are no longer separate concerns to keep in sync.
+
+---
+
 # Open questions
 
 Every numbered question is answered. What remains is not a question but a
@@ -2574,8 +2603,12 @@ threat model is written into the application's own defences. That surfaced two f
 corrections: a `hard` declaration that was not provable (D48), and the discovery that
 D37 never mitigated farming (D49).
 
-What generated traffic still cannot do is calibrate. The next step is IXFE's real
-logs rather than another synthetic target; Pusaka remains a candidate for a genuinely
+What generated traffic still cannot do is calibrate. D56 went looking for IXFE's
+real logs and found that per-request records do not exist in either service, so the
+recording is now built: an observing proxy in front of the live origin writes one
+line per request in the shape the window needs. D57 then drove a real browser through
+it, because the site has no audience to wait for — which falsified four things about
+the integration, and moved the blocker from *visitors* to *their distribution*. Pusaka remains a candidate for a genuinely
 unauthenticated public surface, still blocked on whether it gains a server side.
 
 | Ref | Recorded as | Still unvalidated |
@@ -2583,7 +2616,9 @@ unauthenticated public surface, still blocked on whether it gains a server side.
 | D45 | Generated persona traffic | The distributions are invented. Every persona is a hypothesis about how someone behaves, and an attacker who reads the file can shape traffic around it. |
 | D46 | Two thresholds corrected | Corrected in the right direction, not calibrated to a value. `OBSERVE` at `developing` is defensible; that `3` and `7` are the right boundaries is still a guess. |
 | D37, D49, D55 | Saturation / farming | **Closed in generated traffic.** Pricing positives by gap shape at intake reaches every farmer tested at one abuse call, and tops legitimate automation out at `OBSERVE`. Not calibrated against a real population. |
-| D47 | IXFE as the target | Its invariants are read from its code, which is honest, and its *traffic* is still generated. IXFE has real users and real logs; using those is the next step, not something claimed here. |
+| D47 | IXFE as the target | Its invariants are read from its code, which is honest, and its *traffic* is still generated. |
+| D56 | The live observer | Built, tested, and transparent — and it has recorded no *population*. Half the invariants stay unexercised, because a proxy cannot see a credit balance. |
+| D57 | Real-browser visitors | Real timing, real keystrokes, real page state — and an invented mix. It found four integration bugs generated traffic could not have; it cannot tell you how many real clients look like any of these. |
 | D55 | The intake discount | `maxInterArrivalCv = 0.25` is inherited from D36, not measured. The mechanism is sound in generated traffic; whether real automation clusters below that value is unknown. |
 | D54 | The patient farmer | Untouched, by construction. One request every ten minutes reaches `mass 81`, `mean 0.988` and trips nothing. Farming fast then abusing slowly also lifts the floor — 18 abuse calls instead of 1. D49 is narrowed, not closed. |
 | D51 | Ten collectors, no thresholds | Each collector measures the right thing; not one has met a real false positive. The catalogue's promise that every signal has a written innocent cause is kept on paper, not in evidence. |
@@ -2879,3 +2914,210 @@ never withheld in the first place.
 
 Still uncalibrated: `maxInterArrivalCv = 0.25` is inherited from D36 and every
 number above comes from generated traffic (D45).
+
+---
+
+## D56 — Real traffic is recorded by an observing proxy, not by reading logs
+
+**Decided, on finding there was nothing to read.** The roadmap's first remaining
+item said *use IXFE's real logs, which exist*. They do not, in the sense the
+sentence assumed.
+
+### What IXFE actually retains
+
+Checked against the running deployment, both services:
+
+| source | what it holds | why it cannot calibrate |
+|---|---|---|
+| `security_events` | scanner signatures only, one row per IP/kind/60s | fires on `sqlmap`-shaped requests; ordinary traffic leaves nothing |
+| `login_log` | authenticated logins | pre-launch, so empty — and it is one row per success, not per request |
+| stdout | worker lifecycle lines | no request line at all; there is no `morgan` |
+| tunnel inspector | last few requests, in memory | evaporates on restart, and cloudflared keeps none |
+
+Nothing in either service records one row per request, which is the only shape the
+behavioral window (D36) can be computed from. Inter-arrival CV needs the gaps
+between a client's requests; a table of successful logins cannot produce them.
+
+So the roadmap item was not "read the logs". It was "there are no logs, and the
+recording has to be built before anything can be calibrated".
+
+### An observing proxy rather than middleware in IXFE
+
+Two ways to record: instrument IXFE, or put a hop in front of it. The hop, for
+three reasons.
+
+- **A bug in SG must not be able to cost a real visitor.** In the proxy the origin's
+  response is already on the wire before the guard is consulted — `res.on('finish')`
+  — so advisory-only (D9) is structural rather than a promise. Middleware sits in the
+  request path, where a throw is a 500 on someone's pre-order.
+- **IXFE stays unmodified.** It is a live product with paying intent behind its
+  funnel. The measurement must not be able to change what is being measured.
+- **It is the deployment shape an adopter has.** A library that can only be
+  integrated by editing the application is a library with a much smaller audience
+  than one that can observe from in front of it.
+
+The cost is honest and worth naming: a proxy sees HTTP, so it cannot see the
+server-side facts half the invariants need — no credit balance, no `wasIssued`, no
+`attemptsSoFar`. Those observations are passed as empty rather than guessed, because
+inventing them in live traffic is D45's error where nothing would catch it. What the
+proxy *can* prove is the causality class, off the wire: `dwell` is a field the page
+always sends, so its absence is proof at both forms.
+
+### Two invariants the pentest never needed
+
+`/api/order` has the same time-trap and the same hidden `website` field as
+`/api/waitlist`, and until now only the waitlist scope declared them. Added as
+`ixfe.order-came-from-form` (`hard`) and `ixfe.order-honeypot-untouched` (`soft`),
+declared separately rather than by widening the waitlist scope — D32 makes an
+invariant's scope a completeness claim, and these are two forms that happen to
+agree, not one scope.
+
+### What the recorded shape may contain
+
+The record is one JSONL line per observed request, and it is shape only: a salted
+hash of IP and user-agent as the entity, the path, the status, the advice, and the
+behavioral features. No address, no query string, no body. Bodies are read at the
+two form endpoints and for the two declared fields (`dwell`, `website`), then
+dropped. Static assets and non-GET document requests are not observed at all — they
+say nothing about intent and would swamp the window with noise.
+
+Page views feed the window but earn no evidence. Loading a page is not an
+achievement, and treating it as one would let a crawler accumulate trust by reading.
+
+### What the report may not do
+
+`examples/ixfe/live/report.ts` prints distributions and no thresholds: observed
+gap-CV quantiles against the D55 gate, observed anomaly quantiles against the D52
+reference, and every escalation the origin did not corroborate. Choosing a number
+from those distributions is a human decision made with them in view. Writing one
+into the file from this run would be D45's mistake with better data.
+
+One subtlety the first draft got wrong: a 2xx from IXFE is not consent. Both form
+endpoints answer `{ slot: 0 }` to a request their own honeypot or time-trap caught —
+"serap diam-diam" — so counting 2xx as agreement would have scored IXFE's own
+detections as the guard's false positives. Candidates now exclude any record with a
+violation of either strength, and hard violations are excluded outright because
+proof is not a false positive (D15).
+
+### Consequences
+
+- The roadmap's first item changes from *read the logs* to *run the observer and
+  wait*. Calibration is now blocked on elapsed time and visitors, not on code.
+- Nothing is calibrated by this decision. It is the instrument, and it has never
+  been pointed at a population — the numbers in D36, D52 and D55 are exactly as
+  unvalidated as they were.
+- The proxy is not a defence and adds no authentication of its own. Everything the
+  origin exposes stays exposed, which is what observational neutrality requires and
+  what makes it useless as protection.
+
+---
+
+## D57 — Drive a real browser, because a real audience is not available
+
+**Decided, from a constraint rather than a preference.** D56 built the observer and
+concluded that calibration was now blocked on visitors and elapsed time. It is: the
+site has no audience, and promoting it is not work this project can do. Waiting was
+the plan and waiting produces nothing.
+
+So the visits are produced — by a real Chrome, against the real origin, through the
+observer.
+
+### What this is and is not
+
+**D45's limit applies unchanged. This falsifies; it does not calibrate.** Every
+persona is still a hypothesis about how someone behaves. What changed is that nothing
+about the *client* is invented any more:
+
+| | persona replay (D45) | this |
+|---|---|---|
+| `dwell` | a number chosen in a file | Chrome's own `Date.now()` difference |
+| keystrokes | not present | one `Input.dispatchKeyEvent` per character |
+| gaps | scheduled by a fake clock | actual elapsed wall time |
+| page state | assumed | rendered, with the site's own scripts running |
+| the request | constructed by the test | issued by the page's own `fetch` |
+
+A threshold that fires against a real browser's timing is a stronger falsification
+than one that fires against invented numbers. How many such browsers, and in what
+mix, remains invented — and that is precisely what still cannot be calibrated from.
+
+The adversaries stay `fetch`-based on purpose. An attacker willing to drive a real
+browser produces human-shaped timing, and the design's own premise (§1) is that this
+is possible. These are the cheap attacks, which is what actually arrives.
+
+### A CDP client rather than Puppeteer
+
+Six commands are needed against a Chrome already installed on the machine. Puppeteer
+is ~80 MB and downloads its own Chromium. `examples/ixfe/live/cdp.ts` is ~180 lines
+over the `WebSocket` global Node 22 already has, so the zero-dependency promise
+survives in the examples that argue for it.
+
+### What the traffic falsified
+
+Four things, and this is the reason the decision is worth recording. Every one is a
+bug that generated persona traffic structurally could not have found, because each
+lived in the gap between what the model assumed and what a real deployment does.
+
+**1. A 200 is not a success.** IXFE's landing service answers unknown `/api/*` paths
+with its SPA fallback — 200, and 94 KB of HTML. A path scanner asking for
+`/api/admin/users` was therefore *credited with a positive* and ended with more trust
+than it started with. An API route answering a document did not complete an action;
+it is a 404 the origin failed to say. Now read as the refusal it is, and recorded as
+`answeredWithDocument` so the report does not score that escalation as a false
+positive either.
+
+**2. One scope for every page reproduced D46's entropy bug.** All page views shared
+`ixfe.page`, and a single scope admits no balance — so `scopeEntropy` was 0 and
+`distinctScopes` was 1 for *every* visitor who only browsed. Honest readers scored as
+monotonous by construction. Same lesson as D46, different hat: the feature was
+measuring the integration's coarseness, not the visitor's behavior. The scope is now
+per path.
+
+**3. Weak signals on page views are a false positive on the operator's own
+monitoring.** Measured: a 20-request uptime check reached `INCREASE_FRICTION` at step
+15, from `SIG_UNIFORM_DELAY_SHAPE` and friends. Over HTTP alone an uptime monitor and
+a crawler are the same client — both are `GET /` at a fixed interval by a non-browser.
+D56 already decided a page view earns no evidence; signals are now attached only to
+actions, which carries that argument to its conclusion.
+
+The cost is stated rather than hidden: a crawler that only reads public pages now
+walks through at `ALLOW`. That is the honest answer for an instrument that sees only
+HTTP, and reading public pages is not an offence the guard is entitled to price. A
+404 *is* still negative evidence — asking for pages that are not there is the shape
+of a wordlist, and that is what keeps the scanner caught.
+
+**4. Two harness bugs that would have looked like model behavior.** `scrollIntoView`
+and `getBoundingClientRect` in one expression returns pre-scroll coordinates, so
+every form click landed on empty space — producing focus events, no submission, and a
+plausible-looking "the persona did not convert". And an unbounded CDP command hung
+the entire run when the post-launch `/order` redirect pointed at an unreachable host.
+Both now fail one visitor instead of silently changing what was measured.
+
+### Where it stands after the fixes
+
+Ten clients, 145 observations, two rounds:
+
+```
+legitimate
+  skimmer, researcher, mobile visitor,          ALLOW throughout, mean 0.500
+  stale bookmark, returning visitor
+  uptime monitor (40 fixed-interval GETs)       ALLOW throughout, mean 0.500
+
+adversary
+  endpoint shooter (no dwell)                   RESTRICT at request 1     proof
+  honeypot filler (order form)                  INCREASE_FRICTION at 3    soft + mass
+  path scanner (10 scanner paths)               BLOCK at 11               mass only
+  silent crawler (public pages only)            ALLOW                     see above
+```
+
+False-positive candidates: 0. Hard violations: 24, all of them the missing `dwell`.
+
+### Consequences
+
+- Calibration is no longer blocked on an audience. It is blocked on *distribution* —
+  how many real clients of each kind exist — which is the part generated traffic can
+  never supply, and the honest residue of D45.
+- The silent crawler walking through is a real limit, recorded rather than patched. A
+  host that cares about crawlers holds facts the proxy does not, and D42's
+  `SIG_BREADTH_OF_TARGET` is where that belongs.
+- Nothing in `src/` changed. All four falsifications were in the integration, which
+  is where an unvalidated model was always most likely to be wrong.
