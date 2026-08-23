@@ -70,6 +70,16 @@ export const CSS = String.raw`
   }
   .mast .title b { font-weight: 700; }
   .mast .title span { color: var(--ink-3); font: italic 400 .875rem/1 var(--serif); }
+  .mast .crumb { display: flex; align-items: baseline; gap: .4rem; margin-right: auto; }
+  .mast .crumb-home {
+    font: 700 .8125rem/1 var(--mono); letter-spacing: .08em;
+    color: var(--ink); text-decoration: none; padding: .2rem .35rem;
+    border: 1px solid var(--line); border-radius: 2px;
+  }
+  .mast .crumb-home:hover { border-color: var(--ink); }
+  .mast .crumb-sep { color: var(--ink-3); font-size: .8125rem; }
+  .mast .crumb-page { font: italic 400 .875rem/1.2 var(--serif); color: var(--ink-2); max-width: 14rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
   .mast .tools { display: flex; gap: .4rem; }
   .mast button {
     font: .75rem/1 var(--sans); color: var(--ink-2); background: var(--paper);
@@ -132,17 +142,17 @@ export const CSS = String.raw`
   aside.toc ol > li > a::before {
     content: counter(toc, decimal-leading-zero); color: var(--ink-3);
     font-variant-numeric: tabular-nums; font-size: .6875rem;
-    float: left; width: 1.5rem; margin-left: -1.5rem;
-    text-align: right; box-sizing: border-box; padding-right: .4rem;
+    display: inline-block; width: 1.6rem; flex-shrink: 0;
+    text-align: right; margin-right: .55rem;
   }
-  aside.toc a {
-    display: block; padding: .28rem 0; font-size: .8125rem; line-height: 1.45;
-    color: var(--ink-2); text-decoration: none;
-    border-left: 2px solid transparent; padding-left: .65rem;
+  aside.toc ol > li > a {
+    display: flex; align-items: baseline; padding: .28rem 0;
+    font-size: .8125rem; line-height: 1.45; color: var(--ink-2); text-decoration: none;
   }
+  aside.toc ul > li > a { display: block; }
   aside.toc a:hover { color: var(--ink); text-decoration: underline; }
-  aside.toc a[aria-current="true"] { color: var(--ink); font-weight: 700; border-left-color: var(--ink); }
-aside.toc a[aria-current="true"]::before { color: var(--ink); }
+  aside.toc ol > li > a[aria-current="true"] { color: var(--ink); font-weight: 700; }
+  aside.toc ol > li > a[aria-current="true"]::before { color: var(--ink); }
   aside.toc ul { list-style: none; margin: 0 0 0 .9rem; padding: 0; }
   aside.toc ul a { font-size: .78125rem; color: var(--ink-3); }
   aside.toc .seg { border-top: 1px solid var(--line-2); padding-top: .9rem; margin-top: .25rem; }
@@ -305,6 +315,23 @@ aside.toc a[aria-current="true"]::before { color: var(--ink); }
     max-width: min(48rem, 100%);
   }
 
+  /* ---- prev / next at the bottom of every page ---- */
+  nav.prevnext {
+    display: flex; justify-content: space-between; gap: 1rem; margin-top: 3rem;
+    padding-top: 1.25rem; border-top: 1px solid var(--line-2);
+    max-width: min(48rem, 100%);
+  }
+  nav.prevnext a.pn {
+    display: flex; flex-direction: column; gap: .15rem; text-decoration: none;
+    padding: .6rem .8rem; border: 1px solid var(--line-2); border-radius: 3px; min-width: 10rem;
+  }
+  nav.prevnext a.pn:hover { border-color: var(--ink); background: var(--paper-2); }
+  nav.prevnext .pn-prev { margin-right: auto; }
+  nav.prevnext .pn-next { margin-left: auto; text-align: right; align-items: flex-end; }
+  nav.prevnext .pn-lbl { font: 700 .6875rem/1 var(--sans); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); }
+  nav.prevnext .pn-title { font: 400 .875rem/1.35 var(--serif); color: var(--ink); }
+  nav.prevnext a.pn:hover .pn-title { text-decoration: underline; }
+
   footer {
     border-top: 1px solid var(--line); margin-top: 3.5rem;
     padding: 1.1rem 2.5rem 2.5rem;
@@ -457,6 +484,24 @@ ${sections
 
 
 
+  // Prev / next links for linear reading.
+  const currentIndex = CHAPTERS.findIndex((chapter) => chapter.file === file);
+  const prevChapter = currentIndex > 0 ? CHAPTERS[currentIndex - 1] : null;
+  const nextChapter = currentIndex < CHAPTERS.length - 1 ? CHAPTERS[currentIndex + 1] : null;
+  const prevnext = [prevChapter, nextChapter]
+    .map((chapter) => {
+      if (!chapter) return '';
+      const isPrev = chapter === prevChapter;
+      const label = isPrev ? t('Previous', 'Sebelumnya') : t('Next', 'Selanjutnya');
+      const arrow = isPrev ? '\u2190' : '\u2192';
+      return `      <a class="pn ${isPrev ? 'pn-prev' : 'pn-next'}" href="${chapter.file}">
+        <span class="pn-lbl">${arrow} ${label}</span>
+        <span class="pn-title">${t(chapter.titleEn, chapter.titleId)}</span>
+      </a>`;
+    })
+    .filter(Boolean)
+    .join('\n');
+
   return `<!DOCTYPE html>
 <html lang="en" data-theme="light">
 <head>
@@ -490,7 +535,12 @@ ${sections
 
 <header class="mast">
   <div class="row">
-    <a class="title" href="index.html"><b>Scorpio Guard</b> <span>${t('adaptive trust evaluation', 'evaluasi trust adaptif')}</span></a>
+    <span class="crumb">
+      <a href="index.html" class="crumb-home"><b>SG</b></a>
+      <span class="crumb-sep">/</span>
+      <span class="crumb-page">${t(titleEn, titleId)}</span>
+    </span>
+    <a class="title" href="index.html"><b>Scorpio Guard</b> <span style="display:none">${t('adaptive trust evaluation', 'evaluasi trust adaptif')}</span></a>
     <div class="tools">
       <button id="lang" type="button" aria-label="Switch language / Ganti bahasa">ID</button>
       <button id="theme" type="button" aria-label="Switch theme / Ganti tema">◐</button>
@@ -513,6 +563,10 @@ ${sections
     <h1>${t(titleEn, titleId)}</h1>
     <p class="subtitle">${t(subtitleEn, subtitleId)}</p>
 ${body}
+
+    <nav class="prevnext" aria-label="${escape('Chapter navigation')}">
+${prevnext}
+    </nav>
   </main>
 </div>
 
