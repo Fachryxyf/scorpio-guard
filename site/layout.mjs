@@ -127,15 +127,21 @@ export const CSS = String.raw`
     font: 700 .625rem/1 var(--sans); letter-spacing: .11em; text-transform: uppercase;
     color: var(--ink-3); margin: 0 0 .6rem;
   }
-  aside.toc ol { list-style: none; margin: 0 0 1.25rem; padding: 0; }
-  aside.toc li { margin: 0; }
+  aside.toc ol { list-style: none; margin: 0 0 1.25rem; padding: 0; counter-reset: toc; }
+  aside.toc li { counter-increment: toc; margin: 0; }
+  aside.toc ol > li > a::before {
+    content: counter(toc, decimal-leading-zero); color: var(--ink-3);
+    font-variant-numeric: tabular-nums; font-size: .6875rem;
+    display: inline-block; width: 1.4rem; text-align: right; margin-right: .45rem;
+  }
   aside.toc a {
-    display: block; padding: .3rem .55rem .3rem 0; font-size: .8125rem; line-height: 1.45;
+    display: block; padding: .28rem 0; font-size: .8125rem; line-height: 1.45;
     color: var(--ink-2); text-decoration: none;
     border-left: 2px solid transparent; padding-left: .65rem;
   }
   aside.toc a:hover { color: var(--ink); text-decoration: underline; }
-  aside.toc a[aria-current="true"] { color: var(--ink); font-weight: 700; }
+  aside.toc a[aria-current="true"] { color: var(--ink); font-weight: 700; border-left-color: var(--ink); }
+aside.toc a[aria-current="true"]::before { color: var(--ink); }
   aside.toc ul { list-style: none; margin: 0 0 0 .9rem; padding: 0; }
   aside.toc ul a { font-size: .78125rem; color: var(--ink-3); }
   aside.toc .seg { border-top: 1px solid var(--line-2); padding-top: .9rem; margin-top: .25rem; }
