@@ -137,14 +137,12 @@
     font: 700 .625rem/1 var(--sans); letter-spacing: .11em; text-transform: uppercase;
     color: var(--ink-3); margin: 0 0 .6rem;
   }
-  aside.toc ol { list-style: none; margin: 0 0 1.5rem; padding: 0; counter-reset: toc; }
-  aside.toc li { counter-increment: toc; margin: 0; }
-  aside.toc ol > li > a::before {
-    content: counter(toc) ". "; color: var(--ink-3); font-variant-numeric: tabular-nums;
-  }
+  aside.toc ol { list-style: none; margin: 0 0 1.25rem; padding: 0; }
+  aside.toc li { margin: 0; }
   aside.toc a {
-    display: block; padding: .22rem 0; font-size: .8125rem; line-height: 1.4;
+    display: block; padding: .3rem .55rem .3rem 0; font-size: .8125rem; line-height: 1.45;
     color: var(--ink-2); text-decoration: none;
+    border-left: 2px solid transparent; padding-left: .65rem;
   }
   aside.toc a:hover { color: var(--ink); text-decoration: underline; }
   aside.toc a[aria-current="true"] { color: var(--ink); font-weight: 700; }
@@ -174,10 +172,10 @@
     color: var(--ink-2); margin: 1.4rem 0 .35rem;
   }
   h2 .n, h3 .n { color: var(--ink-3); font-variant-numeric: tabular-nums; }
-  p { margin: 0 0 .9rem; }
+  p { margin: 0 0 .9rem; text-align: justify; hyphens: auto; -webkit-hyphens: auto; }
   .lead { font-size: 1.0625rem; line-height: 1.6; }
   ul, ol { margin: 0 0 .9rem; padding-left: 1.5rem; }
-  li { margin: 0 0 .3rem; }
+  li, dd { margin: 0 0 .3rem; text-align: justify; hyphens: auto; -webkit-hyphens: auto; }
   li > ul, li > ol { margin-top: .3rem; }
   strong, b { font-weight: 700; }
 
