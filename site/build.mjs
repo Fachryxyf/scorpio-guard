@@ -23,6 +23,7 @@ import { results } from './pages/results.mjs';
 import { protocol } from './pages/protocol.mjs';
 import { usage } from './pages/usage.mjs';
 import { limits } from './pages/limits.mjs';
+import { coverage } from './pages/coverage.mjs';
 import { record } from './pages/record.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -124,6 +125,7 @@ const pages = {
   'protocol.html': protocol,
   'usage.html': usage,
   'limits.html': limits,
+  'coverage.html': coverage,
   'record.html': record,
 };
 

@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Symptom and prescription — Scorpio Guard</title>
-<meta name="description" content="What may cross the wire, what structurally cannot, and why nothing transmits yet.">
+<title>Coverage — Scorpio Guard</title>
+<meta name="description" content="What has been tested, decided, and exercised — and what none of that proves.">
 <meta name="color-scheme" content="light dark">
-<link rel="canonical" href="https://scorpio-guard.fachryxyf.com/protocol.html">
-<meta property="og:title" content="Symptom and prescription">
-<meta property="og:description" content="What may cross the wire, what structurally cannot, and why nothing transmits yet.">
-<meta property="og:url" content="https://scorpio-guard.fachryxyf.com/protocol.html">
+<link rel="canonical" href="https://scorpio-guard.fachryxyf.com/coverage.html">
+<meta property="og:title" content="Coverage">
+<meta property="og:description" content="What has been tested, decided, and exercised — and what none of that proves.">
+<meta property="og:url" content="https://scorpio-guard.fachryxyf.com/coverage.html">
 <meta property="og:type" content="article">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%23ffffff'/><text y='24' x='7' font-size='22' font-family='Georgia,serif'>S</text></svg>">
 <script>
@@ -382,7 +382,7 @@
     <span class="crumb">
       <a href="index.html" class="crumb-home"><b>SG</b></a>
       <span class="crumb-sep">/</span>
-      <span class="crumb-page"><span data-lang="en">Symptom and prescription</span><span data-lang="id">Symptom dan prescription</span></span>
+      <span class="crumb-page"><span data-lang="en">Coverage</span><span data-lang="id">Cakupan</span></span>
     </span>
     <a class="title" href="index.html"><b>Scorpio Guard</b> <span style="display:none"><span data-lang="en">adaptive trust evaluation</span><span data-lang="id">evaluasi trust adaptif</span></span></a>
     <div class="tools">
@@ -405,18 +405,18 @@
           <a href="evidence.html"><span data-lang="en">Evidence</span><span data-lang="id">Evidence</span></a>
         </nav>
       </details>
-      <details class="dropdown">
+      <details class="dropdown" data-active>
         <summary aria-haspopup="true"><span data-lang="en">Findings</span><span data-lang="id">Temuan</span></summary>
         <nav class="drop" aria-label="Findings">
           <a href="results.html"><span data-lang="en">Results</span><span data-lang="id">Hasil</span></a>
           <a href="limits.html"><span data-lang="en">Limits</span><span data-lang="id">Batas</span></a>
-          <a href="coverage.html"><span data-lang="en">Coverage</span><span data-lang="id">Cakupan</span></a>
+          <a href="coverage.html" aria-current="page"><span data-lang="en">Coverage</span><span data-lang="id">Cakupan</span></a>
         </nav>
       </details>
-      <details class="dropdown" data-active>
+      <details class="dropdown">
         <summary aria-haspopup="true"><span data-lang="en">Reference</span><span data-lang="id">Rujukan</span></summary>
         <nav class="drop" aria-label="Reference">
-          <a href="protocol.html" aria-current="page"><span data-lang="en">Protocol</span><span data-lang="id">Protokol</span></a>
+          <a href="protocol.html"><span data-lang="en">Protocol</span><span data-lang="id">Protokol</span></a>
           <a href="record.html"><span data-lang="en">Record</span><span data-lang="id">Rekaman</span></a>
         </nav>
       </details>
@@ -429,139 +429,295 @@
       <summary><span data-lang="en">Contents</span><span data-lang="id">Daftar isi</span></summary>
       <p class="lbl"><span data-lang="en">On this page</span><span data-lang="id">Di halaman ini</span></p>
       <ol>
-        <li><a href="#shape"><span data-lang="en">The shape</span><span data-lang="id">Bentuknya</span></a></li>
-        <li><a href="#vocabulary"><span data-lang="en">Two-tier vocabulary</span><span data-lang="id">Kosakata dua lapis</span></a></li>
-        <li><a href="#wire"><span data-lang="en">Wire format</span><span data-lang="id">Format wire</span></a></li>
-        <li><a href="#degrade"><span data-lang="en">Degradation rules</span><span data-lang="id">Aturan degradasi</span></a></li>
-        <li><a href="#conformance"><span data-lang="en">Conformance</span><span data-lang="id">Konformansi</span></a></li>
+        <li><a href="#counts"><span data-lang="en">What the numbers are</span><span data-lang="id">Apa angka-angkanya</span></a></li>
+        <li><a href="#tests"><span data-lang="en">Test coverage</span><span data-lang="id">Cakupan test</span></a></li>
+        <li><a href="#personas"><span data-lang="en">Persona coverage</span><span data-lang="id">Cakupan persona</span></a></li>
+        <li><a href="#decisions"><span data-lang="en">Decision record</span><span data-lang="id">Rekaman keputusan</span></a></li>
+        <li><a href="#honest"><span data-lang="en">What this does not prove</span><span data-lang="id">Apa yang tidak dibuktikan ini</span></a></li>
       </ol>
     </details>
   </aside>
 
   <main id="main">
-    <h1><span data-lang="en">Symptom and prescription</span><span data-lang="id">Symptom dan prescription</span></h1>
-    <p class="subtitle"><span data-lang="en">What may cross the wire, what structurally cannot, and why nothing transmits yet.</span><span data-lang="id">Apa yang boleh lewat kabel, apa yang secara struktural tak bisa, dan kenapa belum ada yang dikirim.</span></p>
+    <h1><span data-lang="en">Coverage</span><span data-lang="id">Cakupan</span></h1>
+    <p class="subtitle"><span data-lang="en">What has been tested, decided, and exercised — and what none of that proves.</span><span data-lang="id">Apa yang sudah diuji, diputuskan, dan dilatih — dan apa yang tak dibuktikan oleh semuanya.</span></p>
 
-    <p class="lead"><span data-lang="en">The protocol is the one part designed to outlive this library. It defines what may cross a network between deployments that share nothing but vocabulary — and it transmits nothing today, by design.</span><span data-lang="id">Protokol adalah satu bagian yang dirancang untuk hidup lebih lama dari library ini. Ia mendefinisikan apa yang boleh melintasi jaringan antar deployment yang tak berbagi apa pun kecuali kosakata — dan hari ini tidak mengirim apa pun, memang disengaja.</span></p>
+    <p class="lead"><span data-lang="en">The three headline numbers — 222 tests, 60 decisions, 22 personas — and what sits behind each one. Every figure here is generated at build time; nothing was typed by hand.</span><span data-lang="id">Tiga angka utama — 222 test, 60 keputusan, 22 persona — dan apa yang ada di balik masing-masing. Setiap angka di sini dibangkitkan saat build; tidak ada yang diketik manual.</span></p>
 
-    <h2 id="shape"><span class="n">1.</span> <span data-lang="en">The shape</span><span data-lang="id">Bentuknya</span></h2>
+    <h2 id="counts"><span class="n">1.</span> <span data-lang="en">What the numbers are</span><span data-lang="id">Apa angka-angkanya</span></h2>
 
-    <p><span data-lang="en">A deployment reports abstract shapes it observed; it receives strategies for handling that class of shape. The prescription travels; the patient does not. No entity key, no raw observation, no trust state, no free text. The constraint is structural rather than a policy: the message type has no field in which raw data would fit.</span><span data-lang="id">Sebuah deployment melaporkan bentuk abstrak yang ia observasi; ia menerima strategi untuk menangani kelas bentuk itu. Resepnya yang berpindah; pasiennya tidak. Tanpa kunci entitas, tanpa observasi mentah, tanpa state trust, tanpa teks bebas. Kendalanya struktural, bukan kebijakan: tipe pesannya tidak punya field tempat data mentah bisa muat.</span></p>
-
-    <pre>POST /v0/symptoms
-Content-Type: application/json
-
-{
-  "protocol": "sg/0.1",
-  "schema": 1,
-  "reports": [
-    { "category": "SYM_TIMING",
-      "detail": "SYM_UNIFORM_DELAY_SHAPE",
-      "entities": "few" }
-  ]
-}</pre>
-
-    <h2 id="vocabulary"><span class="n">2.</span> <span data-lang="en">Two-tier vocabulary</span><span data-lang="id">Kosakata dua lapis</span></h2>
-
-    <p><span data-lang="en">The category tier is stable and expected never to grow. The detail tier is free to grow release to release. An unrecognised detail degrades to its stated category rather than failing; an unrecognised category is rejected because there is nothing left to fall back to.</span><span data-lang="id">Lapis kategori stabil dan diharapkan tidak pernah bertambah. Lapis detail bebas bertambah setiap rilis. Detail yang tak dikenali turun ke kategori yang dinyatakan bersamanya alih-alih gagal; kategori yang tak dikenali ditolak karena tak ada lagi tempat jatuhnya.</span></p>
-
-    <table>
-      <caption><span data-lang="en">Stable categories and their current details (generated from source)</span><span data-lang="id">Kategori stabil dan detail terkininya (dibangkitkan dari sumber)</span></caption>
-      <thead>
-        <tr><th><span data-lang="en">Category — stable</span><span data-lang="id">Kategori — stabil</span></th><th><span data-lang="en">Details — evolve</span><span data-lang="id">Detail — berkembang</span></th></tr>
-      </thead>
+    <table class="ledger">
+      <caption><span data-lang="en">Headline figures</span><span data-lang="id">Angka utama</span></caption>
+      <thead><tr><th></th><th class="num"><span data-lang="en">count</span><span data-lang="id">jumlah</span></th></tr></thead>
       <tbody>
-        <tr>
-          <th><code>SYM_TIMING</code></th>
-          <td><code>SYM_REQUEST_BURST</code><br><code>SYM_HIGH_VELOCITY</code><br><code>SYM_UNIFORM_DELAY_SHAPE</code><br><code>SYM_OFF_WINDOW_ACCESS</code></td>
-        </tr>
-        <tr>
-          <th><code>SYM_REPETITION</code></th>
-          <td><code>SYM_REPEATED_PATTERN</code><br><code>SYM_LOW_VARIETY</code></td>
-        </tr>
-        <tr>
-          <th><code>SYM_INTERACTION</code></th>
-          <td><code>SYM_UNINTERACTED_INPUT</code><br><code>SYM_IDENTITY_DRIFT</code></td>
-        </tr>
-        <tr>
-          <th><code>SYM_SEQUENCE</code></th>
-          <td><code>SYM_UNUSUAL_SEQUENCE</code><br><code>SYM_NEW_BEHAVIOR</code></td>
-        </tr>
-        <tr>
-          <th><code>SYM_TARGET</code></th>
-          <td><code>SYM_BROAD_ENUMERATION</code><br><code>SYM_SENSITIVE_FOCUS</code></td>
-        </tr>
-        <tr>
-          <th><code>SYM_CONSTRAINT</code></th>
-          <td><code>SYM_DECLARED_VIOLATION</code></td>
-        </tr>
+        <tr><th>Tests</th><td class="num"><b>222</b></td></tr>
+        <tr><th><span data-lang="en">Numbered decisions</span><span data-lang="id">Keputusan bernomor</span></th><td class="num"><b>60</b></td></tr>
+        <tr><th><span data-lang="en">Personas replayed</span><span data-lang="id">Persona diputar</span></th><td class="num"><b>22</b></td></tr>
+        <tr><th>&mdash; <span data-lang="en">legitimate</span><span data-lang="id">sah</span></th><td class="num">10</td></tr>
+        <tr><th>&mdash; adversary</th><td class="num">12</td></tr>
+        <tr><th><span data-lang="en">False positives across all personas</span><span data-lang="id">False positive dari semua persona</span></th><td class="num">0</td></tr>
+        <tr><th><span data-lang="en">Adversaries that walked through untouched</span><span data-lang="id">Adversary yang lolos tanpa terasa</span></th><td class="num">0</td></tr>
       </tbody>
     </table>
 
-    <h3><span data-lang="en">Entity counts are buckets, not numbers</span><span data-lang="id">Hitungan entitas adalah bucket, bukan angka</span></h3>
+    <h2 id="tests"><span class="n">2.</span> <span data-lang="en">Test coverage</span><span data-lang="id">Cakupan test</span></h2>
+
+    <p><span data-lang="en">222 tests run on every push via CI. They are not a coverage percentage; they pin the specific numeric and semantic properties the design argues from — decay factors, stage boundaries, ceiling behavior, signal mass caps, protocol degradation rules, store conformance. A threshold change that no test pins is a bug in the test suite, not a feature of the library.</span><span data-lang="id">222 test dijalankan di setiap push lewat CI. Mereka bukan persentase coverage; mereka memaku properti numerik dan semantik spesifik yang dipakai desain sebagai argumen — faktor decay, batas tahap, perilaku ceiling, cap massa sinyal, aturan degradasi protokol, konformansi store. Perubahan ambang yang tak dipaku test mana pun adalah bug dalam test suite-nya, bukan fitur library.</span></p>
 
     <table>
-      <caption><span data-lang="en">Ordered labels, deliberately coarse</span><span data-lang="id">Label berurutan, sengaja kasar</span></caption>
-      <thead><tr><th><span data-lang="en">Bucket</span><span data-lang="id">Bucket</span></th><th><span data-lang="en">Meaning</span><span data-lang="id">Arti</span></th></tr></thead>
+      <caption><span data-lang="en">What the tests actually pin, by area</span><span data-lang="id">Apa yang dipaku test, per area</span></caption>
+      <thead><tr><th><span data-lang="en">Area</span><span data-lang="id">Area</span></th><th><span data-lang="en">Pinned by</span><span data-lang="id">Dipaku oleh</span></th></tr></thead>
       <tbody>
-        <tr><th><code>one</code></th><td><span data-lang="en">a sender-side bucketed count; boundaries unpublished</span><span data-lang="id">hitungan ber-bucket dari sisi pengirim; batasnya tidak dipublikasikan</span></td></tr>
-        <tr><th><code>few</code></th><td><span data-lang="en">a sender-side bucketed count; boundaries unpublished</span><span data-lang="id">hitungan ber-bucket dari sisi pengirim; batasnya tidak dipublikasikan</span></td></tr>
-        <tr><th><code>several</code></th><td><span data-lang="en">a sender-side bucketed count; boundaries unpublished</span><span data-lang="id">hitungan ber-bucket dari sisi pengirim; batasnya tidak dipublikasikan</span></td></tr>
-        <tr><th><code>many</code></th><td><span data-lang="en">a sender-side bucketed count; boundaries unpublished</span><span data-lang="id">hitungan ber-bucket dari sisi pengirim; batasnya tidak dipublikasikan</span></td></tr>
+        <tr><th><span data-lang="en">Trust model arithmetic</span><span data-lang="id">Aritmetika model trust</span></th><td><span data-lang="en">decay compositeness, prior mean/variance, single-observation effects, mass ceilings</span><span data-lang="id">komposisi decay, prior mean/variansi, efek satu observasi, batas massa</span></td></tr>
+        <tr><th>Decision layer</th><td><span data-lang="en">band boundaries, epistemic stages, uncertainty gates, anomaly concurrence, strongest-wins combination</span><span data-lang="id">batas band, tahap epistemik, gate uncertainty, concurrence anomali, kombinasi terkuat-menang</span></td></tr>
+        <tr><th><span data-lang="en">Constraint taxonomy</span><span data-lang="id">Taksonomi constraint</span></th><td><span data-lang="en">each of the seven classes fires and does not fire on the right inputs; soft violations weigh correctly</span><span data-lang="id">ketujuh kelas memicu dan tidak memicu pada input yang benar; pelanggaran soft berbobot dengan tepat</span></td></tr>
+        <tr><th>Weak signals</th><td><span data-lang="en">mass caps, catalogue completeness (every collector exists), unknown-id tolerance</span><span data-lang="id">cap massa, kelengkapan katalog (setiap collector ada), toleransi id tak dikenal</span></td></tr>
+        <tr><th>Behavior features</th><td><span data-lang="en">scope entropy normalisation (D46), gap CV, velocity gate, intake discount (D55)</span><span data-lang="id">normalisasi entropi scope (D46), CV jeda, gate velocity, diskon intake (D55)</span></td></tr>
+        <tr><th>Store conformance</th><td><span data-lang="en">eleven checks against both memory and SQLite stores; millisecond precision, window persistence, opaque keys</span><span data-lang="id">sebelas cek atas kedua store; presisi milidetik, persistensi window, kunci opaque</span></td></tr>
+        <tr><th>Protocol encoding</th><td><span data-lang="en">v0.1 encode/decode, bucket ordering, degradation rules 1–5, no raw data in any field</span><span data-lang="id">encode/decode v0.1, urutan bucket, aturan degradasi 1–5, tanpa data mentah di field mana pun</span></td></tr>
+        <tr><th><span data-lang="en">Persona assertions</span><span data-lang="id">Asersi persona</span></th><td><span data-lang="en">zero false positives and zero walkthroughs asserted as hard requirements</span><span data-lang="id">nol false positive dan nol lolos ditegaskan sebagai syarat keras</span></td></tr>
       </tbody>
     </table>
 
-    <h2 id="wire"><span class="n">3.</span> <span data-lang="en">Wire format</span><span data-lang="id">Format wire</span></h2>
+    <h2 id="personas"><span class="n">3.</span> <span data-lang="en">Persona coverage</span><span data-lang="id">Cakupan persona</span></h2>
 
-    <p><span data-lang="en">HTTP POST, JSON, one object per request. Boring on purpose: symptom reporting is low-rate, low-urgency, tolerant of loss. Requests are unauthenticated and idempotent; rate limiting is by transport-level address only.</span><span data-lang="id">HTTP POST, JSON, satu objek per request. Sengaja membosankan: pelaporan symptom bervolume rendah, rendah urgensi, toleran terhadap kehilangan. Request tanpa autentikasi dan idempoten; rate limiting hanya lewat alamat transport.</span></p>
+    <div class="scroll">
+    <table>
+      <caption><span data-lang="en">All 22 personas, both targets</span><span data-lang="id">Semua 22 persona, dua target</span></caption>
+      <thead><tr><th><span data-lang="en">Persona</span><span data-lang="id">Persona</span></th><th><span data-lang="en">Kind</span><span data-lang="id">Jenis</span></th><th><span data-lang="en">Worst advice</span><span data-lang="id">Saran terburuk</span></th><th class="num"><span data-lang="en">Steps</span><span data-lang="id">Langkah</span></th><th>FP?</th><th><span data-lang="en">Walked?</span><span data-lang="id">Lolos?</span></th></tr></thead>
+      <tbody>
+        <tr>
+          <th>preorder-buyer</th>
+          <td><span data-lang="en">legit</span><span data-lang="id">sah</span></td>
+          <td><code>OBSERVE</code></td>
+          <td class="num">6</td>
+          <td><span data-lang="en">no</span><span data-lang="id">tidak</span></td>
+          <td><span data-lang="en">no</span><span data-lang="id">tidak</span></td>
+        </tr>
+        <tr>
+          <th>typo-retry</th>
+          <td><span data-lang="en">legit</span><span data-lang="id">sah</span></td>
+          <td><code>OBSERVE</code></td>
+          <td class="num">4</td>
+          <td><span data-lang="en">no</span><span data-lang="id">tidak</span></td>
+          <td><span data-lang="en">no</span><span data-lang="id">tidak</span></td>
+        </tr>
+        <tr>
+          <th>working-customer</th>
+          <td><span data-lang="en">legit</span><span data-lang="id">sah</span></td>
+          <td><code>OBSERVE</code></td>
+          <td class="num">82</td>
+          <td><span data-lang="en">no</span><span data-lang="id">tidak</span></td>
+          <td><span data-lang="en">no</span><span data-lang="id">tidak</span></td>
+        </tr>
+        <tr>
+          <th>ran-out-of-credits</th>
+          <td><span data-lang="en">legit</span><span data-lang="id">sah</span></td>
+          <td><code>OBSERVE</code></td>
+          <td class="num">4</td>
+          <td><span data-lang="en">no</span><span data-lang="id">tidak</span></td>
+          <td><span data-lang="en">no</span><span data-lang="id">tidak</span></td>
+        </tr>
+        <tr>
+          <th>activated-founder</th>
+          <td><span data-lang="en">legit</span><span data-lang="id">sah</span></td>
+          <td><code>OBSERVE</code></td>
+          <td class="num">4</td>
+          <td><span data-lang="en">no</span><span data-lang="id">tidak</span></td>
+          <td><span data-lang="en">no</span><span data-lang="id">tidak</span></td>
+        </tr>
+        <tr>
+          <th>endpoint-shooter</th>
+          <td><span data-lang="en">adversary</span><span data-lang="id">adversary</span></td>
+          <td><code>RESTRICT</code></td>
+          <td class="num">30</td>
+          <td><span data-lang="en">no</span><span data-lang="id">tidak</span></td>
+          <td><span data-lang="en">no</span><span data-lang="id">tidak</span></td>
+        </tr>
+        <tr>
+          <th>honeypot-filler</th>
+          <td><span data-lang="en">adversary</span><span data-lang="id">adversary</span></td>
+          <td><code>INCREASE_FRICTION</code></td>
+          <td class="num">20</td>
+          <td><span data-lang="en">no</span><span data-lang="id">tidak</span></td>
+          <td><span data-lang="en">no</span><span data-lang="id">tidak</span></td>
+        </tr>
+        <tr>
+          <th>otp-grinder</th>
+          <td><span data-lang="en">adversary</span><span data-lang="id">adversary</span></td>
+          <td><code>RESTRICT</code></td>
+          <td class="num">35</td>
+          <td><span data-lang="en">no</span><span data-lang="id">tidak</span></td>
+          <td><span data-lang="en">no</span><span data-lang="id">tidak</span></td>
+        </tr>
+        <tr>
+          <th>webhook-forger</th>
+          <td><span data-lang="en">adversary</span><span data-lang="id">adversary</span></td>
+          <td><code>RESTRICT</code></td>
+          <td class="num">25</td>
+          <td><span data-lang="en">no</span><span data-lang="id">tidak</span></td>
+          <td><span data-lang="en">no</span><span data-lang="id">tidak</span></td>
+        </tr>
+        <tr>
+          <th>activation-replayer</th>
+          <td><span data-lang="en">adversary</span><span data-lang="id">adversary</span></td>
+          <td><code>RESTRICT</code></td>
+          <td class="num">10</td>
+          <td><span data-lang="en">no</span><span data-lang="id">tidak</span></td>
+          <td><span data-lang="en">no</span><span data-lang="id">tidak</span></td>
+        </tr>
+        <tr>
+          <th>credit-drainer</th>
+          <td><span data-lang="en">adversary</span><span data-lang="id">adversary</span></td>
+          <td><code>INCREASE_FRICTION</code></td>
+          <td class="num">42</td>
+          <td><span data-lang="en">no</span><span data-lang="id">tidak</span></td>
+          <td><span data-lang="en">no</span><span data-lang="id">tidak</span></td>
+        </tr>
+        <tr>
+          <th>post-launch-replayer</th>
+          <td><span data-lang="en">adversary</span><span data-lang="id">adversary</span></td>
+          <td><code>RESTRICT</code></td>
+          <td class="num">12</td>
+          <td><span data-lang="en">no</span><span data-lang="id">tidak</span></td>
+          <td><span data-lang="en">no</span><span data-lang="id">tidak</span></td>
+        </tr>
+        <tr>
+          <th>pending-freeloader</th>
+          <td><span data-lang="en">adversary</span><span data-lang="id">adversary</span></td>
+          <td><code>RESTRICT</code></td>
+          <td class="num">15</td>
+          <td><span data-lang="en">no</span><span data-lang="id">tidak</span></td>
+          <td><span data-lang="en">no</span><span data-lang="id">tidak</span></td>
+        </tr>
+        <tr>
+          <th>daily-ritual</th>
+          <td><span data-lang="en">legit</span><span data-lang="id">sah</span></td>
+          <td><code>OBSERVE</code></td>
+          <td class="num">79</td>
+          <td><span data-lang="en">no</span><span data-lang="id">tidak</span></td>
+          <td><span data-lang="en">no</span><span data-lang="id">tidak</span></td>
+        </tr>
+        <tr>
+          <th>fat-finger</th>
+          <td><span data-lang="en">legit</span><span data-lang="id">sah</span></td>
+          <td><code>OBSERVE</code></td>
+          <td class="num">3</td>
+          <td><span data-lang="en">no</span><span data-lang="id">tidak</span></td>
+          <td><span data-lang="en">no</span><span data-lang="id">tidak</span></td>
+        </tr>
+        <tr>
+          <th>password-manager</th>
+          <td><span data-lang="en">legit</span><span data-lang="id">sah</span></td>
+          <td><code>OBSERVE</code></td>
+          <td class="num">2</td>
+          <td><span data-lang="en">no</span><span data-lang="id">tidak</span></td>
+          <td><span data-lang="en">no</span><span data-lang="id">tidak</span></td>
+        </tr>
+        <tr>
+          <th>session-restore</th>
+          <td><span data-lang="en">legit</span><span data-lang="id">sah</span></td>
+          <td><code>OBSERVE</code></td>
+          <td class="num">6</td>
+          <td><span data-lang="en">no</span><span data-lang="id">tidak</span></td>
+          <td><span data-lang="en">no</span><span data-lang="id">tidak</span></td>
+        </tr>
+        <tr>
+          <th>power-user</th>
+          <td><span data-lang="en">legit</span><span data-lang="id">sah</span></td>
+          <td><code>OBSERVE</code></td>
+          <td class="num">26</td>
+          <td><span data-lang="en">no</span><span data-lang="id">tidak</span></td>
+          <td><span data-lang="en">no</span><span data-lang="id">tidak</span></td>
+        </tr>
+        <tr>
+          <th>forged-api-call</th>
+          <td><span data-lang="en">adversary</span><span data-lang="id">adversary</span></td>
+          <td><code>RESTRICT</code></td>
+          <td class="num">1</td>
+          <td><span data-lang="en">no</span><span data-lang="id">tidak</span></td>
+          <td><span data-lang="en">no</span><span data-lang="id">tidak</span></td>
+        </tr>
+        <tr>
+          <th>scripted-brute-force</th>
+          <td><span data-lang="en">adversary</span><span data-lang="id">adversary</span></td>
+          <td><code>INCREASE_FRICTION</code></td>
+          <td class="num">30</td>
+          <td><span data-lang="en">no</span><span data-lang="id">tidak</span></td>
+          <td><span data-lang="en">no</span><span data-lang="id">tidak</span></td>
+        </tr>
+        <tr>
+          <th>jittered-brute-force</th>
+          <td><span data-lang="en">adversary</span><span data-lang="id">adversary</span></td>
+          <td><code>INCREASE_FRICTION</code></td>
+          <td class="num">30</td>
+          <td><span data-lang="en">no</span><span data-lang="id">tidak</span></td>
+          <td><span data-lang="en">no</span><span data-lang="id">tidak</span></td>
+        </tr>
+        <tr>
+          <th>slow-poisoner</th>
+          <td><span data-lang="en">adversary</span><span data-lang="id">adversary</span></td>
+          <td><code>RESTRICT</code></td>
+          <td class="num">60</td>
+          <td><span data-lang="en">no</span><span data-lang="id">tidak</span></td>
+          <td><span data-lang="en">no</span><span data-lang="id">tidak</span></td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
 
-    <pre>{
-  "protocol": "sg/0.1",
-  "prescriptions": [
-    {
-      "category": "SYM_TIMING",
-      "detail": "SYM_UNIFORM_DELAY_SHAPE",
-      "strategy": "TIGHTEN_TIMING_TOLERANCE",
-      "confidence": "provisional"
-    }
-  ]
-}</pre>
+    <p class="tnote"><span data-lang="en">Every legitimate persona stays at or below OBSERVE. Every adversary is advised something felt. Both facts are asserted in the test suite, so a regression fails CI rather than shipping silently.</span><span data-lang="id">Setiap persona sah tetap di OBSERVE atau lebih lunak. Setiap adversary disarankan sesuatu yang terasa. Kedua fakta ditegaskan dalam test suite, jadi regresi gagal di CI alih-alih terkirim diam-diam.</span></p>
 
-    <p><span data-lang="en">A prescription is advice about a class of shape, never a verdict about an entity — the server has never been told which entities were involved. A receiver must ignore an unrecognised strategy rather than escalate on it.</span><span data-lang="id">Resep adalah saran tentang kelas bentuk, bukan putusan tentang entitas — server tak pernah diberi tahu entitas mana yang terlibat. Penerima harus mengabaikan strategi yang tak dikenalinya alih-alih mengeskalasi karena itu.</span></p>
+    <h2 id="decisions"><span class="n">4.</span> <span data-lang="en">Decision record</span><span data-lang="id">Rekaman keputusan</span></h2>
 
-    <h2 id="degrade"><span class="n">4.</span> <span data-lang="en">Degradation rules</span><span data-lang="id">Aturan degradasi</span></h2>
+    <p><span data-lang="en">60 numbered decisions in DECISIONS.md, each recording the question, the answer, and what it commits the implementation to. The count is parsed from the file at build time — adding D59 makes it 61 without touching this page.</span><span data-lang="id">60 keputusan bernomor di DECISIONS.md, masing-masing merekam pertanyaan, jawaban, dan komitmennya pada implementasi. Jumlahnya diparse dari file saat build — menambah D59 membuatnya 61 tanpa menyentuh halaman ini.</span></p>
 
     <table>
-      <caption><span data-lang="en">What a receiver must do</span><span data-lang="id">Apa yang harus dilakukan penerima</span></caption>
-      <thead><tr><th><span data-lang="en">Case</span><span data-lang="id">Kasus</span></th><th><span data-lang="en">Rule</span><span data-lang="id">Aturan</span></th></tr></thead>
+      <caption><span data-lang="en">Decisions by part</span><span data-lang="id">Keputusan per bagian</span></caption>
+      <thead><tr><th><span data-lang="en">Part</span><span data-lang="id">Bagian</span></th><th class="num"><span data-lang="en">Entries</span><span data-lang="id">Entri</span></th></tr></thead>
       <tbody>
-        <tr><th><span data-lang="en">Unknown detail, known category</span><span data-lang="id">Detail tak dikenal, kategori dikenal</span></th><td><span data-lang="en">accept, act on the category. Normal forward compatibility.</span><span data-lang="id">terima, bertindak atas kategorinya. Kompatibilitas maju normal.</span></td></tr>
-        <tr><th><span data-lang="en">Unknown category</span><span data-lang="id">Kategori tak dikenal</span></th><td><span data-lang="en">reject that report. Nothing left to fall back to.</span><span data-lang="id">tolak laporan itu. Tak ada lagi yang bisa jadi cadangan.</span></td></tr>
-        <tr><th><span data-lang="en">Newer schema number</span><span data-lang="id">Nomor skema lebih baru</span></th><td><span data-lang="en">accept. New details are already covered by rule one.</span><span data-lang="id">terima. Detail baru sudah tercakup aturan pertama.</span></td></tr>
-        <tr><th><span data-lang="en">Unknown protocol major</span><span data-lang="id">Protokol mayor tak dikenal</span></th><td><span data-lang="en">reject the whole message.</span><span data-lang="id">tolak seluruh pesan.</span></td></tr>
-        <tr><th><span data-lang="en">Unknown fields</span><span data-lang="id">Field tak dikenal</span></th><td><span data-lang="en">ignore them; reject only on missing required ones.</span><span data-lang="id">abaikan; tolak hanya jika yang wajib hilang.</span></td></tr>
+        <tr><th>I: Foundations</th><td class="num">4</td></tr>
+        <tr><th>II: Trust model</th><td class="num">3</td></tr>
+        <tr><th>III: Decision layer</th><td class="num">6</td></tr>
+        <tr><th>IV: Hard constraints</th><td class="num">7</td></tr>
+        <tr><th>V: Anomaly model</th><td class="num">4</td></tr>
+        <tr><th>VI: Architecture and API</th><td class="num">8</td></tr>
+        <tr><th>VII: Protocol and privacy</th><td class="num">7</td></tr>
+        <tr><th>VIII: Project and tooling</th><td class="num">21</td></tr>
+        <tr class="tot"><th>Total</th><td class="num">60</td></tr>
       </tbody>
     </table>
 
-    <h2 id="conformance"><span class="n">5.</span> <span data-lang="en">Conformance</span><span data-lang="id">Konformansi</span></h2>
+    <h2 id="honest"><span class="n">5.</span> <span data-lang="en">What this does not prove</span><span data-lang="id">Apa yang tidak dibuktikan ini</span></h2>
 
-    <p><span data-lang="en">An implementation conforms when it sends only tokens it shipped with, carries the category alongside every detail, buckets entity counts, applies every degradation rule, ignores unrecognised strategies, and includes no field carrying raw observation or identity. That last point is worth testing adversarially: it is the guarantee the privacy argument rests on, and the only one whose violation is invisible to the sender.</span><span data-lang="id">Implementasi konform ketika ia hanya mengirim token yang dikirimnya saat rilis, menyertakan kategori bersama setiap detail, membuat hitungan entitas jadi bucket, menerapkan semua aturan degradasi, mengabaikan strategi tak dikenal, dan tidak memuat field pembawa observasi mentah atau identitas. Poin terakhir layak diuji secara adversarial: itu jaminan tempat argumen privasi berdiri, dan satu-satunya yang pelanggarannya tak terlihat oleh pengirim.</span></p>
+    <p><span data-lang="en">These numbers describe what has been built and tested, not whether it works against real users. The personas are hypotheses about how someone behaves; their distributions were invented. The thresholds they exercise are reasoned guesses set leniently. None of it has been calibrated.</span><span data-lang="id">Angka-angka ini menggambarkan apa yang sudah dibangun dan diuji, bukan apakah ia bekerja terhadap pengguna nyata. Persona-persona itu hipotesis tentang bagaimana seseorang berperilaku; distribusinya diciptakan. Ambang-ambang yang mereka latih tebakan bernaling disetel longgar. Belum ada yang dikalibrasi.</span></p>
+
+    <table>
+      <caption><span data-lang="en">The honest residue</span><span data-lang="id">Sisa jujurnya</span></caption>
+      <thead><tr><th></th><th><span data-lang="en">Status</span><span data-lang="id">Status</span></th></tr></thead>
+      <tbody>
+        <tr><th><span data-lang="en">Calibrated against a real population</span><span data-lang="id">Terkalibrasi terhadap populasi nyata</span></th><td class="no"><span data-lang="en">no</span><span data-lang="id">belum</span></td></tr>
+        <tr><th><span data-lang="en">Wire format round-tripped</span><span data-lang="id">Format wire sudah di-round-trip</span></th><td class="no"><span data-lang="en">never — nothing transmits yet</span><span data-lang="id">belum pernah — belum ada yang dikirim</span></td></tr>
+        <tr><th><span data-lang="en">Anomaly reference trained</span><span data-lang="id">Rujukan anomali dilatih</span></th><td class="no"><span data-lang="en">deliberately untrained</span><span data-lang="id">sengaja tidak dilatih</span></td></tr>
+        <tr><th><span data-lang="en">Signal false-positive stories</span><span data-lang="id">Cerita false-positive tiap sinyal</span></th><td class="part"><span data-lang="en">collectors built, stories not earned</span><span data-lang="id">collector dibangun, ceritanya belum didapat</span></td></tr>
+      </tbody>
+    </table>
 
     <p class="seealso"><b><span data-lang="en">See also</span><span data-lang="id">Lihat juga</span></b>
-      <a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/PROTOCOL.md"><span data-lang="en">Full protocol draft</span><span data-lang="id">Draf protokol lengkap</span></a>
-      <a href="evidence.html#catalogue"><span data-lang="en">Weak-signal catalogue</span><span data-lang="id">Katalog weak signal</span></a>
-      <a href="limits.html#wire"><span data-lang="en">What the protocol does not yet decide</span><span data-lang="id">Apa yang belum diputuskan protokol</span></a>
+      <a href="results.html"><span data-lang="en">Measurements detail</span><span data-lang="id">Detail pengukuran</span></a>
+      <a href="limits.html"><span data-lang="en">Open problems</span><span data-lang="id">Masalah terbuka</span></a>
+      <a href="record.html"><span data-lang="en">Full decision index</span><span data-lang="id">Indeks keputusan lengkap</span></a>
     </p>
   
 
     <nav class="prevnext" aria-label="Chapter navigation">
-      <a class="pn pn-prev" href="coverage.html">
+      <a class="pn pn-prev" href="limits.html">
         <span class="pn-lbl">← <span data-lang="en">Previous</span><span data-lang="id">Sebelumnya</span></span>
-        <span class="pn-title"><span data-lang="en">What has been tested</span><span data-lang="id">Apa yang sudah diuji</span></span>
+        <span class="pn-title"><span data-lang="en">What is not known</span><span data-lang="id">Yang belum diketahui</span></span>
       </a>
-      <a class="pn pn-next" href="record.html">
+      <a class="pn pn-next" href="protocol.html">
         <span class="pn-lbl">→ <span data-lang="en">Next</span><span data-lang="id">Selanjutnya</span></span>
-        <span class="pn-title"><span data-lang="en">Design record and glossary</span><span data-lang="id">Rekaman desain dan glosarium</span></span>
+        <span class="pn-title"><span data-lang="en">Symptom and prescription</span><span data-lang="id">Symptom dan prescription</span></span>
       </a>
     </nav>
   </main>
