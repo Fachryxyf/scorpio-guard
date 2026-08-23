@@ -69,7 +69,7 @@
   .skip:focus { left: 1rem; top: 1rem; background: var(--paper-2); padding: .6rem 1rem; z-index: 30; }
 
   /* ---- masthead: a title block over a segmented menu, not a hero ---- */
-  header.mast { border-bottom: 1px solid var(--line); }
+  header.mast { position: sticky; top: 0; z-index: 20; background: var(--paper); border-bottom: 1px solid var(--line); }
   .mast .row {
     display: flex; align-items: baseline; gap: 1rem; flex-wrap: wrap;
     padding: .8rem 2rem .55rem;
@@ -88,30 +88,48 @@
   }
   .mast button:hover { color: var(--ink); border-color: var(--ink); }
 
-  /* the segmented menu: groups named, chapters under them */
+  /* segmented menu: right-aligned dropdowns, no dead labels */
   .mast nav.seg {
-    display: flex; gap: 0 2rem; flex-wrap: wrap;
+    display: flex; justify-content: flex-end; gap: .4rem; flex-wrap: wrap;
     padding: 0 2rem .55rem;
     border-top: 1px solid var(--line-2);
     padding-top: .5rem;
   }
-  .mast nav.seg section { display: flex; align-items: baseline; gap: .7rem; }
-  .mast nav.seg h2 {
-    font: 700 .625rem/1.6 var(--sans); letter-spacing: .11em; text-transform: uppercase;
-    color: var(--ink-3); margin: 0; border: 0; padding: 0; white-space: nowrap;
+  .mast nav.seg details { position: relative; }
+  .mast nav.seg summary {
+    list-style: none; cursor: pointer; user-select: none;
+    font: 700 .75rem/1 var(--sans); letter-spacing: .08em; text-transform: uppercase;
+    color: var(--ink-2); background: transparent; border: 1px solid transparent; border-radius: 2px;
+    padding: .45rem .7rem;
   }
-  .mast nav.seg a {
-    font: 400 .8125rem/1.6 var(--sans); color: var(--ink-2);
-    text-decoration: none; border-bottom: 2px solid transparent; padding-bottom: 1px;
+  .mast nav.seg summary::-webkit-details-marker { display: none; }
+  .mast nav.seg summary::after {
+    content: "\25BE"; font-size: .55rem; margin-left: .35rem; vertical-align: middle;
   }
-  .mast nav.seg a + a { margin-left: .7rem; }
-  .mast nav.seg a:hover { color: var(--ink); border-bottom-color: var(--line); }
-  .mast nav.seg a[aria-current="page"] { color: var(--ink); font-weight: 700; border-bottom-color: var(--ink); }
+  .mast nav.seg summary:hover { color: var(--ink); border-color: var(--line); }
+  .mast nav.seg details[open] > summary,
+  .mast nav.seg details.active > summary {
+    color: var(--ink); background: var(--paper-2); border-color: var(--line);
+  }
+  .mast nav.seg .drop {
+    position: absolute; right: 0; top: calc(100% + 4px); z-index: 30;
+    min-width: 12rem; background: var(--paper); border: 1px solid var(--line);
+    box-shadow: 0 2px 8px rgba(0,0,0,.12);
+  }
+  html[data-theme="dark"] .mast nav.seg .drop { box-shadow: 0 2px 8px rgba(0,0,0,.5); }
+  .mast nav.seg .drop a {
+    display: block; font: 400 .8125rem/1.4 var(--sans); color: var(--ink-2);
+    text-decoration: none; padding: .45rem .8rem;
+  }
+  .mast nav.seg .drop a:hover { color: var(--ink); background: var(--paper-2); }
+  .mast nav.seg .drop a[aria-current="page"] {
+    color: var(--ink); font-weight: 700; background: var(--paper-3);
+  }
 
   /* ---- body grid ---- */
   .wrap { display: grid; grid-template-columns: var(--side) minmax(0, 1fr); gap: 0; align-items: start; }
   aside.toc {
-    position: sticky; top: 0; align-self: start;
+    position: sticky; top: 6.5rem; align-self: start;
     padding: 1.75rem 1.25rem 3rem; border-right: 1px solid var(--line-2);
     max-height: 100vh; overflow-y: auto;
   }
@@ -336,10 +354,34 @@
     </div>
   </div>
   <nav class="seg" aria-label="Chapters">
-      <section><h2><span data-lang="en">Start</span><span data-lang="id">Mulai</span></h2><a href="index.html"><span data-lang="en">Overview</span><span data-lang="id">Ringkasan</span></a><a href="usage.html" aria-current="page"><span data-lang="en">Usage</span><span data-lang="id">Pemakaian</span></a></section>
-      <section><h2><span data-lang="en">Theory</span><span data-lang="id">Teori</span></h2><a href="model.html"><span data-lang="en">Model</span><span data-lang="id">Model</span></a><a href="evidence.html"><span data-lang="en">Evidence</span><span data-lang="id">Evidence</span></a></section>
-      <section><h2><span data-lang="en">Findings</span><span data-lang="id">Temuan</span></h2><a href="results.html"><span data-lang="en">Results</span><span data-lang="id">Hasil</span></a><a href="limits.html"><span data-lang="en">Limits</span><span data-lang="id">Batas</span></a></section>
-      <section><h2><span data-lang="en">Reference</span><span data-lang="id">Rujukan</span></h2><a href="protocol.html"><span data-lang="en">Protocol</span><span data-lang="id">Protokol</span></a><a href="record.html"><span data-lang="en">Record</span><span data-lang="id">Rekaman</span></a></section>
+            <details class="dropdown" data-active>
+        <summary aria-haspopup="true"><span data-lang="en">Start</span><span data-lang="id">Mulai</span></summary>
+        <nav class="drop" aria-label="&lt;span data-lang="en"&gt;Start chapters&lt;/span&gt;&lt;span data-lang="id"&gt;Bab Mulai&lt;/span&gt;">
+          <a href="index.html"><span data-lang="en">Overview</span><span data-lang="id">Ringkasan</span></a>
+          <a href="usage.html" aria-current="page"><span data-lang="en">Usage</span><span data-lang="id">Pemakaian</span></a>
+        </nav>
+      </details>
+      <details class="dropdown">
+        <summary aria-haspopup="true"><span data-lang="en">Theory</span><span data-lang="id">Teori</span></summary>
+        <nav class="drop" aria-label="&lt;span data-lang="en"&gt;Theory chapters&lt;/span&gt;&lt;span data-lang="id"&gt;Bab Teori&lt;/span&gt;">
+          <a href="model.html"><span data-lang="en">Model</span><span data-lang="id">Model</span></a>
+          <a href="evidence.html"><span data-lang="en">Evidence</span><span data-lang="id">Evidence</span></a>
+        </nav>
+      </details>
+      <details class="dropdown">
+        <summary aria-haspopup="true"><span data-lang="en">Findings</span><span data-lang="id">Temuan</span></summary>
+        <nav class="drop" aria-label="&lt;span data-lang="en"&gt;Findings chapters&lt;/span&gt;&lt;span data-lang="id"&gt;Bab Temuan&lt;/span&gt;">
+          <a href="results.html"><span data-lang="en">Results</span><span data-lang="id">Hasil</span></a>
+          <a href="limits.html"><span data-lang="en">Limits</span><span data-lang="id">Batas</span></a>
+        </nav>
+      </details>
+      <details class="dropdown">
+        <summary aria-haspopup="true"><span data-lang="en">Reference</span><span data-lang="id">Rujukan</span></summary>
+        <nav class="drop" aria-label="&lt;span data-lang="en"&gt;Reference chapters&lt;/span&gt;&lt;span data-lang="id"&gt;Bab Rujukan&lt;/span&gt;">
+          <a href="protocol.html"><span data-lang="en">Protocol</span><span data-lang="id">Protokol</span></a>
+          <a href="record.html"><span data-lang="en">Record</span><span data-lang="id">Rekaman</span></a>
+        </nav>
+      </details>
   </nav>
 </header>
 
@@ -357,10 +399,6 @@
         <li><a href="#policy"><span data-lang="en">Every tunable number</span><span data-lang="id">Semua angka yang bisa disetel</span></a></li>
         <li><a href="#recipes"><span data-lang="en">Recipes</span><span data-lang="id">Resep</span></a></li>
       </ol>
-        <div class="seg"><p class="lbl"><span data-lang="en">Start</span><span data-lang="id">Mulai</span></p><ul><li><a href="index.html"><span data-lang="en">Overview</span><span data-lang="id">Ringkasan</span></a></li><li><a href="usage.html" aria-current="true"><span data-lang="en">Usage</span><span data-lang="id">Pemakaian</span></a></li></ul></div>
-        <div class="seg"><p class="lbl"><span data-lang="en">Theory</span><span data-lang="id">Teori</span></p><ul><li><a href="model.html"><span data-lang="en">Model</span><span data-lang="id">Model</span></a></li><li><a href="evidence.html"><span data-lang="en">Evidence</span><span data-lang="id">Evidence</span></a></li></ul></div>
-        <div class="seg"><p class="lbl"><span data-lang="en">Findings</span><span data-lang="id">Temuan</span></p><ul><li><a href="results.html"><span data-lang="en">Results</span><span data-lang="id">Hasil</span></a></li><li><a href="limits.html"><span data-lang="en">Limits</span><span data-lang="id">Batas</span></a></li></ul></div>
-        <div class="seg"><p class="lbl"><span data-lang="en">Reference</span><span data-lang="id">Rujukan</span></p><ul><li><a href="protocol.html"><span data-lang="en">Protocol</span><span data-lang="id">Protokol</span></a></li><li><a href="record.html"><span data-lang="en">Record</span><span data-lang="id">Rekaman</span></a></li></ul></div>
     </details>
   </aside>
 
@@ -511,6 +549,20 @@ const guard = createGuard({ store: sqliteStore({ path: './trust.db' }) });</pre>
       root.dataset.theme = root.dataset.theme === 'dark' ? 'light' : 'dark';
       try { localStorage.setItem('sg-theme', root.dataset.theme); } catch (e) {}
     });
+
+    // Dropdown: opening one closes the others; clicking outside closes all.
+    var drops = [].slice.call(document.querySelectorAll('.mast nav.seg details'));
+    if (drops.length) {
+      document.addEventListener('click', function (e) {
+        var inside = drops.some(function (d) { return d.contains(e.target); });
+        if (!inside) drops.forEach(function (d) { d.removeAttribute('open'); });
+      });
+      drops.forEach(function (d) {
+        d.querySelector('summary').addEventListener('click', function () {
+          drops.forEach(function (other) { if (other !== d && other.hasAttribute('open')) other.removeAttribute('open'); });
+        });
+      });
+    }
 
     // Mark the section being read. Progressive: the TOC works without it.
     var links = [].slice.call(document.querySelectorAll('aside.toc ol a'));

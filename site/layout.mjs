@@ -59,7 +59,7 @@ export const CSS = String.raw`
   .skip:focus { left: 1rem; top: 1rem; background: var(--paper-2); padding: .6rem 1rem; z-index: 30; }
 
   /* ---- masthead: a title block over a segmented menu, not a hero ---- */
-  header.mast { border-bottom: 1px solid var(--line); }
+  header.mast { position: sticky; top: 0; z-index: 20; background: var(--paper); border-bottom: 1px solid var(--line); }
   .mast .row {
     display: flex; align-items: baseline; gap: 1rem; flex-wrap: wrap;
     padding: .8rem 2rem .55rem;
@@ -78,30 +78,48 @@ export const CSS = String.raw`
   }
   .mast button:hover { color: var(--ink); border-color: var(--ink); }
 
-  /* the segmented menu: groups named, chapters under them */
+  /* segmented menu: right-aligned dropdowns, no dead labels */
   .mast nav.seg {
-    display: flex; gap: 0 2rem; flex-wrap: wrap;
+    display: flex; justify-content: flex-end; gap: .4rem; flex-wrap: wrap;
     padding: 0 2rem .55rem;
     border-top: 1px solid var(--line-2);
     padding-top: .5rem;
   }
-  .mast nav.seg section { display: flex; align-items: baseline; gap: .7rem; }
-  .mast nav.seg h2 {
-    font: 700 .625rem/1.6 var(--sans); letter-spacing: .11em; text-transform: uppercase;
-    color: var(--ink-3); margin: 0; border: 0; padding: 0; white-space: nowrap;
+  .mast nav.seg details { position: relative; }
+  .mast nav.seg summary {
+    list-style: none; cursor: pointer; user-select: none;
+    font: 700 .75rem/1 var(--sans); letter-spacing: .08em; text-transform: uppercase;
+    color: var(--ink-2); background: transparent; border: 1px solid transparent; border-radius: 2px;
+    padding: .45rem .7rem;
   }
-  .mast nav.seg a {
-    font: 400 .8125rem/1.6 var(--sans); color: var(--ink-2);
-    text-decoration: none; border-bottom: 2px solid transparent; padding-bottom: 1px;
+  .mast nav.seg summary::-webkit-details-marker { display: none; }
+  .mast nav.seg summary::after {
+    content: "\25BE"; font-size: .55rem; margin-left: .35rem; vertical-align: middle;
   }
-  .mast nav.seg a + a { margin-left: .7rem; }
-  .mast nav.seg a:hover { color: var(--ink); border-bottom-color: var(--line); }
-  .mast nav.seg a[aria-current="page"] { color: var(--ink); font-weight: 700; border-bottom-color: var(--ink); }
+  .mast nav.seg summary:hover { color: var(--ink); border-color: var(--line); }
+  .mast nav.seg details[open] > summary,
+  .mast nav.seg details.active > summary {
+    color: var(--ink); background: var(--paper-2); border-color: var(--line);
+  }
+  .mast nav.seg .drop {
+    position: absolute; right: 0; top: calc(100% + 4px); z-index: 30;
+    min-width: 12rem; background: var(--paper); border: 1px solid var(--line);
+    box-shadow: 0 2px 8px rgba(0,0,0,.12);
+  }
+  html[data-theme="dark"] .mast nav.seg .drop { box-shadow: 0 2px 8px rgba(0,0,0,.5); }
+  .mast nav.seg .drop a {
+    display: block; font: 400 .8125rem/1.4 var(--sans); color: var(--ink-2);
+    text-decoration: none; padding: .45rem .8rem;
+  }
+  .mast nav.seg .drop a:hover { color: var(--ink); background: var(--paper-2); }
+  .mast nav.seg .drop a[aria-current="page"] {
+    color: var(--ink); font-weight: 700; background: var(--paper-3);
+  }
 
   /* ---- body grid ---- */
   .wrap { display: grid; grid-template-columns: var(--side) minmax(0, 1fr); gap: 0; align-items: start; }
   aside.toc {
-    position: sticky; top: 0; align-self: start;
+    position: sticky; top: 6.5rem; align-self: start;
     padding: 1.75rem 1.25rem 3rem; border-right: 1px solid var(--line-2);
     max-height: 100vh; overflow-y: auto;
   }
@@ -395,15 +413,24 @@ export function figure(svg, captionEn, captionId) {
 }
 
 export function page({ file, titleEn, titleId, subtitleEn, subtitleId, sections, body, extraHead = '' }) {
+  // Dropdown menus: the segment name is a button that opens a chapter list.
+  // No dead labels — every visible word is either a trigger or a destination.
   const nav = SEGMENTS.map((segment) => {
-    const links = CHAPTERS.filter((chapter) => chapter.segment === segment.id)
+    const chapters = CHAPTERS.filter((chapter) => chapter.segment === segment.id);
+    const active = chapters.some((chapter) => chapter.file === file);
+    const links = chapters
       .map(
         (chapter) =>
-          `<a href="${chapter.file}"${chapter.file === file ? ' aria-current="page"' : ''}>${t(chapter.en, chapter.id)}</a>`,
+          `          <a href="${chapter.file}"${chapter.file === file ? ' aria-current="page"' : ''}>${t(chapter.en, chapter.id)}</a>`,
       )
-      .join('');
-    return `<section><h2>${t(segment.en, segment.id_)}</h2>${links}</section>`;
-  }).join('\n      ');
+      .join('\n');
+    return `      <details class="dropdown"${active ? ' data-active' : ''}>
+        <summary aria-haspopup="true">${t(segment.en, segment.id_)}</summary>
+        <nav class="drop" aria-label="${escape(t(segment.en + ' chapters', 'Bab ' + segment.id_))}">
+${links}
+        </nav>
+      </details>`;
+  }).join('\n');
 
   const toc = sections.length
     ? `<p class="lbl">${t('On this page', 'Di halaman ini')}</p>
@@ -423,17 +450,7 @@ ${sections
       </ol>`
     : '';
 
-  // The sidebar repeats the segmentation rather than dumping "other chapters":
-  // a reader who is lost is lost about *which* segment, not about which of eight.
-  const segments = SEGMENTS.map((segment) => {
-    const items = CHAPTERS.filter((chapter) => chapter.segment === segment.id)
-      .map(
-        (chapter) =>
-          `<li><a href="${chapter.file}"${chapter.file === file ? ' aria-current="true"' : ''}>${t(chapter.en, chapter.id)}</a></li>`,
-      )
-      .join('');
-    return `<div class="seg"><p class="lbl">${t(segment.en, segment.id_)}</p><ul>${items}</ul></div>`;
-  }).join('\n        ');
+
 
   return `<!DOCTYPE html>
 <html lang="en" data-theme="light">
@@ -484,7 +501,6 @@ ${sections
     <details open>
       <summary>${t('Contents', 'Daftar isi')}</summary>
       ${toc}
-        ${segments}
     </details>
   </aside>
 
@@ -528,6 +544,20 @@ ${body}
       root.dataset.theme = root.dataset.theme === 'dark' ? 'light' : 'dark';
       try { localStorage.setItem('sg-theme', root.dataset.theme); } catch (e) {}
     });
+
+    // Dropdown: opening one closes the others; clicking outside closes all.
+    var drops = [].slice.call(document.querySelectorAll('.mast nav.seg details'));
+    if (drops.length) {
+      document.addEventListener('click', function (e) {
+        var inside = drops.some(function (d) { return d.contains(e.target); });
+        if (!inside) drops.forEach(function (d) { d.removeAttribute('open'); });
+      });
+      drops.forEach(function (d) {
+        d.querySelector('summary').addEventListener('click', function () {
+          drops.forEach(function (other) { if (other !== d && other.hasAttribute('open')) other.removeAttribute('open'); });
+        });
+      });
+    }
 
     // Mark the section being read. Progressive: the TOC works without it.
     var links = [].slice.call(document.querySelectorAll('aside.toc ol a'));
