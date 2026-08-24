@@ -1,13 +1,24 @@
 {
   "name": "@fachryxyf/scorpio-guard",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Adaptive trust evaluation for web interactions — a local, advisory library.",
   "license": "MIT",
   "author": "Fachryxyf",
   "repository": "github:Fachryxyf/scorpio-guard",
   "homepage": "https://scorpio-guard.fachryxyf.com",
+  "bugs": "https://github.com/Fachryxyf/scorpio-guard/issues",
+  "keywords": [
+    "adaptive-trust",
+    "abuse-prevention",
+    "rate-limiting",
+    "trust",
+    "advisory",
+    "zero-dependency"
+  ],
   "type": "module",
-  "private": true,
+  "publishConfig": {
+    "access": "public"
+  },
   "files": [
     "dist"
   ],

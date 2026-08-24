@@ -17,11 +17,11 @@ the answer given, and what that answer commits the implementation to.
   policy; the tests are what make a policy change visible.
 
 Status: every numbered question is answered — the original thirty, plus D31 to
-D58 arising from review, implementation, and a live pentest. Nothing is blocked on
+D59 arising from review, implementation, and a live pentest. Nothing is blocked on
 a decision. What remains is validation: the values recorded here have not met real
 traffic yet, and D47 names where they will.
 
-Last updated: 2026-08-23
+Last updated: 2026-08-24
 
 ---
 
@@ -110,6 +110,7 @@ Last updated: 2026-08-23
 - [D56 — Real traffic is recorded by an observing proxy, not by reading logs](#d56--real-traffic-is-recorded-by-an-observing-proxy-not-by-reading-logs)
 - [D57 — Drive a real browser, because a real audience is not available](#d57--drive-a-real-browser-because-a-real-audience-is-not-available)
 - [D58 — The site is generated from the library, not hand-copied from it](#d58--the-site-is-generated-from-the-library-not-hand-copied-from-it)
+- [D59 — Published, and running in production as an observer](#d59--published-and-running-in-production-as-an-observer)
 
 **[Open questions](#open-questions)**
 
@@ -2572,6 +2573,95 @@ The fix is structural rather than cosmetic:
 
 ---
 
+## D59 — Published, and running in production as an observer
+
+**Decided, and then measured.** D25 held `private: true` until the evaluation API
+stopped moving. It has: `0.1.0` is on npm as `@fachryxyf/scorpio-guard`, MIT, scoped
+public, zero dependencies. The stage claim in this record moves from *installable* to
+*published*, and nothing else about it changes — the version is `0.1.0` rather than
+`1.0.0` precisely because no threshold is calibrated.
+
+### The third integration, and it says the same thing as the first two
+
+SG now observes a live chat endpoint (`fachry-os.chat`), consumed from npm at an
+exact pin rather than a caret range. The reasoning for pinning is the project's own
+README: with no calibrated threshold, a minor-version bump can change advisory
+behavior, and a caret range would pull that in silently.
+
+Three invariants are declared for the `fachry-os.chat` scope:
+
+| Invariant | Strength | Why that strength |
+|---|---|---|
+| `chat.credentials-present` | `hard` | The browser must fetch a token and solve a proof-of-work from `/api/session` before it can send anything. Absence is proof, not probability. |
+| `chat.first-party-context` | `soft` | An `Origin` or `Referer` is normally present and legitimately absent sometimes. |
+| `chat.within-client-limit` | `soft` | The UI sends an 800-character cap; exceeding it is evidence the client was not the UI, not proof. |
+
+Measured against the deployed endpoint:
+
+```
+legit visitor                          ALLOW      hard=false
+forged: no token, no pow, no origin    RESTRICT   hard=true
+token only, no pow                     RESTRICT   hard=true
+message longer than the client cap     OBSERVE    hard=false
+```
+
+The trace explains itself: `hard violation of chat.credentials-present: advises
+RESTRICT, ceiling bypassed`. A brand-new entity with no history is still restricted
+when it violates a proof, which is D39 and D40 behaving as recorded.
+
+### What did not move, and why that is the finding
+
+**The statistical layer never engaged.** Twelve scripted messages in sequence, every
+weak signal lit, ended at `OBSERVE` / `developing` and went no further. The cause is
+not a threshold: it is `memoryStore` being process-local while the endpoint runs on
+Vercel, so a cold start discards accumulated trust before it can accumulate.
+
+This is the same result HealthMe produced (D34) and IXFE produced again (D47): **the
+part that works in production is the least novel part of the design.** Declared
+invariants are set membership expressible as one `if`. Beta trust, decay, and the
+epistemic stage — the parts that are actually new — remain untrained in every
+deployment so far, and now for a reason that is architectural rather than statistical.
+
+Fixing it needs a `StateStore` adapter to something that survives a cold start.
+`sqliteStore` (D44) does not help on serverless, because the filesystem does not
+persist either. That is a networked store, behind the same three methods, proven with
+the conformance kit (D8) before being trusted.
+
+### Two things worth recording about the integration itself
+
+**It enforces nothing.** `observeChat()` records and its result is discarded; the
+decisions still belong to the origin check, the token, the proof-of-work and the rate
+limit. That is D9 honoured in the only place it can be tested — a real endpoint where
+being wrong would cost a real visitor.
+
+**There is no sink, so the observation is currently unreadable.** Recording advice
+that nothing stores is a measurement taken and thrown away. This is the gap between
+*running* and *useful*, and it is named rather than glossed: the integration needs
+somewhere to write before it can tell anyone anything.
+
+### One trap, avoided, worth naming
+
+`verifySolution()` consumes the proof-of-work challenge. Calling it twice — once for
+the observer, once for the real decision — rejects legitimate visitors, because the
+second call finds the challenge already spent. It is verified once and the result is
+shared. A replay test proves the single-use rule is still intact.
+
+The general shape is a hazard for any observational integration: **an observer that
+calls a stateful verifier has changed the state it was supposed to be watching.**
+
+### Consequences
+
+- Installation instructions change from a git URL to `npm install`. The git path
+  still works and stays documented for contributors.
+- The blocker moves again. It was visitors (D56), then their distribution (D57). For
+  the statistical layer it is now *durable state on serverless*, which is a store
+  adapter rather than a research problem.
+- Three integrations, three times the same lesson: hard constraints earn their keep
+  immediately, and the probabilistic model has still never been exercised by a real
+  population.
+
+---
+
 # Open questions
 
 Every numbered question is answered. What remains is not a question but a
@@ -2624,6 +2714,7 @@ unauthenticated public surface, still blocked on whether it gains a server side.
 | D51 | Ten collectors, no thresholds | Each collector measures the right thing; not one has met a real false positive. The catalogue's promise that every signal has a written innocent cause is kept on paper, not in evidence. |
 | D52 | The anomaly reference profile | Four expected values and four weights, all chosen by judgement. Deliberately not trained, because the only traffic available is invented (D45) — so the classifier is honest about its ignorance rather than free of it. |
 | D53 | The v0.1 wire format | Encodes, decodes, and degrades correctly against its own tests. Never round-tripped against a server, because no server exists. The strategy vocabulary is still empty. |
+| D59 | The published package | `0.1.0` is on npm and running in production as an observer. What runs there is the invariant layer; the trust model is reset by every cold start, so it has been *deployed* without being *exercised*. |
 
 ---
 

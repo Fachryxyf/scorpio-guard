@@ -70,7 +70,8 @@ ${items}
       <table>
         <tbody>
           <tr><th>${t('Kind', 'Jenis')}</th><td>${t('library', 'library')}</td></tr>
-          <tr><th>${t('Stage', 'Tahap')}</th><td>pre-alpha</td></tr>
+          <tr><th>npm</th><td>0.1.0</td></tr>
+          <tr><th>${t('Stage', 'Tahap')}</th><td>${t('published, uncalibrated', 'terbit, belum dikalibrasi')}</td></tr>
           <tr><th>${t('Language', 'Bahasa')}</th><td>TypeScript</td></tr>
           <tr><th>${t('Dependencies', 'Dependensi')}</th><td>0</td></tr>
           <tr><th>${t('Runtime', 'Runtime')}</th><td>Node &ge; 22.6</td></tr>
@@ -254,8 +255,8 @@ ${portals}
     file: 'index.html',
     titleEn: 'Scorpio Guard',
     titleId: 'Scorpio Guard',
-    subtitleEn: 'Trust is a spectrum, not a verdict. A local, advisory trust-evaluation library &mdash; pre-alpha, and calibrated against nothing.',
-    subtitleId: 'Trust itu spektrum, bukan putusan. Library evaluasi trust yang lokal dan bersifat saran &mdash; pre-alpha, dan belum dikalibrasi terhadap apa pun.',
+    subtitleEn: 'Trust is a spectrum, not a verdict. A local, advisory trust-evaluation library &mdash; published at 0.1.0, and calibrated against nothing.',
+    subtitleId: 'Trust itu spektrum, bukan putusan. Library evaluasi trust yang lokal dan bersifat saran &mdash; terbit di 0.1.0, dan belum dikalibrasi terhadap apa pun.',
     sections,
     body,
   });

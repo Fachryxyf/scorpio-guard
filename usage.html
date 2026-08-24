@@ -448,12 +448,15 @@
 
     <h2 id="install"><span class="n">1.</span> <span data-lang="en">Install</span><span data-lang="id">Pasang</span></h2>
 
-    <pre>npm install github:Fachryxyf/scorpio-guard</pre>
+    <pre>npm install @fachryxyf/scorpio-guard@0.1.0</pre>
+
+    <p class="tnote"><span data-lang="en">Pin the exact version rather than a caret range. No threshold in this library is calibrated, so a minor bump can change advisory behavior and <code>^0.1.0</code> would pull that in silently. Installing from source also works: <code>npm install github:Fachryxyf/scorpio-guard</code>.</span><span data-lang="id">Patok versi tepat alih-alih rentang caret. Tak ada ambang di library ini yang terkalibrasi, jadi kenaikan minor bisa mengubah perilaku saran dan <code>^0.1.0</code> akan menariknya diam-diam. Memasang dari sumber juga bisa: <code>npm install github:Fachryxyf/scorpio-guard</code>.</span></p>
 
     <table>
       <caption><span data-lang="en">Requirements and entry points</span><span data-lang="id">Kebutuhan dan titik masuk</span></caption>
       <thead><tr><th></th><th></th></tr></thead>
       <tbody>
+        <tr><th>npm</th><td><code>@fachryxyf/scorpio-guard</code> &middot; 0.1.0 &middot; MIT</td></tr>
         <tr><th>Node</th><td>&ge; 22.6 &middot; ESM &middot; <span data-lang="en">zero runtime dependencies</span><span data-lang="id">tanpa dependensi runtime</span></td></tr>
         <tr><th>.</th><td><span data-lang="en">the model</span><span data-lang="id">modelnya</span></td></tr>
         <tr><th>./collect</th><td><span data-lang="en">the browser collector</span><span data-lang="id">collector peramban</span></td></tr>
@@ -570,7 +573,7 @@ const guard = createGuard({ store: sqliteStore({ path: './trust.db' }) });</pre>
 
 <footer>
   <p>
-    <span data-lang="en">Scorpio Guard is pre-alpha and calibrated against nothing. Every number on this site is generated from the code that produces it; none of it has met a real population.</span><span data-lang="id">Scorpio Guard masih pre-alpha dan belum dikalibrasi terhadap apa pun. Setiap angka di situs ini dihasilkan dari kode yang memproduksinya; belum ada satu pun yang bertemu populasi nyata.</span>
+    <span data-lang="en">Scorpio Guard is published at 0.1.0 and calibrated against nothing. Every number on this site is generated from the code that produces it; none of it has met a real population.</span><span data-lang="id">Scorpio Guard terbit di 0.1.0 dan belum dikalibrasi terhadap apa pun. Setiap angka di situs ini dihasilkan dari kode yang memproduksinya; belum ada satu pun yang bertemu populasi nyata.</span>
   </p>
   <p>
     <a href="https://github.com/Fachryxyf/scorpio-guard"><span data-lang="en">Source</span><span data-lang="id">Sumber</span></a> ·

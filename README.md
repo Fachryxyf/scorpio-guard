@@ -161,17 +161,22 @@ the thesis rather than smoke-test it.
 
 ## Install
 
-Not on npm yet: `@fachryxyf/scorpio-guard` is reserved but unpublished until the
-evaluation API stops moving (D25). Install the repository directly — it builds
-itself on install.
-
 ```
-npm install github:Fachryxyf/scorpio-guard
+npm install @fachryxyf/scorpio-guard
 ```
 
-Node 22.6 or newer, ESM only, no runtime dependencies. Two entry points: `.` for
-the model, `./collect` for the browser collector, on one version number so they
-cannot be installed mismatched.
+Published at `0.1.0`, MIT, zero runtime dependencies (D59). Pin the exact version
+rather than a caret range: no threshold in this library is calibrated, so a minor
+bump can change advisory behavior, and `^0.1.0` would pull that in silently.
+
+```
+npm install @fachryxyf/scorpio-guard@0.1.0   # recommended
+npm install github:Fachryxyf/scorpio-guard   # from source, builds on install
+```
+
+Node 22.6 or newer, ESM only. Three entry points: `.` for the model, `./collect`
+for the browser collector, `./sqlite` for the durable store — on one version number
+so they cannot be installed mismatched.
 
 ## Usage
 
