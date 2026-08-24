@@ -59,5 +59,6 @@
   "D56": "examples/ixfe/live/",
   "D57": "examples/ixfe/live/visitors.ts, cdp.ts",
   "D58": "site/, scripts/research.mjs",
-  "D59": "package.json, npm @fachryxyf/scorpio-guard"
+  "D59": "package.json, npm @fachryxyf/scorpio-guard",
+  "D60": "src/store/kv.ts"
 }

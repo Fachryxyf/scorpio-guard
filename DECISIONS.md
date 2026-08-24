@@ -17,7 +17,7 @@ the answer given, and what that answer commits the implementation to.
   policy; the tests are what make a policy change visible.
 
 Status: every numbered question is answered — the original thirty, plus D31 to
-D59 arising from review, implementation, and a live pentest. Nothing is blocked on
+D60 arising from review, implementation, and a live pentest. Nothing is blocked on
 a decision. What remains is validation: the values recorded here have not met real
 traffic yet, and D47 names where they will.
 
@@ -111,6 +111,7 @@ Last updated: 2026-08-24
 - [D57 — Drive a real browser, because a real audience is not available](#d57--drive-a-real-browser-because-a-real-audience-is-not-available)
 - [D58 — The site is generated from the library, not hand-copied from it](#d58--the-site-is-generated-from-the-library-not-hand-copied-from-it)
 - [D59 — Published, and running in production as an observer](#d59--published-and-running-in-production-as-an-observer)
+- [D60 — Durable trust on serverless is a networked store, over HTTP](#d60--durable-trust-on-serverless-is-a-networked-store-over-http)
 
 **[Open questions](#open-questions)**
 
@@ -2662,6 +2663,99 @@ calls a stateful verifier has changed the state it was supposed to be watching.*
 
 ---
 
+## D60 — Durable trust on serverless is a networked store, over HTTP
+
+**Decided, from the measurement in D59 rather than from a preference.** Three
+integrations have now shown the same thing: the invariant layer earns its keep and
+the trust model never gets exercised. D59 established that the last cause is not
+statistical but architectural — `memoryStore` is process-local, and a serverless
+cold start discards accumulated evidence before it can accumulate.
+
+`sqliteStore` (D44) does not fix it. It answers restart durability *on one
+filesystem*, and a serverless filesystem is as ephemeral as the process on it. So
+durability there means state that lives somewhere else, which means the network.
+
+### HTTP through `fetch`, not a Redis client
+
+Two reasons, and the dependency count is the weaker one.
+
+The stronger reason is shape: a TCP connection pool assumes a process that keeps
+running, and a serverless function may be frozen mid-request and thawed later. Every
+managed KV service these platforms actually offer — Upstash Redis, Vercel KV,
+Cloudflare KV — exposes an HTTP API for exactly that reason. Using it keeps D7's
+zero-dependency promise intact as a *consequence* rather than as the goal.
+
+### The transport is injected, so this is not one vendor's adapter
+
+`kvStore` holds the model concerns: JSON encoding, millisecond precision, freezing
+what it returns, refusing to reinterpret an opaque key. A `KvTransport` holds the
+service concerns, in three functions. `upstashTransport` ships because it is what
+Upstash and Vercel KV both speak; anything else is three functions away.
+
+```
+import { kvStore, upstashTransport } from '@fachryxyf/scorpio-guard/kv';
+
+const guard = createGuard({
+  store: kvStore({
+    transport: upstashTransport({ url: process.env.KV_URL, token: process.env.KV_TOKEN }),
+  }),
+});
+```
+
+### Three details that are correctness, not polish
+
+**1. The key travels in the request body, never in the path.** `POST /get/<key>`
+breaks on an entity reference containing a slash or a space, and D1 permits both —
+the reference is opaque, so the store may not normalise, trim, or hash it. The
+conformance kit checks this with keys containing spaces, slashes, colons and braces,
+and a path-based transport fails it.
+
+**2. The service TTL is deliberately longer than the retention horizon.** Retention
+has one definition, `isExpired` (D6). A service-side expiry that fired first would
+become a second definition, disagreeing with every other store about when state dies.
+So the TTL is a generous upper bound whose only job is reclaiming space — the same
+role `sweep` plays in the memory store.
+
+**3. A foreign value is not read as trust state.** In a shared namespace something
+else may own a colliding key. Unparseable JSON, or JSON of the wrong shape, reads as
+absent rather than throwing on every request or — worse — being interpreted.
+
+### Fail-open, and the cost said out loud
+
+A transport failure reads as a cold start and a failed write is swallowed. That
+follows from D9: the guard is advisory, so a KV outage must not take the host's
+request path down with it.
+
+The cost is real and is recorded rather than buried: **an attacker who can make your
+KV unreachable resets every entity to `unknown`**, the most permissive state the
+trust dimension has. What survives is the layer that has actually been earning its
+keep — a proven violation reaches `RESTRICT` with no history at all (D15). Fail-open
+degrades the statistical dimension and leaves the provable one untouched, which is
+the right way round.
+
+`failOpen: false` exists for a host that would rather fail the request than trust an
+entity it has forgotten. And `onError` is not optional decoration: a store that is
+silently failing open is indistinguishable from one that is working, and that is
+exactly how a deployment discovers months later that trust never accumulated.
+
+### What this does and does not close
+
+Closed: durable trust state on a platform with no durable process. Three stores now
+satisfy one contract, and the conformance kit finally has the second network-shaped
+implementation it was written for.
+
+**Not closed: calibration.** This makes accumulation *possible* on serverless; it does
+not supply a population. What it does change is the kind of thing standing in the way
+— every unvalidated row in this record is waiting on real observations, and until now
+they could not survive a cold start to be observed.
+
+Still missing, and named: **a sink.** D59 recorded that the production observer
+discards its own result. A durable store means the trust state persists; it does not
+mean anyone can read what the guard advised. Recording advice nobody stores is still
+a measurement taken and thrown away.
+
+---
+
 # Open questions
 
 Every numbered question is answered. What remains is not a question but a
@@ -2715,6 +2809,7 @@ unauthenticated public surface, still blocked on whether it gains a server side.
 | D52 | The anomaly reference profile | Four expected values and four weights, all chosen by judgement. Deliberately not trained, because the only traffic available is invented (D45) — so the classifier is honest about its ignorance rather than free of it. |
 | D53 | The v0.1 wire format | Encodes, decodes, and degrades correctly against its own tests. Never round-tripped against a server, because no server exists. The strategy vocabulary is still empty. |
 | D59 | The published package | `0.1.0` is on npm and running in production as an observer. What runs there is the invariant layer; the trust model is reset by every cold start, so it has been *deployed* without being *exercised*. |
+| D60 | The networked KV store | Satisfies the store contract against an in-process transport. No production deployment has yet run on it, so *durable accumulation* is demonstrated in tests and not in the field. |
 
 ---
 

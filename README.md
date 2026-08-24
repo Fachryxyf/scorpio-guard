@@ -165,18 +165,18 @@ the thesis rather than smoke-test it.
 npm install @fachryxyf/scorpio-guard
 ```
 
-Published at `0.1.0`, MIT, zero runtime dependencies (D59). Pin the exact version
+Published at `0.2.0`, MIT, zero runtime dependencies (D59). Pin the exact version
 rather than a caret range: no threshold in this library is calibrated, so a minor
 bump can change advisory behavior, and `^0.1.0` would pull that in silently.
 
 ```
-npm install @fachryxyf/scorpio-guard@0.1.0   # recommended
+npm install @fachryxyf/scorpio-guard@0.2.0   # recommended
 npm install github:Fachryxyf/scorpio-guard   # from source, builds on install
 ```
 
-Node 22.6 or newer, ESM only. Three entry points: `.` for the model, `./collect`
-for the browser collector, `./sqlite` for the durable store — on one version number
-so they cannot be installed mismatched.
+Node 22.6 or newer, ESM only. Four entry points: `.` for the model, `./collect` for
+the browser collector, `./sqlite` for the single-host durable store, `./kv` for the
+networked one — on one version number so they cannot be installed mismatched.
 
 ## Usage
 
@@ -253,6 +253,25 @@ const guard = createGuard({ store: sqliteStore({ path: './trust.db' }) });
 Still no dependencies: `node:sqlite` is in the standard library. Behavioral history
 is personal data, so treat that file as such — `guard.forget()` deletes a row, and
 retention expiry deletes it for you.
+
+On serverless, the filesystem is as ephemeral as the process, so neither store above
+survives a cold start. Use the networked one (D60) — it talks HTTP through `fetch`,
+so there is still no dependency to install:
+
+```js
+import { createGuard } from '@fachryxyf/scorpio-guard';
+import { kvStore, upstashTransport } from '@fachryxyf/scorpio-guard/kv';
+
+const guard = createGuard({
+  store: kvStore({
+    transport: upstashTransport({ url: process.env.KV_URL, token: process.env.KV_TOKEN }),
+  }),
+});
+```
+
+A transport failure reads as a cold start rather than throwing, because the guard is
+advisory and a KV outage must not take your request path down with it. Pass `onError`
+so you find out — a store silently failing open looks exactly like one that works.
 
 Deleting an entity's history is one call, and it is the same code path retention
 uses with the horizon forced to zero:

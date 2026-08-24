@@ -1,6 +1,6 @@
 {
   "name": "@fachryxyf/scorpio-guard",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Adaptive trust evaluation for web interactions — a local, advisory library.",
   "license": "MIT",
   "author": "Fachryxyf",
@@ -34,6 +34,10 @@
     "./sqlite": {
       "types": "./dist/store/sqlite.d.ts",
       "default": "./dist/store/sqlite.js"
+    },
+    "./kv": {
+      "types": "./dist/store/kv.d.ts",
+      "default": "./dist/store/kv.js"
     }
   },
   "scripts": {

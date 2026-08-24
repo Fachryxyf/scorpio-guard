@@ -29,7 +29,7 @@ export function usage(data) {
 
     ${h2(1, 'install', 'Install', 'Pasang')}
 
-    <pre>npm install @fachryxyf/scorpio-guard@0.1.0</pre>
+    <pre>npm install @fachryxyf/scorpio-guard@0.2.0</pre>
 
     <p class="tnote">${t(
       'Pin the exact version rather than a caret range. No threshold in this library is calibrated, so a minor bump can change advisory behavior and <code>^0.1.0</code> would pull that in silently. Installing from source also works: <code>npm install github:Fachryxyf/scorpio-guard</code>.',
@@ -40,11 +40,12 @@ export function usage(data) {
       <caption>${t('Requirements and entry points', 'Kebutuhan dan titik masuk')}</caption>
       <thead><tr><th></th><th></th></tr></thead>
       <tbody>
-        <tr><th>npm</th><td><code>@fachryxyf/scorpio-guard</code> &middot; 0.1.0 &middot; MIT</td></tr>
+        <tr><th>npm</th><td><code>@fachryxyf/scorpio-guard</code> &middot; 0.2.0 &middot; MIT</td></tr>
         <tr><th>Node</th><td>&ge; 22.6 &middot; ESM &middot; ${t('zero runtime dependencies', 'tanpa dependensi runtime')}</td></tr>
         <tr><th>.</th><td>${t('the model', 'modelnya')}</td></tr>
         <tr><th>./collect</th><td>${t('the browser collector', 'collector peramban')}</td></tr>
-        <tr><th>./sqlite</th><td>${t('durable store over node:sqlite', 'store tahan restart di atas node:sqlite')}</td></tr>
+        <tr><th>./sqlite</th><td>${t('durable store over node:sqlite, one host', 'store tahan restart di atas node:sqlite, satu host')}</td></tr>
+        <tr><th>./kv</th><td>${t('networked store over HTTP, for serverless', 'store jaringan lewat HTTP, untuk serverless')}</td></tr>
       </tbody>
     </table>
 
@@ -108,8 +109,37 @@ await guard.evaluate({
 const guard = createGuard({ store: sqliteStore({ path: './trust.db' }) });</pre>
 
     <p>${t(
-      'Still zero dependencies: node:sqlite is standard library. Treat that file as personal data, because that is what it holds. Deleting one entity is one call:',
-      'Tetap tanpa dependensi: node:sqlite ada di pustaka standar. Perlakukan file itu sebagai data pribadi, karena memang isinya begitu. Menghapus satu entitas cukup satu panggilan:',
+      'Still zero dependencies: node:sqlite is standard library. Treat that file as personal data, because that is what it holds.',
+      'Tetap tanpa dependensi: node:sqlite ada di pustaka standar. Perlakukan file itu sebagai data pribadi, karena memang isinya begitu.',
+    )}</p>
+
+    <h3>${t('On serverless, use the networked store', 'Di serverless, pakai store jaringan')}</h3>
+
+    <p>${t(
+      'A serverless filesystem is as ephemeral as the process on it, so neither store above survives a cold start &mdash; which is exactly what stopped the trust model from ever accumulating in production (D59). The KV store talks HTTP through <code>fetch</code>, so there is still nothing to install.',
+      'Filesystem serverless sama sementaranya dengan prosesnya, jadi kedua store di atas tak bertahan melewati cold start &mdash; dan itu tepat yang menghentikan model trust dari pernah berakumulasi di produksi (D59). Store KV bicara HTTP lewat <code>fetch</code>, jadi tetap tak ada yang perlu dipasang.',
+    )}</p>
+
+<pre>import { kvStore, upstashTransport } from '@fachryxyf/scorpio-guard/kv';
+
+const guard = createGuard({
+  store: kvStore({
+    transport: upstashTransport({
+      url: process.env.KV_URL,
+      token: process.env.KV_TOKEN,
+    }),
+    onError: (error, op) =&gt; log.warn({ error, op }, 'trust store degraded'),
+  }),
+});</pre>
+
+    <p class="tnote">${t(
+      'A transport failure reads as a cold start rather than throwing, because the guard is advisory and a KV outage must not take your request path down with it. Pass <code>onError</code> so you find out: a store silently failing open looks exactly like one that works. Prove any store you write with <code>checkStoreConformance</code> before trusting it.',
+      'Kegagalan transport terbaca sebagai cold start alih-alih melempar error, karena guard bersifat saran dan gangguan KV tak boleh menjatuhkan jalur request-mu. Berikan <code>onError</code> supaya kamu tahu: store yang diam-diam fail-open tampak persis seperti yang bekerja. Buktikan store apa pun yang kamu tulis dengan <code>checkStoreConformance</code> sebelum mempercayainya.',
+    )}</p>
+
+    <p>${t(
+      'Deleting one entity is one call:',
+      'Menghapus satu entitas cukup satu panggilan:',
     )}</p>
 
     <pre>await guard.forget(entity);</pre>
