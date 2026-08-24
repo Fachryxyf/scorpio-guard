@@ -577,8 +577,8 @@ ${prevnext}
 <footer>
   <p>
     ${t(
-      'Scorpio Guard is published at 0.2.0 and calibrated against nothing. Every number on this site is generated from the code that produces it; none of it has met a real population.',
-      'Scorpio Guard terbit di 0.2.0 dan belum dikalibrasi terhadap apa pun. Setiap angka di situs ini dihasilkan dari kode yang memproduksinya; belum ada satu pun yang bertemu populasi nyata.',
+      'Scorpio Guard is published at 0.1.0 and calibrated against nothing. Every number on this site is generated from the code that produces it; none of it has met a real population.',
+      'Scorpio Guard terbit di 0.1.0 dan belum dikalibrasi terhadap apa pun. Setiap angka di situs ini dihasilkan dari kode yang memproduksinya; belum ada satu pun yang bertemu populasi nyata.',
     )}
   </p>
   <p>

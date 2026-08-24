@@ -165,18 +165,23 @@ the thesis rather than smoke-test it.
 npm install @fachryxyf/scorpio-guard
 ```
 
-Published at `0.2.0`, MIT, zero runtime dependencies (D59). Pin the exact version
+Published at `0.1.0`, MIT, zero runtime dependencies (D59). Pin the exact version
 rather than a caret range: no threshold in this library is calibrated, so a minor
 bump can change advisory behavior, and `^0.1.0` would pull that in silently.
 
 ```
-npm install @fachryxyf/scorpio-guard@0.2.0   # recommended
+npm install @fachryxyf/scorpio-guard@0.1.0   # recommended
 npm install github:Fachryxyf/scorpio-guard   # from source, builds on install
 ```
 
+`0.2.0` is on `main` and unreleased. It adds the networked KV store (D60), which is
+the only way to get durable trust state on serverless — install from source until it
+is published.
+
 Node 22.6 or newer, ESM only. Four entry points: `.` for the model, `./collect` for
 the browser collector, `./sqlite` for the single-host durable store, `./kv` for the
-networked one — on one version number so they cannot be installed mismatched.
+networked one (unreleased) — on one version number so they cannot be installed
+mismatched.
 
 ## Usage
 

@@ -2809,7 +2809,7 @@ unauthenticated public surface, still blocked on whether it gains a server side.
 | D52 | The anomaly reference profile | Four expected values and four weights, all chosen by judgement. Deliberately not trained, because the only traffic available is invented (D45) — so the classifier is honest about its ignorance rather than free of it. |
 | D53 | The v0.1 wire format | Encodes, decodes, and degrades correctly against its own tests. Never round-tripped against a server, because no server exists. The strategy vocabulary is still empty. |
 | D59 | The published package | `0.1.0` is on npm and running in production as an observer. What runs there is the invariant layer; the trust model is reset by every cold start, so it has been *deployed* without being *exercised*. |
-| D60 | The networked KV store | Satisfies the store contract against an in-process transport. No production deployment has yet run on it, so *durable accumulation* is demonstrated in tests and not in the field. |
+| D60 | The networked KV store | Satisfies the store contract against an in-process transport. Unreleased — `0.2.0` is on `main` and not on npm. No production deployment has run on it, so *durable accumulation* is demonstrated in tests and not in the field. |
 
 ---
 

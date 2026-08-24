@@ -448,7 +448,7 @@
 
     <h2 id="install"><span class="n">1.</span> <span data-lang="en">Install</span><span data-lang="id">Pasang</span></h2>
 
-    <pre>npm install @fachryxyf/scorpio-guard@0.2.0</pre>
+    <pre>npm install @fachryxyf/scorpio-guard@0.1.0</pre>
 
     <p class="tnote"><span data-lang="en">Pin the exact version rather than a caret range. No threshold in this library is calibrated, so a minor bump can change advisory behavior and <code>^0.1.0</code> would pull that in silently. Installing from source also works: <code>npm install github:Fachryxyf/scorpio-guard</code>.</span><span data-lang="id">Patok versi tepat alih-alih rentang caret. Tak ada ambang di library ini yang terkalibrasi, jadi kenaikan minor bisa mengubah perilaku saran dan <code>^0.1.0</code> akan menariknya diam-diam. Memasang dari sumber juga bisa: <code>npm install github:Fachryxyf/scorpio-guard</code>.</span></p>
 
@@ -456,12 +456,12 @@
       <caption><span data-lang="en">Requirements and entry points</span><span data-lang="id">Kebutuhan dan titik masuk</span></caption>
       <thead><tr><th></th><th></th></tr></thead>
       <tbody>
-        <tr><th>npm</th><td><code>@fachryxyf/scorpio-guard</code> &middot; 0.2.0 &middot; MIT</td></tr>
+        <tr><th>npm</th><td><code>@fachryxyf/scorpio-guard</code> &middot; 0.1.0 &middot; MIT</td></tr>
         <tr><th>Node</th><td>&ge; 22.6 &middot; ESM &middot; <span data-lang="en">zero runtime dependencies</span><span data-lang="id">tanpa dependensi runtime</span></td></tr>
         <tr><th>.</th><td><span data-lang="en">the model</span><span data-lang="id">modelnya</span></td></tr>
         <tr><th>./collect</th><td><span data-lang="en">the browser collector</span><span data-lang="id">collector peramban</span></td></tr>
         <tr><th>./sqlite</th><td><span data-lang="en">durable store over node:sqlite, one host</span><span data-lang="id">store tahan restart di atas node:sqlite, satu host</span></td></tr>
-        <tr><th>./kv</th><td><span data-lang="en">networked store over HTTP, for serverless</span><span data-lang="id">store jaringan lewat HTTP, untuk serverless</span></td></tr>
+        <tr><th>./kv</th><td><span data-lang="en">networked store over HTTP, for serverless — unreleased</span><span data-lang="id">store jaringan lewat HTTP, untuk serverless — belum dirilis</span></td></tr>
       </tbody>
     </table>
 
@@ -521,6 +521,8 @@ const guard = createGuard({ store: sqliteStore({ path: './trust.db' }) });</pre>
     <p><span data-lang="en">Still zero dependencies: node:sqlite is standard library. Treat that file as personal data, because that is what it holds.</span><span data-lang="id">Tetap tanpa dependensi: node:sqlite ada di pustaka standar. Perlakukan file itu sebagai data pribadi, karena memang isinya begitu.</span></p>
 
     <h3><span data-lang="en">On serverless, use the networked store</span><span data-lang="id">Di serverless, pakai store jaringan</span></h3>
+
+    <p class="tnote"><span data-lang="en"><b>Unreleased.</b> This ships in 0.2.0, which is on <code>main</code> and not yet on npm. Install from source to use it: <code>npm install github:Fachryxyf/scorpio-guard</code>.</span><span data-lang="id"><b>Belum dirilis.</b> Ini ada di 0.2.0, yang sudah di <code>main</code> tapi belum di npm. Pasang dari sumber untuk memakainya: <code>npm install github:Fachryxyf/scorpio-guard</code>.</span></p>
 
     <p><span data-lang="en">A serverless filesystem is as ephemeral as the process on it, so neither store above survives a cold start &mdash; which is exactly what stopped the trust model from ever accumulating in production (D59). The KV store talks HTTP through <code>fetch</code>, so there is still nothing to install.</span><span data-lang="id">Filesystem serverless sama sementaranya dengan prosesnya, jadi kedua store di atas tak bertahan melewati cold start &mdash; dan itu tepat yang menghentikan model trust dari pernah berakumulasi di produksi (D59). Store KV bicara HTTP lewat <code>fetch</code>, jadi tetap tak ada yang perlu dipasang.</span></p>
 
@@ -594,7 +596,7 @@ const guard = createGuard({
 
 <footer>
   <p>
-    <span data-lang="en">Scorpio Guard is published at 0.2.0 and calibrated against nothing. Every number on this site is generated from the code that produces it; none of it has met a real population.</span><span data-lang="id">Scorpio Guard terbit di 0.2.0 dan belum dikalibrasi terhadap apa pun. Setiap angka di situs ini dihasilkan dari kode yang memproduksinya; belum ada satu pun yang bertemu populasi nyata.</span>
+    <span data-lang="en">Scorpio Guard is published at 0.1.0 and calibrated against nothing. Every number on this site is generated from the code that produces it; none of it has met a real population.</span><span data-lang="id">Scorpio Guard terbit di 0.1.0 dan belum dikalibrasi terhadap apa pun. Setiap angka di situs ini dihasilkan dari kode yang memproduksinya; belum ada satu pun yang bertemu populasi nyata.</span>
   </p>
   <p>
     <a href="https://github.com/Fachryxyf/scorpio-guard"><span data-lang="en">Source</span><span data-lang="id">Sumber</span></a> ·

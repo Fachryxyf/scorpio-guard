@@ -29,7 +29,7 @@ export function usage(data) {
 
     ${h2(1, 'install', 'Install', 'Pasang')}
 
-    <pre>npm install @fachryxyf/scorpio-guard@0.2.0</pre>
+    <pre>npm install @fachryxyf/scorpio-guard@0.1.0</pre>
 
     <p class="tnote">${t(
       'Pin the exact version rather than a caret range. No threshold in this library is calibrated, so a minor bump can change advisory behavior and <code>^0.1.0</code> would pull that in silently. Installing from source also works: <code>npm install github:Fachryxyf/scorpio-guard</code>.',
@@ -40,12 +40,12 @@ export function usage(data) {
       <caption>${t('Requirements and entry points', 'Kebutuhan dan titik masuk')}</caption>
       <thead><tr><th></th><th></th></tr></thead>
       <tbody>
-        <tr><th>npm</th><td><code>@fachryxyf/scorpio-guard</code> &middot; 0.2.0 &middot; MIT</td></tr>
+        <tr><th>npm</th><td><code>@fachryxyf/scorpio-guard</code> &middot; 0.1.0 &middot; MIT</td></tr>
         <tr><th>Node</th><td>&ge; 22.6 &middot; ESM &middot; ${t('zero runtime dependencies', 'tanpa dependensi runtime')}</td></tr>
         <tr><th>.</th><td>${t('the model', 'modelnya')}</td></tr>
         <tr><th>./collect</th><td>${t('the browser collector', 'collector peramban')}</td></tr>
         <tr><th>./sqlite</th><td>${t('durable store over node:sqlite, one host', 'store tahan restart di atas node:sqlite, satu host')}</td></tr>
-        <tr><th>./kv</th><td>${t('networked store over HTTP, for serverless', 'store jaringan lewat HTTP, untuk serverless')}</td></tr>
+        <tr><th>./kv</th><td>${t('networked store over HTTP, for serverless — unreleased', 'store jaringan lewat HTTP, untuk serverless — belum dirilis')}</td></tr>
       </tbody>
     </table>
 
@@ -114,6 +114,11 @@ const guard = createGuard({ store: sqliteStore({ path: './trust.db' }) });</pre>
     )}</p>
 
     <h3>${t('On serverless, use the networked store', 'Di serverless, pakai store jaringan')}</h3>
+
+    <p class="tnote">${t(
+      '<b>Unreleased.</b> This ships in 0.2.0, which is on <code>main</code> and not yet on npm. Install from source to use it: <code>npm install github:Fachryxyf/scorpio-guard</code>.',
+      '<b>Belum dirilis.</b> Ini ada di 0.2.0, yang sudah di <code>main</code> tapi belum di npm. Pasang dari sumber untuk memakainya: <code>npm install github:Fachryxyf/scorpio-guard</code>.',
+    )}</p>
 
     <p>${t(
       'A serverless filesystem is as ephemeral as the process on it, so neither store above survives a cold start &mdash; which is exactly what stopped the trust model from ever accumulating in production (D59). The KV store talks HTTP through <code>fetch</code>, so there is still nothing to install.',
