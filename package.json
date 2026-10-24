@@ -50,12 +50,16 @@
     "visitors": "node --experimental-strip-types examples/ixfe/live/visitors.ts",
     "observed": "node --experimental-strip-types examples/ixfe/live/report.ts",
     "smoke": "node scripts/smoke.mjs",
+    "example:integration": "node --experimental-strip-types examples/integration/server.ts --demo",
     "site": "node site/build.mjs",
     "site:check": "node site/build.mjs --check",
-    "check:manifest": "node scripts/check-manifest.mjs"
+    "check:manifest": "node scripts/check-manifest.mjs",
+    "check:docs": "node scripts/check-docs.mjs"
   },
   "devDependencies": {
+    "@types/express": "^5.0.6",
     "@types/node": "22.18.11",
+    "express": "^5.3.0",
     "typescript": "5.9.3"
   },
   "engines": {

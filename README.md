@@ -365,7 +365,7 @@ in SG costs a log line rather than a visitor's pre-order. `cdp.ts` is a ~180-lin
 DevTools Protocol client over Node's `WebSocket` global, written instead of installing
 Puppeteer so the zero-dependency promise holds in the examples too.
 
-Two hundred and thirty-three tests, which double as the record of every numeric and
+Two hundred and thirty-nine tests, which double as the record of every numeric and
 semantic property the design depends on.
 
 Writing your own store? Prove it works before trusting it:
