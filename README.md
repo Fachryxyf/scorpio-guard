@@ -409,7 +409,14 @@ in SG costs a log line rather than a visitor's pre-order. `cdp.ts` is a ~180-lin
 DevTools Protocol client over Node's `WebSocket` global, written instead of installing
 Puppeteer so the zero-dependency promise holds in the examples too.
 
-Two hundred and fifty-two tests, which double as the record of every numeric and
+A traffic lab in `examples/lab/`: real Chrome instances against shipped sites, one
+declared persona per instance, each run recorded as a labelled dataset with its seed
+and browser version. [docs/DATASET.md](docs/DATASET.md) is the first run, 129 requests
+across two live builds, and it reports what it found rather than what it hoped: zero
+false positives on legitimate automation, and six adversarial misses with one shared
+cause (D63).
+
+Two hundred and fifty-eight tests, which double as the record of every numeric and
 semantic property the design depends on. [docs/CLAIMS.md](docs/CLAIMS.md) maps each
 design decision to the test that names it, and lists the ones that are still prose
 only, generated rather than maintained by hand.

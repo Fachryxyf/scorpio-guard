@@ -47,6 +47,10 @@ Tagged in `package.json`, not yet published to npm. The registry has 0.1.0, and
   by default and can be replaced by a salted hash (D61).
 - `checkStoreConformance`, a published kit so a host-written store proves itself
   against the same contract as the reference (D8).
+- A traffic lab in `examples/lab`: one Chrome per persona, seven declared personas,
+  three targets, a labelled dataset written under `var/lab/`, and `docs/DATASET.md`
+  recording what the first run found. Development-only, not in the published tarball
+  (D63).
 
 ### Changed
 

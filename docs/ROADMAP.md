@@ -81,6 +81,7 @@ alat kalibrasi, review keamanan.
 | H16 | API belum dibekukan. Tidak ada kebijakan deprecation atau panduan migrasi | 1.0 | M5.3 | semver policy dan panduan migrasi |
 | H17 | Klaim di `DECISIONS.md` tidak punya indeks ke test yang membuktikannya | MVP | M1.8 | indeks dibangkitkan, klaim tanpa target muncul sebagai daftar |
 | H18 | Tidak ada soak atau load test untuk sweep dan store | 1.0 | M4.4 | soak 24 jam dengan batas memori dan jumlah state |
+| H19 | 404 untuk path yang ditautkan build sendiri dibaca sebagai bukti negatif, jadi crawler sah mewarisi link mati situs. Ditemukan lab (F3 di `docs/DATASET.md`) | 1.0 | M2.6 | dua 404 identik: yang tertaut tidak menaikkan stage, yang tidak tertaut menaikkannya |
 
 ---
 
@@ -227,11 +228,22 @@ yang cukup untuk memilih threshold:
 
 | Task | Isi |
 |---|---|
-| M2.1 | Traffic lab: runner yang menggerakkan beberapa instans Chrome sungguhan lewat REA, satu persona per instans, seed tercatat. Persona minimum: manusia lambat, manusia cepat, monitor uptime, klien mesin sah, penyerang sabar, penyerang burst. Target: build lokal IXFE. Keluaran: dataset berlabel di `var/` dengan manifest komposisi |
+| M2.1 | Traffic lab: runner yang menggerakkan beberapa instans Chrome sungguhan lewat REA, satu persona per instans dengan `--user-data-dir` sendiri, seed dan versi browser tercatat, label dicap di sink observer. Tujuh persona: manusia lambat, manusia cepat (mobile), monitor uptime, klien mesin sah, penyerang sabar, penyerang burst, dan crawler. Target: dua build statis yang sudah terkirim, plus `--target=ixfe` yang memutar sesi D56/D57. Keluaran: dataset berlabel di `var/` dengan manifest komposisi, dan `docs/DATASET.md` |
 | M2.2 | `scripts/calibrate.mjs`: confusion matrix untuk grid policy (half-life, band, uncertainty, velocity, diskon intake). Menolak dataset di bawah ukuran minimum atau dengan segmen kosong. Keluaran: laporan yang bisa diperiksa, bukan satu angka |
 | M2.3 | Fixture beku: rekaman sesi lab disimpan sebagai fixture yang diputar di CI, sehingga perubahan model yang mengubah treatment muncul sebagai diff, bukan ditemukan di produksi |
 | M2.4 | Keputusan D baru: classifier atau konjungsi ambang yang memutuskan (D52), plus threshold terpilih, dengan komposisi dataset ditulis di samping angkanya |
 | M2.5 | Re-kalibrasi dengan campuran nyata begitu ada data produksi. Sampai itu ada, halaman jaminan menyebut batas ini secara eksplisit |
+| M2.6 | 404 yang tertaut bukan bukti (H19). Observer mencatat path yang pernah ia sajikan dari `<a href>` di HTML yang lewat, dan 404 untuk path itu tidak menambah bukti negatif |
+
+Status: M2.1 selesai sebagai harness, bukan sebagai kalibrasi (D63). Satu run
+terekam: 129 request, 14 persona-run, dua target, 0 false positive, 6 false
+negative. Keenam false negative punya satu sebab yang sama dan bukan soal
+penempatan threshold: di target yang tidak mendeklarasikan apa pun, satu page view
+tidak membawa bukti, jadi mass tetap 2.00, stage tetap `unknown`, dan plafonnya
+`ALLOW` berapa pun skor anomalinya (F1 di `docs/DATASET.md`). Karena itu M2.2 belum
+bisa menghasilkan threshold: yang bisa dikalibrasi belum ada di dataset ini. Yang
+dibutuhkan lebih dulu adalah target yang punya aksi untuk berhasil, yaitu
+`npm run lab -- --target=ixfe`, tempat endpoint waitlist dan order membawa bukti.
 
 Exit: laporan FP/FN terbit di situs, komposisi dataset tertulis, fixture beku diputar
 di CI, dan keputusan baru tercatat di `DECISIONS.md`.

@@ -17,7 +17,7 @@ the answer given, and what that answer commits the implementation to.
   policy; the tests are what make a policy change visible.
 
 Status: every numbered question is answered, the original thirty, plus D31 to
-D62 arising from review, implementation, and a live pentest. Nothing is blocked on
+D63 arising from review, implementation, a live pentest, and the traffic lab. Nothing is blocked on
 a decision. What remains is validation: the values recorded here have not met real
 traffic yet, and D47 names where they will.
 
@@ -114,6 +114,7 @@ Last updated: 2026-10-24
 - [D60: Durable trust on serverless is a networked store, over HTTP](#d60-durable-trust-on-serverless-is-a-networked-store-over-http)
 - [D61: Reporting is a versioned event, and the entity reference is withheld](#d61-reporting-is-a-versioned-event-and-the-entity-reference-is-withheld)
 - [D62: Fail-open requires a witness](#d62-fail-open-requires-a-witness)
+- [D63: The traffic lab is one browser per persona, labelled in the sink](#d63-the-traffic-lab-is-one-browser-per-persona-labelled-in-the-sink)
 
 **[Open questions](#open-questions)**
 
@@ -3432,3 +3433,71 @@ failing open.
 Gates: `src/store/kv.test.ts` (construction refused without a sink, a throwing sink
 does not escalate, a failing transport still yields a treatment and reports both
 operations, and proof still restricts).
+
+## D63: The traffic lab is one browser per persona, labelled in the sink
+
+M2.1 has to produce a labelled dataset, and the label is the entire basis for anything
+built on top of it. A dataset whose labels are inferred is worse than no dataset, because
+the inference error is invisible in every number derived from it. Three questions had to
+be answered before a single row was recorded: what is one persona, where does the label
+come from, and what does a target that can prove nothing get to contribute.
+
+### One browser instance per persona
+
+Each persona gets its own Chrome, launched with its own `--user-data-dir` and killed when
+the persona is finished. The alternative, one browser with a tab per persona, shares a
+profile: cache, cookies, redirect history, and connection reuse. A persona that lands on
+a page a previous persona already fetched can be answered from cache and issue fewer
+requests, so the recorded traffic would depend on the order the personas were listed in.
+That is contamination that would never appear as an error; it would appear as a smaller
+request count and a slightly lower suspicion score.
+
+The cost is real and accepted: a launch per persona is roughly two seconds, and a run of
+seven personas against two targets spends most of its wall clock in process startup.
+
+### The label is stamped by the observer's own sink
+
+The lab does not try to recover which persona a record belongs to. The observer accepts a
+sink, runs are sequential per target, and the runner stamps the current persona's id and
+ground truth onto every row as it is written.
+
+Two alternatives were rejected, both for the same reason. Recomputing the entity hash in
+the runner would require reproducing the observer's salt and the exact loopback address
+spelling Chrome chose, which makes the label depend on a detail that can change without
+anyone noticing. Matching on the user agent would require the record to carry one, and it
+deliberately does not: the observer records a hashed entity and nothing that identifies
+the client, which is D61 applied to the live path.
+
+The consequence is a constraint on the harness, not just a convenience: personas within a
+target must run one at a time. A parallel run would stamp the wrong label on concurrent
+rows, and the compiler would not say anything about it.
+
+### A static target declares no invariants, and its profile says so
+
+The two extra targets are shipped static builds. They have no forms, no writes, and no
+rule that can be violated, so their profiles declare an empty invariant list rather than
+borrowing IXFE's. What the lab measures there is the statistical dimension only, and
+`docs/DATASET.md` states that beside the numbers instead of leaving a reader to assume the
+proven-violation path was exercised.
+
+The scopes are per section (`<site>.blog`, `<site>.page`) rather than per path, so the
+diversity dimension can still distinguish a reader who crosses sections from a script that
+hammers one URL. Collapsing every path into one scope would have erased that.
+
+### The unit of judgement is the persona, and OBSERVE is not a treatment
+
+A legitimate persona that was given friction is a false positive even if most of its
+requests were allowed; an adversarial persona that was never treated is a false negative
+even if it was watched closely. Per-request rates would let a chatty target dilute exactly
+the mistake that matters, and counting `OBSERVE` as a treatment would report a cost the
+visitor never paid: it changes nothing and tells the host more.
+
+`--strict` makes either mistake fail the run, and is not the default. A false negative is a
+calibration finding about the model, not a malfunction of the harness, so the harness gate
+is that every row carries a label and the run completes. The finding itself belongs in the
+dataset page and in the roadmap, where it can be argued with.
+
+Gates: `examples/lab/lab.test.ts` (the scope map, unique user agents per persona so two
+visitors cannot merge into one entity, seed reproduction, first-treatment reporting, the
+two mistakes by name, and the labels surviving JSONL). The first recorded run and its
+findings are in `docs/DATASET.md`.

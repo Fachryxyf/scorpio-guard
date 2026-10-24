@@ -47,6 +47,7 @@ import { sqliteStore } from '../../../src/store/sqlite.ts';
 import { measureLatency } from '../../../src/collect/timing.ts';
 import { collectSignalIds } from '../../../src/collect/signals.ts';
 import type { BehaviorFeatures } from '../../../src/core/behavior.ts';
+import type { Invariant } from '../../../src/core/constraints.ts';
 import {
   AUTH_SCOPE,
   BILLING_SCOPE,
@@ -118,6 +119,29 @@ export type LiveRecord = {
   readonly signals: readonly string[];
 };
 
+/**
+ * What makes a target observable. D56, generalized for M2.1.
+ *
+ * The observer was written for IXFE, where the scopes match endpoints that carry
+ * declared invariants. The traffic lab needs the same instrument in front of two
+ * static sites, so the parts that are about the site rather than about observing
+ * are here: which scopes exist, which of them mean "a page was viewed", and what
+ * can be proven about them.
+ *
+ * A static site declares no invariants at all, and that is the honest profile: a
+ * marketing page cannot prove order skipping or a replayed token. Whatever the lab
+ * records there is statistical, and the dataset says so.
+ */
+export type LiveProfile = {
+  readonly id: string;
+  readonly invariants: readonly Invariant[];
+  readonly scopeFor: (method: string, path: string) => string | undefined;
+  /** Page views earn no evidence; asking for a page that is not there does. */
+  readonly isPageView: (scope: string) => boolean;
+  /** Scopes whose body carries declared fields. Empty for a site with no forms. */
+  readonly formScopes?: readonly string[];
+};
+
 export type ProxyOptions = {
   readonly origin: string;
   readonly port: number;
@@ -131,6 +155,8 @@ export type ProxyOptions = {
    * across restarts, which is the safe default, not the useful one.
    */
   readonly salt?: string;
+  /** Defaults to IXFE, which is what the first three integrations observed. */
+  readonly profile?: LiveProfile;
 };
 
 /** Static assets say nothing about intent and would swamp the window. */
@@ -196,6 +222,7 @@ function evidenceFor(
   scope: string,
   status: number,
   contentType: string,
+  isPageView: (scope: string) => boolean,
 ): { positive?: 'weak'; negative?: 'weak' } | undefined {
   const refused =
     status === 401 || status === 403 || status === 404 || status === 410 || status === 429;
@@ -204,7 +231,7 @@ function evidenceFor(
   // asking for a page that does not exist is not nothing: it is the shape of a
   // scanner walking a wordlist. Asymmetric on purpose. The innocent cause is a stale
   // link or an old bookmark, which is why it is weak rather than declared.
-  if (scope.startsWith(PAGE_SCOPE)) return refused ? { negative: 'weak' } : undefined;
+  if (isPageView(scope)) return refused ? { negative: 'weak' } : undefined;
 
   const answeredWithDocument = contentType.includes('text/html');
   if (status >= 200 && status < 300) {
@@ -231,10 +258,21 @@ function ensureParent(file: string): string {
   return file;
 }
 
+/** The profile the D56 and D57 runs used, unchanged. */
+export const IXFE_PROFILE: LiveProfile = {
+  id: 'ixfe',
+  invariants: ixfeInvariants,
+  scopeFor,
+  isPageView: (scope) => scope.startsWith(PAGE_SCOPE),
+  formScopes: [WAITLIST_SCOPE, ORDER_SCOPE],
+};
+
 export function createLiveProxy(options: ProxyOptions) {
   const origin = new URL(options.origin);
   const store = sqliteStore({ path: ensureParent(options.storePath ?? LIVE_STORE_PATH) });
-  const guard = createGuard({ invariants: ixfeInvariants, store });
+  const profile = options.profile ?? IXFE_PROFILE;
+  const forms = profile.formScopes ?? [];
+  const guard = createGuard({ invariants: profile.invariants, store });
   const salt = options.salt ?? randomBytes(16).toString('hex');
   /**
    * The previous evaluation's features, per entity, so the server-side collectors
@@ -295,7 +333,7 @@ export function createLiveProxy(options: ProxyOptions) {
      * walks through at `ALLOW`. That is the honest answer for an observer that sees
      * only HTTP, and it is why the proxy is an instrument and not a defence.
      */
-    const isPageView = input.scope.startsWith(PAGE_SCOPE);
+    const isPageView = profile.isPageView(input.scope);
     // The catalogue's own ids, from the catalogue's own thresholds. This file
     // contributes no number of its own (D42).
     const signals: string[] = previous && !isPageView ? collectSignalIds({ behavior: previous }) : [];
@@ -303,7 +341,7 @@ export function createLiveProxy(options: ProxyOptions) {
       signals.push('SIG_SUBHUMAN_LATENCY');
     }
 
-    const evidence = evidenceFor(input.scope, input.status, input.contentType);
+    const evidence = evidenceFor(input.scope, input.status, input.contentType, profile.isPageView);
     const assessment = await guard.evaluate({
       entity: input.entity,
       observation: {
@@ -339,7 +377,7 @@ export function createLiveProxy(options: ProxyOptions) {
       anomaly: assessment.anomaly.score,
       diversity: assessment.diversity,
       farming: assessment.farming,
-      ...(input.scope === WAITLIST_SCOPE || input.scope === ORDER_SCOPE ? { dwellMs } : {}),
+      ...(forms.includes(input.scope) ? { dwellMs } : {}),
       signals,
     });
   }
@@ -347,9 +385,9 @@ export function createLiveProxy(options: ProxyOptions) {
   const server = createServer((req, res) => {
     const path = (req.url ?? '/').split('?')[0] ?? '/';
     const method = req.method ?? 'GET';
-    const scope = scopeFor(method, path);
+    const scope = profile.scopeFor(method, path);
     // Bodies are only read where an invariant declares a field in them.
-    const wantsBody = scope === WAITLIST_SCOPE || scope === ORDER_SCOPE;
+    const wantsBody = scope !== undefined && forms.includes(scope);
 
     const upstream = httpRequest(
       {

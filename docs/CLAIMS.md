@@ -9,7 +9,7 @@ proving it and stronger than nothing: it means every design claim either has a p
 in the suite that would notice a change, or a written explanation of why it cannot
 have one.
 
-Total: 65 decisions, 50 named by a test, 15 explained, 0 unexplained.
+Total: 66 decisions, 50 named by a test, 16 explained, 0 unexplained.
 
 | Decision | Title | Tests |
 |---|---|---|
@@ -84,6 +84,7 @@ covered instead when it is covered at all.
 - D30: PoC must run against a real application flow. PoC must run against a real application flow. Satisfied by `examples/healthme` and `examples/ixfe`, whose replay tests name D34 and D47. The decision itself is a scope choice, and the scope is what those tests carry.
 - D58: The site is generated from the library, not hand-copied from it. The site is generated from the library, not hand-copied from it. Gate: `npm run site:check` renders every page and fails on a broken generator. It runs in CI and is not a `*.test.ts`, so this index does not see it.
 - D59: Published, and running in production as an observer. Published, and running in production as an observer. A claim about a deployment rather than about code. Its consequence is the missing durability the measurement exposed, which is D60, and `src/deployment.test.ts` covers that.
+- D63: The traffic lab is one browser per persona, labelled in the sink. The traffic lab is one browser per persona, labelled in the sink. A harness design, not a behaviour of the library. Its observable consequences are in `examples/lab/lab.test.ts` (unique user agents per persona, the per-persona summary, the two mistakes by name) and its first record is `docs/DATASET.md`; no test names the decision itself.
 
 ## Prose only, and not yet explained
 
