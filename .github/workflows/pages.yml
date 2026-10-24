@@ -1,8 +1,7 @@
 name: Pages
 
 # The site is built here rather than committed. No generated HTML lives in the
-# repository, so a page cannot drift from the code that renders it, and a change to
-# a figure shows up in the diff of the generator rather than in 9 stale files.
+# repository, so a page cannot drift from the code that renders it.
 on:
   push:
     branches: [main]
@@ -21,9 +20,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: '22.x'
           cache: npm
@@ -33,9 +32,9 @@ jobs:
       - name: Build the site into site/dist
         run: npm run site
 
-      - uses: actions/configure-pages@v5
+      - uses: actions/configure-pages@v6
 
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: site/dist
 
@@ -47,4 +46,4 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
