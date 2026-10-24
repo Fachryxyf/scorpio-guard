@@ -10,18 +10,40 @@ import { createGuard } from './guard.ts';
 
 const ENTITY = 'user@example.com';
 
-/** The event is emitted off the request path, so a bare await is not enough. */
-async function settle(): Promise<void> {
-  await new Promise<void>((resolve) => setImmediate(resolve));
-  await new Promise<void>((resolve) => setImmediate(resolve));
-}
-
+/**
+ * A sink that also lets a test wait for the next event.
+ *
+ * The event is emitted off the request path, so `await guard.evaluate()` does not mean
+ * the sink has run: the digest is asynchronous, and on a loaded machine that can take
+ * longer than any fixed number of ticks. The first version of this file waited two
+ * `setImmediate` turns and failed in CI for exactly that reason. Waiting on the event
+ * itself is the only version that is deterministic.
+ */
 function collect() {
   const events: AssessmentEvent[] = [];
+  const waiters: Array<() => void> = [];
+  let cursor = 0;
+
   return {
     events,
-    onAssessment: (event: AssessmentEvent) => {
+    onAssessment: (event: AssessmentEvent): void => {
       events.push(event);
+      for (const wake of waiters.splice(0)) wake();
+    },
+    async next(timeoutMs = 5000): Promise<AssessmentEvent> {
+      while (events.length <= cursor) {
+        await Promise.race([
+          new Promise<void>((resolve) => waiters.push(resolve)),
+          new Promise<never>((_, reject) => {
+            const timer = setTimeout(
+              () => reject(new Error('no assessment event within ' + timeoutMs + ' ms')),
+              timeoutMs,
+            );
+            timer.unref?.();
+          }),
+        ]);
+      }
+      return events[cursor++]!;
     },
   };
 }
@@ -31,11 +53,9 @@ test('D61: one event per evaluation, in a versioned shape', async () => {
   const guard = createGuard({ onAssessment: sink.onAssessment });
 
   const assessment = await guard.evaluate({ entity: ENTITY, observation: { scope: 'checkout' } });
-  await settle();
+  const event = await sink.next();
 
   assert.equal(sink.events.length, 1, 'exactly one event per evaluation');
-  const event = sink.events[0]!;
-
   assert.equal(event.schemaVersion, ASSESSMENT_EVENT_SCHEMA);
   assert.deepEqual(
     Object.keys(event).sort(),
@@ -52,7 +72,7 @@ test('D61: one event per evaluation, in a versioned shape', async () => {
       'uncertainty',
       'violations',
     ],
-    'the shape is fixed: a host destructures it, so a silent addition is a breaking change',
+    'the shape is fixed: a host destructures it, so an addition is a decision',
   );
 
   assert.equal(event.decision, assessment.decision);
@@ -77,9 +97,8 @@ test('D61: the raw entity reference never reaches the event by default', async (
   const guard = createGuard({ onAssessment: sink.onAssessment });
 
   await guard.evaluate({ entity: ENTITY, observation: { scope: 'checkout' } });
-  await settle();
+  const event = await sink.next();
 
-  const event = sink.events[0]!;
   assert.equal('entity' in event, false, 'no reference is carried unless the host asks');
   assert.equal(
     JSON.stringify(event).includes(ENTITY),
@@ -109,15 +128,14 @@ test('D61: a hashed identity is keyed by the host salt, and is not the reference
   await withSalt.evaluate({ entity: ENTITY });
   await sameAgain.evaluate({ entity: ENTITY });
   await differentSalt.evaluate({ entity: ENTITY });
-  await settle();
 
-  const key = first.events[0]!.entity;
+  const key = (await first.next()).entity;
   assert.ok(key, 'a hashed identity is present');
   assert.match(key, /^[0-9a-f]{32}$/, 'truncated to 128 bits so it fits a log column');
   assert.notEqual(key, ENTITY);
-  assert.equal(second.events[0]!.entity, key, 'stable for one salt, so events correlate');
+  assert.equal((await second.next()).entity, key, 'stable for one salt, so events correlate');
   assert.notEqual(
-    other.events[0]!.entity,
+    (await other.next()).entity,
     key,
     'a different salt breaks correlation, which is the point of it being a secret',
   );
@@ -133,9 +151,13 @@ test('D61: two different entities do not collide under one salt', async () => {
 });
 
 test('D61: reporting does not change the advice', async () => {
-  const quiet = createGuard();
+  // A fixed clock, so the comparison is about the sink and not about the milliseconds
+  // that passed between the two calls.
+  const clock = { now: () => 1_700_000_000_000 };
+  const quiet = createGuard({ clock });
   const sink = collect();
   const loud = createGuard({
+    clock,
     onAssessment: sink.onAssessment,
     identity: { kind: 'hash', salt: 'deployment-a' },
   });
@@ -143,9 +165,8 @@ test('D61: reporting does not change the advice', async () => {
   const input = { entity: ENTITY, observation: { scope: 'checkout', signals: ['no-pointer-motion'] } };
   const withoutSink = await quiet.evaluate(input);
   const withSink = await loud.evaluate(input);
-  await settle();
+  await sink.next();
 
-  assert.equal(sink.events.length, 1);
   assert.deepEqual(withSink, withoutSink, 'the event must be an observer, not a factor');
 });
 
@@ -163,7 +184,9 @@ test('D61: a broken sink cannot fail an evaluation', async () => {
 
   const first = await throwing.evaluate({ entity: ENTITY });
   const second = await rejecting.evaluate({ entity: ENTITY });
-  await settle();
+  // Give a would-be unhandled rejection a chance to surface: the sink runs after the
+  // evaluation resolves, so a missing catch would show up here rather than never.
+  await new Promise((resolve) => setTimeout(resolve, 50));
 
   assert.equal(first.decision, 'ALLOW');
   assert.equal(second.decision, 'ALLOW');
