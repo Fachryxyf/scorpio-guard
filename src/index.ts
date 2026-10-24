@@ -69,6 +69,13 @@ export { transitionGraph } from './core/transitions.ts';
 export type { Transition } from './core/transitions.ts';
 
 export { createGuard } from './core/guard.ts';
+export { ASSESSMENT_EVENT_SCHEMA, hashEntity, toAssessmentEvent } from './core/event.ts';
+export type {
+  AssessmentEvent,
+  AssessmentEventOptions,
+  AssessmentEventViolation,
+  AssessmentIdentity,
+} from './core/event.ts';
 export type {
   Assessment,
   EvaluateInput,

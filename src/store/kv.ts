@@ -42,7 +42,13 @@ export type KvTransport = {
   del(key: string): Promise<void>;
 };
 
-export type KvStoreOptions = {
+export type KvFailureHandler = (
+  error: unknown,
+  operation: 'get' | 'set' | 'del',
+  key: string,
+) => void;
+
+type KvStoreShared = {
   readonly transport: KvTransport;
   readonly retentionHours?: number;
 
@@ -52,32 +58,29 @@ export type KvStoreOptions = {
    * altered beyond that, because D1 makes it opaque.
    */
   readonly keyPrefix?: string;
-
-  /**
-   * What to do when the transport throws or times out.
-   *
-   * `true` (the default) reads a failure as a cold start and swallows a failed
-   * write. The reasoning is D9: the guard is advisory, so a KV outage must not take
-   * down the host's request path with it. The cost is stated rather than hidden:
-   * an attacker who can make your KV unreachable resets every entity to `unknown`,
-   * which is the most permissive state the trust dimension has.
-   *
-   * What survives that attack is the invariant layer: a proven violation reaches
-   * `RESTRICT` with no history at all (D15), so fail-open degrades the statistical
-   * dimension and not the provable one.
-   *
-   * `false` propagates, for a host that would rather fail the request than trust an
-   * entity it has forgotten.
-   */
-  readonly failOpen?: boolean;
-
-  /**
-   * Called on every transport failure. Present because a fail-open store that is
-   * silently failing open is indistinguishable from one that is working, and that
-   * is how a deployment discovers months later that trust never accumulated.
-   */
-  readonly onError?: (error: unknown, operation: 'get' | 'set' | 'del', key: string) => void;
 };
+
+/**
+ * The store options, split by what a failure is allowed to mean. D62.
+ *
+ * Failing open stays the default, because D9 makes the guard advisory and a KV outage
+ * must not take the host request path down with it. What is no longer free is the
+ * silence: failing open requires naming the sink that hears about it. The cost is
+ * stated rather than hidden, an attacker who can make your KV unreachable resets every
+ * entity to unknown, which is the most permissive state the trust dimension has. What
+ * survives that attack is the invariant layer: a proven violation reaches RESTRICT
+ * with no history at all (D15), so fail-open degrades the statistical dimension and
+ * not the provable one.
+ *
+ * Setting failOpen to false propagates instead, for a host that would rather fail the
+ * request than trust an entity it has forgotten. That branch is where a sink stays
+ * optional, because the failure is already loud.
+ */
+export type KvStoreOptions = KvStoreShared &
+  (
+    | { readonly failOpen?: true; readonly onError: KvFailureHandler }
+    | { readonly failOpen: false; readonly onError?: KvFailureHandler }
+  );
 
 export type KvStore = StateStore;
 
@@ -89,13 +92,22 @@ export type KvStore = StateStore;
  * live:
  *
  *     import { checkStoreConformance, assertConformant } from '@fachryxyf/scorpio-guard';
- *     assertConformant(await checkStoreConformance(() => kvStore({ transport })));
+ *     assertConformant(await checkStoreConformance(() => kvStore({ transport, onError: log })));
  */
 export function kvStore(options: KvStoreOptions): KvStore {
   const { transport } = options;
   const retentionHours = options.retentionHours ?? DEFAULT_RETENTION_HOURS;
   const failOpen = options.failOpen ?? true;
   const prefix = options.keyPrefix ?? 'sg';
+
+  // The type already requires this; JavaScript callers and casts do not see types,
+  // and a deployment that fails open in silence is the failure mode D62 exists for.
+  if (failOpen && typeof options.onError !== 'function') {
+    throw new Error(
+      'kvStore: fail-open without onError is silent by construction, so it is refused. ' +
+        'Pass onError to hear about outages, or set failOpen to false. D62.',
+    );
+  }
 
   /**
    * The entity reference is opaque (D1), so it is used as-is rather than trimmed,
@@ -119,7 +131,12 @@ export function kvStore(options: KvStoreOptions): KvStore {
   const ttlSeconds = Math.ceil(retentionHours * 3600 * 1.5);
 
   function handle(error: unknown, operation: 'get' | 'set' | 'del', key: string): void {
-    options.onError?.(error, operation, key);
+    try {
+      options.onError?.(error, operation, key);
+    } catch {
+      // The sink is the host diagnostic, not part of the request path. A logger
+      // that throws must not become a second outage on top of the first.
+    }
     if (!failOpen) throw error;
   }
 

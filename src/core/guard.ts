@@ -23,6 +23,11 @@ import {
   type Violation,
 } from './constraints.ts';
 import { severity, strongest, type Decision } from './decision.ts';
+import {
+  toAssessmentEvent,
+  type AssessmentEvent,
+  type AssessmentIdentity,
+} from './event.ts';
 import { signalMass, type WeakSignal } from './signals.ts';
 import { DEFAULT_POLICY, hardViolationDecision, type Policy } from './policy.ts';
 import { memoryStore, type StateStore } from './store.ts';
@@ -145,6 +150,25 @@ export type GuardOptions = {
   readonly anomaly?: AnomalyOptions;
   /** Override the weak-signal catalogue. D42. Defaults to the published one. */
   readonly signals?: readonly WeakSignal[];
+
+  /**
+   * Called once per evaluation with a structured event. D61.
+   *
+   * Reporting only. The event is built after the decision is final and the guard
+   * does not wait for the sink, so a slow collector cannot slow the advice and a
+   * broken one cannot fail the request.
+   */
+  readonly onAssessment?: (event: AssessmentEvent) => void | Promise<void>;
+
+  /**
+   * How that event identifies the entity. D61.
+   *
+   * Defaults to omitting the reference, so an event log cannot quietly become a
+   * second copy of the host user table. A hashed identity keys the event to an
+   * entity without carrying it: keep the salt as configuration, and rotating it
+   * breaks correlation in the log rather than in the state.
+   */
+  readonly identity?: AssessmentIdentity;
 };
 
 export type EvaluateInput = {
@@ -190,6 +214,7 @@ export function createGuard(options: GuardOptions = {}) {
   return {
     async evaluate(input: EvaluateInput): Promise<Assessment> {
       const now = clock.now();
+      const startedAt = performance.now();
       const observation = input.observation ?? {};
       const trace: string[] = [];
 
@@ -327,7 +352,7 @@ export function createGuard(options: GuardOptions = {}) {
         }
       }
 
-      return {
+      const assessment: Assessment = {
         entity: input.entity,
         decision,
         trust,
@@ -341,6 +366,13 @@ export function createGuard(options: GuardOptions = {}) {
         context: input.context,
         trace,
       };
+
+      // Reporting happens after the advice is settled, and is not awaited. D61.
+      if (options.onAssessment) {
+        emit(options.onAssessment, options.identity, assessment, now, performance.now() - startedAt);
+      }
+
+      return assessment;
     },
 
     /** Forget one entity outright. D22. Same operation retention uses. */
@@ -351,3 +383,29 @@ export function createGuard(options: GuardOptions = {}) {
 }
 
 export type Guard = ReturnType<typeof createGuard>;
+
+/**
+ * Hand the event to the host sink, and never let that sink touch the advice.
+ *
+ * The digest is asynchronous, so the event is built off the request path rather than
+ * awaited: a host pointing this at a network collector would otherwise add that
+ * collector latency to every evaluation. Out of order arrival is therefore possible,
+ * which is why each event carries both at and durationMs.
+ */
+function emit(
+  sink: (event: AssessmentEvent) => void | Promise<void>,
+  identity: AssessmentIdentity | undefined,
+  assessment: Assessment,
+  at: number,
+  durationMs: number,
+): void {
+  void (async () => {
+    try {
+      const event = await toAssessmentEvent(assessment, { at, durationMs, identity });
+      await sink(event);
+    } catch {
+      // A collector that is down, or a digest that is unavailable, is a telemetry
+      // problem. The evaluation already answered and its answer stands.
+    }
+  })();
+}

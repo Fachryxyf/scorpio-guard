@@ -224,6 +224,30 @@ Log `trace` from the first day. Four independent dimensions feed one outcome, so
 unexplained decision cannot be debugged after the fact: which is why the trace is
 part of the return value rather than a debug flag.
 
+If you already run a collector, take the same occasion as a structured event instead
+of parsing log lines (D61):
+
+```js
+const guard = createGuard({
+  invariants: [checkoutOrder],
+  onAssessment: (event) => metrics.push(event),
+  identity: { kind: 'hash', salt: process.env.GUARD_SALT },
+});
+
+event.schemaVersion; // 1, bumped only when a field changes meaning
+event.decision;      // the advice
+event.stage;         // 'unknown' | 'developing' | 'established'
+event.trust;         // mean, variance, mass, band, proposed, ceiling, capped
+event.violations;    // which invariant, which class, which strength
+event.durationMs;    // measured, not inferred from the clock
+event.entity;        // absent unless `identity` asks: a hash, never the reference
+```
+
+The reference is withheld by default, because an event log leaves your process with
+weaker retention rules than the state it describes. Reporting cannot change the
+advice: the sink is called after the decision is final, and the guard does not wait
+for it, so a slow collector costs you events rather than latency.
+
 A first-time entity is advised `ALLOW` at stage `unknown`: lack of evidence is not
 negative evidence. A brand-new entity that breaks a `hard` invariant is still
 restricted.
@@ -270,13 +294,17 @@ import { kvStore, upstashTransport } from '@fachryxyf/scorpio-guard/kv';
 const guard = createGuard({
   store: kvStore({
     transport: upstashTransport({ url: process.env.KV_URL, token: process.env.KV_TOKEN }),
+    onError: (error, operation) => log.warn({ error, operation }, 'trust store degraded'),
   }),
 });
 ```
 
 A transport failure reads as a cold start rather than throwing, because the guard is
-advisory and a KV outage must not take your request path down with it. Pass `onError`
-so you find out, a store silently failing open looks exactly like one that works.
+advisory and a KV outage must not take your request path down with it. Failing open
+is not free to do silently, though: `kvStore` refuses to be constructed without
+`onError` unless you pass `failOpen: false` (D62). Wire that sink to an alert. A
+store that has been failing quietly for a month looks exactly like one that works,
+and the dimension it feeds never recovers on its own.
 
 Deleting an entity's history is one call, and it is the same code path retention
 uses with the horizon forced to zero:
@@ -365,7 +393,7 @@ in SG costs a log line rather than a visitor's pre-order. `cdp.ts` is a ~180-lin
 DevTools Protocol client over Node's `WebSocket` global, written instead of installing
 Puppeteer so the zero-dependency promise holds in the examples too.
 
-Two hundred and thirty-nine tests, which double as the record of every numeric and
+Two hundred and forty-nine tests, which double as the record of every numeric and
 semantic property the design depends on.
 
 Writing your own store? Prove it works before trusting it:

@@ -3,17 +3,21 @@ import { test } from 'node:test';
 
 import { assertConformant, checkStoreConformance } from '../core/conformance.ts';
 import { applyEvidence, freshState, type EntityState } from '../core/trust.ts';
-import { kvStore, memoryTransport, upstashTransport, type KvTransport } from './kv.ts';
+import { createGuard } from '../core/guard.ts';
+import { kvStore, memoryTransport, upstashTransport, type KvStoreOptions, type KvTransport } from './kv.ts';
+
+/** Fail-open requires a sink; these tests only care about the state machine. */
+const ignore = (): void => {};
 
 test('D60: the KV store satisfies the store contract', async () => {
   // The whole point of D8 existing: a networked store proves itself against the
   // same checks as the reference, or it is not usable.
-  assertConformant(await checkStoreConformance(() => kvStore({ transport: memoryTransport() })));
+  assertConformant(await checkStoreConformance(() => kvStore({ transport: memoryTransport(), onError: ignore })));
 });
 
 test('D60: state is namespaced so it cannot collide with the host own data', async () => {
   const transport = memoryTransport();
-  const store = kvStore({ transport, keyPrefix: 'trust' });
+  const store = kvStore({ transport, keyPrefix: 'trust', onError: ignore });
   await store.set('e1', freshState(0));
 
   const raw = await transport.get('trust:e1');
@@ -25,7 +29,7 @@ test('D1: an opaque entity reference is not reinterpreted by the store', async (
   // Keys that differ must stay distinct even when they contain characters a
   // path-based transport would mangle.
   const transport = memoryTransport();
-  const store = kvStore({ transport });
+  const store = kvStore({ transport, onError: ignore });
   const keys = ['a', 'A', 'a ', ' a', 'a/b', 'a:b', '{"a":1}'];
 
   for (const [index, key] of keys.entries()) {
@@ -83,7 +87,7 @@ test('D60: failOpen false propagates, for a host that would rather fail the requ
 
 test('D60: a foreign value in a shared namespace is not read as trust state', async () => {
   const transport = memoryTransport();
-  const store = kvStore({ transport });
+  const store = kvStore({ transport, onError: ignore });
 
   await transport.set('sg:e1', 'not json at all');
   assert.equal(await store.get('e1'), undefined, 'unparseable values read as absent');
@@ -104,7 +108,7 @@ test('D6: the service TTL is a space bound, never the retention boundary', async
     del: async () => {},
   };
 
-  await kvStore({ transport, retentionHours: 168 }).set('e1', freshState(0));
+  await kvStore({ transport, retentionHours: 168, onError: ignore }).set('e1', freshState(0));
   assert.ok(seen[0] !== undefined, 'a TTL must be set so the service can reclaim space');
   assert.ok(
     seen[0]! > 168 * 3600,
@@ -123,7 +127,7 @@ test('D60: float precision survives the encoding', async () => {
     window: [{ at: 1_700_000_000_123, scope: 'a/b c' }],
   };
 
-  const store = kvStore({ transport: memoryTransport() });
+  const store = kvStore({ transport: memoryTransport(), onError: ignore });
   await store.set('precise', state);
   const found = await store.get('precise');
 
@@ -176,4 +180,84 @@ test('D60: a hung transport is abandoned rather than waited on', async () => {
   });
 
   await assert.rejects(() => transport.get('k'), /abort/i);
+});
+
+test('D62: fail-open without a sink is refused, because silence is the failure mode', () => {
+  // The type requires a sink; this test is for JavaScript callers, who do not see
+  // types, and for a cast that would otherwise silence the requirement.
+  assert.throws(
+    () => kvStore({ transport: memoryTransport() } as unknown as KvStoreOptions),
+    /fail-open without onError/,
+  );
+});
+
+test('D62: failOpen false needs no sink, because the failure is already loud', async () => {
+  const store = kvStore({ transport: memoryTransport(), failOpen: false });
+  assert.equal(await store.get('e1'), undefined);
+});
+
+test('D62: a sink that throws does not become the outage it reports', async () => {
+  const failing: KvTransport = {
+    get: async () => {
+      throw new Error('unreachable');
+    },
+    set: async () => {
+      throw new Error('unreachable');
+    },
+    del: async () => {
+      throw new Error('unreachable');
+    },
+  };
+
+  const store = kvStore({
+    transport: failing,
+    onError: () => {
+      throw new Error('the logger itself is broken');
+    },
+  });
+
+  assert.equal(await store.get('e1'), undefined, 'the read still degrades to a cold start');
+  await store.set('e1', freshState(0));
+});
+
+test('D62: a failing transport still yields a treatment, and the outage is reported', async () => {
+  // The plan asks for exactly this: fail-open may degrade the statistical dimension,
+  // and may not be invisible or take the advice down.
+  const seen: Array<'get' | 'set' | 'del'> = [];
+  const failing: KvTransport = {
+    get: async () => {
+      throw new Error('unreachable');
+    },
+    set: async () => {
+      throw new Error('unreachable');
+    },
+    del: async () => {
+      throw new Error('unreachable');
+    },
+  };
+
+  const guard = createGuard({
+    store: kvStore({ transport: failing, onError: (_error, operation) => seen.push(operation) }),
+    invariants: [
+      {
+        id: 'token-unissued',
+        class: 'IMPOSSIBLE_UNISSUED_REFERENCE',
+        strength: 'hard',
+        scope: 'login',
+        holds: (observation) => (observation as { issued?: boolean }).issued !== false,
+      },
+    ],
+  });
+
+  const degraded = await guard.evaluate({ entity: 'e1', observation: { scope: 'page' } });
+  assert.equal(degraded.decision, 'ALLOW', 'a KV outage degrades, it does not deny');
+  assert.deepEqual(seen, ['get', 'set'], 'the failed read and the failed write are both reported');
+
+  // D15: proof does not need history, so the invariant layer still reaches RESTRICT
+  // with a store that has been failing the whole time.
+  const proven = await guard.evaluate({
+    entity: 'e2',
+    observation: { scope: 'login', data: { issued: false } },
+  });
+  assert.equal(proven.decision, 'RESTRICT');
 });

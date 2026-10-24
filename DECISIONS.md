@@ -17,11 +17,11 @@ the answer given, and what that answer commits the implementation to.
   policy; the tests are what make a policy change visible.
 
 Status: every numbered question is answered, the original thirty, plus D31 to
-D60 arising from review, implementation, and a live pentest. Nothing is blocked on
+D62 arising from review, implementation, and a live pentest. Nothing is blocked on
 a decision. What remains is validation: the values recorded here have not met real
 traffic yet, and D47 names where they will.
 
-Last updated: 2026-08-24
+Last updated: 2026-10-24
 
 ---
 
@@ -112,6 +112,8 @@ Last updated: 2026-08-24
 - [D58: The site is generated from the library, not hand-copied from it](#d58-the-site-is-generated-from-the-library-not-hand-copied-from-it)
 - [D59: Published, and running in production as an observer](#d59-published-and-running-in-production-as-an-observer)
 - [D60: Durable trust on serverless is a networked store, over HTTP](#d60-durable-trust-on-serverless-is-a-networked-store-over-http)
+- [D61: Reporting is a versioned event, and the entity reference is withheld](#d61-reporting-is-a-versioned-event-and-the-entity-reference-is-withheld)
+- [D62: Fail-open requires a witness](#d62-fail-open-requires-a-witness)
 
 **[Open questions](#open-questions)**
 
@@ -3307,3 +3309,126 @@ False-positive candidates: 0. Hard violations: 24, all of them the missing `dwel
   `SIG_BREADTH_OF_TARGET` is where that belongs.
 - Nothing in `src/` changed. All four falsifications were in the integration, which
   is where an unvalidated model was always most likely to be wrong.
+
+## D61: Reporting is a versioned event, and the entity reference is withheld
+
+**Decided, because the alternative was already failing in practice.** Three
+integrations shipped in this repository, and each one wrote its own parser over
+`trace` to answer a question the library could have answered: how often was I
+advised to add friction, and which dimension decided it. A prose field cannot be
+aggregated without a parser per host, and every parser is a place the meaning can
+drift from the source.
+
+So `createGuard` takes `onAssessment`, called once per evaluation with one event:
+`schemaVersion`, `at`, `durationMs`, `decision`, `stage`, `uncertainty`, the trust
+numbers (`mean`, `variance`, `mass`, `band`, `proposed`, `ceiling`, `capped`), the
+violations as invariant plus class plus strength, `hardViolated`, `coldStart`, and
+the same `trace` the assessment returns.
+
+### The reference is absent by default
+
+The entity is not a secret to SG, which keys all of its state by it. It is a
+secret to the systems an event travels to: a collector, a dashboard, a vendor with
+its own retention policy and its own access list. Sending the raw reference would
+make that log a second copy of the host's user table under weaker rules than the
+original, which is the shape of most accidental data exposures.
+
+The default is therefore `identity: { kind: 'omit' }`. A host that needs to
+correlate events passes `{ kind: 'hash', salt }`, and gets a SHA-256 digest
+truncated to 128 bits, computed with Web Crypto so the core keeps running wherever
+the host runs. The salt is configuration, not state: rotating it breaks correlation
+in the log without touching stored trust. Without `subtle`, the identity is dropped
+rather than downgraded to the unhashed reference.
+
+### Reporting cannot change the advice
+
+Three properties, each of which is a test:
+
+- The event is built after the decision is final, so it is an observer and not a
+  factor. The advise-and-not-enforce rule (D9, D14) is what makes this a
+  requirement rather than a style choice.
+- The sink is called without being awaited, because a host pointing it at a network
+  collector would otherwise add that collector's latency to every evaluation. The
+  cost is stated: events can arrive out of order, which is why each carries both
+  `at` and `durationMs`.
+- A sink that throws or rejects is swallowed. A collector that is down is a
+  telemetry problem, and the evaluation already answered.
+
+### Rejected alternatives
+
+**Returning the event from `evaluate`.** It couples advice to telemetry, charges
+every host for it, and changes a return type that D16 treats as published.
+
+**A callback before the decision, able to veto it.** That is enforcement wearing a
+hook's clothes. The host already holds that power; giving it to a library callback
+would make the guard responsible for a decision it cannot see the consequences of.
+
+**Logging the raw reference and documenting that hosts should redact it.**
+Redaction that happens inside someone else's pipeline is redaction that does not
+happen.
+
+### The shape is versioned, and adding a field is still a decision
+
+`schemaVersion` bumps when a field changes meaning or disappears. Adding a field is
+not a schema break, but it is not free either: hosts destructure this object. The
+test asserts the exact key set rather than a subset, so an addition fails a test in
+the change that makes it, and is recorded here before it ships.
+
+Gates: `src/core/event.test.ts` (shape, no raw reference, stable hashing under one
+salt and not under another, advice unchanged with and without a sink, a broken sink
+cannot fail an evaluation).
+
+## D62: Fail-open requires a witness
+
+**Decided, from the failure T2 describes rather than from a preference.** `kvStore`
+fails open by default, for the reason D9 gives: the guard is advisory, and a KV
+outage must not take the host's request path down with it. What that default never
+did was make anyone notice. A store failing open and a store working are
+indistinguishable from the inside, which is exactly how D59 found a deployment where
+the statistical layer had never engaged at all.
+
+`onError` was already there and was already optional, and an optional alarm is an
+alarm that is off. So the options type is now a union split by what a failure is
+allowed to mean:
+
+- fail open, which requires an `onError` sink, and is still the default branch;
+- `failOpen: false`, which propagates and needs no sink, because the failure is
+  already loud.
+
+The requirement is enforced at runtime too, not only in the type, because a
+JavaScript caller and a cast both skip types. `kvStore` refuses to construct without
+a sink rather than failing open in silence.
+
+### Two details that are correctness
+
+**A sink that throws does not replace the transport error.** The sink is the host's
+diagnostic; a logger that throws must not become a second outage on top of the
+first. Its exception is swallowed and the original failure still decides whether the
+call throws.
+
+**The failure is not reclassified.** A failed read is still a cold start, and a
+failed write is still dropped, because changing that would silently convert the
+advisory library into an availability dependency. What changed is only whether the
+host can hear about it.
+
+### Deployment consequence
+
+Wiring this sink to an alert is a deployment requirement, not a suggestion:
+failing open degrades the statistical dimension to the most permissive state it has
+(every entity reads `unknown`), while the invariant layer keeps working because
+proof needs no history (D15). The test asserts both halves of that sentence: the
+degraded evaluation still returns a treatment, and a proven violation still reaches
+`RESTRICT` with a store that has been failing throughout.
+
+### Rejected alternatives
+
+**A default handler that writes to the console.** A library that chooses the host's
+log format has made the same mistake as one that chooses its storage.
+
+**Failing closed by default.** A KV blip would become an outage of the host, which
+is the outcome D9 exists to prevent. The quiet failure was the problem, not the
+failing open.
+
+Gates: `src/store/kv.test.ts` (construction refused without a sink, a throwing sink
+does not escalate, a failing transport still yields a treatment and reports both
+operations, and proof still restricts).
