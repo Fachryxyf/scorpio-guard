@@ -402,3 +402,30 @@ dipakai seluruh situs. Tema gelap sebagai default tetap dipertahankan.
 
 Temuan P0/P1 di bagian 6 tidak berubah: kalibrasi, reference server, dan
 observability tetap pekerjaan yang belum tersentuh.
+
+### 10.5 Tindak lanjut sesi yang sama
+
+| ID | Temuan | Dampak |
+|---|---|---|
+| A6 | `packageManager` menyebut pnpm padahal repo memakai npm dan `package-lock.json`; workflow masih memakai action major yang berjalan di Node 20 | Setiap run CI memunculkan anotasi deprecation, dan field itu menyuruh kontributor memakai toolchain yang salah |
+| A7 | `anchorFor()` menciutkan tanda hubung berulang, sehingga anchor yang dihasilkan bukan anchor yang dibuat GitHub | Seluruh tautan silang dari situs ke `DECISIONS.md` mati tanpa ada yang gagal di CI |
+| A8 | 23 komentar pembatas digambar dengan kotak karakter, dan 733 em dash tersebar di 57 file, sebagian ditulis sebagai escape atau entitas sehingga lolos dari pencarian karakter literal | Gaya komentar tidak konsisten, dan em dash melanggar aturan copywriting yang dipegang proyek |
+
+Perbaikan:
+
+- Field `packageManager` dihapus. `ci.yml` dan `pages.yml` naik ke major action
+  yang berjalan di Node 24 (`checkout@v7`, `setup-node@v7`, `configure-pages@v6`,
+  `upload-pages-artifact@v5`, `deploy-pages@v5`). Anotasi deprecation hilang.
+- `anchorFor()` sekarang mengikuti aturan GitHub persis, dan tanda pisah pada
+  judul diganti titik dua sehingga anchor yang dihasilkan sama dengan yang dibuat
+  GitHub. 64 tautan internal situs resolve, 0 mati.
+- Komentar pembatas diganti satu baris `//` biasa.
+- Em dash dihapus dari 57 file. Titik dua untuk elaborasi, koma untuk aposisi,
+  titik koma untuk dua klausa yang masing-masing punya subjek, tanda kurung untuk
+  pasangan dash yang mengapit sisipan, dan en dash sebagai placeholder sel "tidak
+  ada data". Pemeriksaan sekarang mencakup bentuk escape dan entitas, bukan hanya
+  karakter literal.
+
+Verifikasi: `typecheck`, 233/233 test, `build`, `smoke` (`ALLOW`), dan `site:check`
+(10 halaman dirender tanpa menulis, 63 keputusan, 233 test) lolos. Em dash di
+sumber 0, di HTML hasil build 0, dan 0 juga di enam halaman live yang diperiksa.
