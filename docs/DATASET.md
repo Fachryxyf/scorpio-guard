@@ -8,7 +8,7 @@ and what may and may not be concluded from it.
 
 | field | value |
 | --- | --- |
-| run | `var/lab/2026-10-24T15-17-57-456Z/` |
+| run | `var/lab/2026-10-24T15-28-22-310Z/` |
 | command | `npm run lab -- --target=aufsicht,talkhere` |
 | node | v22.16.0, darwin-x64 |
 | browser | Chrome/150.0.7871.125, one instance per persona |
@@ -111,6 +111,27 @@ the trust dimension may ask for is `OBSERVE`, so regular intervals alone cannot 
 friction. The false positive count for this run is zero and it is zero for a reason that
 can be pointed at in the code, not because the sample was small.
 
+## Calibration against this run (M2.2)
+
+`npm run calibrate` replays these rows under a grid of policies, half-life 24, 72 and 168
+hours against developing thresholds 3, 4 and 5, and counts the two mistakes per cell.
+It refuses this run instead, and says why:
+
+    the run has 129 recorded requests, below the 240 a grid needs to say anything
+    aufsicht:reader has 2 requests, below the 8 that makes its label mean anything
+    aufsicht:skimmer has 1 requests, below the 8 that makes its label mean anything
+    talkhere:reader has 4 requests, below the 8 that makes its label mean anything
+    talkhere:skimmer has 1 requests, below the 8 that makes its label mean anything
+
+The refusal is the output, not a failure to produce one. Two personas leave after a
+single request, which is honest behaviour and useless as a labelled segment, and the run
+as a whole is about half the size a nine-cell grid needs before its cells differ from
+noise. Lowering the floor would make the table appear without making it mean anything.
+
+Every row also carries the observation that was evaluated, so a replay cannot drift from
+the recorded run: calibration reads the same object the guard read instead of rebuilding
+it from the row's other fields.
+
 ## What this dataset cannot do
 
 It cannot calibrate the thresholds M2.2 was written for, and the reason is structural
@@ -138,7 +159,7 @@ fields and invariants.
 
 ```sh
 npm run lab -- --target=aufsicht,talkhere --seed=1
-npm run lab -- --report=2026-10-24T15-17-57-456Z
+npm run lab -- --report=2026-10-24T15-28-22-310Z
 ```
 
 The second command re-reads the recorded files and prints the same tables without a

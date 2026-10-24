@@ -9,7 +9,7 @@ proving it and stronger than nothing: it means every design claim either has a p
 in the suite that would notice a change, or a written explanation of why it cannot
 have one.
 
-Total: 66 decisions, 50 named by a test, 16 explained, 0 unexplained.
+Total: 67 decisions, 50 named by a test, 17 explained, 0 unexplained.
 
 | Decision | Title | Tests |
 |---|---|---|
@@ -85,6 +85,7 @@ covered instead when it is covered at all.
 - D58: The site is generated from the library, not hand-copied from it. The site is generated from the library, not hand-copied from it. Gate: `npm run site:check` renders every page and fails on a broken generator. It runs in CI and is not a `*.test.ts`, so this index does not see it.
 - D59: Published, and running in production as an observer. Published, and running in production as an observer. A claim about a deployment rather than about code. Its consequence is the missing durability the measurement exposed, which is D60, and `src/deployment.test.ts` covers that.
 - D63: The traffic lab is one browser per persona, labelled in the sink. The traffic lab is one browser per persona, labelled in the sink. A harness design, not a behaviour of the library. Its observable consequences are in `examples/lab/lab.test.ts` (unique user agents per persona, the per-persona summary, the two mistakes by name) and its first record is `docs/DATASET.md`; no test names the decision itself.
+- D64: Calibration refuses a dataset it cannot learn from. Calibration refuses a dataset it cannot learn from. A policy about what may be published, not a behaviour of the library. The refusals, the grid and the per-persona counting are all in `examples/lab/calibration.test.ts`, verified by mutation; what no test can hold is the rule that a refusal must be printed instead of a table.
 
 ## Prose only, and not yet explained
 

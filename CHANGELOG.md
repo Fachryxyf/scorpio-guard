@@ -51,6 +51,10 @@ Tagged in `package.json`, not yet published to npm. The registry has 0.1.0, and
   three targets, a labelled dataset written under `var/lab/`, and `docs/DATASET.md`
   recording what the first run found. Development-only, not in the published tarball
   (D63).
+- `npm run calibrate`: replays a recorded lab run under a grid of evidence half-lives
+  and epistemic thresholds, counts false positives and negatives per persona, and
+  refuses a run that cannot answer the question instead of printing a constant table
+  (D64).
 
 ### Changed
 

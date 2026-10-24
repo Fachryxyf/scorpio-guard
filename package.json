@@ -50,6 +50,7 @@
     "visitors": "node --experimental-strip-types examples/ixfe/live/visitors.ts",
     "observed": "node --experimental-strip-types examples/ixfe/live/report.ts",
     "lab": "node --experimental-strip-types examples/lab/run.ts",
+    "calibrate": "node --experimental-strip-types scripts/calibrate.mjs",
     "smoke": "node scripts/smoke.mjs",
     "example:integration": "node --experimental-strip-types examples/integration/server.ts --demo",
     "site": "node site/build.mjs",

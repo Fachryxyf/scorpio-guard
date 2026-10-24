@@ -17,7 +17,7 @@ the answer given, and what that answer commits the implementation to.
   policy; the tests are what make a policy change visible.
 
 Status: every numbered question is answered, the original thirty, plus D31 to
-D63 arising from review, implementation, a live pentest, and the traffic lab. Nothing is blocked on
+D64 arising from review, implementation, a live pentest, and the traffic lab. Nothing is blocked on
 a decision. What remains is validation: the values recorded here have not met real
 traffic yet, and D47 names where they will.
 
@@ -115,6 +115,7 @@ Last updated: 2026-10-24
 - [D61: Reporting is a versioned event, and the entity reference is withheld](#d61-reporting-is-a-versioned-event-and-the-entity-reference-is-withheld)
 - [D62: Fail-open requires a witness](#d62-fail-open-requires-a-witness)
 - [D63: The traffic lab is one browser per persona, labelled in the sink](#d63-the-traffic-lab-is-one-browser-per-persona-labelled-in-the-sink)
+- [D64: Calibration refuses a dataset it cannot learn from](#d64-calibration-refuses-a-dataset-it-cannot-learn-from)
 
 **[Open questions](#open-questions)**
 
@@ -3501,3 +3502,65 @@ Gates: `examples/lab/lab.test.ts` (the scope map, unique user agents per persona
 visitors cannot merge into one entity, seed reproduction, first-treatment reporting, the
 two mistakes by name, and the labels surviving JSONL). The first recorded run and its
 findings are in `docs/DATASET.md`.
+
+## D64: Calibration refuses a dataset it cannot learn from
+
+M2.2 has to turn a recorded run into threshold choices. The tempting shape is a script
+that always prints a table: nine cells, two numbers each, and a reader who assumes the
+table describes the model. The question was whether the tool is allowed to refuse.
+
+### The audit runs first, and its reasons are the output
+
+Three refusals are checked before any replay:
+
+- the run has fewer than 240 recorded requests, which is roughly where nine cells stop
+  differing by one or two rows;
+- a persona has fewer than eight requests, because a visitor who made one request was
+  not observed well enough to be called caught or missed;
+- no row ever left the epistemic stage `unknown`, which means no request earned
+  evidence, which means every cell would print the identical decision and the table
+  would be a constant wearing a table's clothes.
+
+A refusal exits non-zero and writes no calibration file. The reasons name what is
+missing, not only the number that failed, because the number is usually a symptom: 129
+rows is not the problem, the problem is what those rows do not contain.
+
+### The replay uses the recorded observation
+
+Rows now carry the exact observation the guard was given. Reconstructing it in the
+calibrator from `scope`, `status` and `answeredWithDocument` would have been a second
+implementation of the evidence rule, and two implementations of one rule drift quietly.
+The dataset is also the input to M2.3's frozen fixtures, which have no other source of
+truth. The clock is pinned to each row's own timestamp, so the replay meets the gaps the
+observer met.
+
+### Two axes, and the shipped cell is marked
+
+The grid moves the evidence half-life (24, 72, 168 hours) and the developing threshold
+(3, 4, 5), with the established threshold held four units above it. Those are the two
+constants that decide how much evidence is enough and how long it lasts; the rest are
+weights D4 fixed or decisions D5 already made. The cell the library ships with is
+printed as `(shipped)`, so a candidate cannot be mistaken for today's behaviour.
+
+### Rejected alternatives
+
+**Lower the floor until the current run passes.** A table that appears for a run which
+cannot support it is worse than no table, because the caveat does not travel with the
+number.
+
+**Count per request.** It would let a chatty persona swamp the judgement, and D63
+already decided the unit is the persona.
+
+**Report only the best cell.** A score invites a search for whatever looks best on one
+run. The whole grid is printed so the reader can see whether a choice is a plateau or a
+spike.
+
+### Consequence for the version number
+
+1.0.0 requires thresholds from a reproducible dataset with published composition. Until
+a run passes this audit, that proof does not exist, so the version stays 0.x by the rule
+in `CHANGELOG.md` rather than by anyone's judgement.
+
+Gates: `examples/lab/calibration.test.ts`, verified by mutation three times (an audit
+that never refuses, a missing stage reason, and a grid that collapses both axes each
+fail the suite).

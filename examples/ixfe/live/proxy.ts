@@ -42,7 +42,7 @@ import { createHash, randomBytes } from 'node:crypto';
 import { appendFileSync, mkdirSync } from 'node:fs';
 import { dirname } from 'node:path';
 
-import { createGuard } from '../../../src/core/guard.ts';
+import { createGuard, type Observation } from '../../../src/core/guard.ts';
 import { sqliteStore } from '../../../src/store/sqlite.ts';
 import { measureLatency } from '../../../src/collect/timing.ts';
 import { collectSignalIds } from '../../../src/collect/signals.ts';
@@ -93,6 +93,13 @@ export type LiveRecord = {
   readonly method: string;
   readonly path: string;
   readonly scope: string;
+  /**
+   * Exactly the observation that was evaluated, kept so a decision can be re-derived
+   * under a different policy without reconstructing it (M2.2). Rebuilding it from the
+   * record's other fields would be a second implementation of the same rule, and the
+   * two would drift.
+   */
+  readonly observation: Observation;
   readonly status: number;
   /**
    * The origin answered an API path with a document. D57.
@@ -221,7 +228,7 @@ function observationFor(scope: string, body: unknown): { data: unknown; dwellMs?
 function evidenceFor(
   scope: string,
   status: number,
-  contentType: string,
+  answeredWithDocument: boolean,
   isPageView: (scope: string) => boolean,
 ): { positive?: 'weak'; negative?: 'weak' } | undefined {
   const refused =
@@ -233,7 +240,6 @@ function evidenceFor(
   // link or an old bookmark, which is why it is weak rather than declared.
   if (isPageView(scope)) return refused ? { negative: 'weak' } : undefined;
 
-  const answeredWithDocument = contentType.includes('text/html');
   if (status >= 200 && status < 300) {
     return answeredWithDocument ? { negative: 'weak' } : { positive: 'weak' };
   }
@@ -341,16 +347,19 @@ export function createLiveProxy(options: ProxyOptions) {
       signals.push('SIG_SUBHUMAN_LATENCY');
     }
 
-    const evidence = evidenceFor(input.scope, input.status, input.contentType, profile.isPageView);
-    const assessment = await guard.evaluate({
-      entity: input.entity,
-      observation: {
-        scope: input.scope,
-        data,
-        ...(evidence ? { evidence } : {}),
-        ...(signals.length > 0 ? { signals } : {}),
-      },
-    });
+    const evidence = evidenceFor(
+      input.scope,
+      input.status,
+      input.contentType.includes('text/html'),
+      profile.isPageView,
+    );
+    const observation: Observation = {
+      scope: input.scope,
+      data,
+      ...(evidence ? { evidence } : {}),
+      ...(signals.length > 0 ? { signals } : {}),
+    };
+    const assessment = await guard.evaluate({ entity: input.entity, observation });
 
     if (lastBehavior.size >= MAX_TRACKED) {
       const oldest = lastBehavior.keys().next().value;
@@ -379,6 +388,7 @@ export function createLiveProxy(options: ProxyOptions) {
       farming: assessment.farming,
       ...(forms.includes(input.scope) ? { dwellMs } : {}),
       signals,
+      observation,
     });
   }
 

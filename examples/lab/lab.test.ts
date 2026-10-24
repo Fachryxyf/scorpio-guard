@@ -32,6 +32,7 @@ function record(
     method: 'GET',
     path,
     scope: scopeFor('GET', path) ?? 'unscoped',
+    observation: { scope: scopeFor('GET', path) ?? 'unscoped', data: {} },
     status: 200,
     answeredWithDocument: false,
     advice,

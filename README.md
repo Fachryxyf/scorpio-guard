@@ -414,9 +414,11 @@ declared persona per instance, each run recorded as a labelled dataset with its 
 and browser version. [docs/DATASET.md](docs/DATASET.md) is the first run, 129 requests
 across two live builds, and it reports what it found rather than what it hoped: zero
 false positives on legitimate automation, and six adversarial misses with one shared
-cause (D63).
+cause (D63). `npm run calibrate` replays such a run under a grid of policies and
+refuses the one recorded so far, with five reasons, rather than printing a table that
+would describe nothing (D64).
 
-Two hundred and fifty-eight tests, which double as the record of every numeric and
+Two hundred and sixty-eight tests, which double as the record of every numeric and
 semantic property the design depends on. [docs/CLAIMS.md](docs/CLAIMS.md) maps each
 design decision to the test that names it, and lists the ones that are still prose
 only, generated rather than maintained by hand.

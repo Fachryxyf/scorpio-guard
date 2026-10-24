@@ -85,15 +85,35 @@ export type Verdicts = {
   readonly correct: readonly string[];
 };
 
+/**
+ * Whether one persona's treatment was right, wrong, or absent.
+ *
+ * One function, because the lab summary and the calibration grid have to agree about
+ * what a mistake is; two copies of this rule would let the report and the grid disagree
+ * about the same run.
+ */
+export type Verdict = 'correct' | 'false-positive' | 'false-negative';
+
+export function classify(
+  persona: string,
+  groundTruth: PersonaLabel,
+  treated: boolean,
+): Verdict {
+  void persona;
+  if (groundTruth === 'legitimate') return treated ? 'false-positive' : 'correct';
+  return treated ? 'correct' : 'false-negative';
+}
+
 export function verdicts(summaries: readonly PersonaSummary[]): Verdicts {
   const falsePositives: string[] = [];
   const falseNegatives: string[] = [];
   const correct: string[] = [];
 
   for (const summary of summaries) {
-    const treated = summary.escalatedAt !== null;
-    if (summary.groundTruth === 'legitimate') (treated ? falsePositives : correct).push(summary.persona);
-    else (treated ? correct : falseNegatives).push(summary.persona);
+    const verdict = classify(summary.persona, summary.groundTruth, summary.escalatedAt !== null);
+    if (verdict === 'false-positive') falsePositives.push(summary.persona);
+    else if (verdict === 'false-negative') falseNegatives.push(summary.persona);
+    else correct.push(summary.persona);
   }
 
   return { falsePositives, falseNegatives, correct };

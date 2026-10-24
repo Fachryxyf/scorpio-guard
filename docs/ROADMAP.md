@@ -245,6 +245,15 @@ bisa menghasilkan threshold: yang bisa dikalibrasi belum ada di dataset ini. Yan
 dibutuhkan lebih dulu adalah target yang punya aksi untuk berhasil, yaitu
 `npm run lab -- --target=ixfe`, tempat endpoint waitlist dan order membawa bukti.
 
+Status: M2.2 selesai sebagai alat, belum sebagai hasil (D64). `npm run calibrate`
+memutar ulang satu run di bawah sembilan sel (half-life 24, 72, 168 jam kali
+developingAt 3, 4, 5) dan menghitung dua kesalahan per sel, per persona. Untuk run
+yang ada sekarang ia menolak, dan penolakan itu keluarannya: 129 request di bawah
+lantai 240, dan dua persona yang hanya membuat satu sampai empat request sebelum
+pergi. Menurunkan lantai bukan jawaban; menambah persona dan memakai target yang
+punya aksi adalah jawabannya. Gate: `examples/lab/calibration.test.ts`, diverifikasi
+dengan tiga mutasi.
+
 Exit: laporan FP/FN terbit di situs, komposisi dataset tertulis, fixture beku diputar
 di CI, dan keputusan baru tercatat di `DECISIONS.md`.
 

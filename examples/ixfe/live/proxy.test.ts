@@ -282,6 +282,7 @@ function record(overrides: Partial<LiveRecord> = {}): LiveRecord {
     method: 'POST',
     path: '/api/waitlist',
     scope: WAITLIST_SCOPE,
+    observation: { scope: WAITLIST_SCOPE, data: {} },
     status: 200,
     answeredWithDocument: false,
     advice: 'ALLOW',
