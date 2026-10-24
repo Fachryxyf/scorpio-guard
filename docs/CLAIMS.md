@@ -9,7 +9,7 @@ proving it and stronger than nothing: it means every design claim either has a p
 in the suite that would notice a change, or a written explanation of why it cannot
 have one.
 
-Total: 67 decisions, 50 named by a test, 17 explained, 0 unexplained.
+Total: 68 decisions, 50 named by a test, 18 explained, 0 unexplained.
 
 | Decision | Title | Tests |
 |---|---|---|
@@ -86,6 +86,7 @@ covered instead when it is covered at all.
 - D59: Published, and running in production as an observer. Published, and running in production as an observer. A claim about a deployment rather than about code. Its consequence is the missing durability the measurement exposed, which is D60, and `src/deployment.test.ts` covers that.
 - D63: The traffic lab is one browser per persona, labelled in the sink. The traffic lab is one browser per persona, labelled in the sink. A harness design, not a behaviour of the library. Its observable consequences are in `examples/lab/lab.test.ts` (unique user agents per persona, the per-persona summary, the two mistakes by name) and its first record is `docs/DATASET.md`; no test names the decision itself.
 - D64: Calibration refuses a dataset it cannot learn from. Calibration refuses a dataset it cannot learn from. A policy about what may be published, not a behaviour of the library. The refusals, the grid and the per-persona counting are all in `examples/lab/calibration.test.ts`, verified by mutation; what no test can hold is the rule that a refusal must be printed instead of a table.
+- D65: The frozen fixture is how a treatment change becomes visible. The frozen fixture is how a treatment change becomes visible. The freeze itself is a script, and its consequences are in `examples/lab/fixture.test.ts` (a fixture exists, replays to its frozen decisions, and holds no hashed identifier), verified by mutation; what no test can hold is the promise that a fixture is only regenerated on purpose.
 
 ## Prose only, and not yet explained
 

@@ -254,6 +254,16 @@ pergi. Menurunkan lantai bukan jawaban; menambah persona dan memakai target yang
 punya aksi adalah jawabannya. Gate: `examples/lab/calibration.test.ts`, diverifikasi
 dengan tiga mutasi.
 
+Status: M2.3 selesai. `scripts/freeze-lab.mjs` menyimpan satu run ke
+`examples/lab/fixtures/`, hanya dengan field yang dibutuhkan replay: waktu relatif,
+id entity pendek yang stabil, persona, label, dan observation yang dievaluasi, plus
+keputusan model untuk tiap baris. `examples/lab/fixture.test.ts` memutar ulang fixture
+itu dengan policy yang dikirim setiap push, jadi perubahan model yang menggeser
+treatment gagal di CI dan harus diterima dengan sengaja lewat `npm run freeze:lab`.
+Saat dibekukan, replay juga dibandingkan dengan advice yang dicatat observer dan cocok
+di keempat belas persona. Batasnya dicatat di D65: ini gate perilaku, bukan gate
+parameter, karena menaikkan developingAt dari 3 ke 5 tidak menggeser satu pun keputusan
+beku.
 Exit: laporan FP/FN terbit di situs, komposisi dataset tertulis, fixture beku diputar
 di CI, dan keputusan baru tercatat di `DECISIONS.md`.
 

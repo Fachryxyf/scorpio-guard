@@ -55,6 +55,9 @@ Tagged in `package.json`, not yet published to npm. The registry has 0.1.0, and
   and epistemic thresholds, counts false positives and negatives per persona, and
   refuses a run that cannot answer the question instead of printing a constant table
   (D64).
+- `npm run freeze:lab`: freezes a recorded run into `examples/lab/fixtures/`, and a CI
+  test replays it on every push, so a model change that moves any decision fails the
+  build instead of being found in production (D65).
 
 ### Changed
 

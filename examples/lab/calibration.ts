@@ -13,7 +13,7 @@
  * false positive however quiet the rest of its traffic was, which is the same rule the
  * lab summary applies (D63).
  */
-import { createGuard } from '../../src/core/guard.ts';
+import { createGuard, type Observation } from '../../src/core/guard.ts';
 import { epistemicStage } from '../../src/core/assess.ts';
 import type { Policy } from '../../src/core/policy.ts';
 import { memoryStore } from '../../src/core/store.ts';
@@ -122,6 +122,19 @@ export function grid(): PolicyCell[] {
 /** The cell the library ships with today. */
 export const DEFAULT_CELL: PolicyCell = { halfLifeHours: 24, developingAt: 3, establishedAt: 7 };
 
+/**
+ * What a replay needs from a row, which is less than a recorded row carries. The
+ * frozen fixture stores exactly this, so a fixture cannot be missing a field the replay
+ * silently defaults.
+ */
+export type ReplayRow = {
+  readonly at: number;
+  readonly entity: string;
+  readonly persona: string;
+  readonly groundTruth: 'legitimate' | 'adversarial';
+  readonly observation?: Observation | undefined;
+};
+
 export type CellOutcome = {
   readonly cell: PolicyCell;
   readonly falsePositives: readonly string[];
@@ -139,7 +152,7 @@ export type CellOutcome = {
  * observer met. Anything else would calibrate a different dataset than the one recorded.
  */
 export async function evaluateCell(
-  records: readonly LabRecord[],
+  records: readonly ReplayRow[],
   cell: PolicyCell,
 ): Promise<CellOutcome> {
   const ordered = [...records].sort((left, right) => left.at - right.at);

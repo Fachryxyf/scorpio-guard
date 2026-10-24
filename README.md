@@ -416,9 +416,11 @@ across two live builds, and it reports what it found rather than what it hoped: 
 false positives on legitimate automation, and six adversarial misses with one shared
 cause (D63). `npm run calibrate` replays such a run under a grid of policies and
 refuses the one recorded so far, with five reasons, rather than printing a table that
-would describe nothing (D64).
+would describe nothing (D64). The recorded run is frozen into `examples/lab/fixtures/`
+and replayed on every push, so a change that moves any decision fails CI rather than
+being found in production (D65).
 
-Two hundred and sixty-eight tests, which double as the record of every numeric and
+Two hundred and seventy-one tests, which double as the record of every numeric and
 semantic property the design depends on. [docs/CLAIMS.md](docs/CLAIMS.md) maps each
 design decision to the test that names it, and lists the ones that are still prose
 only, generated rather than maintained by hand.

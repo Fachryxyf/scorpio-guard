@@ -17,7 +17,7 @@ the answer given, and what that answer commits the implementation to.
   policy; the tests are what make a policy change visible.
 
 Status: every numbered question is answered, the original thirty, plus D31 to
-D64 arising from review, implementation, a live pentest, and the traffic lab. Nothing is blocked on
+D65 arising from review, implementation, a live pentest, and the traffic lab. Nothing is blocked on
 a decision. What remains is validation: the values recorded here have not met real
 traffic yet, and D47 names where they will.
 
@@ -116,6 +116,7 @@ Last updated: 2026-10-24
 - [D62: Fail-open requires a witness](#d62-fail-open-requires-a-witness)
 - [D63: The traffic lab is one browser per persona, labelled in the sink](#d63-the-traffic-lab-is-one-browser-per-persona-labelled-in-the-sink)
 - [D64: Calibration refuses a dataset it cannot learn from](#d64-calibration-refuses-a-dataset-it-cannot-learn-from)
+- [D65: The frozen fixture is how a treatment change becomes visible](#d65-the-frozen-fixture-is-how-a-treatment-change-becomes-visible)
 
 **[Open questions](#open-questions)**
 
@@ -3564,3 +3565,50 @@ in `CHANGELOG.md` rather than by anyone's judgement.
 Gates: `examples/lab/calibration.test.ts`, verified by mutation three times (an audit
 that never refuses, a missing stage reason, and a grid that collapses both axes each
 fail the suite).
+
+## D65: The frozen fixture is how a treatment change becomes visible
+
+A threshold is a number in a policy object. Changing it looks like a one-line diff and
+can move the advice for every visitor on the site, and nothing in the repository would
+say so before a host noticed. The question was what makes that visible.
+
+### What is frozen
+
+`scripts/freeze-lab.mjs` writes one file per recorded run into
+`examples/lab/fixtures/`. It keeps only what a replay needs: the timestamp
+relative to the run's first request, a stable short entity id, the persona and its
+label, and the observation that was evaluated. It also keeps the decisions the model
+produced for every row, plus the false positives, false negatives and totals, computed
+by the same rule the lab summary uses.
+
+The entity hashes from the run are replaced with `e01`, `e02` and so on.
+A hash of a loopback address and a user agent is not an identity, but it is a
+correlatable handle across runs, and a fixture has no use for it.
+
+`examples/lab/fixture.test.ts` replays the fixture with the shipped policy on
+every push and compares the decisions row by row. A model change that moves any
+decision fails CI with the fixture's own instruction: regenerate it deliberately with
+`npm run freeze:lab`, and the diff then shows what moved.
+
+### The freeze was checked against the live record first
+
+When the fixture was written it also replayed the run and compared the replay to the
+advice the live observer had recorded, persona by persona. They matched on all fourteen
+personas, which is what makes the fixture a record of the system rather than of the
+replay code. A mismatch would have been reported before the file was written, because a
+freeze that quietly pins a different behaviour than the one recorded is worse than none.
+
+### What it does not prove
+
+It proves that behaviour did not move on these 129 rows. It does not prove that a
+constant did not move: raising the developing threshold from 3 to 5 was tried as a
+mutation and no frozen decision changed, because the personas that earned evidence
+earned more than five units of it. So the fixture is a behavioural gate and not a
+parameter gate, and a policy change that this dataset cannot see still needs its own
+reasoning and its own test. Saying that here is cheaper than implying a coverage the
+file does not have.
+
+Gates: `examples/lab/fixture.test.ts`, three tests (a fixture exists, it replays
+to the frozen decisions, and it carries no hashed identifier), verified by mutation
+twice: making weak evidence heavy, and dropping the `developing` ceiling, both
+fail. All eleven repository gates pass.
