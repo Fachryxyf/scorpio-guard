@@ -51,7 +51,8 @@
     "observed": "node --experimental-strip-types examples/ixfe/live/report.ts",
     "smoke": "node scripts/smoke.mjs",
     "site": "node site/build.mjs",
-    "site:check": "node site/build.mjs --check"
+    "site:check": "node site/build.mjs --check",
+    "check:manifest": "node scripts/check-manifest.mjs"
   },
   "devDependencies": {
     "@types/node": "22.18.11",

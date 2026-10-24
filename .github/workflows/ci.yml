@@ -30,6 +30,11 @@ jobs:
       - name: Verify the built package imports and runs
         run: node scripts/smoke.mjs
 
+      # The manifest and the lockfile must agree, and packageManager must name the
+      # tool that owns the lockfile. A bulk edit once broke this silently.
+      - name: Verify the manifest matches the lockfile
+        run: npm run check:manifest
+
       # Renders every page without writing anything, so a broken generator fails in
       # CI rather than in the deploy. The published HTML is not committed; Pages
       # builds it in .github/workflows/pages.yml.
