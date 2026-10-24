@@ -539,6 +539,8 @@ conclusions.
 
 ## Roadmap
 
+Rencana bertahap, daftar hole, dan exit criteria tiap milestone: [docs/ROADMAP.md](docs/ROADMAP.md).
+
 Done: the core model, the pluggable store with its conformance kit and a durable
 SQLite implementation, the browser collector, two integration targets with declared
 invariants, the three enumeration tasks, the constraint taxonomy closed over proof
