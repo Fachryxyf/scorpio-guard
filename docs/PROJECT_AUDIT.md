@@ -415,7 +415,7 @@ Perbaikan:
 
 - Field `packageManager` dihapus. `ci.yml` dan `pages.yml` naik ke major action
   yang berjalan di Node 24 (`checkout@v7`, `setup-node@v7`, `configure-pages@v6`,
-  `upload-pages-artifact@v5`, `deploy-pages@v5`). Anotasi deprecation hilang.
+  `upload-pages-artifact@v5`, `deploy-pages@v5`). Anotasi deprecation hilang. Field itu sempat masuk kembali tanpa sengaja pada commit penyuntingan massal, dan sekarang dihapus lagi. Gate yang mencegahnya kembali dicatat sebagai M1.7 di docs/ROADMAP.md.
 - `anchorFor()` sekarang mengikuti aturan GitHub persis, dan tanda pisah pada
   judul diganti titik dua sehingga anchor yang dihasilkan sama dengan yang dibuat
   GitHub. 64 tautan internal situs resolve, 0 mati.
