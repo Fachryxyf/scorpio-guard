@@ -3,11 +3,11 @@
  *
  * NOT EXPORTED from the package surface, deliberately. D17 removes the API key and
  * D20 makes a serverless guard fully functional, so nothing currently transmits
- * anything — and an exported vocabulary with no transmitter invites use it has no
+ * anything: and an exported vocabulary with no transmitter invites use it has no
  * semantics for. It returns to the public surface when a prescription client
  * exists, and its final wire format is owed to scorpio-guard-protocol anyway.
  *
- * Raw behavior is reduced to one of these tokens before transmission —
+ * Raw behavior is reduced to one of these tokens before transmission:
  * `47 requests / 2.3s` becomes `SYM_REQUEST_BURST`, and the requests themselves
  * never travel. An instance may not invent symptoms the ecosystem does not know.
  *
@@ -26,7 +26,7 @@
  *   category rather than failing.
  *
  * `SYM_UNKNOWN_PATTERN` is not a category. Being unable to name something is a
- * detail-tier admission inside whichever category was observed — promoting it to
+ * detail-tier admission inside whichever category was observed, promoting it to
  * a category would make "we don't know" a permanent principle-level class.
  */
 
@@ -62,7 +62,7 @@ export type SymptomCategory = (typeof SYMPTOM_CATEGORIES)[number];
  *
  * Every detail is a *shape*, never a value: `SYM_REQUEST_BURST` says volume
  * arrived compressed in time, and carries no count, no interval and no endpoint.
- * That is the whole privacy argument of the symptom model — the server learns
+ * That is the whole privacy argument of the symptom model, the server learns
  * that a shape recurred, not what produced it.
  */
 export const SYMPTOM_DETAILS = {
@@ -121,7 +121,7 @@ export function categoryOf(detail: string): SymptomCategory | undefined {
 /**
  * What actually travels. D43.
  *
- * The category is transmitted *with* the detail rather than derived from it — the
+ * The category is transmitted *with* the detail rather than derived from it, the
  * whole point of the tier split is that a receiver too old to know the detail can
  * still act on the category, and it cannot look up what it does not have.
  */

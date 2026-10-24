@@ -2,7 +2,7 @@
 
 At this stage discussion is worth more than code. The model is built but nothing
 in it is calibrated against real traffic, so the most valuable contribution is
-evidence that a number is wrong — not a patch that changes it.
+evidence that a number is wrong, not a patch that changes it.
 
 ## Read this first
 
@@ -17,27 +17,27 @@ decided will be closed with a pointer to the entry.
 | Contribution | Why it helps |
 |---|---|
 | A false positive, with its trace | `evaluate()` returns `trace` for exactly this. Paste it. A decision without its trace cannot be diagnosed. |
-| A proof source the taxonomy missed | D41 closes the constraint classes over six kinds of fact a host can prove something from. A *seventh kind of proof* would reopen it — a new attack shape would not, since it should already map to an existing class. Say which of the six yours is not. |
+| A proof source the taxonomy missed | D41 closes the constraint classes over six kinds of fact a host can prove something from. A *seventh kind of proof* would reopen it: a new attack shape would not, since it should already map to an existing class. Say which of the six yours is not. |
 | A weak signal, with its innocent cause | D42 requires the plausible legitimate path to triggering it. A signal whose false-positive story cannot be written down is not understood well enough to weigh. Thresholds are deliberately not part of the catalogue. |
 | A store implementation | Run `checkStoreConformance()` against it and paste the result. Eleven checks, and two implementations already pass them. |
 | A threshold that is wrong on real traffic | The whole model is reasoned guesses. Say what you observed and how much of it. |
 | A persona the generator is missing | `npm run replay` drives seeded personas through two declared targets (D45, D47). A legitimate usage pattern that gets escalated is a bug in the thresholds; an adversary that walks through is a gap in the model. Either is worth more than a patch. |
-| An application with something worth stealing | The best target has unauthenticated endpoints and real cost behind them — that is why IXFE replaced a personal app as the primary one (D47). Declared invariants from a flow nobody would bother attacking prove very little. |
+| An application with something worth stealing | The best target has unauthenticated endpoints and real cost behind them: that is why IXFE replaced a personal app as the primary one (D47). Declared invariants from a flow nobody would bother attacking prove very little. |
 
 ## What is not useful yet
 
 - A prescription client or wire format. The vocabulary's *structure* is settled
   (D43) but the wire format is not, and it belongs to `scorpio-guard-protocol`, so
   anything transmitting is premature.
-- A new symptom *category*. The stable tier is meant never to grow — that is the
+- A new symptom *category*. The stable tier is meant never to grow; that is the
   whole point of splitting it from the detail tier. A new **detail** under an
   existing category is welcome; a seventh category needs an argument that the guard
   can observe a kind of thing none of the six covers.
 - An anomaly algorithm. The feature space is settled and the personas now give
   candidates something to be compared against, but choosing one still wants a real
-  population — generated traffic can falsify a candidate, not rank it.
+  population, generated traffic can falsify a candidate, not rank it.
 - Framework middleware. The core API is still moving, and middleware is an adapter
-  over it — never the other way around.
+  over it, never the other way around.
 
 ## Working on the code
 
@@ -64,11 +64,11 @@ House rules, in order of how likely they are to get a change sent back:
    a threshold nobody can find or override.
 4. **Time comes from the injected `Clock`.** Never `Date.now()` in the core.
 5. **A deliberate simplification is marked `ponytail:`**, naming its ceiling and
-   the upgrade path. An unmarked shortcut reads as an oversight — and a marked one
+   the upgrade path. An unmarked shortcut reads as an oversight: and a marked one
    is a debt, so removing it counts as a contribution.
 6. **`hard` needs an enumeration, not an error code.** Declaring `hard` asserts the
    legitimate set is complete for that scope. That the server already refuses the
-   request is not evidence of completeness — see D48, where "paid work requires
+   request is not evidence of completeness, see D48, where "paid work requires
    enough credits" turned out to be `soft` because the client's view of its balance
    is stale by construction.
 7. **No threshold goes in `signals.ts`.** The catalogue names what is measured,
@@ -87,5 +87,5 @@ console.log(JSON.stringify({ decision: result.decision, trace: result.trace }, n
 ```
 
 Do not include raw user data. Nothing in the guard needs it, and nothing in a bug
-report does either — the trace describes the shape of what happened, which is the
+report does either, the trace describes the shape of what happened, which is the
 whole point of the design.

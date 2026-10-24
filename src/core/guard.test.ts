@@ -235,7 +235,7 @@ test('D23: every evaluation explains itself', async () => {
   assert.deepEqual(result.context, { endpoint: '/pay', sensitivity: 'high' });
 });
 
-test('D2: context does not partition state — trust is global per entity', async () => {
+test('D2: context does not partition state, trust is global per entity', async () => {
   const clock = fakeClock();
   const guard = createGuard({ clock });
 

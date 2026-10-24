@@ -19,7 +19,7 @@ export function record(data) {
         .join('\n');
       return `
     <table>
-      <caption>${part.part.replace(/^Part ([IVX]+) — (.+)$/, (_m, roman, title) => `${t('Part', 'Bagian')} ${roman}: ${title}`)}</caption>
+      <caption>${part.part.replace(/^Part ([IVX]+): (.+)$/, (_m, roman, title) => `${t('Part', 'Bagian')} ${roman}: ${title}`)}</caption>
       <thead><tr><th>#</th><th>${t('Decision', 'Keputusan')}</th><th>${t('Files', 'File')}</th></tr></thead>
       <tbody>
 ${rows}
@@ -45,7 +45,7 @@ ${rows}
       t('How much has accumulated, n = α + β after decay. Mass is the amount of belief; trust is its direction.',
         'Seberapa banyak yang sudah terkumpul, n = α + β setelah decay. Massa adalah banyak keyakinan; trust adalah arahnya.')],
     ['stage', 'Epistemic stage', 'Tahap epistemik',
-      t('unknown, developing, established — how much do I know? — read before trust answers what do I believe?',
+      t('unknown, developing, established, how much do I know?, read before trust answers what do I believe?',
         'unknown, developing, established \u2014 seberapa banyak saya tahu? \u2014 dibaca sebelum trust menjawab apa yang saya yakini?')],
     ['hard-constraint', 'Hard constraint', 'Constraint hard',
       t('A violation that is a proof, not a probability. Declaring hard claims both determinism and completeness over its scope.',

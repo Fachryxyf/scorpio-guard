@@ -55,7 +55,7 @@ Content-Type: application/json
     <table>
       <caption>${t('Stable categories and their current details (generated from source)', 'Kategori stabil dan detail terkininya (dibangkitkan dari sumber)')}</caption>
       <thead>
-        <tr><th>${t('Category — stable', 'Kategori — stabil')}</th><th>${t('Details — evolve', 'Detail — berkembang')}</th></tr>
+        <tr><th>${t('Category, stable', 'Kategori, stabil')}</th><th>${t('Details, evolve', 'Detail, berkembang')}</th></tr>
       </thead>
       <tbody>
 ${vocabRows}

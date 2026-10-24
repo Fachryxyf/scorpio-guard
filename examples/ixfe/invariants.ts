@@ -3,7 +3,7 @@
  *
  * IXFE (`ixfe.pro`) is a competitor-intelligence platform: three deployables, an
  * unauthenticated pre-launch funnel, and a credit ledger where one request can
- * spend real money — Puppeteer scrapes and Google Places calls are billed to the
+ * spend real money: Puppeteer scrapes and Google Places calls are billed to the
  * operator whether or not the caller was legitimate.
  *
  * That last property is why it replaces HealthMe as the primary target (D47). A
@@ -12,7 +12,7 @@
  *
  * Every invariant below is declared at one of the six proof sources in D41, and the
  * `strength` is chosen by whether IXFE can honestly claim *completeness* over the
- * scope (D32) — not by how bad a violation feels.
+ * scope (D32), not by how bad a violation feels.
  */
 import type { Invariant } from '../../src/core/constraints.ts';
 import { transitionGraph } from '../../src/core/transitions.ts';
@@ -30,7 +30,7 @@ export const WORK_SCOPE = 'ixfe.work';
  *
  * `order.html` is a three-part form on one page: choose a plan, fill details,
  * submit. So the reachable states are few and enumerable, which is what makes this
- * `hard` — a submission claiming to arrive from a state the page cannot produce did
+ * `hard`: a submission claiming to arrive from a state the page cannot produce did
  * not come from the page.
  */
 export const orderFunnel: Invariant = transitionGraph({
@@ -93,10 +93,10 @@ export type WorkRequest = {
  * so a stream of these says something about the caller even though each one is
  * correctly refused.
  *
- * `soft`, and the first draft got this wrong — see D48. Declaring `hard` asserts
+ * `soft`, and the first draft got this wrong, see D48. Declaring `hard` asserts
  * completeness (D32): that *no* legitimate client ever asks for work it cannot
  * afford. That claim is false. The client's view of its balance is stale by
- * construction — jobs are queued and billed asynchronously, another tab may have
+ * construction, jobs are queued and billed asynchronously, another tab may have
  * spent the difference, and a lapsed subscription changes the answer without the
  * open page hearing about it. So the honest reading is negative evidence, not proof:
  * one refused request is how a person discovers their balance, and a hundred is a
@@ -114,12 +114,12 @@ export const workRequiresCredits: Invariant = {
 };
 
 /**
- * A pending subscription has no credit allowance at all — `provisionPending()`
+ * A pending subscription has no credit allowance at all, `provisionPending()`
  * writes zero, and only a paid callback calls `activateSubscription()`. So paid work
  * from a pending account cannot have been legitimately funded.
  *
  * Kept `hard`, with one thing worth naming: a violation here proves *something is
- * wrong*, not necessarily that the **caller** did it — an internal accounting bug
+ * wrong*, not necessarily that the **caller** did it: an internal accounting bug
  * would look identical. D14 covers this exactly, because "hard" describes the
  * certainty of the violation and never the severity of the response. `RESTRICT` is
  * right either way: withholding paid compute until a human looks is correct whether
@@ -156,7 +156,7 @@ export type FormSubmission = {
  * `order.html` compute `dwell` unconditionally at page load, so its absence proves
  * the request bypassed the page rather than suggesting the human was quick.
  *
- * The threshold version of this — `dwell < 1500ms` — is deliberately **not** here.
+ * The threshold version of this: `dwell < 1500ms`: is deliberately **not** here.
  * That is a calibrated number about human speed, so it belongs to the weak-signal
  * catalogue (`SIG_SUBHUMAN_LATENCY`), not to a proof.
  */
@@ -175,7 +175,7 @@ export const submissionCameFromForm: Invariant = {
  * The same proof at the pre-order form. D56.
  *
  * `order.html` computes `dwell` at page load exactly as `index.html` does, and
- * `/api/order` runs the same `looksAutomated()` check — so the claim is identical
+ * `/api/order` runs the same `looksAutomated()` check: so the claim is identical
  * and the scope is not. Declared separately rather than by widening the scope of
  * the one above, because an invariant names the scope it can prove completeness
  * over (D32), and these are two forms that happen to agree.
@@ -193,7 +193,7 @@ export const orderCameFromForm: Invariant = {
  * fills it.
  *
  * `soft` rather than `hard`, deliberately. IXFE's own comment calls this "serap
- * diam-diam" — absorb silently — and the reason to keep it a signal is that a
+ * diam-diam": absorb silently: and the reason to keep it a signal is that a
  * password manager or an over-eager autofill extension can populate a hidden input
  * it found in the DOM. Rare, and not impossible, which is the definition of soft.
  */
@@ -232,7 +232,7 @@ export type OtpAttempt = {
  * A code cannot be submitted before it was requested.
  *
  * `/api/auth/otp/request` writes the row; `verifyOtp()` reads it. A submission for
- * an address with no issued code is not a wrong guess — it is a guess at a code
+ * an address with no issued code is not a wrong guess: it is a guess at a code
  * that does not exist, which only a script does.
  */
 export const otpWasRequestedFirst: Invariant = {
@@ -251,7 +251,7 @@ export const otpWasRequestedFirst: Invariant = {
  *
  * `verifyOtp()` burns the code at `OTP_MAX_ATTEMPTS`, so any further guess is
  * against something already dead. IXFE's own comment notes the per-code cap is the
- * fix that survives IP rotation while the rate limiter does not — this is the same
+ * fix that survives IP rotation while the rate limiter does not: this is the same
  * fact, expressed where SG can accumulate it against the caller.
  */
 export const otpWithinAttemptCap: Invariant = {
@@ -283,7 +283,7 @@ export type IssuedReference = {
  * This is the class the original five could not express (D41), and IXFE has three
  * instances of it at once: the activation `jti` in `activation_consumed`, the
  * `order_id` in `payments`, and the `external_id` a Xendit callback claims. The
- * webhook case is the one with money attached — `/api/billing/xendit/callback`
+ * webhook case is the one with money attached, `/api/billing/xendit/callback`
  * already answers 404 for an unknown `external_id`, and this is what turns that
  * refusal into evidence about the caller rather than a discarded log line.
  */
@@ -328,7 +328,7 @@ export type LaunchClaim = {
  * IXFE returns 410 for both after launch, and its comment explains why the check
  * cannot live in the UI: the form is hidden, but the endpoint can still be shot at
  * directly. A caller asking to join a waiting list for a product that is already
- * live is holding two contradictory facts — most likely a replayed request from a
+ * live is holding two contradictory facts, most likely a replayed request from a
  * recorded session, which is exactly what the premise of this whole design says an
  * attacker can do.
  */

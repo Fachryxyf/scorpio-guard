@@ -6,7 +6,7 @@ const HOUR_MS = 3_600_000;
 /**
  * Accumulated evidence mass for one entity. D1, D3.
  *
- * `a` and `b` are evidence mass only — the Beta(1,1) prior is structural and
+ * `a` and `b` are evidence mass only: the Beta(1,1) prior is structural and
  * lives outside them, so a fresh entity is (0, 0) and reads as exactly flat.
  * Both timestamps are milliseconds since the epoch:
  *
@@ -65,7 +65,7 @@ export function decayedMass(
  * `w / (1 - lambda(T))` for arrivals every `T`; add-then-decay-on-read lets it
  * grow without limit.
  *
- * `positive` and `negative` are masses and must not be negative — sign is
+ * `positive` and `negative` are masses and must not be negative, sign is
  * carried by which parameter they land in, never by the number itself. D4.
  */
 export function applyEvidence(
@@ -110,7 +110,7 @@ export function uncertainty(state: EntityState, now: number, halfLifeHours?: num
 /**
  * Evidence mass, `n = alpha + beta`. D5 revision.
  *
- * Includes the prior, so a fresh entity reads exactly 2 — which is what makes
+ * Includes the prior, so a fresh entity reads exactly 2, which is what makes
  * "has any evidence arrived at all" answerable rather than inferred from the mean.
  */
 export function evidenceMass(state: EntityState, now: number, halfLifeHours?: number): number {

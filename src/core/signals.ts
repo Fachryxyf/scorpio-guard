@@ -10,8 +10,8 @@
  * Two properties of this file are load-bearing:
  *
  * 1. It contains no thresholds. Every entry names what is measured and what
- *    observing it is worth, and the host — or a later calibration against real
- *    traffic — decides when it fires. Publishing `flag if interval < 220ms` in an
+ *    observing it is worth, and the host, or a later calibration against real
+ *    traffic, decides when it fires. Publishing `flag if interval < 220ms` in an
  *    open-source library hands an attacker the exact number to route around
  *    (design notes §7).
  * 2. It cannot escalate on its own. `signalMass` returns negative evidence, and
@@ -21,7 +21,7 @@
  *
  * ponytail: a flat catalogue with per-signal weights, combined by summation.
  * Correct while signals are treated as independent. Upgrade path: correlated
- * groups, once real traffic shows which of these co-occur — three signals that
+ * groups, once real traffic shows which of these co-occur, three signals that
  * always fire together should not count three times.
  */
 import { DEFAULT_WEIGHTS } from './policy.ts';
@@ -31,12 +31,12 @@ import { DEFAULT_WEIGHTS } from './policy.ts';
  * `constraints.ts`, and the reason this catalogue is bounded too: a signal SG
  * cannot observe is not a signal it can carry.
  *
- * - `timing` — when things happened, and the shape of the gaps
- * - `repetition` — how similar this interaction is to previous ones
- * - `interaction` — the presence and texture of human input
- * - `sequence` — the path taken, where no invariant forbids it
- * - `target` — what is being asked for, and how broadly
- * - `environment` — coarse client-side facts, never fingerprints
+ * - `timing`, when things happened, and the shape of the gaps
+ * - `repetition`: how similar this interaction is to previous ones
+ * - `interaction`, the presence and texture of human input
+ * - `sequence`, the path taken, where no invariant forbids it
+ * - `target`, what is being asked for, and how broadly
+ * - `environment`, coarse client-side facts, never fingerprints
  */
 export const SIGNAL_SOURCES = [
   'timing',
@@ -68,14 +68,14 @@ export const SIGNAL_WEIGHTS = {
 /**
  * The most mass all the weak signals of a single interaction may contribute.
  *
- * One weak observation — the least the trust model recognises. This is what
+ * One weak observation, the least the trust model recognises. This is what
  * "never a standalone trigger" means numerically, and it is a stronger guarantee
  * than the wording alone: with the prior at `n = 2` and `developingAt` at `3`, an
  * interaction that trips *every* signal in the catalogue still leaves the entity
  * in the `unknown` stage, where the trust dimension asks for nothing (D40).
  *
  * So measurement cannot manufacture a treatment on its own. It takes repeated
- * interactions to accumulate past the stage boundary — which is exactly the
+ * interactions to accumulate past the stage boundary: which is exactly the
  * "meaningful in combination" the design notes ask for, combination over time
  * rather than a single well-instrumented request.
  */
@@ -87,7 +87,7 @@ export type WeakSignal = {
   readonly id: string;
   readonly source: SignalSource;
   readonly weight: SignalWeight;
-  /** What is measured. Never a threshold — see the header. */
+  /** What is measured. Never a threshold, see the header. */
   readonly measures: string;
   /** Why a legitimate user might trigger it. The honest false-positive path. */
   readonly innocentCause: string;
@@ -133,7 +133,7 @@ export const WEAK_SIGNALS: readonly WeakSignal[] = [
     source: 'timing',
     weight: 'faint',
     measures: 'activity outside the hours this entity, or the application, normally sees',
-    innocentCause: 'travel, shift work, insomnia — a signal that is mostly noise alone',
+    innocentCause: 'travel, shift work, insomnia, a signal that is mostly noise alone',
     computed: false,
   },
   {
@@ -158,7 +158,7 @@ export const WEAK_SIGNALS: readonly WeakSignal[] = [
     weight: 'pronounced',
     measures: 'a field populated with fewer interaction events than filling it requires',
     innocentCause:
-      'assistive technology, autofill, or a browser SG has no interaction API for — this is exactly why it is a signal and not the IMPOSSIBLE_IDLE_ACTION invariant',
+      'assistive technology, autofill, or a browser SG has no interaction API for; this is exactly why it is a signal and not the IMPOSSIBLE_IDLE_ACTION invariant',
     computed: false,
   },
   {
@@ -209,7 +209,7 @@ export function isWeakSignal(value: unknown): value is WeakSignal['id'] {
  * combination*, and an average would make a second signal weaken the first.
  *
  * Capped at `SIGNAL_MASS_CAP`. A weak signal is measurement, and no pile of
- * measurements should outweigh what a host declared — nor should a catalogue that
+ * measurements should outweigh what a host declared: nor should a catalogue that
  * grows over time quietly become more punitive per interaction than it was when
  * these thresholds were reasoned about.
  */

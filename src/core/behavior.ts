@@ -1,7 +1,7 @@
 /**
  * The anomaly feature space. D36.
  *
- * Features first, algorithm later (D18) — so this file computes features and
+ * Features first, algorithm later (D18), so this file computes features and
  * makes no attempt to classify. Every value here is derived from a bounded
  * window of recent observations, never from raw payloads.
  *
@@ -25,7 +25,7 @@ export type ObservationTrace = {
  * Computed from a bounded window (D36, `DEFAULT_WINDOW_SIZE`), not from a
  * streaming estimator. That is a decision rather than a shortcut: over a window
  * this size the values here are exact, a streaming estimator would only
- * approximate them, and the bound is itself required — an unbounded per-entity
+ * approximate them, and the bound is itself required: an unbounded per-entity
  * history is a memory-growth surface and a retention problem (D6, D22). A
  * streaming form becomes worth writing only if the window ever needs to be large,
  * which nothing in the model currently asks for.
@@ -41,7 +41,7 @@ export type BehaviorFeatures = {
    * perfectly evenly over whatever scopes were visited, 0 means every observation
    * landed in the same one.
    *
-   * Normalised against `log2(distinctScopes)` rather than `log2(count)` — see D46.
+   * Normalised against `log2(distinctScopes)` rather than `log2(count)`, see D46.
    * The window-size denominator made this a proxy for `distinctScopes` and tied
    * the value to how many scopes the *application* has, so the same behavior
    * scored differently in a small app than in a large one. Breadth is
@@ -51,7 +51,7 @@ export type BehaviorFeatures = {
   /**
    * Coefficient of variation of inter-arrival gaps: standard deviation over mean.
    *
-   * This is the discriminating feature the design notes single out — the tell is
+   * This is the discriminating feature the design notes single out: the tell is
    * not the delay but the *shape* of the randomness. Human activity is bursty
    * (high CV); fixed sleeps approach 0, and a flat `uniform(a, b)` sits at a
    * characteristic low value well below human traffic.
@@ -112,7 +112,7 @@ export function behaviorFeatures(window: readonly ObservationTrace[]): BehaviorF
 /**
  * Does observed behavior vary enough for low variance to be believed? D37.
  *
- * Returns `undefined` when the window is too small to judge — which is not the
+ * Returns `undefined` when the window is too small to judge: which is not the
  * same claim as monotonous, and is why `anomalyConcurs` is three-valued.
  */
 export function diversityConcurs(
@@ -137,7 +137,7 @@ export type DiversityThresholds = {
 
 /**
  * PoC defaults. Every one of these is a guess until D30 puts them against real
- * traffic — they are deliberately lenient, because a wrong threshold here
+ * traffic: they are deliberately lenient, because a wrong threshold here
  * withholds escalation rather than manufacturing a false positive.
  */
 export const DEFAULT_DIVERSITY: DiversityThresholds = {
@@ -187,7 +187,7 @@ export type VelocityThresholds = {
   /** Observations needed before a rate is measured at all. */
   readonly minObservations: number;
   /**
-   * How regular the gaps must also be — coefficient of variation *below* this —
+   * How regular the gaps must also be, coefficient of variation *below* this:
    * before a high rate is read as farming rather than as a fast human.
    */
   readonly maxInterArrivalCv: number;
@@ -225,7 +225,7 @@ export function observationRate(
  * A conjunction of rate and *gap regularity*, and the history of both halves is
  * worth keeping:
  *
- * 1. D50 shipped a pure rate check. Generated traffic falsified it immediately — a
+ * 1. D50 shipped a pure rate check. Generated traffic falsified it immediately, a
  *    busy operator at one action per 45 seconds and a power user at one per 20
  *    seconds both tripped it. Humans are simply capable of being fast, so rate
  *    alone is exactly the false positive the central constraint forbids.
@@ -235,7 +235,7 @@ export function observationRate(
  *    timing. Legitimate people do use one feature over and over.
  *
  * What actually separates a farmer from a fast human is neither speed nor breadth
- * but the *shape of the gaps* — which is the one thing the design notes single out,
+ * but the *shape of the gaps*: which is the one thing the design notes single out,
  * and the one thing a farmer cannot fix without giving up the volume it needs. A
  * jittered fixed sleep still reads at `cv ~= 0.05`; bursty human activity sits above
  * `1.0`.
@@ -258,7 +258,7 @@ export function farmingSuspected(
  *
  * The farming answer that acts on *intake* rather than on the decision. D4 argued
  * against acting on mass at decision time and D49 accepted that, which left farming
- * with no available lever — but "how much is this observation worth" is a different
+ * with no available lever: but "how much is this observation worth" is a different
  * question from "what should this mean do", and it is asked earlier.
  *
  * Returns a factor in [0,1]: full credit for bursty human-shaped activity,
@@ -269,7 +269,7 @@ export function farmingSuspected(
  * discounted. A regular client earns trust more slowly; it is never distrusted for
  * being regular. Measured across the full regularity range, a client that only ever
  * earns positives cannot be advised worse than `OBSERVE`, which costs a user
- * nothing — so withholding credit cannot become punishment.
+ * nothing: so withholding credit cannot become punishment.
  *
  * `undefined` window state (too few observations) yields full credit: absence of a
  * measurement is not grounds to withhold anything.

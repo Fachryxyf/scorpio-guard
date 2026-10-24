@@ -4,12 +4,12 @@
  * The in-memory default is process-local: it resets on restart and is invisible to
  * other instances, so a cold start silently discards accumulated trust. D20 claims
  * a serverless guard is fully functional, and that claim was only true of the
- * decision path — not of its memory. This store makes it true of both.
+ * decision path, not of its memory. This store makes it true of both.
  *
  * Chosen over Redis or a SQL server because `node:sqlite` is in the standard
  * library: the zero-dependency promise survives, and an adopter needs no
  * infrastructure to get durability. Separate entry point (`./sqlite`) rather than
- * part of the core, because D12 keeps `src/core/` free of platform APIs — the same
+ * part of the core, because D12 keeps `src/core/` free of platform APIs: the same
  * model still runs in a browser.
  *
  * Not a replacement for Redis in a multi-host deployment: SQLite is one file on
@@ -44,7 +44,7 @@ export type SqliteStore = StateStore & {
  *
  * The state is stored as one JSON column rather than as typed columns. The window
  * (D36) is a variable-length array and the trust fields are floats whose exact
- * values matter (the conformance kit checks precision) — normalising that into
+ * values matter (the conformance kit checks precision), normalising that into
  * rows would buy queryability that D1 says nothing needs, since the entity key is
  * opaque and there is nothing to query by.
  */
@@ -120,8 +120,8 @@ export function sqliteStore(options: SqliteStoreOptions = {}): SqliteStore {
 }
 
 /**
- * A table name reaches SQL by interpolation — `node:sqlite` parameters bind
- * values, not identifiers — so it is validated rather than trusted. Everything
+ * A table name reaches SQL by interpolation, `node:sqlite` parameters bind
+ * values, not identifiers, so it is validated rather than trusted. Everything
  * else in this file is a bound parameter.
  */
 function assertPlainIdentifier(name: string): void {

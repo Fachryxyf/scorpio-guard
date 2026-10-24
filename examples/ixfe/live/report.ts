@@ -4,13 +4,13 @@
  * Every "still unvalidated" row in the README that says *needs real traffic* names a
  * number this report measures against real clients:
  *
- * - `maxInterArrivalCv = 0.25` (D55) — the gap-regularity gate that decides how much
+ * - `maxInterArrivalCv = 0.25` (D55), the gap-regularity gate that decides how much
  *   trust a legitimate machine client is denied. Reported as the observed CV
  *   distribution, so the question becomes where real clients actually sit rather
  *   than whether 0.25 feels right.
- * - The anomaly reference profile (D52) — reported as observed quantiles per feature,
+ * - The anomaly reference profile (D52), reported as observed quantiles per feature,
  *   which is what a reference profile should be fitted to.
- * - The collectors (D51) — every advice above `ALLOW` given to a client that the
+ * - The collectors (D51), every advice above `ALLOW` given to a client that the
  *   origin itself never refused is a false-positive candidate, listed individually
  *   because D51's debt is that not one collector has met a real one.
  *
@@ -57,8 +57,8 @@ export function quantile(values: readonly number[], q: number): number | undefin
  * - A hard violation is proof (D15). It cannot be a false positive, whatever the
  *   origin answered.
  * - A 2xx from IXFE is not consent. `/api/waitlist` and `/api/order` answer
- *   `{ slot: 0 }` to a request their own honeypot or time-trap caught — "serap
- *   diam-diam", absorb silently — so reading that status as agreement would count
+ *   `{ slot: 0 }` to a request their own honeypot or time-trap caught, "serap
+ *   diam-diam", absorb silently, so reading that status as agreement would count
  *   IXFE's own detections as the guard's mistakes.
  * - Nor is a 200 that carries a document from an API path. That is the SPA fallback
  *   answering for a route that does not exist (D57), so the origin refused too; it
@@ -109,7 +109,7 @@ export function summarise(records: readonly LiveRecord[]) {
 /**
  * Per-client verdicts, which is the grain the design's claims are stated at. D58.
  *
- * A row per request is too fine to argue from — "no legitimate visitor is ever given
+ * A row per request is too fine to argue from: "no legitimate visitor is ever given
  * friction" is a claim about visitors. Same reasoning as `formatResults` in the
  * persona harness.
  */
@@ -178,7 +178,7 @@ if (process.argv[1]?.endsWith('report.ts')) {
     process.exit(0);
   }
 
-  console.log(`\n  IXFE live traffic — ${path}`);
+  console.log(`\n  IXFE live traffic, ${path}`);
   console.log(`    records: ${summary.total}   distinct clients: ${summary.entities}   measurable windows: ${summary.scored}\n`);
 
   if (summary.total === 0) {

@@ -12,7 +12,7 @@ export type Transition = {
  *
  * Set membership, not scoring: no threshold, no calibration, and therefore no
  * false positives *given a correct declaration*. Which is exactly why `strength`
- * is a required argument rather than defaulting to `hard` — declaring `hard`
+ * is a required argument rather than defaulting to `hard`, declaring `hard`
  * asserts that `allowed` is complete for this scope (D32), and a forgotten edge
  * becomes a provable violation of something legitimate.
  */

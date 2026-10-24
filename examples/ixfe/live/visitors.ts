@@ -40,7 +40,7 @@ const CHROME_PORT = 9444;
  * One user-agent per persona, all of them real strings.
  *
  * Necessary rather than decorative: the observer keys an entity on IP *and* UA
- * (D56), and every session here arrives from the same loopback address — so two
+ * (D56), and every session here arrives from the same loopback address, so two
  * personas sharing a UA would be merged into one entity and the report would be
  * about a chimera. Reusing a UA is exactly the identity-churn case, in reverse.
  */
@@ -166,14 +166,14 @@ const mobileVisitor: VisitorSession = {
  * thinks the product is pre-launch.
  *
  * This is the most valuable legitimate case here, and the least obvious. The site is
- * live now, so `/api/waitlist` answers 410 — an honest visitor, honestly refused,
+ * live now, so `/api/waitlist` answers 410, an honest visitor, honestly refused,
  * accruing negative evidence they did nothing to deserve. Whether SG escalates on
  * that is exactly the false-positive question D51 owes an answer to, and it did not
  * have to be invented: the site's own comment explains that a CDN- or
  * browser-cached copy carries the old phase, which is why the endpoint has to refuse
  * rather than the form being hidden.
  *
- * `data-phase` is set back to `prelaunch` to reproduce that cached copy — the form
+ * `data-phase` is set back to `prelaunch` to reproduce that cached copy: the form
  * and its `dwell` timer are in the DOM either way, and the attribute is the only
  * thing the live page changes. Everything after that is real: real keystrokes, real
  * `dwell` measured by the page's own clock, and the page's own `fetch`.
@@ -225,7 +225,7 @@ const returningVisitor: VisitorSession = {
 
 // Adversaries. Each must cost something.
 
-/** Shoots the waitlist endpoint directly. No page, so no `dwell` — a proof (D47). */
+/** Shoots the waitlist endpoint directly. No page, so no `dwell`, a proof (D47). */
 const endpointShooter: VisitorSession = {
   id: 'endpoint-shooter',
   legitimate: false,
@@ -302,7 +302,7 @@ const silentCrawler: VisitorSession = {
 };
 
 /**
- * An uptime monitor: `GET /` on a fixed interval, forever. Legitimate by definition —
+ * An uptime monitor: `GET /` on a fixed interval, forever. Legitimate by definition:
  * the operator set it up.
  *
  * Here to test the one innocent cause `SIG_UNIFORM_DELAY_SHAPE` names in the
@@ -361,7 +361,7 @@ if (process.argv[1]?.endsWith('visitors.ts')) {
 
   console.log(`\n  Generated visitors against ${target}`);
   console.log(`    ${sessions.length} session type(s), ${rounds} round(s)`);
-  console.log(`    still generated traffic — this falsifies, it does not calibrate (D45)\n`);
+  console.log(`    still generated traffic; this falsifies, it does not calibrate (D45)\n`);
 
   const kill = await launch({ port: CHROME_PORT, profileDir: '/tmp/sg-visitors-profile' });
   const browser = await connect(CHROME_PORT);

@@ -7,7 +7,7 @@
  *
  * Five rungs, deliberately. `CHALLENGE` is an alias for `INCREASE_FRICTION`, and
  * `deceive` (tarpit, silent failure, decoy data) is a host-side variant of
- * `BLOCK` — both describe how a host executes a treatment, not a new degree of
+ * `BLOCK`, both describe how a host executes a treatment, not a new degree of
  * severity, and SG names severity only. D33.
  */
 export const DECISIONS = [

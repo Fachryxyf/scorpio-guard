@@ -2,8 +2,8 @@
  * Drive personas through a guard and report what happened. D45, generalised by D47.
  *
  * One row per interaction is too fine a grain to argue about; the design's claims
- * are stated per *visitor* — a legitimate user is never given friction, sustained
- * abuse becomes expensive — so this reports a verdict per persona.
+ * are stated per *visitor*: a legitimate user is never given friction, sustained
+ * abuse becomes expensive, so this reports a verdict per persona.
  *
  * The clock is driven by the persona's own gaps, so a fourteen-day run costs
  * milliseconds while decay, retention and diversity all see real elapsed time.
@@ -61,7 +61,7 @@ export type PersonaResult = {
 /**
  * `INCREASE_FRICTION` is the first rung a legitimate user would actually feel, and
  * therefore both the false-positive line and the line at which abuse starts to
- * cost something. One constant, two readings — they are the same threshold seen
+ * cost something. One constant, two readings: they are the same threshold seen
  * from either side.
  */
 const FELT: Decision = 'INCREASE_FRICTION';
@@ -73,7 +73,7 @@ export type ReplayOptions = {
   readonly startAt?: number;
   /**
    * Read as "the host would not have stood in the way". A host with no friction
-   * step — only pass and reject — should count friction as agreement with passing.
+   * step: only pass and reject: should count friction as agreement with passing.
    */
   readonly permits?: (advice: Decision) => boolean;
   /** Velocity thresholds for the farming ceiling. D50. */
@@ -173,7 +173,7 @@ export async function replayAll(
   return results;
 }
 
-/** Disagreements between the host and the guard — the interesting output. */
+/** Disagreements between the host and the guard, the interesting output. */
 export function disagreements(results: readonly PersonaResult[]): readonly Observed[] {
   return results.flatMap((result) => result.records.filter((record) => !record.agrees));
 }

@@ -110,7 +110,7 @@ test('D36: the window is bounded, dropping oldest first', () => {
 });
 
 test('D46: entropy measures balance, independently of how many scopes the app has', () => {
-  // The same behavior — attention spread perfectly evenly over whatever exists —
+  // The same behavior: attention spread perfectly evenly over whatever exists:
   // must score the same in a two-scope app and a five-scope one. Normalising
   // against the window size made this a proxy for `distinctScopes` instead, so a
   // small application could not reach the diversity threshold at all.
@@ -169,7 +169,7 @@ test('D54: a fast human is not farming, because gap shape is what separates them
 test('D54: repeating one scope quickly is not farming either', () => {
   // The second falsification: HealthMe's power-user reads one scope over and over
   // and scores 0.56 on the composite anomaly measure. Narrow attention is not the
-  // signal — regular timing is.
+  // signal, regular timing is.
   let seed = 5;
   const random = () => ((seed = (seed * 1664525 + 1013904223) >>> 0) / 4294967296);
   let at = 0;

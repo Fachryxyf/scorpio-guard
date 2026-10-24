@@ -25,7 +25,7 @@ const options = {
  * The central constraint, as an assertion. D45.
  *
  * The design states false positives are unacceptable at product scale; this is
- * what that means operationally — no persona built from HealthMe's own honest
+ * what that means operationally, no persona built from HealthMe's own honest
  * usage may ever be advised anything a user would feel.
  */
 test('D45: no legitimate persona is ever given friction', async () => {
@@ -86,7 +86,7 @@ test('D46: the slow poisoner is caught, and how long it takes is recorded', asyn
 
 /**
  * Identity churn is recorded as an open problem. This measures it rather than
- * asserting it away — the number is the finding.
+ * asserting it away: the number is the finding.
  */
 test('D45: churning identities defeats accumulation, and the floor is two requests', async () => {
   const churned = await replayAll(churningBruteForce(30, 3), options);
@@ -95,7 +95,7 @@ test('D45: churning identities defeats accumulation, and the floor is two reques
   );
 
   // Three attempts per identity is enough for the second one to be felt, so churn
-  // does not make an attacker free — it caps what one identity costs them.
+  // does not make an attacker free: it caps what one identity costs them.
   assert.equal(escalated.length, churned.length);
 
   // One attempt per identity is the actual hole: nothing accumulates, because

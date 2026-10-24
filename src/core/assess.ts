@@ -45,7 +45,7 @@ export function epistemicStage(
  *
  * The bands in D5 are named as pairs ("trusted / observe"), describing a range
  * rather than one rung. Read here as the least interventionist rung of each pair,
- * because a ceiling can only ever lower a decision — so starting at the gentler
+ * because a ceiling can only ever lower a decision, so starting at the gentler
  * end would make the ceiling unable to express itself.
  */
 const BAND_DECISION: Record<TrustBand, Decision> = {
@@ -67,7 +67,7 @@ const UNCERTAINTY_CEILING: Record<UncertaintyLevel, Decision> = {
  * The most severe treatment each epistemic stage permits on trust alone.
  *
  * An `unknown` entity contributes nothing: with no evidence, the trust dimension
- * has no standing to ask for anything. It does not force `ALLOW` either — an
+ * has no standing to ask for anything. It does not force `ALLOW` either: an
  * independent anomaly signal or hard-constraint violation still reaches the
  * decision layer on its own authority.
  *
@@ -76,7 +76,7 @@ const UNCERTAINTY_CEILING: Record<UncertaintyLevel, Decision> = {
  * `OBSERVE` is the only rung that does that: it costs the user nothing and tells
  * the host something. `INCREASE_FRICTION` is the first rung a legitimate user
  * actually feels, so allowing it here made the `unknown` → `developing` boundary a
- * cliff — a third observation could turn silence into friction. D46 records the
+ * cliff: a third observation could turn silence into friction. D46 records the
  * traffic that found it.
  */
 const STAGE_CEILING: Record<EpistemicStage, Decision> = {
@@ -109,7 +109,7 @@ export type AssessOptions = {
    * enough for low variance to be believed. D37.
    *
    * `undefined` means no anomaly data exists yet, which is the current state of
-   * the project — not an assertion that behavior is monotonous.
+   * the project: not an assertion that behavior is monotonous.
    */
   readonly anomalyConcurs?: boolean | undefined;
 
@@ -131,9 +131,9 @@ export type AssessOptions = {
  *
  * Three ceilings apply and the lowest binds:
  *
- * - epistemic stage — has enough evidence arrived to interpret the mean at all
- * - uncertainty — is the distribution tight enough to act on
- * - anomaly concurrence — is that tightness earned by varied behavior
+ * - epistemic stage: has enough evidence arrived to interpret the mean at all
+ * - uncertainty: is the distribution tight enough to act on
+ * - anomaly concurrence: is that tightness earned by varied behavior
  *
  * Advisory only; the host decides what to do with the result. D14.
  */
@@ -194,8 +194,8 @@ export function assessTrust(
  * `ALLOW`, and a ceiling can only ever *lower* a decision. So the gate is
  * unobservable for exactly the entity it was designed to catch.
  *
- * Where it is observable is the mirror image — `mean < 0.4`, an entity the model
- * already distrusts — and there it withholds escalation *because* behavior was
+ * Where it is observable is the mirror image, `mean < 0.4`, an entity the model
+ * already distrusts: and there it withholds escalation *because* behavior was
  * monotonous. That is a real effect with a real tradeoff, and it is not the one
  * recorded in D37:
  *

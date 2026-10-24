@@ -93,7 +93,7 @@ test('D60: a foreign value in a shared namespace is not read as trust state', as
 });
 
 test('D6: the service TTL is a space bound, never the retention boundary', async () => {
-  // Retention has exactly one definition — isExpired. A service-side expiry that
+  // Retention has exactly one definition, isExpired. A service-side expiry that
   // fired first would become a second one, disagreeing with every other store.
   const seen: Array<number | undefined> = [];
   const transport: KvTransport = {

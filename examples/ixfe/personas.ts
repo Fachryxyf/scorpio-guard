@@ -2,7 +2,7 @@
  * IXFE traffic. D47.
  *
  * Where the HealthMe personas had to invent an adversary, these are drawn from what
- * IXFE's own code already defends against — every mitigation in `landing-service/`
+ * IXFE's own code already defends against, every mitigation in `landing-service/`
  * and `server/index.js` is a record of an attack its author expected. The honeypot,
  * the time-trap, the disposable-email blocklist, the per-code OTP cap, the 404 for
  * unknown `external_id`: each one names a persona.
@@ -42,7 +42,7 @@ export function preOrderBuyer(seed = 11): Persona {
   return {
     id: 'preorder-buyer',
     legitimate: true,
-    what: 'lands, reads pricing, picks a plan, pre-orders — the funnel as designed',
+    what: 'lands, reads pricing, picks a plan, pre-orders, the funnel as designed',
     steps: [
       {
         afterMs: 0,
@@ -139,7 +139,7 @@ export function typoRetryBuyer(seed = 12): Persona {
   return {
     id: 'typo-retry',
     legitimate: true,
-    what: 'mistypes the email domain, is told so, and retries — an honest second try',
+    what: 'mistypes the email domain, is told so, and retries, an honest second try',
     steps,
   };
 }
@@ -212,7 +212,7 @@ export function ranOutOfCredits(seed = 14): Persona {
   return {
     id: 'ran-out-of-credits',
     legitimate: true,
-    what: 'hits a zero balance, is refused once, tops up — the honest 402',
+    what: 'hits a zero balance, is refused once, tops up, the honest 402',
     steps: [
       {
         afterMs: 0,
@@ -319,7 +319,7 @@ export function activatedFounder(seed = 15): Persona {
 /**
  * The endpoint-shooter: POSTs straight at `/api/waitlist` with no page involved.
  *
- * IXFE absorbs these silently — it answers `{ slot: 0 }` so the bot cannot tell it
+ * IXFE absorbs these silently; it answers `{ slot: 0 }` so the bot cannot tell it
  * failed. Excellent for the bot's operator to be confused by, and it leaves IXFE
  * with no accumulating record of who did it. That is the gap SG fills: the missing
  * `dwell` is a *proof*, not a guess.
@@ -356,7 +356,7 @@ export function honeypotFiller(requests: number, seed = 21): Persona {
       afterMs: i === 0 ? 0 : 900 + random() * 600,
       event: `bot submission ${i + 1}`,
       scope: WAITLIST_SCOPE,
-      // It renders the page, so it has a dwell — but it fills what it should not see.
+      // It renders the page, so it has a dwell, but it fills what it should not see.
       data: { dwellMs: 2200 + random() * 500, honeypot: 'https://seo-backlinks.example', fieldsFilled: 5, interactions: 3 },
       hostDid: 'allowed',
       signals: ['SIG_UNIFORM_DELAY_SHAPE', 'SIG_REPEATED_PATTERN'],
@@ -481,7 +481,7 @@ export function activationReplayer(attempts: number): Persona {
  *
  * A paying account, or a compromised one, running the most expensive action in a
  * tight loop. `marketplace_global` is 12 credits and makes one Google Places call
- * per market — so this is billed to the operator in cash, not just in credits.
+ * per market, so this is billed to the operator in cash, not just in credits.
  *
  * Every request is individually authorised. Nothing here violates an invariant,
  * which is the point: this persona has to be caught by the statistical layer or not
@@ -530,7 +530,7 @@ export function creditDrainer(calls: number, seed = 24): Persona {
   return {
     id: 'credit-drainer',
     legitimate: false,
-    what: 'authorised account draining the most expensive action in a loop — real money, no invariant broken',
+    what: 'authorised account draining the most expensive action in a loop, real money, no invariant broken',
     steps,
   };
 }
@@ -539,8 +539,8 @@ export function creditDrainer(calls: number, seed = 24): Persona {
  * Replaying a recorded pre-launch session after launch.
  *
  * The premise of the whole design, made concrete: any behavior a human produces can
- * be recorded and replayed. This is a captured waitlist submission — correct dwell,
- * empty honeypot, plausible everything — resent after the product went live.
+ * be recorded and replayed. This is a captured waitlist submission, correct dwell,
+ * empty honeypot, plausible everything, resent after the product went live.
  */
 export function postLaunchReplayer(attempts: number): Persona {
   const steps: Step[] = [];
@@ -558,7 +558,7 @@ export function postLaunchReplayer(attempts: number): Persona {
   return {
     id: 'post-launch-replayer',
     legitimate: false,
-    what: 'a recorded pre-launch submission replayed after launch — the premise, concretely',
+    what: 'a recorded pre-launch submission replayed after launch, the premise, concretely',
     steps,
   };
 }

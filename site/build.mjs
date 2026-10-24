@@ -3,7 +3,7 @@
  *
  * Every page is generated, and the figures inside them are computed by
  * `scripts/research.mjs` from the library itself. The point is not convenience: the
- * old site carried hand-copied numbers, which is a slow-motion lie — the code moves
+ * old site carried hand-copied numbers, which is a slow-motion lie, the code moves
  * and the page does not. Now a threshold change either appears on the page or breaks
  * this build.
  *
@@ -66,11 +66,11 @@ function testCount() {
 function designRecord() {
   const md = readFileSync(resolve(root, 'DECISIONS.md'), 'utf8');
   const body = md.slice(md.indexOf('# Part I'));
-  const chunks = body.split(/^# (Part [IVX]+ — .+)$/m);
+  const chunks = body.split(/^# (Part [IVX]+: .+)$/m);
 
   const parts = [];
   for (let i = 1; i < chunks.length; i += 2) {
-    const entries = [...chunks[i + 1].matchAll(/^## (D[0-9a-z.]+) — (.+)$/gm)].map((match) => ({
+    const entries = [...chunks[i + 1].matchAll(/^## (D[0-9a-z.]+): (.+)$/gm)].map((match) => ({
       id: match[1],
       title: match[2].trim(),
       anchor: anchorFor(match[1], match[2].trim()),
@@ -92,13 +92,7 @@ function designRecord() {
 
 /** GitHub's heading-anchor rule, which is what the DECISIONS.md links resolve against. */
 function anchorFor(id, title) {
-  return `${id} — ${title}`
-    .toLowerCase()
-    .replace(/[\u2014\u2013]/g, '')
-    .replace(/[^a-z0-9 -]/g, '')
-    .trim()
-    .replace(/\s+/g, '-')
-    .replace(/-+/g, '-');
+  return (id + ': ' + title).toLowerCase().replace(/[^a-z0-9 _-]/g, '').replace(/ /g, '-');
 }
 
 /** The recorded live run, if one has been summarised. Absent is a valid state. */

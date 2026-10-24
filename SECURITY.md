@@ -16,8 +16,8 @@ claim:
   for measurement, never as proof. If the host supplies a reference that is cheap
   to discard, every history-based defence goes with it. That is the host's
   responsibility.
-- **It does not resist a determined adversary yet.** Sybil churn — discarding
-  identities rather than building trust — is an open problem, recorded as such.
+- **It does not resist a determined adversary yet.** Sybil churn, discarding
+  identities rather than building trust, is an open problem, recorded as such.
 - **It has no network surface.** No API key, no phoning home, no runtime request
   forwarding. There is nothing to intercept because nothing is sent.
 - **Thresholds are public.** The library and its policy defaults are open by
@@ -35,7 +35,7 @@ claim:
 
 Behavioral history is personal data under GDPR and Indonesia's UU PDP. The guard
 stores trust state and a bounded observation window per entity, keyed by a
-reference the host supplies. `guard.forget(entity)` deletes it outright — the same
+reference the host supplies. `guard.forget(entity)` deletes it outright, the same
 code path retention uses, with the horizon forced to zero. Consent and the legal
 basis stay with the host.
 
@@ -43,7 +43,7 @@ The browser collector counts interaction and records nothing about content: not
 which keys, not field values, not pointer coordinates.
 
 The durable store (`./sqlite`) writes that state to a file you choose. It holds the
-same data the in-memory store holds, with the same deletion path — but it survives a
+same data the in-memory store holds, with the same deletion path, but it survives a
 restart, which is the point, so treat the file as personal data at rest and back it
 up or encrypt it accordingly.
 
@@ -73,7 +73,7 @@ estimate rather than a service level.
 - **Saturation / farming.** Uniform high-volume interaction converges on a large
   positive evidence mass that resists negative evidence: 300 uniform positives absorb
   seventeen strong negatives before the advice changes. The decision-layer gate that
-  was recorded as the mitigation cannot reach it, and that claim is withdrawn — see
+  was recorded as the mitigation cannot reach it, and that claim is withdrawn, see
   D49. Reports demonstrating this are welcome but will be closed as duplicates of D49.
 - **Identity churn.** At one request per identity reference, nothing accumulates and
   no history-based defence can engage. That is the root-of-trust problem, and the

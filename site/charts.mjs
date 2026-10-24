@@ -122,7 +122,7 @@ export function lineChart({
 
 /**
  * A horizontal bar chart. Used where the x axis is a category rather than a
- * quantity — abuse calls per farm interval, requests per client.
+ * quantity, abuse calls per farm interval, requests per client.
  */
 export function barChart({
   width = 640,

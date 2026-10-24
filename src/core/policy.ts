@@ -24,7 +24,7 @@ export const DEFAULT_WEIGHTS = {
  * Mass contributed by a violated `soft` invariant. D38.
  *
  * Strong, not weak: the host deliberately declared that this should not happen.
- * That it is not provable does not make it faint — weak weight is for signals SG
+ * That it is not provable does not make it faint: weak weight is for signals SG
  * inferred on its own.
  */
 export const DEFAULT_SOFT_VIOLATION_WEIGHT = DEFAULT_WEIGHTS.strong;
@@ -41,8 +41,8 @@ export const DEFAULT_TRUST_BANDS = [
 /**
  * Epistemic stages over evidence mass `n = alpha + beta`. D5, revised.
  *
- * Read as "at least this much evidence". A fresh entity has `n = 2` — the prior
- * alone — and must land in `unknown`, because lack of evidence is not negative
+ * Read as "at least this much evidence". A fresh entity has `n = 2`, the prior
+ * alone: and must land in `unknown`, because lack of evidence is not negative
  * evidence.
  *
  * The boundaries are tied to the D5 trajectory rather than picked freely: `3` is
@@ -71,21 +71,21 @@ export type UncertaintyLevel = (typeof DEFAULT_UNCERTAINTY_BANDS)[number]['level
  * What a proven violation advises, by default.
  *
  * D14 is explicit that "hard" describes the certainty of the violation, not the
- * severity of the treatment — so SG must advise *something* without claiming the
+ * severity of the treatment: so SG must advise *something* without claiming the
  * authority to enforce. `RESTRICT` rather than `BLOCK` keeps the final escalation
  * with the host.
  *
  * One value for every constraint class, because SG has no basis for ranking them:
  * all seven are equally *proven*, and how much a given impossibility should cost
  * is a property of the host's flow, not of the class. Hosts that do have a basis
- * override per class — see `HardViolationPolicy`.
+ * override per class, see `HardViolationPolicy`.
  */
 export const DEFAULT_HARD_VIOLATION_DECISION = 'RESTRICT';
 
 /**
  * Advice for proven violations: one decision for all classes, or per class. D41.
  *
- * The per-class form is partial — classes left out fall back to
+ * The per-class form is partial, classes left out fall back to
  * `DEFAULT_HARD_VIOLATION_DECISION`, so declaring one exception does not oblige a
  * host to restate the other six.
  */

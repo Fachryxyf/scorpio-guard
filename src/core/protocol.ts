@@ -36,7 +36,7 @@ export const ENTITY_BUCKETS = ['one', 'few', 'several', 'many'] as const;
 export type EntityBucket = (typeof ENTITY_BUCKETS)[number];
 
 /**
- * Bucket boundaries are sender-side policy and are not part of the spec —
+ * Bucket boundaries are sender-side policy and are not part of the spec:
  * publishing them lets an attacker infer deployment size from a boundary
  * crossing. These are this implementation's, and an adopter may replace them.
  */

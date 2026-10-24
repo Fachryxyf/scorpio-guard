@@ -1,4 +1,4 @@
-# Scorpio Guard — Audit Produk, Teknis, dan Kesiapan
+# Scorpio Guard, Audit Produk, Teknis, dan Kesiapan
 
 **Tanggal audit:** 2026-10-18  
 **Repositori:** `Fachryxyf/scorpio-guard`  
@@ -92,10 +92,10 @@ Assessment returned to the host
 
 Surface paket publik dibagi menjadi:
 
-- `@fachryxyf/scorpio-guard` — model dan guard inti;
-- `@fachryxyf/scorpio-guard/collect` — observasi interaksi sisi browser;
-- `@fachryxyf/scorpio-guard/sqlite` — persistence Node `node:sqlite`;
-- `@fachryxyf/scorpio-guard/kv` — persistence HTTP/KV yang diinjeksi.
+- `@fachryxyf/scorpio-guard`: model dan guard inti;
+- `@fachryxyf/scorpio-guard/collect`: observasi interaksi sisi browser;
+- `@fachryxyf/scorpio-guard/sqlite`: persistence Node `node:sqlite`;
+- `@fachryxyf/scorpio-guard/kv`: persistence HTTP/KV yang diinjeksi.
 
 `src/core/` tetap bebas dari API browser dan platform storage. Ini merupakan keputusan arsitektur yang baik: model dapat berjalan di berbagai lingkungan, sementara adapter khusus platform tetap berada di edge.
 
@@ -206,35 +206,35 @@ Area-area berikut sudah tepat:
 
 ### 4.2 Risiko teknis dan temuan
 
-#### Temuan T1 — Threshold adalah hipotesis, bukan default production
+#### Temuan T1, Threshold adalah hipotesis, bukan default production
 
 **Severity:** Tinggi untuk kesiapan production; bukan defect kode.  
 Model ini memiliki default yang bermakna untuk half-life, retention, trust bands, uncertainty, diversity, velocity, dan positive-credit discount. Bukti repositori berulang kali melabelinya sebagai tebakan, sementara traffic yang dihasilkan diposisikan sebagai falsification, bukan calibration. Ini merupakan sikap ilmiah yang tepat, tetapi berarti consumer tidak dapat memperlakukan policy default sebagai valid secara umum.
 
 **Rekomendasi:** rilis workflow kalibrasi eksplisit sebelum merekomendasikan penegakan: capture traffic representatif, irisan false-positive/false-negative, replay, pemilihan threshold, pemantauan drift, dan rollback.
 
-#### Temuan T2 — Perilaku fail-open KV dapat menghapus perlindungan statistik
+#### Temuan T2: Perilaku fail-open KV dapat menghapus perlindungan statistik
 
 **Severity:** Tinggi tergantung threat model deployment.  
 `kvStore` default-nya `failOpen: true`. Kegagalan transport ditafsirkan sebagai state yang hilang, dan write yang gagal ditelan setelah `onError` dipanggil. Hal ini mempertahankan ketersediaan host dan menjaga pemeriksaan invariant keras tetap aktif, tetapi attacker yang dapat menyebabkan atau mengeksploitasi ketidaktersediaan KV dapat berulang kali mereset trust statistik ke cold start.
 
 **Rekomendasi:** tampilkan pilihan deployment ini secara menonjol dalam panduan production, wajibkan metric/alert error ketika fail-open digunakan, dan sediakan template policy untuk fail-closed atau friction saat degraded ketika host dapat menoleransinya.
 
-#### Temuan T3 — SQLite durable, tetapi bukan solusi deployment terdistribusi
+#### Temuan T3, SQLite durable, tetapi bukan solusi deployment terdistribusi
 
 **Severity:** Sedang.  
 Adapter ini dengan tepat mendokumentasikan bahwa satu file SQLite mencakup durabilitas setelah restart dan sharing pada satu host, bukan deployment yang didistribusikan secara horizontal. Paket harus membuat keterbatasan ini mustahil terlewatkan pada jalur instalasi utama karena pengguna bisa saja menyimpulkan bahwa “durable” berarti durable multi-instance.
 
 **Rekomendasi:** sertakan contoh topologi deployment dan readiness matrix untuk satu proses, multi-proses pada satu host, serverless, dan multi-region.
 
-#### Temuan T4 — Kompatibilitas protokol diuji secara lokal, tetapi belum dijalankan end-to-end
+#### Temuan T4, Kompatibilitas protokol diuji secara lokal, tetapi belum dijalankan end-to-end
 
 **Severity:** Sedang.  
 Encoder/decoder envelope dan aturan degradasi telah diuji, tetapi tidak ada reference server berjaringan, interoperability fixture, implementasi autentikasi/abuse-control, replay defense, batching policy, atau cadence operasional. Jaminan privasi protokol dipikirkan dengan baik, tetapi risiko server-side poisoning masih terbuka.
 
 **Rekomendasi:** pindahkan protokol ke repositori yang direncanakan, publikasikan JSON fixture, implementasikan reference server minimal, dan uji interoperabilitas sender/receiver melalui HTTP sebelum menampilkan pertukaran protokol sebagai kapabilitas produk.
 
-#### Temuan T5 — Dokumentasi mengalami drift yang terukur
+#### Temuan T5, Dokumentasi mengalami drift yang terukur
 
 **Severity:** Sedang untuk kepercayaan pengguna dan kualitas rilis.  
 Inkonsistensi yang diamati mencakup:
@@ -246,14 +246,14 @@ Inkonsistensi yang diamati mencakup:
 
 **Rekomendasi:** buat jumlah dan status rilis dihasilkan dari satu sumber kebenaran, perbarui bagian instalasi README, dan buat `site:check` gagal jika ada generated diff, bukan diam-diam menulis ulang output.
 
-#### Temuan T6 — Public API berorientasi Node meskipun memiliki browser collector
+#### Temuan T6, Public API berorientasi Node meskipun memiliki browser collector
 
 **Severity:** Sedang.  
 Collector berorientasi browser, tetapi paket memerlukan Node 22.6+ dan menggunakan export paket ESM. Core bersifat framework-agnostic, tetapi kisah distribusi untuk browser bundler, edge runtime, dan Node versi lama belum didemonstrasikan.
 
 **Rekomendasi:** dokumentasikan runtime yang didukung per entry point dan tambahkan browser/edge packaging smoke test jika lingkungan tersebut memang menjadi target.
 
-#### Temuan T7 — Security posture transparan, tetapi bukan audit keamanan independen
+#### Temuan T7, Security posture transparan, tetapi bukan audit keamanan independen
 
 **Severity:** Sedang.  
 `SECURITY.md` repositori menjelaskan scope, isu yang diketahui, privasi, dan pelaporan dengan baik. Pengujian mencakup validasi SQL identifier, penanganan opaque key, isolasi store, dan batasan protokol. Ini merupakan hygiene rekayasa yang baik, tetapi tidak setara dengan security review eksternal atau penetration assessment berbasis threat model terhadap integrasi yang di-deploy.
@@ -271,14 +271,14 @@ Collector berorientasi browser, tetapi paket memerlukan Node 22.6+ dan menggunak
 
 ## 6. Penilaian prioritas
 
-### P0 — Wajib sebelum mengklaim penegakan production
+### P0, Wajib sebelum mengklaim penegakan production
 
 1. Bangun workflow kalibrasi dan shadow-mode menggunakan traffic nyata yang representatif.
 2. Tentukan panduan deployment untuk referensi entitas, outage KV, retensi, penghapusan, dan respons insiden.
 3. Tambahkan persyaratan observability production: decision rate, cold start, store error, trace sampling, tinjauan false positive, dan versioning policy.
 4. Selesaikan drift rilis/dokumentasi dan buat generated docs reproducible.
 
-### P1 — Wajib untuk mengubah arsitektur menjadi ekosistem produk
+### P1, Wajib untuk mengubah arsitektur menjadi ekosistem produk
 
 1. Implementasikan dan operasikan reference protocol server minimal.
 2. Publikasikan protocol fixture dan HTTP interoperability test.
@@ -286,7 +286,7 @@ Collector berorientasi browser, tetapi paket memerlukan Node 22.6+ dan menggunak
 4. Tambahkan perlindungan dan panduan eksplisit untuk poisoning, replay, rate limiting, dan symptom report yang tidak terautentikasi.
 5. Sediakan pola integrasi host untuk enforcement, shadow mode, dan rollback.
 
-### P2 — Peningkatan strategis
+### P2, Peningkatan strategis
 
 1. Dukung browser/edge packaging jika memang menjadi pasar yang dituju.
 2. Tambahkan mekanisme policy registry/versioning agar perubahan model dapat diaudit per keputusan.
@@ -324,23 +324,23 @@ dan P1 di atas terpenuhi.
 
 Bukti utama yang ditinjau:
 
-- `README.md` — premis produk, penggunaan, roadmap, klaim integrasi, keterbatasan
-- `package.json` — surface paket, script, runtime floor, versi rilis
-- `src/core/guard.ts` — komposisi evaluasi end-to-end dan trace
-- `src/core/trust.ts` — state bukti Beta, decay, retention, mass
-- `src/core/assess.ts` — decision band dan ceiling
-- `src/core/behavior.ts` — fitur perilaku berbatas, deteksi farming, positive credit
-- `src/core/constraints.ts` — taksonomi invariant hard/soft
-- `src/core/store.ts` — state store in-memory dan batas memori
-- `src/store/sqlite.ts` — durable store single-host
-- `src/store/kv.ts` — networked store dan failure policy
-- `src/collect/interaction.ts` — minimisasi data browser
-- `src/core/protocol.ts` dan `PROTOCOL.md` — wire format draft dan aturan degradasi
-- `SECURITY.md` — security scope yang dinyatakan dan keterbatasan yang diketahui
-- `.github/workflows/ci.yml` — validasi otomatis
-- `examples/healthme/` dan `examples/ixfe/` — bukti integrasi dan traffic yang dihasilkan
+- `README.md`: premis produk, penggunaan, roadmap, klaim integrasi, keterbatasan
+- `package.json`: surface paket, script, runtime floor, versi rilis
+- `src/core/guard.ts`: komposisi evaluasi end-to-end dan trace
+- `src/core/trust.ts`: state bukti Beta, decay, retention, mass
+- `src/core/assess.ts`: decision band dan ceiling
+- `src/core/behavior.ts`: fitur perilaku berbatas, deteksi farming, positive credit
+- `src/core/constraints.ts`: taksonomi invariant hard/soft
+- `src/core/store.ts`: state store in-memory dan batas memori
+- `src/store/sqlite.ts`: durable store single-host
+- `src/store/kv.ts`: networked store dan failure policy
+- `src/collect/interaction.ts`: minimisasi data browser
+- `src/core/protocol.ts` dan `PROTOCOL.md`, wire format draft dan aturan degradasi
+- `SECURITY.md`: security scope yang dinyatakan dan keterbatasan yang diketahui
+- `.github/workflows/ci.yml`: validasi otomatis
+- `examples/healthme/` dan `examples/ixfe/`, bukti integrasi dan traffic yang dihasilkan
 
-## 10. Adendum — sesi 2026-10-24
+## 10. Adendum, sesi 2026-10-24
 
 Audit ulang dijalankan pada working tree yang sama. Seluruh gate tetap hijau
 (`typecheck`, 233/233 test, `build`, `smoke`), tetapi lima temuan baru muncul dan

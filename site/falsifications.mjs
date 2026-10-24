@@ -5,7 +5,7 @@
  * lying: the list grows and the number does not. So the list is the source and the
  * number is `FALSIFICATIONS.length`.
  *
- * `source` is the traffic that did it, because the two kinds are not equivalent —
+ * `source` is the traffic that did it, because the two kinds are not equivalent:
  * generated personas exercise the model, and real-browser traffic through the live
  * observer exercises the *integration*, which is where the last four lived.
  */

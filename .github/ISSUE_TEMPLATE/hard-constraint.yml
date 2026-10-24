@@ -9,7 +9,7 @@ body:
         provable impossibility is the highest-value contribution to this project.
 
         The test is completeness: within a declared scope, can the legitimate set
-        be enumerated exhaustively? If not, it is a weak signal — still worth
+        be enumerated exhaustively? If not, it is a weak signal, still worth
         reporting, under the other template.
   - type: textarea
     id: constraint

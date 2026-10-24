@@ -3,7 +3,7 @@
  *
  * This is the collector, and it collects only what the hard constraints need to
  * be checkable. Notably it does **not** record what was typed, where a pointer
- * moved, or any field value — the impossible-idle-action constraint needs to know
+ * moved, or any field value: the impossible-idle-action constraint needs to know
  * *whether* interaction occurred, not what it contained.
  *
  * No platform API is used outside this directory, per D7: `src/core/` stays free
@@ -14,7 +14,7 @@
 export type InteractionCounts = {
   /** Pointer events: down, move within the element, up. */
   readonly pointer: number;
-  /** Key events. Count only — never which keys. */
+  /** Key events. Count only, never which keys. */
   readonly keyboard: number;
   /** Paste, drop, and autofill-shaped input with no preceding keystroke. */
   readonly injected: number;
@@ -93,7 +93,7 @@ export function watchInteraction(
 
   /**
    * An `input` event with no keystroke before it did not come from typing.
-   * That covers password managers and programmatic assignment alike — which is
+   * That covers password managers and programmatic assignment alike, which is
    * exactly why the constraint built on this is declared `soft` and not `hard`:
    * a filled field with no keystrokes is suspicious, never provable.
    */

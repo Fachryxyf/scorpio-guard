@@ -3,8 +3,8 @@
  *
  * Kept after D47 moved the primary target to IXFE, because it is the smaller case:
  * two scopes, one user, a PIN screen. That is what caught the entropy denominator
- * bug in D46 — a two-scope application could not reach the diversity threshold at
- * all — and a harness that only ever runs against a large surface would not have
+ * bug in D46: a two-scope application could not reach the diversity threshold at
+ * all: and a harness that only ever runs against a large surface would not have
  * found it. So this stays as the small-application regression.
  *
  * What it can settle is unchanged from D45: it **falsifies** and it does not
@@ -222,7 +222,7 @@ export function forgedApiCall(): Persona {
 /**
  * A PIN brute force with a fixed sleep. The naive script.
  *
- * HealthMe stops this after three tries — with client-side state the attacker
+ * HealthMe stops this after three tries, with client-side state the attacker
  * controls, so in practice it stops after three tries *per cleared localStorage*.
  */
 export function scriptedBruteForce(attempts: number, gapMs = 1500): Persona {
@@ -254,7 +254,7 @@ export function scriptedBruteForce(attempts: number, gapMs = 1500): Persona {
 }
 
 /**
- * The same brute force with `uniform(1.2, 2.3)` jitter — the design notes name
+ * The same brute force with `uniform(1.2, 2.3)` jitter, the design notes name
  * this exact distribution as the tell that is *not* the delay but its shape.
  */
 export function jitteredBruteForce(attempts: number, seed = 6): Persona {
@@ -292,7 +292,7 @@ export function jitteredBruteForce(attempts: number, seed = 6): Persona {
  *
  * The same attacker as `scriptedBruteForce`, spending three attempts per entity
  * and then discarding the reference. Every request is a cold start, so nothing
- * accumulates — this exists to *show* the hole rather than to pass.
+ * accumulates: this exists to *show* the hole rather than to pass.
  */
 export function churningBruteForce(entities: number, perEntity = 3): readonly Persona[] {
   return Array.from({ length: entities }, (_, index) => {

@@ -57,7 +57,7 @@ export async function connect(port: number): Promise<Browser> {
   });
 
   /**
-   * Every command is bounded, and that is not defensive padding — it is the bug the
+   * Every command is bounded, and that is not defensive padding; it is the bug the
    * first D57 run hit. The post-launch site 302s `/order` to `app.ixfe.pro`, which is
    * not reachable from here, and Chrome answers nothing at all while it waits on the
    * connection. An unbounded `Runtime.evaluate` then hangs the whole run rather than
@@ -142,7 +142,7 @@ export async function connect(port: number): Promise<Browser> {
           if (!found) throw new Error(`no element matches ${selector}`);
           // Scrolling and reading the rectangle have to be two steps. Doing both in
           // one expression returns pre-scroll coordinates, and a click at those
-          // coordinates lands on whatever happens to be there — which is how the
+          // coordinates lands on whatever happens to be there: which is how the
           // first D57 run produced focus events but no form submission.
           await sleep(150);
           const box = await evaluate<{ x: number; y: number } | null>(

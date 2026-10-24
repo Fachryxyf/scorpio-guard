@@ -107,7 +107,7 @@ export function notFound() {
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>404 — nothing here | Scorpio Guard</title>
+<title>404: nothing here | Scorpio Guard</title>
 <meta name="robots" content="noindex">
 <meta name="color-scheme" content="dark light">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><text y='25' x='3' font-size='24' font-family='monospace'>%26gt;</text></svg>">
@@ -118,7 +118,7 @@ ${headBootstrap({ defaultTheme: 'dark' })}
 <main class="box">
   <div class="chrome">
     <span class="dots">• • •</span>
-    ${t('trust.eval — no route', 'trust.eval — rute kosong')}
+    ${t('trust.eval: no route', 'trust.eval: rute kosong')}
     <span class="grow"></span>
     <button class="ctl" id="lang" type="button" aria-label="Switch language / Ganti bahasa"></button>
     <button class="ctl" id="theme" type="button" aria-label="Switch theme / Ganti tema"></button>
@@ -129,13 +129,13 @@ ${headBootstrap({ defaultTheme: 'dark' })}
     <p class="label">${t('Route not found', 'Rute tidak ditemukan')}</p>
 
     <p>${t(
-      'This whole site is one page. One. So the honest question here is not what broke — it is how you managed to get <em>this</em> far off the path.',
+      'This whole site is one page. One. So the honest question here is not what broke: it is how you managed to get <em>this</em> far off the path.',
       'Situs ini isinya cuma satu halaman. Satu. Jadi pertanyaannya bukan apa yang rusak, tapi gimana caranya kamu bisa nyasar sejauh <em>ini</em>.',
     )}</p>
 
     <p class="aside">${t(
-      'verdict: unknown, not untrusted — Beta(1,1)<span class="caret">_</span>',
-      'putusan: belum diketahui, bukan tak dipercaya — Beta(1,1)<span class="caret">_</span>',
+      'verdict: unknown, not untrusted, Beta(1,1)<span class="caret">_</span>',
+      'putusan: belum diketahui, bukan tak dipercaya, Beta(1,1)<span class="caret">_</span>',
     )}</p>
 
     <a class="home" href="/">${t('&larr; back to homepage', '&larr; balik ke halaman utama')}</a>

@@ -134,7 +134,7 @@ test('the collector never records what was entered', () => {
   const counts = collector.counts();
 
   // Counts and a boolean. Anything resembling content would be a privacy defect,
-  // not a feature — D19 and the local-first non-goals both forbid it.
+  // not a feature, D19 and the local-first non-goals both forbid it.
   assert.deepEqual(Object.keys(counts).sort(), [
     'durationMs',
     'injected',

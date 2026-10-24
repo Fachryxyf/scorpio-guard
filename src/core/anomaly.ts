@@ -2,7 +2,7 @@
  * The anomaly classifier over the D36 feature space.
  *
  * D18 deferred the algorithm until the feature space settled. It has, so this is
- * the first classifier — and the choice of algorithm is itself a decision worth
+ * the first classifier: and the choice of algorithm is itself a decision worth
  * stating.
  *
  * **Why a distance-to-reference model rather than a learned one.** A learned
@@ -80,7 +80,7 @@ export const MIN_OBSERVATIONS = 4;
 export type AnomalyScore = {
   /**
    * Distance from the reference profile in [0,1]. Higher is more unusual.
-   * `undefined` when the window is too small to score — not the same claim as 0.
+   * `undefined` when the window is too small to score, not the same claim as 0.
    */
   readonly score: number | undefined;
   /** Per-feature contribution, for the trace. */

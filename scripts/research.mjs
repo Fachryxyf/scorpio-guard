@@ -229,7 +229,7 @@ const ABUSE_LIMIT = 200;
  *
  * `INCREASE_FRICTION`, not `RESTRICT`, and the first draft of this script got it
  * wrong: it counted to `RESTRICT` and reported that farming was never answered at
- * all. It is — but `RESTRICT` needs low uncertainty, low uncertainty needs anomaly
+ * all. It is, but `RESTRICT` needs low uncertainty, low uncertainty needs anomaly
  * concurrence (D37), and an entity hammering one scope monotonously never concurs.
  * So a bot is held at `INCREASE_FRICTION` *because* it behaves mechanically, which
  * is the tradeoff D49 recorded rather than a failure to escalate.

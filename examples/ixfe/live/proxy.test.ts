@@ -69,7 +69,7 @@ async function settle(records: readonly LiveRecord[], expected: number): Promise
   }
 }
 
-test('D56: the proxy is transparent — status, body and headers are the origin\'s', async () => {
+test('D56: the proxy is transparent, status, body and headers are the origin\'s', async () => {
   await withProxy(
     () => ({ status: 201, body: '{"slot":7}' }),
     async (base, records, seen) => {
@@ -221,7 +221,7 @@ test('D57: an API path answered with a document is a refusal, not a success', as
 
 /**
  * The false positive the first D57 run produced, pinned. An uptime check is `GET /`
- * at a fixed interval by a non-browser — indistinguishable over HTTP from a crawler,
+ * at a fixed interval by a non-browser, indistinguishable over HTTP from a crawler,
  * and configured by the operator themselves.
  */
 test('D57: repeated page views never escalate, however regular they are', async () => {
@@ -322,7 +322,7 @@ test('D56: the report measures the D55 gate rather than asserting it', () => {
     record({ interArrivalCv: 0.05 }),
     record({ interArrivalCv: 0.1 }),
     record({ interArrivalCv: 0.9 }),
-    // Too short a window to have features at all — excluded, not counted as 0.
+    // Too short a window to have features at all, excluded, not counted as 0.
     record({ interArrivalCv: 0, windowCount: 2, anomaly: undefined }),
   ]);
 

@@ -2,7 +2,7 @@
  * Target-breadth signal collectors. D42.
  *
  * SIG_BREADTH_OF_TARGET and SIG_SENSITIVE_TARGET are computed from what the
- * host observed being requested — record identifiers and endpoint labels.
+ * host observed being requested, record identifiers and endpoint labels.
  *
  * Ids are hashed before they enter this module's state, so breadth is countable
  * without the guard holding the identifiers themselves. That is the same
@@ -27,7 +27,7 @@ export type BreadthObservation = {
  * Track distinct record identifiers touched within one session.
  *
  * `record()` takes an already-opaque key. If the caller has a raw database id,
- * hash it first — this module deliberately offers no hashing, so the choice of
+ * hash it first; this module deliberately offers no hashing, so the choice of
  * salt and algorithm stays with the host that owns the data.
  */
 export function trackBreadth(options: BreadthOptions) {
@@ -48,7 +48,7 @@ export function trackBreadth(options: BreadthOptions) {
       const distinctRecords = seen.size;
       return {
         // Overflow means the bound was reached, which is itself past any
-        // sane threshold — report broad rather than under-report.
+        // sane threshold: report broad rather than under-report.
         broad: overflowed || distinctRecords > options.maxDistinctRecords,
         distinctRecords,
       };
@@ -76,7 +76,7 @@ export type SensitiveTargetObservation = {
 /**
  * SIG_SENSITIVE_TARGET: attention concentrated on the endpoints the host
  * marked expensive. Ratio over the scopes actually visited, not over the
- * application's full surface — a two-page app should not read as concentrated
+ * application's full surface: a two-page app should not read as concentrated
  * simply for having few pages.
  */
 export function assessSensitiveTargets(

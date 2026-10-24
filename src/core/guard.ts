@@ -41,7 +41,7 @@ export type EvidenceStrength = 'weak' | 'strong';
 export type Observation = {
   /**
    * Which declared scope this observation belongs to. Invariants outside it are
-   * not consulted, and an undeclared scope yields no violations — unknown, not
+   * not consulted, and an undeclared scope yields no violations, unknown, not
    * forbidden. D32.
    */
   readonly scope?: string;
@@ -68,7 +68,7 @@ export type Observation = {
 export type EvaluationContext = {
   /**
    * Endpoint sensitivity and anything else the host wants recorded against the
-   * decision. Part of `C` in `T = PI(A, C)` — not part of the state key, since
+   * decision. Part of `C` in `T = PI(A, C)`, not part of the state key, since
    * trust is global per entity. D2.
    */
   readonly [key: string]: unknown;
@@ -291,7 +291,7 @@ export function createGuard(options: GuardOptions = {}) {
       const farming = farmingSuspected(updated.window, velocityThresholds);
       if (farming === true) {
         trace.push(
-          `farming shape observed: rate above ${velocityThresholds.maxObsPerHour}/hr with gaps too regular (CV ${behavior.interArrivalCv.toFixed(2)}). Priced at intake rather than escalated — see D55.`,
+          `farming shape observed: rate above ${velocityThresholds.maxObsPerHour}/hr with gaps too regular (CV ${behavior.interArrivalCv.toFixed(2)}). Priced at intake rather than escalated, see D55.`,
         );
       }
 
@@ -312,7 +312,7 @@ export function createGuard(options: GuardOptions = {}) {
       // enforces, so the escalation is bounded by policy.
       let decision = trust.decision;
       if (hard.length > 0) {
-        // Per-class advice, strongest wins — the same rule the decision layer
+        // Per-class advice, strongest wins, the same rule the decision layer
         // already uses when several dimensions each advise something. D41.
         const advised = strongest(
           hard.map((violation) => hardViolationDecision(policy.hardViolationDecision, violation.class)),

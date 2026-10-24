@@ -4,7 +4,7 @@
  * The old front page was the README with a stylesheet, and it read like one:
  * premise, product shape, two kinds of signal, open problems, roadmap, in one
  * column, in one scroll. This one answers the three questions a visitor actually
- * arrives with — what is this, is it usable yet, where do I go — and then hands
+ * arrives with, what is this, is it usable yet, where do I go, and then hands
  * off. Everything else is a chapter.
  */
 import { barChart } from '../charts.mjs';

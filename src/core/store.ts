@@ -5,7 +5,7 @@ import { isExpired, type EntityState } from './trust.ts';
  * Trust state persistence. D8.
  *
  * Deliberately three operations over an opaque key. D1 makes the entity
- * reference opaque to SG, so there is nothing to query by — which keeps this
+ * reference opaque to SG, so there is nothing to query by, which keeps this
  * implementable on top of a Map, Redis, or a single SQL table without any of
  * them needing to understand the model.
  *
@@ -20,7 +20,7 @@ export type StateStore = {
 
   /**
    * Remove state for one entity. Used both by retention expiry (D6) and by the
-   * host-facing purge primitive (D22) — the same operation, different trigger.
+   * host-facing purge primitive (D22), the same operation, different trigger.
    */
   delete(entity: string): Promise<void>;
 };
@@ -43,7 +43,7 @@ export type MemoryStoreOptions = {
    * Present because an unbounded map is a denial-of-service surface: an attacker
    * who can mint fresh references can grow it without limit, and D1 guarantees SG
    * cannot tell minted references from legitimate new ones. Dropping state is
-   * safe in a way that running out of memory is not — a dropped entity returns as
+   * safe in a way that running out of memory is not, a dropped entity returns as
    * `unknown`, which D40 already treats as a well-defined state.
    */
   readonly maxEntities?: number;
@@ -62,7 +62,7 @@ export const DEFAULT_SWEEP_EVERY = 512;
  *
  * Process-local by construction: it resets on restart and is invisible to other
  * instances. That is correct for one process and wrong for anything that restarts
- * often, so it is no longer the only option — `sqliteStore` (`./sqlite`) is the
+ * often, so it is no longer the only option, `sqliteStore` (`./sqlite`) is the
  * durable counterpart behind the same three methods, and both pass the same
  * conformance kit. This one remains the default because it needs no filesystem
  * and runs anywhere the core does.

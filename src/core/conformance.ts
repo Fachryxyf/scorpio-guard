@@ -2,7 +2,7 @@
  * Conformance kit for `StateStore` implementations. D8.
  *
  * The in-memory store is the reference, but anyone writing a Redis, SQL, or KV
- * store has to reproduce behavior that is easy to get subtly wrong — and a store
+ * store has to reproduce behavior that is easy to get subtly wrong: and a store
  * that is subtly wrong produces a guard that is subtly wrong, silently, in
  * production.
  *
@@ -80,7 +80,7 @@ export async function checkStoreConformance(
     assert(found.b === state.b, `b changed: ${found.b} !== ${state.b}`);
     assert(
       found.lastSeen === state.lastSeen,
-      `lastSeen changed: ${found.lastSeen} !== ${state.lastSeen} — millisecond precision is required`,
+      `lastSeen changed: ${found.lastSeen} !== ${state.lastSeen}, millisecond precision is required`,
     );
   });
 

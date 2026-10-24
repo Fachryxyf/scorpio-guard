@@ -2,12 +2,12 @@
  * Persona traffic, independent of any one application. D45, generalised by D47.
  *
  * A persona is a sequence of interactions with the gaps between them. Nothing here
- * knows what an application's scopes mean — the host supplies invariants, the
+ * knows what an application's scopes mean, the host supplies invariants, the
  * persona supplies observations, and the harness drives one through the other.
  *
  * Kept out of `src/` deliberately: this generates *test* traffic. Shipping it
  * inside the library would put a traffic generator in an adopter's bundle, and
- * would blur the line the whole design rests on — SG observes, it never produces.
+ * would blur the line the whole design rests on: SG observes, it never produces.
  */
 
 export const SECOND = 1000;

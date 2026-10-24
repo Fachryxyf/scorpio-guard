@@ -18,7 +18,7 @@ const withInvariants = { invariants: ixfeInvariants };
  * The central constraint. D47.
  *
  * IXFE's legitimate personas are drawn from its real funnel, including the awkward
- * ones — a mistyped email domain, a refused request from a zero balance. None may
+ * ones, a mistyped email domain, a refused request from a zero balance. None may
  * cost a user anything.
  */
 test('D47: no legitimate IXFE persona is ever given friction', async () => {
@@ -74,7 +74,7 @@ test('D48: a refused request from a stale balance is evidence, never proof', asy
 
 test('D47: a missing dwell is a proof, where a fast dwell would only be a signal', async () => {
   // IXFE absorbs these silently and learns nothing. The page always computes
-  // `dwell`, so its absence proves the request bypassed the page — as opposed to
+  // `dwell`, so its absence proves the request bypassed the page, as opposed to
   // `dwell < 1500ms`, which is a calibrated guess about human speed and lives in the
   // weak-signal catalogue instead.
   const result = await replayPersona(endpointShooter(5), withInvariants);
@@ -109,7 +109,7 @@ test('D45: rotating the entity reference still costs two requests per identity',
     'a missing dwell is provable, so even a fresh identity is caught immediately',
   );
 
-  // And unlike HealthMe's brute force, one request per identity is caught too —
+  // And unlike HealthMe's brute force, one request per identity is caught too:
   // because the violation is a proof rather than accumulated evidence.
   const onceEach = await replayPersona(rotatingShooter(20, 1), withInvariants);
   assert.equal(onceEach.walkedThrough, false, 'proof needs no history');

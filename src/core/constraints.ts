@@ -4,7 +4,7 @@ import { DEFAULT_SOFT_VIOLATION_WEIGHT } from './policy.ts';
  * Declared invariants and their violation. D13, D16, D32.
  *
  * Nothing here is learned. SG never infers impossibility from how rarely
- * something has been seen — that is the anomaly dimension's job (D18).
+ * something has been seen: that is the anomaly dimension's job (D18).
  */
 
 /**
@@ -33,12 +33,12 @@ export type ConstraintClass = (typeof CONSTRAINT_CLASSES)[number];
  * A host can only prove impossibility from facts it already has, and those facts
  * come in six kinds:
  *
- * - `reachability` — the flow graph it declared
- * - `precondition` — state that must hold before an action is available
- * - `causality` — the input that must have produced an observed effect
- * - `order` — timestamps the system itself recorded
- * - `issuance` — values the system itself handed out
- * - `exclusivity` — facts that cannot both be true
+ * - `reachability`, the flow graph it declared
+ * - `precondition`: state that must hold before an action is available
+ * - `causality`, the input that must have produced an observed effect
+ * - `order`, timestamps the system itself recorded
+ * - `issuance`, values the system itself handed out
+ * - `exclusivity`: facts that cannot both be true
  *
  * Anything not derivable from one of these is measurement, not proof, and
  * belongs in the weak-signal catalogue (`signals.ts`) instead. That is the whole
@@ -60,7 +60,7 @@ export type ProofSource = (typeof PROOF_SOURCES)[number];
  *
  * `IMPOSSIBLE_SEGMENT_JUMP` and `IMPOSSIBLE_STATE_TRANSITION` share a proof
  * source deliberately: they are the same proof at two declaration granularities
- * — a required earlier step, and a missing edge in an explicit edge set. They
+ *, a required earlier step, and a missing edge in an explicit edge set. They
  * stay separate because the class is diagnostic, and a host reading a trace
  * benefits from the distinction even though SG's advice does not depend on it.
  */
@@ -78,7 +78,7 @@ export const PROOF_SOURCE_OF: Record<ConstraintClass, ProofSource> = {
  * Epistemic strength, declared by the host per constraint. D32.
  *
  * `hard` is two claims at once: violations are deterministic, *and* the
- * declaration is complete over its own scope — within it, anything not declared
+ * declaration is complete over its own scope, within it, anything not declared
  * legitimate is provably wrong.
  *
  * `soft` claims only the first. It contributes evidence (D38), never proof, and
@@ -113,7 +113,7 @@ export type Violation = {
  * Check an observation against the invariants covering a scope.
  *
  * Invariants outside `scope` are not consulted. An observation in a scope nobody
- * declared yields no violations — unknown, not forbidden (D32).
+ * declared yields no violations, unknown, not forbidden (D32).
  */
 export function checkInvariants(
   observation: unknown,
@@ -157,7 +157,7 @@ export function softViolations(violations: readonly Violation[]): readonly Viola
  * through a learned baseline would also let it influence the D37 diversity
  * check, which it has no business touching.
  *
- * Hard violations contribute nothing here — they reach the decision layer as
+ * Hard violations contribute nothing here: they reach the decision layer as
  * their own dimension and never become mass, because proof that decays under a
  * half-life would be incoherent (D15).
  */

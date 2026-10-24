@@ -2,8 +2,8 @@
  * Observational reverse proxy in front of a live IXFE deployment. D56.
  *
  * The roadmap's first remaining item is IXFE's real traffic. IXFE records none of
- * it per request — `security_events` only fires on scanner signatures, and the
- * tunnel's inspector keeps a handful of requests — so before anything can be
+ * it per request, `security_events` only fires on scanner signatures, and the
+ * tunnel's inspector keeps a handful of requests: so before anything can be
  * calibrated, real requests have to be *recorded* in the shape the guard reads.
  *
  * This is a transparent hop, not an integration:
@@ -25,7 +25,7 @@
  *    `website`) and then dropped, and no IP, address, query string or payload
  *    reaches the record.
  *
- * This proxy adds no authentication and no filtering of its own — everything the
+ * This proxy adds no authentication and no filtering of its own, everything the
  * origin exposes stays exposed, exactly as before. That is deliberate (it must be
  * observationally neutral) and it means the proxy is not a defence.
  *
@@ -64,7 +64,7 @@ import {
  * one `ixfe.page` made `scopeEntropy` and `distinctScopes` degenerate for anyone who
  * only reads: one scope admits no balance, so every browsing visitor scored as
  * monotonous by construction and tripped `SIG_REPEATED_PATTERN`. That is D46's
- * entropy-denominator bug wearing a different hat — the feature measured the
+ * entropy-denominator bug wearing a different hat, the feature measured the
  * integration's coarseness rather than the visitor's behavior.
  */
 export const PAGE_SCOPE = 'ixfe.page';
@@ -128,7 +128,7 @@ export type ProxyOptions = {
   readonly storePath?: string;
   /**
    * Salt for the entity hash. Without a stable one, records cannot be correlated
-   * across restarts — which is the safe default, not the useful one.
+   * across restarts, which is the safe default, not the useful one.
    */
   readonly salt?: string;
 };
@@ -178,19 +178,19 @@ function observationFor(scope: string, body: unknown): { data: unknown; dwellMs?
  * Evidence read from the origin's own answer.
  *
  * A completed API action is weak positive evidence; a refusal the origin itself
- * issued is weak negative. Page views carry neither — they feed the behavioral
+ * issued is weak negative. Page views carry neither; they feed the behavioral
  * window (D36) and nothing else, because loading a page is not an achievement.
  *
  * `contentType` is here because the first run of D57 falsified the simpler version.
- * IXFE's landing service answers unknown `/api/*` paths with its SPA fallback — 200
- * and 94 KB of HTML — so a path scanner asking for `/api/admin/users` was *credited
+ * IXFE's landing service answers unknown `/api/*` paths with its SPA fallback, 200
+ * and 94 KB of HTML: so a path scanner asking for `/api/admin/users` was *credited
  * with a success* and left with a trust mean above where it started. An API route
  * answering a document did not complete an action; it is a 404 the origin failed to
  * say, so it is read as the refusal it actually is.
  *
  * The innocent cause, since every negative reading owes one: a stale client calling
  * an endpoint that has since been removed. Which is why this is weak evidence rather
- * than a declared invariant — one is a deploy lagging, a stream of them is a scanner.
+ * than a declared invariant, one is a deploy lagging, a stream of them is a scanner.
  */
 function evidenceFor(
   scope: string,
@@ -243,7 +243,7 @@ export function createLiveProxy(options: ProxyOptions) {
    * Deliberately the *previous* window rather than the current one: `evaluate` is
    * what computes features, so a signal derived from this request's window would
    * need the answer before asking the question. Lagging by one observation is the
-   * honest version, and it costs one request of latency in the signal — which is
+   * honest version, and it costs one request of latency in the signal, which is
    * the same lag any host integrating the collectors would have.
    *
    * Bounded, because an unbounded map keyed by visitor is a memory-growth surface
@@ -282,7 +282,7 @@ export function createLiveProxy(options: ProxyOptions) {
      *
      * This is the same argument D56 made about evidence, carried to its conclusion.
      * If loading a page is not an achievement, then loading pages on a schedule is
-     * not an offence — because from HTTP alone an uptime monitor and a crawler are
+     * not an offence: because from HTTP alone an uptime monitor and a crawler are
      * the same client. Both are `GET /` at a fixed interval by a non-browser, and
      * `SIG_UNIFORM_DELAY_SHAPE` fires identically on both.
      *
@@ -374,7 +374,7 @@ export function createLiveProxy(options: ProxyOptions) {
       res.end('{"error":"Bad gateway."}');
     });
 
-    // A request the origin never answered says nothing about the caller — the
+    // A request the origin never answered says nothing about the caller: the
     // 502 below is this proxy's own words, not IXFE's verdict.
     let originAnswered = false;
     let originContentType = '';
@@ -456,7 +456,7 @@ if (process.argv[1]?.endsWith('proxy.ts')) {
   console.log(`    listening: http://127.0.0.1:${port}`);
   console.log(`    origin:    ${origin}`);
   console.log(`    records:   ${out}`);
-  if (!salt) console.log(`    note:      SG_LIVE_SALT unset — entity keys change on restart\n`);
+  if (!salt) console.log(`    note:      SG_LIVE_SALT unset, entity keys change on restart\n`);
   else console.log('');
 
   for (const signal of ['SIGINT', 'SIGTERM'] as const) {

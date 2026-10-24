@@ -6,7 +6,7 @@ the answer given, and what that answer commits the implementation to.
 **How to read this**
 
 - Entries are numbered `Dn` and are stable. They are appended, never renumbered.
-- A decision is superseded by adding a note to it, not by deleting it — the
+- A decision is superseded by adding a note to it, not by deleting it, the
   reasoning that was rejected is part of the record.
 - Sub-numbered entries (`D1.1`) are consequences derived from a decision rather
   than answers given directly.
@@ -16,7 +16,7 @@ the answer given, and what that answer commits the implementation to.
   property is locked as a test in `src/core/trust.test.ts`. Values here are
   policy; the tests are what make a policy change visible.
 
-Status: every numbered question is answered — the original thirty, plus D31 to
+Status: every numbered question is answered, the original thirty, plus D31 to
 D60 arising from review, implementation, and a live pentest. Nothing is blocked on
 a decision. What remains is validation: the values recorded here have not met real
 traffic yet, and D47 names where they will.
@@ -27,101 +27,101 @@ Last updated: 2026-08-24
 
 ## Contents
 
-**Part I — Foundations**
+**Part I: Foundations**
 
-- [D1 — Entity is the fundamental reference unit](#d1--entity-is-the-fundamental-reference-unit)
-- [D1.1 — Root of trust is outside SG](#d11--root-of-trust-is-outside-sg)
-- [D1.2 — Data deletion is a requirement](#d12--data-deletion-is-a-requirement)
-- [D2 — One trust state per entity, not per entity-endpoint](#d2--one-trust-state-per-entity-not-per-entity-endpoint)
+- [D1: Entity is the fundamental reference unit](#d1-entity-is-the-fundamental-reference-unit)
+- [D1.1: Root of trust is outside SG](#d11-root-of-trust-is-outside-sg)
+- [D1.2: Data deletion is a requirement](#d12-data-deletion-is-a-requirement)
+- [D2: One trust state per entity, not per entity-endpoint](#d2-one-trust-state-per-entity-not-per-entity-endpoint)
 
-**Part II — Trust model**
+**Part II: Trust model**
 
-- [D2a — Trust is stored as a distribution, read as a number](#d2a--trust-is-stored-as-a-distribution-read-as-a-number)
-- [D3 — Decay is a half-life over real elapsed time](#d3--decay-is-a-half-life-over-real-elapsed-time)
-- [D4 — Evidence weights, symmetric, 4:1 strong to weak](#d4--evidence-weights-symmetric-41-strong-to-weak)
-- [D6 — Expiration is a retention boundary, separate from decay](#d6--expiration-is-a-retention-boundary-separate-from-decay)
+- [D2a: Trust is stored as a distribution, read as a number](#d2a-trust-is-stored-as-a-distribution-read-as-a-number)
+- [D3: Decay is a half-life over real elapsed time](#d3-decay-is-a-half-life-over-real-elapsed-time)
+- [D4: Evidence weights, symmetric, 4:1 strong to weak](#d4-evidence-weights-symmetric-41-strong-to-weak)
+- [D6: Expiration is a retention boundary, separate from decay](#d6-expiration-is-a-retention-boundary-separate-from-decay)
 
-**Part III — Decision layer**
+**Part III: Decision layer**
 
-- [D5 — Decision is a function of trust and uncertainty](#d5--decision-is-a-function-of-trust-and-uncertainty)
-- [D37 — Saturation guard belongs in the decision layer, not the trust model](#d37--saturation-guard-belongs-in-the-decision-layer-not-the-trust-model)
-- [D40 — An epistemic stage precedes trust and uncertainty](#d40--an-epistemic-stage-precedes-trust-and-uncertainty)
-- [D46 — Two thresholds the traffic falsified](#d46--two-thresholds-the-traffic-falsified)
-- [D49 — D37 does not do what it claims](#d49--d37-does-not-do-what-it-claims)
-- [D39 — The cold-start band contradicted the zero-friction goal](#d39--the-cold-start-band-contradicted-the-zero-friction-goal)
+- [D5: Decision is a function of trust and uncertainty](#d5-decision-is-a-function-of-trust-and-uncertainty)
+- [D37: Saturation guard belongs in the decision layer, not the trust model](#d37-saturation-guard-belongs-in-the-decision-layer-not-the-trust-model)
+- [D40: An epistemic stage precedes trust and uncertainty](#d40-an-epistemic-stage-precedes-trust-and-uncertainty)
+- [D46: Two thresholds the traffic falsified](#d46-two-thresholds-the-traffic-falsified)
+- [D49: D37 does not do what it claims](#d49-d37-does-not-do-what-it-claims)
+- [D39: The cold-start band contradicted the zero-friction goal](#d39-the-cold-start-band-contradicted-the-zero-friction-goal)
 
-**Part IV — Hard constraints**
+**Part IV: Hard constraints**
 
-- [D13 — Hard constraints are violated invariants, in five classes](#d13--hard-constraints-are-violated-invariants-in-five-classes)
-- [D14 — "Hard" describes certainty, not severity](#d14--hard-describes-certainty-not-severity)
-- [D15 — Hard constraints stay outside the Beta model](#d15--hard-constraints-stay-outside-the-beta-model)
-- [D16 — Invariants are declared, never learned](#d16--invariants-are-declared-never-learned)
-- [D32 — Declaring `hard` is itself a claim of completeness](#d32--declaring-hard-is-itself-a-claim-of-completeness)
-- [D38 — A violated `soft` invariant is strong negative trust evidence](#d38--a-violated-soft-invariant-is-strong-negative-trust-evidence)
-- [D41 — The constraint taxonomy is closed over proof sources, not attacks](#d41--the-constraint-taxonomy-is-closed-over-proof-sources-not-attacks)
+- [D13: Hard constraints are violated invariants, in five classes](#d13-hard-constraints-are-violated-invariants-in-five-classes)
+- [D14: "Hard" describes certainty, not severity](#d14-hard-describes-certainty-not-severity)
+- [D15: Hard constraints stay outside the Beta model](#d15-hard-constraints-stay-outside-the-beta-model)
+- [D16: Invariants are declared, never learned](#d16-invariants-are-declared-never-learned)
+- [D32: Declaring `hard` is itself a claim of completeness](#d32-declaring-hard-is-itself-a-claim-of-completeness)
+- [D38: A violated `soft` invariant is strong negative trust evidence](#d38-a-violated-soft-invariant-is-strong-negative-trust-evidence)
+- [D41: The constraint taxonomy is closed over proof sources, not attacks](#d41-the-constraint-taxonomy-is-closed-over-proof-sources-not-attacks)
 
-**Part V — Anomaly model**
+**Part V: Anomaly model**
 
-- [D18 — Anomaly: feature space first, algorithm later](#d18--anomaly-feature-space-first-algorithm-later)
-- [D36 — The anomaly feature space](#d36--the-anomaly-feature-space)
-- [D35 — An observation without evidence is not a meaningful update](#d35--an-observation-without-evidence-is-not-a-meaningful-update)
-- [D42 — The weak-signal catalogue, with no thresholds in it](#d42--the-weak-signal-catalogue-with-no-thresholds-in-it)
+- [D18: Anomaly: feature space first, algorithm later](#d18-anomaly-feature-space-first-algorithm-later)
+- [D36: The anomaly feature space](#d36-the-anomaly-feature-space)
+- [D35: An observation without evidence is not a meaningful update](#d35-an-observation-without-evidence-is-not-a-meaningful-update)
+- [D42: The weak-signal catalogue, with no thresholds in it](#d42-the-weak-signal-catalogue-with-no-thresholds-in-it)
 
-**Part VI — Architecture and API**
+**Part VI: Architecture and API**
 
-- [D7 — One package, multiple entry points](#d7--one-package-multiple-entry-points)
-- [D8 — Pluggable `StateStore`, in-memory default, async](#d8--pluggable-statestore-in-memory-default-async)
-- [D44 — A durable store ships, on `node:sqlite`](#d44--a-durable-store-ships-on-nodesqlite)
-- [D9 — `guard.evaluate({ entity, observation, context })`](#d9--guardevaluate-entity-observation-context-)
-- [D10 — All public evaluation and storage APIs are async](#d10--all-public-evaluation-and-storage-apis-are-async)
-- [D11 — Time is injected through a `Clock` interface](#d11--time-is-injected-through-a-clock-interface)
-- [D12 — Core is framework-agnostic](#d12--core-is-framework-agnostic)
-- [D20 — A serverless guard is fully functional](#d20--a-serverless-guard-is-fully-functional)
+- [D7: One package, multiple entry points](#d7-one-package-multiple-entry-points)
+- [D8: Pluggable `StateStore`, in-memory default, async](#d8-pluggable-statestore-in-memory-default-async)
+- [D44: A durable store ships, on `node:sqlite`](#d44-a-durable-store-ships-on-nodesqlite)
+- [D9: `guard.evaluate({ entity, observation, context })`](#d9-guardevaluate-entity-observation-context-)
+- [D10: All public evaluation and storage APIs are async](#d10-all-public-evaluation-and-storage-apis-are-async)
+- [D11: Time is injected through a `Clock` interface](#d11-time-is-injected-through-a-clock-interface)
+- [D12: Core is framework-agnostic](#d12-core-is-framework-agnostic)
+- [D20: A serverless guard is fully functional](#d20-a-serverless-guard-is-fully-functional)
 
-**Part VII — Protocol and privacy**
+**Part VII: Protocol and privacy**
 
-- [D17 — No API key in the local core](#d17--no-api-key-in-the-local-core)
-- [D19 — Symptoms are local-first, never per request](#d19--symptoms-are-local-first-never-per-request)
-- [D43 — The symptom vocabulary is two tiers, split by rate of change](#d43--the-symptom-vocabulary-is-two-tiers-split-by-rate-of-change)
-- [D21 — Cold start, restated](#d21--cold-start-restated)
-- [D22 — Purge primitive from the start; consent belongs to the host](#d22--purge-primitive-from-the-start-consent-belongs-to-the-host)
-- [D23 — Decision trace is mandatory](#d23--decision-trace-is-mandatory)
-- [D31 — `Relationship : E x E -> R` is deferred out of the PoC](#d31--relationship--e-x-e---r-is-deferred-out-of-the-poc)
+- [D17: No API key in the local core](#d17-no-api-key-in-the-local-core)
+- [D19: Symptoms are local-first, never per request](#d19-symptoms-are-local-first-never-per-request)
+- [D43: The symptom vocabulary is two tiers, split by rate of change](#d43-the-symptom-vocabulary-is-two-tiers-split-by-rate-of-change)
+- [D21: Cold start, restated](#d21-cold-start-restated)
+- [D22: Purge primitive from the start; consent belongs to the host](#d22-purge-primitive-from-the-start-consent-belongs-to-the-host)
+- [D23: Decision trace is mandatory](#d23-decision-trace-is-mandatory)
+- [D31: `Relationship : E x E -> R` is deferred out of the PoC](#d31-relationship--e-x-e---r-is-deferred-out-of-the-poc)
 
-**Part VIII — Project and tooling**
+**Part VIII: Project and tooling**
 
-- [D24 — Licence: MIT](#d24--licence-mit)
-- [D25 — npm: `@fachryxyf/scorpio-guard`](#d25--npm-fachryxyfscorpio-guard)
-- [D26 — Node floor: `>=22.6`](#d26--node-floor-226)
-- [D27 — CI now: typecheck and test](#d27--ci-now-typecheck-and-test)
-- [D28 — Site stays where it is](#d28--site-stays-where-it-is)
-- [D29 — No empty repositories](#d29--no-empty-repositories)
-- [D34 — PoC target: HealthMe, with its limits stated](#d34--poc-target-healthme-with-its-limits-stated)
-- [D45 — Generate the traffic; do not wait for it](#d45--generate-the-traffic-do-not-wait-for-it)
-- [D47 — Primary target: IXFE, because it has something to steal](#d47--primary-target-ixfe-because-it-has-something-to-steal)
-- [D48 — A stale client view is not a proof](#d48--a-stale-client-view-is-not-a-proof)
-- [D30 — PoC must run against a real application flow](#d30--poc-must-run-against-a-real-application-flow)
-- [D50 — Farming is answered on mass, through velocity](#d50--farming-is-answered-on-mass-through-velocity)
-- [D51 — Signal collectors exist for all seven uncovered catalogue entries](#d51--signal-collectors-exist-for-all-seven-uncovered-catalogue-entries)
-- [D52 — The anomaly classifier is a distance-to-reference model, not a trained one](#d52--the-anomaly-classifier-is-a-distance-to-reference-model-not-a-trained-one)
-- [D53 — Wire format is v0.1, documented and tested, still untransmitting](#d53--wire-format-is-v01-documented-and-tested-still-untransmitting)
-- [D54 — Rate is not the farming signal; the shape of the gaps is](#d54--rate-is-not-the-farming-signal-the-shape-of-the-gaps-is)
-- [D55 — Farming is answered at intake, by pricing the evidence](#d55--farming-is-answered-at-intake-by-pricing-the-evidence)
-- [D56 — Real traffic is recorded by an observing proxy, not by reading logs](#d56--real-traffic-is-recorded-by-an-observing-proxy-not-by-reading-logs)
-- [D57 — Drive a real browser, because a real audience is not available](#d57--drive-a-real-browser-because-a-real-audience-is-not-available)
-- [D58 — The site is generated from the library, not hand-copied from it](#d58--the-site-is-generated-from-the-library-not-hand-copied-from-it)
-- [D59 — Published, and running in production as an observer](#d59--published-and-running-in-production-as-an-observer)
-- [D60 — Durable trust on serverless is a networked store, over HTTP](#d60--durable-trust-on-serverless-is-a-networked-store-over-http)
+- [D24: Licence: MIT](#d24-licence-mit)
+- [D25: npm: `@fachryxyf/scorpio-guard`](#d25-npm-fachryxyfscorpio-guard)
+- [D26: Node floor: `>=22.6`](#d26-node-floor-226)
+- [D27: CI now: typecheck and test](#d27-ci-now-typecheck-and-test)
+- [D28: Site stays where it is](#d28-site-stays-where-it-is)
+- [D29: No empty repositories](#d29-no-empty-repositories)
+- [D34: PoC target: HealthMe, with its limits stated](#d34-poc-target-healthme-with-its-limits-stated)
+- [D45: Generate the traffic; do not wait for it](#d45-generate-the-traffic-do-not-wait-for-it)
+- [D47: Primary target: IXFE, because it has something to steal](#d47-primary-target-ixfe-because-it-has-something-to-steal)
+- [D48: A stale client view is not a proof](#d48-a-stale-client-view-is-not-a-proof)
+- [D30: PoC must run against a real application flow](#d30-poc-must-run-against-a-real-application-flow)
+- [D50: Farming is answered on mass, through velocity](#d50-farming-is-answered-on-mass-through-velocity)
+- [D51: Signal collectors exist for all seven uncovered catalogue entries](#d51-signal-collectors-exist-for-all-seven-uncovered-catalogue-entries)
+- [D52: The anomaly classifier is a distance-to-reference model, not a trained one](#d52-the-anomaly-classifier-is-a-distance-to-reference-model-not-a-trained-one)
+- [D53: Wire format is v0.1, documented and tested, still untransmitting](#d53-wire-format-is-v01-documented-and-tested-still-untransmitting)
+- [D54: Rate is not the farming signal; the shape of the gaps is](#d54-rate-is-not-the-farming-signal-the-shape-of-the-gaps-is)
+- [D55: Farming is answered at intake, by pricing the evidence](#d55-farming-is-answered-at-intake-by-pricing-the-evidence)
+- [D56: Real traffic is recorded by an observing proxy, not by reading logs](#d56-real-traffic-is-recorded-by-an-observing-proxy-not-by-reading-logs)
+- [D57: Drive a real browser, because a real audience is not available](#d57-drive-a-real-browser-because-a-real-audience-is-not-available)
+- [D58: The site is generated from the library, not hand-copied from it](#d58-the-site-is-generated-from-the-library-not-hand-copied-from-it)
+- [D59: Published, and running in production as an observer](#d59-published-and-running-in-production-as-an-observer)
+- [D60: Durable trust on serverless is a networked store, over HTTP](#d60-durable-trust-on-serverless-is-a-networked-store-over-http)
 
 **[Open questions](#open-questions)**
 
 ---
 
-# Part I — Foundations
+# Part I: Foundations
 
 What an entity is, what SG is responsible for, and what it explicitly is not.
 
-## D1 — Entity is the fundamental reference unit
+## D1: Entity is the fundamental reference unit
 
 **Decided.**
 
@@ -182,7 +182,7 @@ Memory       : E -> M
 ```
 
 A fifth signature, `Relationship : E x E -> R`, was stated with these. It is
-withheld from the formal model until D31 defines what it means — a signature
+withheld from the formal model until D31 defines what it means: a signature
 without semantics would be implemented by guesswork. See D31; out of scope for
 the PoC.
 
@@ -196,7 +196,7 @@ It is a unit of **continuity**: it guarantees that two observations refer to the
 same reference point over time, not that any quantity attached to it is
 comparable across different entities.
 
-That distinction carries D1.1 without restating it — continuity is not identity,
+That distinction carries D1.1 without restating it: continuity is not identity,
 so the root of trust necessarily sits outside SG.
 
 > Entity is the fundamental reference unit of Scorpio Guard.
@@ -209,7 +209,7 @@ SG does not determine the semantic identity of an entity. The host application
 is responsible for providing and maintaining the reference. SG is responsible
 for the observation, memory, state, assessment, and treatment attached to it.
 
-SG accepts a reference as a basis for measurement — never as proof that the
+SG accepts a reference as a basis for measurement, never as proof that the
 reference represents a particular identity.
 
 ### What this commits the code to
@@ -218,10 +218,10 @@ reference represents a particular identity.
   derives meaning from its content.
 - `rho` lives in the host application. `evaluate()` receives the reference as a
   parameter; SG needs no framework adapter to infer a key from a request.
-- The storage interface can stay a plain key-value contract — pending D31.
+- The storage interface can stay a plain key-value contract, pending D31.
 - `S_e(t)` holds `(alpha, beta, last_seen)`, not a scalar. See D2a.
 
-## D1.1 — Root of trust is outside SG
+## D1.1: Root of trust is outside SG
 
 **Consequence of D1.** Restated by the author in D21.
 
@@ -237,24 +237,24 @@ they have protection they do not have.
 
 ### Noted, not built
 
-SG cannot structurally detect reference rotation — it cannot distinguish a
+SG cannot structurally detect reference rotation: it cannot distinguish a
 hundred legitimate new entities from one attacker discarding identity a hundred
 times. It may later be worth reporting the rate of first-seen references to the
 host as a diagnostic, without SG claiming that rate means abuse. Not
 implemented; recorded only.
 
-## D1.2 — Data deletion is a requirement
+## D1.2: Data deletion is a requirement
 
 **Consequence of D1.** Confirmed by the author in D22.
 
-Lighter than first assessed, because SG never touches PII directly — it holds a
+Lighter than first assessed, because SG never touches PII directly; it holds a
 blind reference. Not eliminated, because SG still stores behavior bound to that
 reference, which on the host's side remains processing of personal data.
 
 A per-entity delete API is still required, and is cheaper to design in now than
 to retrofit into storage later.
 
-## D2 — One trust state per entity, not per entity-endpoint
+## D2: One trust state per entity, not per entity-endpoint
 
 **Decided, as a consequence of D1.**
 
@@ -262,15 +262,15 @@ The signatures settle it: `Trust : E -> [0,1]` and `Uncertainty : E -> R>=0` are
 domained on `E` alone, while `Anomaly : E x I -> R` is per-interaction.
 
 So trust is global per entity. Endpoint sensitivity enters as part of context
-`C` in `PI(A, C)` at treatment time — it is not part of the state key.
+`C` in `PI(A, C)` at treatment time; it is not part of the state key.
 
 ---
 
-# Part II — Trust model
+# Part II: Trust model
 
 How evidence becomes a distribution, how it ages, and when it is discarded.
 
-## D2a — Trust is stored as a distribution, read as a number
+## D2a: Trust is stored as a distribution, read as a number
 
 **Confirmed by D3**, which decays evidence mass underneath the distribution
 rather than editing a trust scalar.
@@ -287,7 +287,7 @@ Uncertainty(e) = Var[p] = (alpha * beta) / ((alpha+beta)^2 * (alpha+beta+1))
 The distribution is the state; the two signatures are projections of it. Code
 proceeds on this reading unless corrected.
 
-## D3 — Decay is a half-life over real elapsed time
+## D3: Decay is a half-life over real elapsed time
 
 **Decided.**
 
@@ -308,7 +308,7 @@ H = 24 hours
 > expected trust value.
 
 If PoC experiments show 24 hours is too aggressive or too slow, the policy
-changes — the mathematical model does not.
+changes: the mathematical model does not.
 
 ### Why base-2 over a bare `lambda` constant
 
@@ -344,8 +344,8 @@ alternative was tested numerically before choosing:
 
 | Reading | `E[p]` after long silence | Distribution stays proper |
 |---|---|---|
-| Decay `alpha` and `beta` wholesale | frozen at its last value forever | No — collapses toward `Beta(0,0)` |
-| Decay mass only, prior pinned | returns to `0.5` = unknown | Yes — floor at `Beta(1,1)` |
+| Decay `alpha` and `beta` wholesale | frozen at its last value forever | No, collapses toward `Beta(0,0)` |
+| Decay mass only, prior pinned | returns to `0.5` = unknown | Yes, floor at `Beta(1,1)` |
 
 Decaying `alpha` and `beta` wholesale was rejected. It holds `E[p]` constant
 while variance grows past the valid range for a unimodal Beta, and an entity
@@ -353,7 +353,7 @@ with 8 positive observations two years ago would still read `E[p] = 0.75`
 forever. That is precisely the dogmatism the design set out to avoid.
 
 Decaying mass only gives the intended behavior: an entity that goes quiet drifts
-back to **unknown, not untrusted** — `E[p] -> 0.5`, `Var[p] -> 1/12`, which is
+back to **unknown, not untrusted**: `E[p] -> 0.5`, `Var[p] -> 1/12`, which is
 exactly flat `Beta(1,1)`. Verified numerically: from mass `(8, 2)`, after 96h
 `E[p] = 0.571`, after 240h `E[p] = 0.502`.
 
@@ -377,7 +377,7 @@ last_seen = now
 Reads apply `lambda(now - last_seen)` without mutating anything.
 
 This is written out because two readings of "decay lazily" are otherwise both
-defensible — decay-then-add, or add-then-decay-at-read — and they do not agree.
+defensible, decay-then-add, or add-then-decay-at-read: and they do not agree.
 Only decay-then-add produces the mass ceiling `m* = w / (1 - lambda(T))` that D4
 depends on; the other lets mass grow without bound. Composability from D3 is what
 makes the single-step decay exact rather than an approximation.
@@ -388,10 +388,10 @@ makes the single-step decay exact rather than an approximation.
   exactly `Beta(1,1)`.
 - Writes follow decay-then-add, above. Reads decay a copy and mutate nothing.
 - `H` is policy, injected as configuration, not a hardcoded constant.
-- Needs an injected clock to be testable — see question 11, now effectively
+- Needs an injected clock to be testable, see question 11, now effectively
   settled in favour of injection.
 
-## D4 — Evidence weights, symmetric, 4:1 strong to weak
+## D4: Evidence weights, symmetric, 4:1 strong to weak
 
 **Decided.**
 
@@ -403,7 +403,7 @@ strong negative  = -2.0
 ```
 
 Positive and negative magnitudes are symmetric. Strength sets how much evidence
-mass an observation contributes — it is not SG's confidence in having classified
+mass an observation contributes: it is not SG's confidence in having classified
 that evidence correctly.
 
 Signs are notation only. Nothing negative is ever added to a Beta parameter;
@@ -438,7 +438,7 @@ evidence rather than guilt:
 | 0.95 | 36 |
 
 A single strong negative bites hardest on entities with little history, and is
-absorbed by entities that have earned mass — the intended asymmetry:
+absorbed by entities that have earned mass, the intended asymmetry:
 
 | Positive mass | `E[p]` before | after one strong negative | drop |
 |---|---|---|---|
@@ -447,7 +447,7 @@ absorbed by entities that have earned mass — the intended asymmetry:
 | 50 | 0.981 | 0.944 | 0.036 |
 
 A brand-new entity hit once by a strong negative lands at `E[p] = 0.25` with
-`Var = 0.038` — low trust held with fairly high confidence, from one
+`Var = 0.038`, low trust held with fairly high confidence, from one
 observation. Whether that is too fast is a threshold question, deferred to D5:
 the decision layer can require a minimum mass before honouring a low `E[p]`,
 so the weights do not have to be softened to compensate.
@@ -470,12 +470,12 @@ m* = w / (1 - lambda(T))
 
 Two things follow. Mass is self-limiting, so no artificial clamp is required for
 ordinary traffic. But a high-frequency entity does saturate near `E[p] = 1` and
-becomes hard to move with negative evidence — a farmable slow-poisoning path.
+becomes hard to move with negative evidence, a farmable slow-poisoning path.
 
 That is not addressed here. Clamping mass would contradict the finding above, so
 it is handled one layer up, in the decision layer: see D37.
 
-Locked as tests in `src/core/trust.test.ts`, not verified once and discarded —
+Locked as tests in `src/core/trust.test.ts`, not verified once and discarded:
 these values are policy and will be revised, so a change has to surface as a
 failing test rather than as silent drift.
 
@@ -487,7 +487,7 @@ failing test rather than as silent drift.
 - Evidence is typed `weak | strong` and `positive | negative`; the mapping to a
   number is one lookup, replaceable by configuration.
 
-## D6 — Expiration is a retention boundary, separate from decay
+## D6: Expiration is a retention boundary, separate from decay
 
 **Decided.**
 
@@ -517,7 +517,7 @@ appears again afterwards, SG treats it as an existing reference carrying no
 retained state and initializes it from the cold-start prior `Beta(1,1)`.
 
 Retention is measured from meaningful evidence and state updates, not from
-arbitrary request activity — trivial traffic must not keep state alive
+arbitrary request activity: trivial traffic must not keep state alive
 indefinitely.
 
 > Expiration is a data-retention policy boundary, not a trust judgment.
@@ -539,8 +539,8 @@ ordinary entities that is already effectively flat:
 | (1000, 50) | 0.864 | 0.011 |
 
 The third row is the point. A high-frequency entity can accumulate mass in the
-thousands — D4 showed a ceiling of 4156 for strong evidence at one-minute
-intervals — and 0.78% of a large number is still a meaningful number. Such an
+thousands, D4 showed a ceiling of 4156 for strong evidence at one-minute
+intervals: and 0.78% of a large number is still a meaningful number. Such an
 entity would read `E[p] = 0.86` at **low uncertainty** a full week after going
 silent, and would still hold the full decision space under D5.
 
@@ -556,7 +556,7 @@ depends on prior traffic volume" is not a retention policy anyone can attest to.
 ### Ambiguity flagged: what counts as a meaningful update
 
 The distinction between a meaningful state update and arbitrary request activity
-is load-bearing — it decides whether an attacker can keep state alive cheaply,
+is load-bearing: it decides whether an attacker can keep state alive cheaply,
 and whether a quiet legitimate entity is dropped too early. Current reading:
 
 - **Meaningful**: any evidence applied to the trust model, positive or negative,
@@ -568,10 +568,10 @@ Under that reading, `last_seen` used for decay and `last_meaningful_update` used
 for retention are two different timestamps, and both have to be stored.
 
 Whether an anomaly observation with no trust evidence counts as meaningful is
-not decided — it depends on the anomaly model, which is still open under
+not decided; it depends on the anomaly model, which is still open under
 question 18.
 
-Locked as tests in `src/core/trust.test.ts`, not verified once and discarded —
+Locked as tests in `src/core/trust.test.ts`, not verified once and discarded:
 these values are policy and will be revised, so a change has to surface as a
 failing test rather than as silent drift.
 
@@ -582,7 +582,7 @@ failing test rather than as silent drift.
   as absent and delete rather than decay. Lazy, consistent with D3, still no
   scheduler required for correctness.
 - A sweeper becomes optional and purely about reclaiming storage, not about
-  correctness — worth having for a persistent store, unnecessary in memory.
+  correctness, worth having for a persistent store, unnecessary in memory.
 - Retention is policy, expressed as a multiple of `H` by default but
   independently configurable.
 - This is the deletion mechanism D22 requires, so a manual per-entity delete is
@@ -590,11 +590,11 @@ failing test rather than as silent drift.
 
 ---
 
-# Part III — Decision layer
+# Part III: Decision layer
 
 How state becomes a treatment, and what limits SG’s autonomy in choosing one.
 
-## D5 — Decision is a function of trust and uncertainty
+## D5: Decision is a function of trust and uncertainty
 
 **Decided.**
 
@@ -650,12 +650,12 @@ D4 noted that a brand-new entity hit once by a strong negative reads
 `E[p] = 0.25`, which lands in `restrict`. Its variance is `0.038`, which is
 medium uncertainty, so the cap holds treatment at `CHALLENGE / INCREASE_FRICTION`
 and `restrict` is never reached on one observation. No minimum-mass rule is
-needed — variance already encodes "not enough evidence", so the mechanism that
+needed, variance already encodes "not enough evidence", so the mechanism that
 was going to be added by hand is the one already in the model.
 
 ### Verified behavior
 
-A fresh entity at `(0, 0)` reads `E[p] = 0.5`, `Var = 0.0833` — the
+A fresh entity at `(0, 0)` reads `E[p] = 0.5`, `Var = 0.0833`, the
 `friction/challenge` band, but high uncertainty, so it is capped at
 `INCREASE_FRICTION`. An unknown entity therefore cannot be restricted or denied,
 which is the intended reading of *unknown, not untrusted*.
@@ -672,7 +672,7 @@ Trajectory on a stream of weak positives:
 
 Roughly 10 weak observations to unlock the full decision space, 3 to leave high
 uncertainty. Deny requires both a low mean and low variance, which in practice
-means sustained negative evidence — `(a=0, b=8)` gives `E[p] = 0.100` with
+means sustained negative evidence: `(a=0, b=8)` gives `E[p] = 0.100` with
 `Var = 0.0082`, low uncertainty, cap lifted.
 
 ### Note: the bands are wide enough that some are unreachable at the top
@@ -710,13 +710,13 @@ policy table without adding expressiveness.
 
 The spectrum stays at five.
 
-Locked as tests in `src/core/trust.test.ts`, not verified once and discarded —
+Locked as tests in `src/core/trust.test.ts`, not verified once and discarded:
 these values are policy and will be revised, so a change has to surface as a
 failing test rather than as silent drift.
 
 ### What this commits the code to
 
-- Bands are policy tables, not inline comparisons — they have to be replaceable
+- Bands are policy tables, not inline comparisons: they have to be replaceable
   without touching decision logic.
 - Two-stage evaluation: pick a band from `p`, then clamp by the ceiling from `U`.
   The clamp is a `min` against the spectrum ordering, which `severity()` already
@@ -724,16 +724,16 @@ failing test rather than as silent drift.
 - A hard constraint bypasses the clamp; explicit host policy may too. Both are
   parameters, not exceptions buried in code.
 
-## D37 — Saturation guard belongs in the decision layer, not the trust model
+## D37: Saturation guard belongs in the decision layer, not the trust model
 
-**Decided. The mitigation claim below is withdrawn by D49** — traffic showed the gate
+**Decided. The mitigation claim below is withdrawn by D49**; traffic showed the gate
 cannot affect a farmed entity, because farming produces a high mean and a ceiling can
 only lower a decision. The reasoning about *where* the fix belongs is left standing;
 the conclusion that farming is therefore mitigated is not.
 
 D4 recorded a gap as a passing note: an entity interacting at high frequency
 converges on a large mass ceiling, drives `Var[p]` low, and unlocks the full
-decision space under D5 — while becoming nearly immovable by negative evidence.
+decision space under D5, while becoming nearly immovable by negative evidence.
 A patient attacker can farm exactly that state.
 
 ### Why the fix does not go in the trust model
@@ -745,7 +745,7 @@ what is wrong.
 What is wrong is a premise sitting *underneath* the mathematics: that homogeneous
 volume is evidence sufficient to reduce uncertainty. That premise holds for
 legitimate traffic and fails for a patient attacker. So the formula does not
-change — what changes is the condition under which its output may be trusted
+change: what changes is the condition under which its output may be trusted
 completely.
 
 ### The fix
@@ -759,7 +759,7 @@ D = pi(Trust, Anomaly, HardConstraints, Context)
 
 has four independent dimensions. Use them: **the uncertainty cap may lift only
 when the Anomaly dimension concurs.** Concurrence is expressed as a diversity
-signal — not how many interactions were observed, but how varied they were in
+signal, not how many interactions were observed, but how varied they were in
 kind, timing, and pattern.
 
 An entity farming thousands of uniform interactions fails the diversity condition
@@ -775,7 +775,7 @@ low Var[p]  AND  monotonous behavior ->  cap holds
 
 Diversity versus monotony is one of the features the anomaly feature space would
 contain anyway, and D18 already fixed the order: feature space first, algorithm
-later. So this adds no machinery — it connects two decisions that were standing
+later. So this adds no machinery: it connects two decisions that were standing
 apart, and makes them check each other.
 
 It is also consistent with the notes' own instruction that hard constraints and
@@ -804,23 +804,23 @@ one gates the other, rather than being averaged.
 
 `assessTrust()` in `src/core/assess.ts` takes `anomalyConcurs`, which is
 deliberately three-valued: `true` concurs, `false` denies, `undefined` means no
-anomaly data exists — which is the project's current state and is not the same
+anomaly data exists: which is the project's current state and is not the same
 claim as monotonous behavior.
 
 With low variance and no concurrence, the ceiling holds at `INCREASE_FRICTION`
 and the reason string says why. A host may set
 `allowEscalationWithoutAnomaly: true` to opt out, but an explicit
-`anomalyConcurs: false` still overrides that opt-in — a stated verdict outranks a
+`anomalyConcurs: false` still overrides that opt-in, a stated verdict outranks a
 blanket permission. Both paths are covered by tests in `assess.test.ts`.
 
 Worth recording: for a *trusted* entity, the D37 guard changes nothing, because
 `ALLOW` already sits below every ceiling. The farming concern is entirely about
-escalation, and a saturated entity was never being escalated — what farming buys
+escalation, and a saturated entity was never being escalated, what farming buys
 an attacker is protection against future escalation, not a treatment change now.
 
 ---
 
-## D40 — An epistemic stage precedes trust and uncertainty
+## D40: An epistemic stage precedes trust and uncertainty
 
 **Decided. Resolves D39.**
 
@@ -871,8 +871,8 @@ uncertainty band alone cannot tell them apart in a way the decision layer can ac
 on. Separating mass out as its own stage makes the epistemic question explicit
 instead of leaving it entangled in the variance.
 
-Moving the band boundary — D39's second option — would have hidden the same
-conflation behind a different threshold. Deferring to the host — the third — would
+Moving the band boundary: D39's second option: would have hidden the same
+conflation behind a different threshold. Deferring to the host: the third, would
 have exported a question the design has a clear position on.
 
 ### Thresholds
@@ -905,7 +905,7 @@ does not accumulate enough for the guard to act autonomously against them.
 
 - Three ceilings, and **the lowest binds**: epistemic stage, uncertainty, and
   anomaly concurrence. Each answers a different question, so none subsumes another.
-- The `unknown` ceiling is `ALLOW`. Not a floor forcing `ALLOW` — it removes the
+- The `unknown` ceiling is `ALLOW`. Not a floor forcing `ALLOW`; it removes the
   trust dimension's standing to ask for anything, while `HardConstraints` and
   `Anomaly` still reach the decision layer on their own authority. Verified: a
   first-contact entity violating a declared invariant is still advised `RESTRICT`.
@@ -919,7 +919,7 @@ does not accumulate enough for the guard to act autonomously against them.
 contact now reads:
 
 ```
-ALLOW — unknown entity (n=2): lack of evidence is not evidence of distrust
+ALLOW, unknown entity (n=2): lack of evidence is not evidence of distrust
 ```
 
 Every assessment carries `mass` and `stage` alongside the mean and variance, so
@@ -927,7 +927,7 @@ the trace states which ceiling bound and why (D23).
 
 ---
 
-## D39 — The cold-start band contradicted the zero-friction goal
+## D39: The cold-start band contradicted the zero-friction goal
 
 **Resolved by D40.** Kept as the record of how the defect was found and which
 alternatives were rejected.
@@ -939,7 +939,7 @@ with a stated product goal.
 
 A first-time visitor has state `(0, 0)`, so `E[p] = 0.5`. Under D5 that is the
 `friction / challenge` band. High uncertainty caps the treatment, but the cap
-lowers to `INCREASE_FRICTION` — it does not lower to `ALLOW`. So the advice
+lowers to `INCREASE_FRICTION`: it does not lower to `ALLOW`. So the advice
 returned for an ordinary new visitor is:
 
 ```
@@ -959,7 +959,7 @@ Trajectory on weak positives, as implemented:
 
 The design states as a target that legitimate traffic experiences *nothing*, and
 that a new entity is unknown rather than untrusted. Advising friction on first
-contact is not nothing, and it treats every new visitor as suspect — which is the
+contact is not nothing, and it treats every new visitor as suspect, which is the
 behavior the premise set out to reject.
 
 It also lands hardest on exactly the population the design cares about: a
@@ -972,7 +972,7 @@ a bug to be quietly resolved:
 
 1. **The uncertainty ceiling should floor at `ALLOW` or `OBSERVE` when there is no
    negative evidence at all.** Distinguishes "no evidence" from "balanced
-   evidence" — both read `E[p] = 0.5`, but they are not the same epistemic state.
+   evidence", both read `E[p] = 0.5`, but they are not the same epistemic state.
 2. **The `friction` band should start below 0.5.** Makes the prior sit in
    `observe` rather than `friction`. A threshold change, and the least invasive.
 3. **Treatment for `coldStart` is the host's call.** Consistent with SG being
@@ -990,12 +990,12 @@ each have left that conflation in place.
 
 ---
 
-## D46 — Two thresholds the traffic falsified
+## D46: Two thresholds the traffic falsified
 
 **Decided, from the D45 replay.**
 
 Two numbers were wrong. Both were found by running traffic rather than by
-argument, which is the whole point of D45 — and both were wrong in the direction
+argument, which is the whole point of D45: and both were wrong in the direction
 the design says matters most: they manufactured friction for legitimate users.
 
 ### The `developing` ceiling was one rung too high
@@ -1021,7 +1021,7 @@ is now `OBSERVE`, and the absence of a cliff is asserted directly.
 
 Note what this does *not* weaken. A hard violation still reaches the decision
 layer on its own authority, so `fat-finger` being quiet does not make a forged API
-call quiet — the replay confirms that unchanged.
+call quiet, the replay confirms that unchanged.
 
 ### Scope entropy was normalised against the wrong denominator
 
@@ -1036,14 +1036,14 @@ same behavior, attention spread perfectly evenly
 ```
 
 So a small application could not reach the diversity threshold at all, no matter
-how its users behaved. HealthMe has two scopes, and its most honest persona —
-fourteen days of daily use — was scored monotonous for the lifetime of the run.
+how its users behaved. HealthMe has two scopes, and its most honest persona:
+fourteen days of daily use: was scored monotonous for the lifetime of the run.
 The consequence was not friction, since D37 only withholds escalation, but it was
 silent and wrong: the guard could never have escalated that entity later, however
 it behaved.
 
 Normalising against `log2(distinctScopes)` makes the feature mean *balance* rather
-than breadth, which is what the diversity check already wanted from it — breadth
+than breadth, which is what the diversity check already wanted from it, breadth
 is `distinctScopes`'s own job, and pairing the two is what makes the conjunction
 in `diversityConcurs()` meaningful instead of redundant.
 
@@ -1058,7 +1058,7 @@ synthetic run suggested it would be exactly the overreach D45 warns against.
 
 ---
 
-## D49 — D37 does not do what it claims
+## D49: D37 does not do what it claims
 
 **Decided, from the D47 traffic. This corrects a claim, not a number.**
 
@@ -1073,7 +1073,7 @@ The IXFE personas made it possible to test that, and it does not hold.
 
 Farming produces a **high** mean. A high mean proposes `ALLOW` or `OBSERVE`. A
 ceiling can only ever *lower* a decision. So for every farmed entity the gate is
-unobservable — and this is not a threshold being slightly off, it is a structural
+unobservable: and this is not a threshold being slightly off, it is a structural
 consequence of where the gate sits:
 
 ```
@@ -1096,8 +1096,8 @@ exactly as feared, with the D37 gate in place and irrelevant to it.
 
 ### Where the gate *is* observable, it inverts
 
-The gate only ever changes an outcome for `mean < 0.4` — an entity the model already
-distrusts — and there it withholds escalation *because* behavior was monotonous:
+The gate only ever changes an outcome for `mean < 0.4`, an entity the model already
+distrusts: and there it withholds escalation *because* behavior was monotonous:
 
 ```
 mean 0.10  monotonous -> INCREASE_FRICTION   diverse -> BLOCK
@@ -1105,21 +1105,21 @@ mean 0.30  monotonous -> INCREASE_FRICTION   diverse -> RESTRICT
 ```
 
 Read plainly: behaving mechanically earns a milder treatment than behaving variedly.
-For a deliberate bot that is backwards. The IXFE `credit-drainer` sits exactly here —
-authorised, machine-paced, spending real money on Google Places calls — and stops at
+For a deliberate bot that is backwards. The IXFE `credit-drainer` sits exactly here:
+authorised, machine-paced, spending real money on Google Places calls: and stops at
 `INCREASE_FRICTION` when varied behavior at the same mean would reach `RESTRICT`.
 
 ### Why the behavior is left alone anyway
 
-An attempt was made to make the gate directional — engage only when `mean >= 0.5`,
+An attempt was made to make the gate directional, engage only when `mean >= 0.5`,
 the farming side. It type-checks, it is arguably more honest, and it changes
 **nothing observable at all**, because that region proposes `ALLOW` or `OBSERVE`
 already. It was reverted: a rule with no effect is worse than no rule, since the next
 reader has to work out that it does nothing.
 
 More importantly, the same inversion that hurts the drainer *helps* the case the
-design says matters most. A broken-but-legitimate client — a cron with a stale token,
-retrying uniformly, failing every time — reaches `mean 0.003` with low variance, and
+design says matters most. A broken-but-legitimate client, a cron with a stale token,
+retrying uniformly, failing every time, reaches `mean 0.003` with low variance, and
 the gate is what keeps it at `INCREASE_FRICTION` instead of `BLOCK`. False positives
 are the central constraint, and that is a false positive avoided.
 
@@ -1135,17 +1135,17 @@ side from synthetic traffic, which is what D45 explicitly forbids.
   back into the documentation: one test fixes that the gate cannot affect a
   positive-dominant entity, another fixes that monotony earns the milder treatment
   where it can.
-- The real fix, whatever it is, has to act on **mass** rather than on the ceiling —
+- The real fix, whatever it is, has to act on **mass** rather than on the ceiling:
   which is what D4 argued against and D37 accepted. That tension is now on the table
   with evidence, instead of settled by assumption.
 
 ---
 
-# Part IV — Hard constraints
+# Part IV: Hard constraints
 
 Provable invariant violations: how they are declared, and why they stay outside the probabilistic model.
 
-## D13 — Hard constraints are violated invariants, in five classes
+## D13: Hard constraints are violated invariants, in five classes
 
 **Decided.**
 
@@ -1173,14 +1173,14 @@ application's declared invariants.
 ### This reframes what was asked
 
 The earlier question asked for an exhaustive list, on the assumption that hard
-constraints were a catalogue to be enumerated. They are not — they are classes of
+constraints were a catalogue to be enumerated. They are not: they are classes of
 invariant violation, and the specific invariants come from the host application
 under D16. So the list does not need to be complete before code can be written;
 the five classes need a representation, and each host supplies its own instances.
 
 That removes what was recorded as the blocker on the PoC.
 
-## D14 — "Hard" describes certainty, not severity
+## D14: "Hard" describes certainty, not severity
 
 **Decided.**
 
@@ -1206,7 +1206,7 @@ probabilistic. The cap does not apply because it has nothing to protect against.
 Bypassing the cap still does not mean escalating to `BLOCK`. The treatment
 remains policy.
 
-## D15 — Hard constraints stay outside the Beta model
+## D15: Hard constraints stay outside the Beta model
 
 **Decided.**
 
@@ -1225,7 +1225,7 @@ according to policy, while leaving the probabilistic trust state intact.
 
 A proof does not become more or less true by being averaged with a probability.
 Folding a violation into `beta` would convert certainty into evidence mass, and
-then decay it under D3 — a proven violation would fade at a half-life, which is
+then decay it under D3: a proven violation would fade at a half-life, which is
 incoherent. Keeping it separate means it neither decays nor dilutes.
 
 It also keeps the design honest about the D4 saturation problem: an entity with
@@ -1239,7 +1239,7 @@ The full function is the four-dimensional one above. The trust bands and the
 uncertainty cap still describe how the trust dimension is read; they are one
 input among four.
 
-## D16 — Invariants are declared, never learned
+## D16: Invariants are declared, never learned
 
 **Decided.**
 
@@ -1267,22 +1267,22 @@ A transition that is merely statistically unlikely is not impossible.
 
 ### What this commits the code to
 
-- The host declares an application model — at minimum a transition graph `G`
+- The host declares an application model, at minimum a transition graph `G`
   with an explicit allowed-edge set `T`.
 - The check is set membership, not scoring. It has no threshold and no
   calibration, which is what makes it free of false positives *given a correct
   declaration*.
-- An incomplete declaration produces false positives — a legitimate edge the host
+- An incomplete declaration produces false positives: a legitimate edge the host
   forgot to declare reads as provably impossible. So the declaration is safety
   critical, and the API must make partial declarations obviously partial rather
   than silently treating unlisted edges as forbidden. Settled in D32.
 - Constraint classes need a shared result type carrying which class fired, which
-  invariant, and what was observed — required for D23-style explainability, since
+  invariant, and what was observed, required for D23-style explainability, since
   a violation claim must be inspectable to be trustworthy.
 
 ---
 
-## D32 — Declaring `hard` is itself a claim of completeness
+## D32: Declaring `hard` is itself a claim of completeness
 
 **Decided.**
 
@@ -1338,7 +1338,7 @@ uncertain about navigation, and say so.
 It also makes the claim of completeness something the host asserts **knowingly**.
 D16 already recorded that the declaration is safety critical; this makes the
 assertion visible. A false positive from a `hard` declaration with a missing edge
-is then plainly the host's error, in a place the host explicitly signed for — not
+is then plainly the host's error, in a place the host explicitly signed for, not
 a mystery surfacing from SG's defaults.
 
 ### Generalisation beyond the transition graph
@@ -1346,7 +1346,7 @@ a mystery surfacing from SG's defaults.
 Strength is per constraint, not per model, so all five classes in D13 are declared
 with a strength rather than only the transition graph. `soft` gives a host that is
 unsure of completeness a way to contribute a real invariant without claiming
-certainty — they are not forced to choose between silence and overreach.
+certainty: they are not forced to choose between silence and overreach.
 
 ### As implemented
 
@@ -1355,7 +1355,7 @@ certainty — they are not forced to choose between silence and overreach.
 `checkInvariants(observation, scope, invariants)` consults only invariants
 declared for that scope and returns `{ declared, violations }`. The `declared`
 flag is what distinguishes *nothing was wrong* from *nobody claimed anything
-here* — collapsing those two would erase the open-world reading.
+here*: collapsing those two would erase the open-world reading.
 
 `transitionGraph()` requires `strength` explicitly rather than defaulting to
 `hard`, so a completeness claim cannot be made by omission.
@@ -1366,7 +1366,7 @@ failing it.
 
 ---
 
-## D38 — A violated `soft` invariant is strong negative trust evidence
+## D38: A violated `soft` invariant is strong negative trust evidence
 
 **Decided, extending D32.**
 
@@ -1381,7 +1381,7 @@ not make it *faint*. Weak weight is for signals SG inferred on its own; a human
 declaration carries more than that. The difference is four-fold, so it is recorded
 rather than left to a call site.
 
-**Which dimension?** `Trust`, as negative evidence — not `Anomaly`.
+**Which dimension?** `Trust`, as negative evidence, not `Anomaly`.
 
 In `pi(Trust, Anomaly, HardConstraints, Context)`, the `Anomaly` dimension is
 learned from observed behavior. A soft invariant is declared, so routing it
@@ -1411,13 +1411,13 @@ zero mass by construction, which is asserted directly in `constraints.test.ts`.
 
 ---
 
-## D41 — The constraint taxonomy is closed over proof sources, not attacks
+## D41: The constraint taxonomy is closed over proof sources, not attacks
 
 **Decided, closing D13.**
 
 D13 recorded five constraint classes and called them an initial set; the design
 notes called the list "a starting set, not exhaustive". Both left the enumeration
-open, and an open enumeration of *attack shapes* can never close — there is always
+open, and an open enumeration of *attack shapes* can never close: there is always
 another way to misuse an application.
 
 The taxonomy closes when the question changes. A host cannot declare an
@@ -1444,11 +1444,11 @@ the two files is now a definition rather than a judgement call.
 Both were missing rather than newly invented, and both come from the scraping
 experience in the design notes.
 
-- `IMPOSSIBLE_UNISSUED_REFERENCE` — a reference the system never issued. The notes
+- `IMPOSSIBLE_UNISSUED_REFERENCE`: a reference the system never issued. The notes
   describe *submitting a form without ever having loaded it, with no case ID known
   in advance*; D13's five classes could only express the ordering half of that, not
   the forged identifier itself.
-- `IMPOSSIBLE_EXCLUSIVE_STATE` — two facts that cannot both hold. Distinct from a
+- `IMPOSSIBLE_EXCLUSIVE_STATE`: two facts that cannot both hold. Distinct from a
   transition violation: nothing illegal was traversed, the claimed state is
   internally contradictory.
 
@@ -1460,7 +1460,7 @@ though SG's advice does not depend on the distinction.
 ### Consequence: advice may be declared per class
 
 D14 keeps treatment as policy, and a single `hardViolationDecision` implied SG had
-a view on which impossibilities are worse. It has none — all seven are equally
+a view on which impossibilities are worse. It has none: all seven are equally
 *proven*, and what a given violation should cost is a property of the host's flow.
 
 So `hardViolationDecision` accepts either one decision or a partial map keyed by
@@ -1478,11 +1478,11 @@ express it.
 
 ---
 
-# Part V — Anomaly model
+# Part V: Anomaly model
 
 Deliberately the least developed part of the design.
 
-## D18 — Anomaly: feature space first, algorithm later
+## D18: Anomaly: feature space first, algorithm later
 
 **Decided.**
 
@@ -1491,12 +1491,12 @@ The feature space is defined first. No ML algorithm is chosen for the PoC.
 This is the right order: the candidate methods recorded in the notes (density
 estimation, isolation forest, Gaussian mixture) all consume a feature vector, so
 none of them can be evaluated before the vector exists. Defining features is also
-independently useful — they are what symptom abstraction reduces.
+independently useful: they are what symptom abstraction reduces.
 
 Consequence for D6: whether an anomaly observation with no trust evidence counts
 as a meaningful update stays open until the feature space lands.
 
-## D36 — The anomaly feature space
+## D36: The anomaly feature space
 
 **Decided.**
 
@@ -1508,7 +1508,7 @@ SG needs to measure shape:
 ObservationTrace = { at: milliseconds, scope: string }
 ```
 
-No payload, no identity, no request content — consistent with D19 and with the
+No payload, no identity, no request content, consistent with D19 and with the
 principle that data stays where the decision happens.
 
 ### The features
@@ -1533,7 +1533,7 @@ randomness*. Checked against synthetic timing:
 | Flat `uniform(1.2, 2.3)s` | 0.16 - 0.18 |
 | Human bursts and pauses | 1.1 - 1.6 |
 
-A flat uniform delay — the exact pattern named in the notes — sits an order of
+A flat uniform delay: the exact pattern named in the notes: sits an order of
 magnitude below human traffic, because humans are bursty and `random.uniform` is
 not. The threshold is set at `0.25`, between the two.
 
@@ -1549,7 +1549,7 @@ scopeEntropy   >= 0.35
 interArrivalCv >= 0.25
 ```
 
-Below the observation minimum it returns `undefined` — too small to judge, which
+Below the observation minimum it returns `undefined`, too small to judge, which
 is not the same claim as monotonous.
 
 Verified: varied scopes with mechanical timing still fail. Varying *what* is
@@ -1574,7 +1574,7 @@ which is the correct direction to be wrong in.
 
 ---
 
-## D35 — An observation without evidence is not a meaningful update
+## D35: An observation without evidence is not a meaningful update
 
 **Decided.**
 
@@ -1587,7 +1587,7 @@ retention. Appending to the behavioral window does not count as meaningful eithe
 ### Why
 
 If mere observation refreshed the retention horizon, an attacker could keep state
-alive indefinitely with traffic carrying no evidence at all — which is precisely
+alive indefinitely with traffic carrying no evidence at all, which is precisely
 what D6 set out to prevent by measuring from meaningful updates rather than
 sighting. Behavioral features are derived data; they do not earn their own
 retention.
@@ -1597,7 +1597,7 @@ evidence for seven days is expired, and its behavioral window goes with it.
 
 ---
 
-## D42 — The weak-signal catalogue, with no thresholds in it
+## D42: The weak-signal catalogue, with no thresholds in it
 
 **Decided, answering the second open item from the design notes.**
 
@@ -1620,15 +1620,15 @@ would make them triggers.
 
 ### Cap: the whole catalogue is worth one weak observation
 
-`signalMass()` sums the observed signals — summed rather than averaged, since a
-second signal must not weaken the first — and caps the total at one weak
+`signalMass()` sums the observed signals, summed rather than averaged, since a
+second signal must not weaken the first, and caps the total at one weak
 observation's mass (`0.5`).
 
 The cap makes "never a standalone trigger" numeric rather than aspirational. With
 the prior at `n = 2` and `developingAt` at `3` (D40), an interaction tripping
 *every* signal in the catalogue still leaves the entity in the `unknown` stage,
 where the trust dimension asks for nothing at all. Escalation therefore requires
-accumulation across interactions — which is the "meaningful in combination" the
+accumulation across interactions: which is the "meaningful in combination" the
 notes ask for, read as combination over time rather than within one
 well-instrumented request.
 
@@ -1638,7 +1638,7 @@ interaction than it was when these numbers were reasoned about.
 ### No thresholds in the catalogue
 
 Every entry names *what is measured* and never *when it fires*: "gaps too evenly
-distributed", not "CV below 0.25". Design notes §7 is explicit — the library is
+distributed", not "CV below 0.25". Design notes §7 is explicit: the library is
 open source, so publishing `flag if interval < 220ms` hands an attacker the exact
 number to route around. Where a threshold is unavoidable it lives in
 `DEFAULT_DIVERSITY` (D36) as policy an adopter is expected to change, not as a
@@ -1649,8 +1649,8 @@ unit fails the suite.
 
 ### Bounded the same way D41 is
 
-Signals are enumerated over what SG can *observe* — `timing`, `repetition`,
-`interaction`, `sequence`, `target`, `environment` — the dual of D41's proof
+Signals are enumerated over what SG can *observe*: `timing`, `repetition`,
+`interaction`, `sequence`, `target`, `environment`, the dual of D41's proof
 sources. A signal SG cannot observe is not a signal it can carry, and the test
 suite fails if a declared source has no signal under it.
 
@@ -1659,7 +1659,7 @@ triggering it. That is not documentation courtesy. False positives are the centr
 constraint (design notes §6), and a signal whose innocent cause cannot be written
 down is not understood well enough to weigh.
 
-Three entries are marked `computed` — the ones D36 already derives. The rest
+Three entries are marked `computed`, the ones D36 already derives. The rest
 describe what a host must supply, and exist so that "known weak signals" is a
 written list rather than folklore.
 
@@ -1672,11 +1672,11 @@ tokens.
 
 ---
 
-# Part VI — Architecture and API
+# Part VI: Architecture and API
 
 Package shape, storage, time, and the surface a developer actually calls.
 
-## D7 — One package, multiple entry points
+## D7: One package, multiple entry points
 
 **Decided.**
 
@@ -1702,7 +1702,7 @@ src/index.ts   core surface
 - A single `package.json` and one version number, so collector and core cannot
   be installed at mismatched versions.
 
-## D8 — Pluggable `StateStore`, in-memory default, async
+## D8: Pluggable `StateStore`, in-memory default, async
 
 **Decided.**
 
@@ -1714,7 +1714,7 @@ mode         async
 
 ### What this commits the code to
 
-- The interface stays small — read, write, delete for one entity key. D1 made the
+- The interface stays small, read, write, delete for one entity key. D1 made the
   key an opaque string, so no query surface is needed.
 - Async from the start, which suits the lazy decay of D3 and the lazy expiry of
   D6: both are computed on read, so the read path is where the work happens
@@ -1752,12 +1752,12 @@ is shown to catch the failure rather than merely to describe it.
 object, so a caller could mutate trust state without going through `set`, making
 every write path a lie about what is held. Now frozen on write.
 
-That is the argument for shipping the kit — the reference store had the defect, and
+That is the argument for shipping the kit: the reference store had the defect, and
 prose describing the contract would not have found it.
 
 ---
 
-## D44 — A durable store ships, on `node:sqlite`
+## D44: A durable store ships, on `node:sqlite`
 
 **Decided, extending D8.**
 
@@ -1765,7 +1765,7 @@ D8 shipped an interface and one in-memory implementation, and called the missing
 durable store an upgrade path. That left a claim overstated: D20 says a serverless
 guard is fully functional, which was true of the decision path and false of its
 memory. A process-local store means every restart is a cold start, so an entity's
-accumulated trust is discarded without anything reporting it — the failure is
+accumulated trust is discarded without anything reporting it: the failure is
 silent, which is the worst shape for it to have.
 
 `sqliteStore()` ships as the durable counterpart, at the `./sqlite` entry point.
@@ -1774,7 +1774,7 @@ silent, which is the worst shape for it to have.
 
 `node:sqlite` is in the standard library, so durability costs an adopter no
 dependency and no infrastructure. A Redis store would need both, and would still be
-written against the same three methods — so it remains an adopter's choice rather
+written against the same three methods: so it remains an adopter's choice rather
 than a gap in the library.
 
 The limit is stated rather than papered over: SQLite is one file on one filesystem,
@@ -1785,14 +1785,14 @@ one.
 ### It stays out of `src/core/`
 
 Separate entry point, not part of the core, because D12 keeps `src/core/` free of
-platform APIs — the same model has to run in a browser. `memoryStore()` remains the
+platform APIs: the same model has to run in a browser. `memoryStore()` remains the
 default for the same reason: it needs no filesystem and runs anywhere the core does.
 
 ### State is one JSON column
 
 Not normalised into typed columns. The observation window (D36) is a
 variable-length array, the trust fields are floats whose exact values matter, and
-D1 makes the entity key opaque — so there is nothing to query by, and normalising
+D1 makes the entity key opaque, so there is nothing to query by, and normalising
 would buy queryability nothing needs while adding two ways to lose precision.
 
 Sweeping filters through `isExpired()` rather than through a `WHERE` clause on the
@@ -1803,13 +1803,13 @@ and the shared function decides.
 ### As implemented
 
 `src/store/sqlite.ts`, exported as `./sqlite`. It passes the same
-`checkStoreConformance()` kit as the in-memory store — the kit's purpose, finally
-exercised by a second implementation — and `sqlite.test.ts` asserts that trust
+`checkStoreConformance()` kit as the in-memory store, the kit's purpose, finally
+exercised by a second implementation, and `sqlite.test.ts` asserts that trust
 survives closing and reopening the file, which is the one thing the memory store
 provably cannot do. The table name is validated before interpolation, since
 `node:sqlite` binds values but not identifiers.
 
-## D9 — `guard.evaluate({ entity, observation, context })`
+## D9: `guard.evaluate({ entity, observation, context })`
 
 **Decided.**
 
@@ -1827,7 +1827,7 @@ formal model with the names filled in.
 
 ### What this commits the code to
 
-- One options object, not positional arguments — the three parts are named the
+- One options object, not positional arguments: the three parts are named the
   same as the model, so the API teaches the model.
 - `context` carries endpoint sensitivity, per D2, since it is not part of the
   state key.
@@ -1836,13 +1836,13 @@ formal model with the names filled in.
   see question 23 on explain mode.
 - Adapters live outside the core and depend on it in one direction only.
 
-## D10 — All public evaluation and storage APIs are async
+## D10: All public evaluation and storage APIs are async
 
 **Decided.**
 
 Follows from D8. `evaluate()` returns a promise, and so does every store method.
 
-## D11 — Time is injected through a `Clock` interface
+## D11: Time is injected through a `Clock` interface
 
 **Decided.**
 
@@ -1855,7 +1855,7 @@ Required by D3 and D6, both of which are functions of real elapsed time. With an
 injected clock, half-life decay and the 7-day retention horizon are testable
 deterministically instead of by waiting.
 
-## D12 — Core is framework-agnostic
+## D12: Core is framework-agnostic
 
 **Decided.**
 
@@ -1865,7 +1865,7 @@ once the core is stable.
 Consistent with D9: middleware is an adapter, so no framework type may appear in
 core signatures.
 
-## D20 — A serverless guard is fully functional
+## D20: A serverless guard is fully functional
 
 **Decided.**
 
@@ -1875,11 +1875,11 @@ With D17, the PoC has no network surface at all.
 
 ---
 
-# Part VII — Protocol and privacy
+# Part VII: Protocol and privacy
 
 What may leave the local instance, and what must never be required to.
 
-## D17 — No API key in the local core
+## D17: No API key in the local core
 
 **Decided.**
 
@@ -1887,9 +1887,9 @@ Not required by the local core. Reserved for future remote services and
 prescription fetching.
 
 Corrects the README, which currently says the library is "accessed via an API
-key" — accurate for the eventual prescription client, wrong for the PoC.
+key", accurate for the eventual prescription client, wrong for the PoC.
 
-## D19 — Symptoms are local-first, never per request
+## D19: Symptoms are local-first, never per request
 
 **Decided.**
 
@@ -1902,7 +1902,7 @@ payloads are abstract.
 
 ---
 
-## D43 — The symptom vocabulary is two tiers, split by rate of change
+## D43: The symptom vocabulary is two tiers, split by rate of change
 
 **Decided, closing the vocabulary item the design notes flagged as the reason for
 the whole discussion.**
@@ -1917,10 +1917,10 @@ shape.
 The vocabulary is split by **rate of change**, which is the only axis that
 dissolves it:
 
-- **Category** — a small set of principle-level classes, expected never to grow. A
+- **Category**: a small set of principle-level classes, expected never to grow. A
   server that understands only categories understands every message any version
   will ever send.
-- **Detail** — the specific pattern within a category, free to grow release to
+- **Detail**: the specific pattern within a category, free to grow release to
   release. An unrecognised detail **degrades to its category** rather than failing.
 
 ### The category tier claims exhaustiveness, and earns it
@@ -1930,7 +1930,7 @@ Six categories: `SYM_TIMING`, `SYM_REPETITION`, `SYM_INTERACTION`, `SYM_SEQUENCE
 
 These are not chosen by taste. The first five are the observable dimensions
 enumerated in D42; the sixth carries proven violations, kept separate so a receiver
-never has to infer certainty from a token's name — the same hard/weak split D13 and
+never has to infer certainty from a token's name, the same hard/weak split D13 and
 D18 draw locally, preserved on the wire.
 
 So the tier is exhaustive for the same reason D41's taxonomy is: it enumerates over
@@ -1939,15 +1939,15 @@ what the guard can know, not over what an attacker might do.
 ### The category travels with the detail
 
 A report carries both. Deriving the category from the detail would defeat the
-entire split — a receiver too old to recognise a detail cannot look up what it does
+entire split: a receiver too old to recognise a detail cannot look up what it does
 not have. `readSymptom()` accepts an unknown detail and falls back to the stated
 category; an unknown *category* is rejected, because nothing remains to fall back
 to.
 
 ### `SYM_UNKNOWN_PATTERN` is demoted
 
-It was a peer of the others in the flat v1 list. It is not a principle-level class
-— being unable to name something is an admission, and making it a category would
+It was a peer of the others in the flat v1 list. It is not a principle-level class:
+being unable to name something is an admission, and making it a category would
 freeze "we don't know" into the stable tier permanently. Inability to name a
 pattern is expressed as a category with no recognised detail, which is what an
 unrecognised detail already degrades to.
@@ -1955,8 +1955,8 @@ unrecognised detail already degrades to.
 ### Symptoms stay shapes, never values
 
 `SYM_REQUEST_BURST` says volume arrived compressed in time. It carries no count, no
-interval, no endpoint. That is the privacy claim of the whole symptom model — the
-server learns that a shape recurred, not what produced it — and it is asserted:
+interval, no endpoint. That is the privacy claim of the whole symptom model, the
+server learns that a shape recurred, not what produced it: and it is asserted:
 `symptoms.test.ts` fails if any token contains a digit.
 
 ### Still not exported, and still not final
@@ -1964,17 +1964,17 @@ server learns that a shape recurred, not what produced it — and it is asserted
 The vocabulary remains internal. D17 removed the API key and D20 makes a serverless
 guard fully functional, so nothing transmits; an exported vocabulary with no
 transmitter invites use it has no semantics for. What is settled here is the
-**structure** — the wire format and the final detail list are owed to
+**structure**: the wire format and the final detail list are owed to
 `scorpio-guard-protocol`, which now has a shape to specify rather than a blank
 page.
 
 ### As implemented
 
 `src/core/symptoms.ts`: `SYMPTOM_CATEGORIES`, `SYMPTOM_DETAILS`, `reportSymptom()`,
-`readSymptom()`. `SYMPTOM_SCHEMA_VERSION` now versions the detail tier only — a
+`readSymptom()`. `SYMPTOM_SCHEMA_VERSION` now versions the detail tier only: a
 change to the category tier would be a new major and a new document, not a bump.
 
-## D21 — Cold start, restated
+## D21: Cold start, restated
 
 **Decided, consistent with the earlier D21 entry above.**
 
@@ -1987,7 +1987,7 @@ root of trust     -> outside SG
 SG does not solve root of trust. Stated as an open problem rather than an implied
 guarantee.
 
-## D22 — Purge primitive from the start; consent belongs to the host
+## D22: Purge primitive from the start; consent belongs to the host
 
 **Decided.**
 
@@ -1997,7 +1997,7 @@ the host application's responsibility.
 Consistent with D6: expiry and manual purge are one code path with the retention
 horizon forced to zero.
 
-## D23 — Decision trace is mandatory
+## D23: Decision trace is mandatory
 
 **Decided.**
 
@@ -2013,11 +2013,11 @@ later.
 - The trace is the honest counterweight to the four-dimensional `pi` of D15: with
   independent dimensions feeding one treatment, an unexplained output cannot be
   debugged by the adopter.
-- It also addresses the open-core risk recorded in the site copy — "blurred
-  debugging responsibility" — by making it visible whether a decision came from
+- It also addresses the open-core risk recorded in the site copy: "blurred
+  debugging responsibility", by making it visible whether a decision came from
   local computation or from a prescription.
 
-## D31 — `Relationship : E x E -> R` is deferred out of the PoC
+## D31: `Relationship : E x E -> R` is deferred out of the PoC
 
 **Decided: deferred.**
 
@@ -2026,8 +2026,8 @@ withheld from the formal model and excluded from the proof of concept.
 
 ### Why deferral is the right answer rather than a definition
 
-Three readings are plausible — behavioral correlation, shared origin, coordination
-graph — and they are not variations on one feature. They differ in what SG would
+Three readings are plausible, behavioral correlation, shared origin, coordination
+graph: and they are not variations on one feature. They differ in what SG would
 have to store, and one of them breaks a decision already made:
 
 | Reading | Storage consequence |
@@ -2046,7 +2046,7 @@ not yet.
 
 ### Noted for when it returns
 
-The coordination reading is where the value likely sits — it is the natural answer
+The coordination reading is where the value likely sits: it is the natural answer
 to sybil churn, which D21 records as unresolved. It is also where the privacy cost
 is highest, since relating entities to one another is exactly the profiling D19
 and the non-goals rule out. That tension is the real decision, and it deserves to
@@ -2056,16 +2056,16 @@ be made deliberately rather than absorbed into a signature.
 
 ---
 
-# Part VIII — Project and tooling
+# Part VIII: Project and tooling
 
 Licence, packaging, toolchain, and where the proof of concept has to run.
 
-## D24 — Licence: MIT
+## D24: Licence: MIT
 
 **Decided.** Matches the current `package.json`. A `LICENSE` file is still
 missing and needs adding.
 
-## D25 — npm: `@fachryxyf/scorpio-guard`
+## D25: npm: `@fachryxyf/scorpio-guard`
 
 **Decided.** Scoped. Publish after the PoC API is stable, so `private: true`
 stays in `package.json` until then.
@@ -2080,27 +2080,27 @@ The reasoning: `files` ships `dist` only, and `dist` is git-ignored, so a git
 install without a build hook resolves `exports` to files that do not exist. An
 adopter would see a module-not-found error and no explanation. `prepare` runs on
 install from git and before publish, and is skipped for a consumer installing from
-the registry later — one line covers both eras.
+the registry later, one line covers both eras.
 
 Naming it scoped now rather than at publish time means the import path in every
 example, the README, and the site is the path that will keep working, instead of a
 bare `scorpio-guard` that silently becomes wrong on the day it is published.
 
-## D26 — Node floor: `>=22.6`
+## D26: Node floor: `>=22.6`
 
 **Decided.** Keeps tests running TypeScript directly with no build step and no
 extra dependency.
 
-## D27 — CI now: typecheck and test
+## D27: CI now: typecheck and test
 
 **Decided.** One GitHub Actions workflow.
 
-## D28 — Site stays where it is
+## D28: Site stays where it is
 
 **Decided.** `index.html` and `404.html` remain at the repository root. Migration
 to `docs/` later if needed.
 
-## D28.1 — The site indexes the record; it does not restate it
+## D28.1: The site indexes the record; it does not restate it
 
 **Decided.** `index.html` carries a glossary and a decision index. Neither
 duplicates the reasoning here: the glossary defines terms used in a narrower sense
@@ -2108,7 +2108,7 @@ than ordinary English, and the index maps each entry to the file it turned into.
 
 The reasoning: forty-odd entries is past what anyone reads front to back, and the
 alternative to an index is prose repeated in two places that drift apart. The
-failure mode is already visible in this repository's own history — the site claimed
+failure mode is already visible in this repository's own history: the site claimed
 no proof-of-concept code existed for several commits after it did.
 
 So the site links into the record by anchor rather than paraphrasing it, and the
@@ -2119,13 +2119,13 @@ Sidebar filtering is substring matching over link text already in the DOM. Both
 languages are present, so a query in either finds the section. No search index,
 because there is one page.
 
-## D29 — No empty repositories
+## D29: No empty repositories
 
 **Decided.** `scorpio-guard-protocol` and `scorpio-guard-server` are not created
 until they have real content and lifecycle. `REPOSITORIES.md` holds the plan
 meanwhile.
 
-## D34 — PoC target: HealthMe, with its limits stated
+## D34: PoC target: HealthMe, with its limits stated
 
 **Decided, and narrowed after the first replay.**
 
@@ -2134,9 +2134,9 @@ health PWA, before any greenfield fixture.
 
 > **What this target can and cannot settle.** HealthMe validates that the library
 > works against a real flow, and it did find a real defect. Its *production*
-> traffic — one user — cannot validate the thesis: there is no sustained abuse for
+> traffic, one user, cannot validate the thesis: there is no sustained abuse for
 > asymmetric cost to act against. Recorded here rather than discovered later by an
-> adopter — see *What the replay could not reach* below.
+> adopter: see *What the replay could not reach* below.
 >
 > **Narrowed again by D45.** "One user" is a fact about the traffic, not about the
 > flow. The flow is declared and drivable, so the statistical layer is now exercised
@@ -2147,7 +2147,7 @@ health PWA, before any greenfield fixture.
 > **Superseded as the primary target by D47.** The deeper problem was never volume:
 > nothing behind a personal PIN screen is worth an attacker's time, so the adversary
 > had to be invented. IXFE has paid compute behind a public endpoint. HealthMe is kept
-> as the small-application regression — two scopes, one user — which is the case that
+> as the small-application regression, two scopes, one user, which is the case that
 > caught the D46 entropy bug.
 
 ### Why it fits the D30 requirements
@@ -2166,7 +2166,7 @@ That last row is what makes it the right target rather than merely an available
 one. The existing protections are exactly the pattern SG argues against, written
 before SG existed:
 
-- 3-strike lockout with a 5-minute penalty, stored in `localStorage` — client
+- 3-strike lockout with a 5-minute penalty, stored in `localStorage`, client
   state an attacker controls, and a hard binary with no notion of how much
   evidence there was.
 - IP rate limiting at 10 requests/hour in a `Map` that resets whenever the lambda
@@ -2180,12 +2180,12 @@ developer actually ships under time pressure, which is the population SG is for.
 
 Declarable with confidence, and therefore `hard`:
 
-- Unlock attempted with no prior lock screen render — an impossible segment jump.
-- Vault content requested while the state is locked — an impossible action
+- Unlock attempted with no prior lock screen render, an impossible segment jump.
+- Vault content requested while the state is locked, an impossible action
   prerequisite.
-- `api/chat.js` called before any unlock in that session — impossible temporal
+- `api/chat.js` called before any unlock in that session, impossible temporal
   order.
-- A form field populated with no corresponding interaction — the impossible idle
+- A form field populated with no corresponding interaction, the impossible idle
   action already named in the design notes.
 
 Scoped narrowly on purpose, per D32: the unlock flow is small enough to enumerate
@@ -2200,7 +2200,7 @@ Stated plainly, because the temptation is to overclaim:
   and cannot validate D37 farming against a real adversary. It can show that a
   legitimate user is never given friction, which is the claim most at risk.
 - **No server component.** Consistent with D20, and it leaves the protocol
-  untested — correctly, since D29 says those repositories do not exist yet.
+  untested, correctly, since D29 says those repositories do not exist yet.
 - **Thresholds stay provisional.** One application's rhythm is not a calibration
   set. Every number in D36 remains a guess afterwards, just a less blind one.
 
@@ -2225,8 +2225,8 @@ disagreements, which is what the exercise was for:
 | 20 scripted attempts | rejects, counter resets on cold start | `INCREASE_FRICTION`, `established` |
 
 The forged API call is the substantive finding: it satisfies HealthMe's origin
-check and its IP limit, while `apiRequiresUnlock` sees that `js/core.js` — the
-only caller — could not have been loaded. The three-mistyped-PIN row is the
+check and its IP limit, while `apiRequiresUnlock` sees that `js/core.js`, the
+only caller: could not have been loaded. The three-mistyped-PIN row is the
 converse: a 3-strike rule charges a real user five minutes where `n = 3.5` reads
 as *developing*, which is not enough evidence to act on.
 
@@ -2239,7 +2239,7 @@ observation was advised friction or worse.
 notes listing "form field filled with zero interaction" as a hard constraint.
 Assistive technology, password managers and paste all produce a populated field
 with few or no interaction events. Under D32 a `hard` declaration asserts
-completeness, and that is a claim this scope cannot honestly make — so it
+completeness, and that is a claim this scope cannot honestly make, so it
 contributes evidence instead of proof.
 
 Navigation inside the unlocked app is not declared at all. It is too large to
@@ -2251,7 +2251,7 @@ guess.
 The honest accounting, since the replay result reads better than it is:
 
 - **The finding came from the least novel layer.** `apiRequiresUnlock` is set
-  membership — one `if` statement, and any competent developer would write it
+  membership, one `if` statement, and any competent developer would write it
   unaided. It is a good demonstration that declared invariants are worth having,
   and no evidence at all for the probabilistic model.
 - **The novel parts were never exercised.** Beta trust (D2a), half-life decay
@@ -2272,7 +2272,7 @@ fixing regardless of SG.
 **Three of those four are now reached, by D45.** Generated personas drive Beta
 trust to `established`, exercise decay across fourteen simulated days, move the
 epistemic stage through all three values, and put the diversity signal on both
-sides of its threshold — including the farming pattern D37 exists for, which turns
+sides of its threshold, including the farming pattern D37 exists for, which turns
 out to be testable synthetically after all: the objection above was that a
 synthetic adversary shares the guard's assumptions, and that is true of *whether
 farming is realistic* but not of *whether the mechanism engages when it happens*.
@@ -2283,15 +2283,15 @@ The fourth is unchanged: nothing here calibrates a threshold.
 Unauthenticated public traffic, data worth scraping, a public search or lookup
 endpoint whose legitimate order can be declared, and ideally a history of real
 automation against it. That profile matches the author's own scraping experience
-recorded in the design notes — *submitting a form without ever having loaded it,
-with no case ID known in advance* — which is a public lookup system, not a
+recorded in the design notes: *submitting a form without ever having loaded it,
+with no case ID known in advance*, which is a public lookup system, not a
 PIN-gated personal app.
 
 Candidate under consideration: **Pusaka** (`github.com/Fachryxyf/pusaka`), a public
 catalogue of Indonesian data APIs. It has unauthenticated traffic, a public search
 over 215,373 school records, and a declarable endpoint-selection rule. Its own
-`SPEC.md` already states the obligation — *don't hammer other people's APIs on
-every render* — which reframes the guard usefully: the party needing protection is
+`SPEC.md` already states the obligation: *don't hammer other people's APIs on
+every render*, which reframes the guard usefully: the party needing protection is
 the **upstream API**, not the site.
 
 Blocked on an architectural fact rather than on effort: Pusaka is `output:
@@ -2301,7 +2301,7 @@ closed. Whether to open it is a decision about Pusaka, not about SG.
 
 ---
 
-## D30 — PoC must run against a real application flow
+## D30: PoC must run against a real application flow
 
 **Decided.**
 
@@ -2320,7 +2320,7 @@ invariants it supplies, and what it explicitly cannot validate.
 
 ---
 
-## D45 — Generate the traffic; do not wait for it
+## D45: Generate the traffic; do not wait for it
 
 **Decided, resolving the sequencing deadlock in D34.**
 
@@ -2338,7 +2338,7 @@ real application supplied, in `examples/healthme/personas.ts`.
 ### What this can and cannot establish
 
 It **can falsify**, which is the point. If a persona built from HealthMe's own
-honest usage gets escalated, a threshold is wrong — and that finding does not
+honest usage gets escalated, a threshold is wrong: and that finding does not
 depend on where the traffic came from. Same in reverse for an adversary that walks
 through untouched. D46 records two numbers this immediately falsified.
 
@@ -2350,7 +2350,7 @@ reason to do nothing.
 
 ### The personas, and why each exists
 
-Legitimate — escalating any of these is a false positive, the central constraint:
+Legitimate, escalating any of these is a false positive, the central constraint:
 
 | Persona | Why it is here |
 |---|---|
@@ -2360,13 +2360,13 @@ Legitimate — escalating any of these is a false positive, the central constrai
 | `session-restore` | HealthMe's own `sessionStorage` unlock, repeated |
 | `power-user` | heavy honest use, past HealthMe's 10/hour IP limit |
 
-Adversaries — walking through untouched is the finding:
+Adversaries: walking through untouched is the finding:
 
 | Persona | Why it is here |
 |---|---|
 | `forged-api-call` | the real defect D34 found: HealthMe allows it |
 | `scripted-brute-force` | fixed sleep, clearing `localStorage` to reset the lockout |
-| `jittered-brute-force` | the same with `uniform(1.2s, 2.3s)` — the exact distribution the design notes name as the tell |
+| `jittered-brute-force` | the same with `uniform(1.2s, 2.3s)`, the exact distribution the design notes name as the tell |
 | `slow-poisoner` | earns trust for ten days, then drains the paid endpoint |
 | `churningBruteForce` | a fresh identity every few attempts |
 
@@ -2377,7 +2377,7 @@ at the same step. The notes' claim that the tell is the shape of the randomness
 rather than the delay survives contact with its own counterexample.
 
 **Churn works, and the floor is two requests.** With three attempts per identity,
-every identity is felt. With **one** attempt per identity, none ever is — nothing
+every identity is felt. With **one** attempt per identity, none ever is, nothing
 accumulates because nothing is asked twice. No amount of trust modelling fixes
 that: it is the root-of-trust problem (D1.1), and it belongs to the host. Recorded
 as a number rather than argued away.
@@ -2389,34 +2389,34 @@ small relative to the traffic that paid for it, and the bound is now asserted.
 
 ### As implemented
 
-`examples/harness/` holds the application-independent parts — a persona is a sequence
+`examples/harness/` holds the application-independent parts: a persona is a sequence
 of interactions with the gaps between them, and the replay drives one through a guard.
 Targets supply their own invariants and personas: `examples/ixfe/` and
 `examples/healthme/`. Asserted in each target's `replay.test.ts`, readable as tables
 via `npm run replay`.
 
-The two claims that must not regress — no legitimate persona feels anything, no
-adversary walks through — are tests. The rest is output meant to be read, because a
+The two claims that must not regress, no legitimate persona feels anything, no
+adversary walks through: are tests. The rest is output meant to be read, because a
 threshold gets argued about from numbers and not from prose.
 
 Deliberately outside `src/`: this generates *test* traffic. Shipping it in the library
 would put a traffic generator in an adopter's bundle, and blur the line the design
-rests on — SG observes, it never produces.
+rests on: SG observes, it never produces.
 
 ---
 
-## D47 — Primary target: IXFE, because it has something to steal
+## D47: Primary target: IXFE, because it has something to steal
 
 **Decided, superseding D34 as the primary target.**
 
 HealthMe was chosen because it was real and available. It is a PIN-gated personal
 health app with one user, and the honest reason it cannot validate the thesis is not
-the traffic volume — it is that **nothing behind the PIN is worth an attacker's
+the traffic volume: it is that **nothing behind the PIN is worth an attacker's
 time**. An adversary needs a motive, and HealthMe supplies none.
 
 IXFE (`ixfe.pro`) does. It is a competitor-intelligence platform: three deployables,
 a public pre-launch funnel with no authentication in front of it, and a credit ledger
-where a single request spends money — `marketplace_global` costs 12 credits and makes
+where a single request spends money: `marketplace_global` costs 12 credits and makes
 one Google Places call per market, billed to the operator whether or not the caller
 was legitimate.
 
@@ -2433,7 +2433,7 @@ was legitimate.
 
 This is what makes IXFE a better target than a hypothetical one. Every mitigation in
 `landing-service/` and `server/index.js` records an attack its author expected, so the
-adversary personas are not invented — they are read off:
+adversary personas are not invented: they are read off:
 
 | IXFE defence | Persona it names |
 |---|---|
@@ -2445,11 +2445,11 @@ adversary personas are not invented — they are read off:
 | 410 after launch | `post-launch-replayer` |
 | `provisionPending()` granting zero credits | `pending-freeloader` |
 | `CF-Connecting-IP` rate limiting | `rotating-shooter` |
-| *(none — every request is authorised)* | `credit-drainer` |
+| *(none: every request is authorised)* | `credit-drainer` |
 
 That last row is the point of the whole exercise. The `credit-drainer` breaks no
 invariant, holds a valid session, and every request is correctly authorised. It has to
-be caught by the statistical layer or not at all — and it is what the model was built
+be caught by the statistical layer or not at all: and it is what the model was built
 for, finally represented by something with money attached.
 
 ### All six proof sources, which HealthMe could not reach
@@ -2474,7 +2474,7 @@ argument being exercised rather than asserted.
 ### What IXFE adds that HealthMe could not show
 
 **A 404 is not a memory.** IXFE already answers correctly at every one of these
-endpoints — 410, 403, 404, silent absorption. What it does not do is *remember*: the
+endpoints: 410, 403, 404, silent absorption. What it does not do is *remember*: the
 `webhook-forger` can guess `external_id` forever, and each refusal is a discarded log
 line. The guard turns each refusal into accumulating evidence about the caller, which
 is the argument for the library stated in a place where it is checkable.
@@ -2482,18 +2482,18 @@ is the argument for the library stated in a place where it is checkable.
 **Silent absorption costs the defender.** IXFE answers `{ slot: 0 }` to a bot so it
 cannot tell it failed. Good for confusing the bot, and it leaves IXFE with no record
 of who did it. The missing `dwell` is a *proof*, so SG reaches `RESTRICT` on request
-one — no history required.
+one, no history required.
 
 **Proof beats churn.** D45 measured that rotating identities defeats accumulated
 evidence below two requests per identity. Against IXFE that floor disappears wherever
 the violation is provable: `rotating-shooter` at one request per identity is still
 caught, because a proof needs no history. That is a concrete answer to the churn
-problem for the subset of cases a host can declare — and it says nothing about the
+problem for the subset of cases a host can declare, and it says nothing about the
 rest, which stays open.
 
 ### HealthMe is kept
 
-Not deleted, demoted — and for a reason found the hard way. HealthMe is the
+Not deleted, demoted: and for a reason found the hard way. HealthMe is the
 *small-application* case: two scopes, one user. That is what caught the entropy
 denominator in D46, because a two-scope application could not reach the diversity
 threshold at all. A harness that only ran against a five-scope surface would not have
@@ -2503,23 +2503,23 @@ found it, so HealthMe stays as the small-surface regression.
 
 IXFE traffic is still **generated**, so D45's limit applies exactly as before: this
 falsifies, it does not calibrate. IXFE has real users and real logs, and using those
-would be a different and better exercise — recorded as the next step rather than
+would be a different and better exercise, recorded as the next step rather than
 claimed here.
 
 ---
 
-## D48 — A stale client view is not a proof
+## D48: A stale client view is not a proof
 
 **Decided, from the first IXFE run.**
 
 The first draft of `workRequiresCredits` was declared `hard`: paid work requires a
 balance that covers it, and `requireCredits()` already returns 402. The traffic
-immediately produced a false positive — `ran-out-of-credits`, a paying customer who
+immediately produced a false positive, `ran-out-of-credits`, a paying customer who
 hits a zero balance, is refused once, and tops up. `RESTRICT` on request three.
 
 D32 is what was violated. Declaring `hard` asserts **completeness** over the scope:
 that no legitimate client ever asks for work it cannot afford. That claim is false,
-and not marginally so — the client's view of its own balance is stale *by
+and not marginally so: the client's view of its own balance is stale *by
 construction*:
 
 - jobs are queued and billed asynchronously, so the balance moves after the response;
@@ -2528,7 +2528,7 @@ construction*:
 
 So one refused request is how a person discovers their balance. A hundred is a script.
 That is exactly the shape of evidence rather than proof, and `soft` is the honest
-declaration — it contributes strong negative mass (D38) and lets the accumulation
+declaration: it contributes strong negative mass (D38) and lets the accumulation
 decide.
 
 ### The general lesson, which is the reason this is recorded
@@ -2536,19 +2536,19 @@ decide.
 *Being enforced by the server does not make something provable.* `requireCredits()`
 returning 402 proves the server refused; it does not prove the caller was
 illegitimate. The two get conflated because both produce an error response, and D14
-already separates them — certainty is not severity — but nothing had connected that to
+already separates them: certainty is not severity: but nothing had connected that to
 `strength` until traffic forced it.
 
 The counterexample in the same file is `workRequiresActiveSubscription`, which stays
 `hard`: `provisionPending()` writes zero credits, so a pending subscription holding a
 balance means something is genuinely wrong. Worth naming that a violation there proves
-*something* is wrong and not necessarily that the **caller** did it — an internal
+*something* is wrong and not necessarily that the **caller** did it, an internal
 accounting bug looks identical. `RESTRICT` is right either way, since withholding paid
 compute until a human looks is correct whichever cause it turns out to be.
 
 ---
 
-## D58 — The site is generated from the library, not hand-copied from it
+## D58: The site is generated from the library, not hand-copied from it
 
 **Decided.** The old front page was 2,600 lines of hand-written HTML carrying numbers
 copied out of the code. Every one of those was a slow-motion lie: the threshold moves
@@ -2557,7 +2557,7 @@ and the page does not.
 The fix is structural rather than cosmetic:
 
 - `scripts/research.mjs` imports the library directly and emits every figure the
-  site publishes — decay curves, mass ceilings, farming tables, persona replays,
+  site publishes, decay curves, mass ceilings, farming tables, persona replays,
   identity-churn counts, live-run summaries. A threshold change either appears on the
   page or breaks the build.
 - `site/` generates eight chapters from that data at build time (`npm run site`).
@@ -2574,12 +2574,12 @@ The fix is structural rather than cosmetic:
 
 ---
 
-## D59 — Published, and running in production as an observer
+## D59: Published, and running in production as an observer
 
 **Decided, and then measured.** D25 held `private: true` until the evaluation API
 stopped moving. It has: `0.1.0` is on npm as `@fachryxyf/scorpio-guard`, MIT, scoped
 public, zero dependencies. The stage claim in this record moves from *installable* to
-*published*, and nothing else about it changes — the version is `0.1.0` rather than
+*published*, and nothing else about it changes: the version is `0.1.0` rather than
 `1.0.0` precisely because no threshold is calibrated.
 
 ### The third integration, and it says the same thing as the first two
@@ -2620,7 +2620,7 @@ Vercel, so a cold start discards accumulated trust before it can accumulate.
 This is the same result HealthMe produced (D34) and IXFE produced again (D47): **the
 part that works in production is the least novel part of the design.** Declared
 invariants are set membership expressible as one `if`. Beta trust, decay, and the
-epistemic stage — the parts that are actually new — remain untrained in every
+epistemic stage, the parts that are actually new: remain untrained in every
 deployment so far, and now for a reason that is architectural rather than statistical.
 
 Fixing it needs a `StateStore` adapter to something that survives a cold start.
@@ -2632,7 +2632,7 @@ the conformance kit (D8) before being trusted.
 
 **It enforces nothing.** `observeChat()` records and its result is discarded; the
 decisions still belong to the origin check, the token, the proof-of-work and the rate
-limit. That is D9 honoured in the only place it can be tested — a real endpoint where
+limit. That is D9 honoured in the only place it can be tested: a real endpoint where
 being wrong would cost a real visitor.
 
 **There is no sink, so the observation is currently unreadable.** Recording advice
@@ -2642,8 +2642,8 @@ somewhere to write before it can tell anyone anything.
 
 ### One trap, avoided, worth naming
 
-`verifySolution()` consumes the proof-of-work challenge. Calling it twice — once for
-the observer, once for the real decision — rejects legitimate visitors, because the
+`verifySolution()` consumes the proof-of-work challenge. Calling it twice, once for
+the observer, once for the real decision, rejects legitimate visitors, because the
 second call finds the challenge already spent. It is verified once and the result is
 shared. A replay test proves the single-use rule is still intact.
 
@@ -2663,12 +2663,12 @@ calls a stateful verifier has changed the state it was supposed to be watching.*
 
 ---
 
-## D60 — Durable trust on serverless is a networked store, over HTTP
+## D60: Durable trust on serverless is a networked store, over HTTP
 
 **Decided, from the measurement in D59 rather than from a preference.** Three
 integrations have now shown the same thing: the invariant layer earns its keep and
 the trust model never gets exercised. D59 established that the last cause is not
-statistical but architectural — `memoryStore` is process-local, and a serverless
+statistical but architectural: `memoryStore` is process-local, and a serverless
 cold start discards accumulated evidence before it can accumulate.
 
 `sqliteStore` (D44) does not fix it. It answers restart durability *on one
@@ -2681,8 +2681,8 @@ Two reasons, and the dependency count is the weaker one.
 
 The stronger reason is shape: a TCP connection pool assumes a process that keeps
 running, and a serverless function may be frozen mid-request and thawed later. Every
-managed KV service these platforms actually offer — Upstash Redis, Vercel KV,
-Cloudflare KV — exposes an HTTP API for exactly that reason. Using it keeps D7's
+managed KV service these platforms actually offer: Upstash Redis, Vercel KV,
+Cloudflare KV, exposes an HTTP API for exactly that reason. Using it keeps D7's
 zero-dependency promise intact as a *consequence* rather than as the goal.
 
 ### The transport is injected, so this is not one vendor's adapter
@@ -2705,7 +2705,7 @@ const guard = createGuard({
 ### Three details that are correctness, not polish
 
 **1. The key travels in the request body, never in the path.** `POST /get/<key>`
-breaks on an entity reference containing a slash or a space, and D1 permits both —
+breaks on an entity reference containing a slash or a space, and D1 permits both:
 the reference is opaque, so the store may not normalise, trim, or hash it. The
 conformance kit checks this with keys containing spaces, slashes, colons and braces,
 and a path-based transport fails it.
@@ -2713,12 +2713,12 @@ and a path-based transport fails it.
 **2. The service TTL is deliberately longer than the retention horizon.** Retention
 has one definition, `isExpired` (D6). A service-side expiry that fired first would
 become a second definition, disagreeing with every other store about when state dies.
-So the TTL is a generous upper bound whose only job is reclaiming space — the same
+So the TTL is a generous upper bound whose only job is reclaiming space, the same
 role `sweep` plays in the memory store.
 
 **3. A foreign value is not read as trust state.** In a shared namespace something
 else may own a colliding key. Unparseable JSON, or JSON of the wrong shape, reads as
-absent rather than throwing on every request or — worse — being interpreted.
+absent rather than throwing on every request or, worse, being interpreted.
 
 ### Fail-open, and the cost said out loud
 
@@ -2729,7 +2729,7 @@ request path down with it.
 The cost is real and is recorded rather than buried: **an attacker who can make your
 KV unreachable resets every entity to `unknown`**, the most permissive state the
 trust dimension has. What survives is the layer that has actually been earning its
-keep — a proven violation reaches `RESTRICT` with no history at all (D15). Fail-open
+keep: a proven violation reaches `RESTRICT` with no history at all (D15). Fail-open
 degrades the statistical dimension and leaves the provable one untouched, which is
 the right way round.
 
@@ -2745,8 +2745,8 @@ satisfy one contract, and the conformance kit finally has the second network-sha
 implementation it was written for.
 
 **Not closed: calibration.** This makes accumulation *possible* on serverless; it does
-not supply a population. What it does change is the kind of thing standing in the way
-— every unvalidated row in this record is waiting on real observations, and until now
+not supply a population. What it does change is the kind of thing standing in the way:
+every unvalidated row in this record is waiting on real observations, and until now
 they could not survive a cold start to be observed.
 
 Still missing, and named: **a sink.** D59 recorded that the production observer
@@ -2773,7 +2773,7 @@ until the proof of concept meets real traffic.
 | D43 | Two-tier symptom vocabulary | The structure is settled; the detail list is a first pass, and the wire format belongs to `scorpio-guard-protocol`. Nothing transmits, so nothing has been round-tripped against a real server. |
 
 D34 has been run and is recorded with its limits: HealthMe establishes that the
-library works against a real flow, and its production traffic — one user — cannot
+library works against a real flow, and its production traffic, one user, cannot
 exercise the probabilistic model.
 
 D45 changes what follows from that. The flow is drivable even though the traffic is
@@ -2781,7 +2781,7 @@ not, so the statistical layer is exercised by generated personas rather than by
 waiting: two thresholds were falsified immediately (D46), and identity churn is
 recorded as a measured floor rather than a worry.
 
-D47 then moved the primary target to **IXFE**, which has what HealthMe never did —
+D47 then moved the primary target to **IXFE**, which has what HealthMe never did:
 paid compute behind an unauthenticated endpoint, so an attacker has a motive and the
 threat model is written into the application's own defences. That surfaced two further
 corrections: a `hard` declaration that was not provable (D48), and the discovery that
@@ -2791,7 +2791,7 @@ What generated traffic still cannot do is calibrate. D56 went looking for IXFE's
 real logs and found that per-request records do not exist in either service, so the
 recording is now built: an observing proxy in front of the live origin writes one
 line per request in the shape the window needs. D57 then drove a real browser through
-it, because the site has no audience to wait for — which falsified four things about
+it, because the site has no audience to wait for, which falsified four things about
 the integration, and moved the blocker from *visitors* to *their distribution*. Pusaka remains a candidate for a genuinely
 unauthenticated public surface, still blocked on whether it gains a server side.
 
@@ -2801,19 +2801,19 @@ unauthenticated public surface, still blocked on whether it gains a server side.
 | D46 | Two thresholds corrected | Corrected in the right direction, not calibrated to a value. `OBSERVE` at `developing` is defensible; that `3` and `7` are the right boundaries is still a guess. |
 | D37, D49, D55 | Saturation / farming | **Closed in generated traffic.** Pricing positives by gap shape at intake reaches every farmer tested at one abuse call, and tops legitimate automation out at `OBSERVE`. Not calibrated against a real population. |
 | D47 | IXFE as the target | Its invariants are read from its code, which is honest, and its *traffic* is still generated. |
-| D56 | The live observer | Built, tested, and transparent — and it has recorded no *population*. Half the invariants stay unexercised, because a proxy cannot see a credit balance. |
-| D57 | Real-browser visitors | Real timing, real keystrokes, real page state — and an invented mix. It found four integration bugs generated traffic could not have; it cannot tell you how many real clients look like any of these. |
+| D56 | The live observer | Built, tested, and transparent: and it has recorded no *population*. Half the invariants stay unexercised, because a proxy cannot see a credit balance. |
+| D57 | Real-browser visitors | Real timing, real keystrokes, real page state, and an invented mix. It found four integration bugs generated traffic could not have; it cannot tell you how many real clients look like any of these. |
 | D55 | The intake discount | `maxInterArrivalCv = 0.25` is inherited from D36, not measured. The mechanism is sound in generated traffic; whether real automation clusters below that value is unknown. |
-| D54 | The patient farmer | Untouched, by construction. One request every ten minutes reaches `mass 81`, `mean 0.988` and trips nothing. Farming fast then abusing slowly also lifts the floor — 18 abuse calls instead of 1. D49 is narrowed, not closed. |
+| D54 | The patient farmer | Untouched, by construction. One request every ten minutes reaches `mass 81`, `mean 0.988` and trips nothing. Farming fast then abusing slowly also lifts the floor, 18 abuse calls instead of 1. D49 is narrowed, not closed. |
 | D51 | Ten collectors, no thresholds | Each collector measures the right thing; not one has met a real false positive. The catalogue's promise that every signal has a written innocent cause is kept on paper, not in evidence. |
-| D52 | The anomaly reference profile | Four expected values and four weights, all chosen by judgement. Deliberately not trained, because the only traffic available is invented (D45) — so the classifier is honest about its ignorance rather than free of it. |
+| D52 | The anomaly reference profile | Four expected values and four weights, all chosen by judgement. Deliberately not trained, because the only traffic available is invented (D45), so the classifier is honest about its ignorance rather than free of it. |
 | D53 | The v0.1 wire format | Encodes, decodes, and degrades correctly against its own tests. Never round-tripped against a server, because no server exists. The strategy vocabulary is still empty. |
 | D59 | The published package | `0.1.0` is on npm and running in production as an observer. What runs there is the invariant layer; the trust model is reset by every cold start, so it has been *deployed* without being *exercised*. |
-| D60 | The networked KV store | Satisfies the store contract against an in-process transport. Unreleased — `0.2.0` is on `main` and not on npm. No production deployment has run on it, so *durable accumulation* is demonstrated in tests and not in the field. |
+| D60 | The networked KV store | Satisfies the store contract against an in-process transport. Unreleased: `0.2.0` is on `main` and not on npm. No production deployment has run on it, so *durable accumulation* is demonstrated in tests and not in the field. |
 
 ---
 
-## D50 — Farming is answered on mass, through velocity
+## D50: Farming is answered on mass, through velocity
 
 **Decided, from D49.** D49 established that a real fix has to act on **mass**
 rather than on the uncertainty ceiling, and left the tension open. This closes it.
@@ -2825,7 +2825,7 @@ touching the trust arithmetic D4 defends.
 The mechanism: a bounded window of recent observations already exists (D36). The
 span of that window over real elapsed time gives an observation rate. When the
 rate exceeds a configurable threshold (`maxObsPerHour`, default 60) over a
-minimum span (5 minutes — a short burst is normal), the guard applies a
+minimum span (5 minutes: a short burst is normal), the guard applies a
 **farming ceiling** that *raises* the minimum decision to `INCREASE_FRICTION`.
 
 Why it works where D37 failed:
@@ -2843,11 +2843,11 @@ after trust assessment. 5 tests in `behavior.test.ts`, 1 in `guard.test.ts`.
 
 ---
 
-## D51 — Signal collectors exist for all seven uncovered catalogue entries
+## D51: Signal collectors exist for all seven uncovered catalogue entries
 
 **Decided.**
 
-D42 named ten signals and marked three as `computed: true` — derived from
+D42 named ten signals and marked three as `computed: true`, derived from
 `behaviorFeatures` (interArrivalCv → `SIG_UNIFORM_DELAY_SHAPE`, scopeEntropy →
 `SIG_REPEATED_PATTERN`, immediateRepeatRatio → `SIG_IMMEDIATE_REPEAT`). The other
 seven need something to produce their observations. That something now exists:
@@ -2866,14 +2866,14 @@ A signal aggregator (`collectSignalIds` in `src/collect/signals.ts`) takes all
 collector outputs and returns the catalogue IDs that `guard.evaluate` accepts.
 12 tests in `collectors.test.ts`.
 
-Every collector returns a typed observation struct. None contains a threshold —
+Every collector returns a typed observation struct. None contains a threshold:
 thresholds remain in the host's policy, per the D42 principle. Each still needs a
 false-positive story told against real traffic before it earns a production
 threshold.
 
 ---
 
-## D52 — The anomaly classifier is a distance-to-reference model, not a trained one
+## D52: The anomaly classifier is a distance-to-reference model, not a trained one
 
 **Decided.**
 
@@ -2906,7 +2906,7 @@ Implements as: `anomalyScore`, `anomalyConcurs` in `src/core/anomaly.ts`.
 
 ---
 
-## D53 — Wire format is v0.1, documented and tested, still untransmitting
+## D53: Wire format is v0.1, documented and tested, still untransmitting
 
 **Decided.**
 
@@ -2916,9 +2916,9 @@ applies all six degradation rules. 13 tests in `protocol.test.ts`.
 
 Key decisions crystallised by writing it:
 
-- Requests are unauthenticated and carry no instance identity — because a report
+- Requests are unauthenticated and carry no instance identity, because a report
   that could be attributed to an instance is a report about a population.
-- Entity counts are bucketed (`one | few | several | many`), never exact — because
+- Entity counts are bucketed (`one | few | several | many`), never exact, because
   an exact count is identifying in a small deployment.
 - The strategy vocabulary in responses is intentionally left open. Inventing tokens
   before a server exists would be guessing.
@@ -2929,22 +2929,22 @@ Still nothing transmits. D17 and D20 stand.
 
 ---
 
-## D54 — Rate is not the farming signal; the shape of the gaps is
+## D54: Rate is not the farming signal; the shape of the gaps is
 
-> **The floor described here was removed by D55.** The finding survives — gap
-> regularity is the discriminator, not rate — and D55 applies it at intake instead.
+> **The floor described here was removed by D55.** The finding survives, gap
+> regularity is the discriminator, not rate: and D55 applies it at intake instead.
 
 **Decided, from traffic that falsified D50 twice in a row.** Recorded in full
 because the two wrong answers are more instructive than the right one.
 
 ### First attempt: rate alone
 
-D50 shipped a pure rate check — sustained observations per hour above a threshold
+D50 shipped a pure rate check, sustained observations per hour above a threshold
 applies a floor of `INCREASE_FRICTION`. Generated traffic falsified it immediately:
 
 ```
 busy operator, 1 action per 45s   ->  80/hr  ->  FALSE POSITIVE at step 8
-power user,    1 action per 20s   -> 180/hr  ->  FALSE POSITIVE at step 16
+power user,  1 action per 20s   -> 180/hr  ->  FALSE POSITIVE at step 16
 ```
 
 Both are legitimate. Humans are simply capable of being fast, and a rate threshold
@@ -2972,7 +2972,7 @@ agree imports its breadth terms into a question that is not about breadth.
 
 ### What actually separates them
 
-Neither speed nor breadth. The *shape of the gaps* — which is the one thing the
+Neither speed nor breadth. The *shape of the gaps*: which is the one thing the
 design notes single out, and the discriminator the feature space already has:
 
 | | rate/hr | gap CV | farming? |
@@ -3015,7 +3015,7 @@ neither is calibrated.
 
 ---
 
-## D55 — Farming is answered at intake, by pricing the evidence
+## D55: Farming is answered at intake, by pricing the evidence
 
 **Decided, superseding the D54 floor.** D50 and D54 both tried to answer farming at
 the *decision*, and both left the same hole: a floor low enough to reach the farmer
@@ -3032,8 +3032,8 @@ farm 120/hr, abuse  40/hr  -> 18 abuse calls        (window rolls, floor lifts)
 ```
 
 And it punished the innocent case it was warned about. A polling widget, a
-monitoring probe and an integration suite — all positive-only, all regular by
-definition — reached `INCREASE_FRICTION`, which is the first rung a client actually
+monitoring probe and an integration suite, all positive-only, all regular by
+definition, reached `INCREASE_FRICTION`, which is the first rung a client actually
 feels. `SIG_UNIFORM_DELAY_SHAPE` already names "a polling widget on a fixed
 interval" as its innocent cause; the floor ignored it.
 
@@ -3072,7 +3072,7 @@ The patient farmer is closed: rate no longer matters, because regularity is what
 priced and a slow farmer is just as regular as a fast one. One abuse call now costs
 something at every gap length tested.
 
-And the innocent case is intact — every positive-only automated client tops out at
+And the innocent case is intact, every positive-only automated client tops out at
 `OBSERVE`, which costs nothing:
 
 ```
@@ -3092,7 +3092,7 @@ never withheld in the first place.
   it no longer moves a decision.
 - On by default, with `discountRegularPositives: false` for a deployment whose
   legitimate traffic is predominantly automated.
-- The credit drainer is *not* caught by this — it earns almost no positives, so
+- The credit drainer is *not* caught by this; it earns almost no positives, so
   there is nothing to price down, and its weak signals do the work. Pinned as a test,
   because it is the case where D55 is not the mechanism.
 - D49 is closed. Farming is answered on mass, as D49 required, by acting on the mass
@@ -3103,7 +3103,7 @@ number above comes from generated traffic (D45).
 
 ---
 
-## D56 — Real traffic is recorded by an observing proxy, not by reading logs
+## D56: Real traffic is recorded by an observing proxy, not by reading logs
 
 **Decided, on finding there was nothing to read.** The roadmap's first remaining
 item said *use IXFE's real logs, which exist*. They do not, in the sense the
@@ -3116,7 +3116,7 @@ Checked against the running deployment, both services:
 | source | what it holds | why it cannot calibrate |
 |---|---|---|
 | `security_events` | scanner signatures only, one row per IP/kind/60s | fires on `sqlmap`-shaped requests; ordinary traffic leaves nothing |
-| `login_log` | authenticated logins | pre-launch, so empty — and it is one row per success, not per request |
+| `login_log` | authenticated logins | pre-launch, so empty: and it is one row per success, not per request |
 | stdout | worker lifecycle lines | no request line at all; there is no `morgan` |
 | tunnel inspector | last few requests, in memory | evaporates on restart, and cloudflared keeps none |
 
@@ -3133,8 +3133,8 @@ Two ways to record: instrument IXFE, or put a hop in front of it. The hop, for
 three reasons.
 
 - **A bug in SG must not be able to cost a real visitor.** In the proxy the origin's
-  response is already on the wire before the guard is consulted — `res.on('finish')`
-  — so advisory-only (D9) is structural rather than a promise. Middleware sits in the
+  response is already on the wire before the guard is consulted (on `res.on('finish')`),
+  so advisory-only (D9) is structural rather than a promise. Middleware sits in the
   request path, where a throw is a 500 on someone's pre-order.
 - **IXFE stays unmodified.** It is a live product with paying intent behind its
   funnel. The measurement must not be able to change what is being measured.
@@ -3143,7 +3143,7 @@ three reasons.
   than one that can observe from in front of it.
 
 The cost is honest and worth naming: a proxy sees HTTP, so it cannot see the
-server-side facts half the invariants need — no credit balance, no `wasIssued`, no
+server-side facts half the invariants need, no credit balance, no `wasIssued`, no
 `attemptsSoFar`. Those observations are passed as empty rather than guessed, because
 inventing them in live traffic is D45's error where nothing would catch it. What the
 proxy *can* prove is the causality class, off the wire: `dwell` is a field the page
@@ -3154,7 +3154,7 @@ always sends, so its absence is proof at both forms.
 `/api/order` has the same time-trap and the same hidden `website` field as
 `/api/waitlist`, and until now only the waitlist scope declared them. Added as
 `ixfe.order-came-from-form` (`hard`) and `ixfe.order-honeypot-untouched` (`soft`),
-declared separately rather than by widening the waitlist scope — D32 makes an
+declared separately rather than by widening the waitlist scope; D32 makes an
 invariant's scope a completeness claim, and these are two forms that happen to
 agree, not one scope.
 
@@ -3164,7 +3164,7 @@ The record is one JSONL line per observed request, and it is shape only: a salte
 hash of IP and user-agent as the entity, the path, the status, the advice, and the
 behavioral features. No address, no query string, no body. Bodies are read at the
 two form endpoints and for the two declared fields (`dwell`, `website`), then
-dropped. Static assets and non-GET document requests are not observed at all — they
+dropped. Static assets and non-GET document requests are not observed at all: they
 say nothing about intent and would swamp the window with noise.
 
 Page views feed the window but earn no evidence. Loading a page is not an
@@ -3179,8 +3179,8 @@ from those distributions is a human decision made with them in view. Writing one
 into the file from this run would be D45's mistake with better data.
 
 One subtlety the first draft got wrong: a 2xx from IXFE is not consent. Both form
-endpoints answer `{ slot: 0 }` to a request their own honeypot or time-trap caught —
-"serap diam-diam" — so counting 2xx as agreement would have scored IXFE's own
+endpoints answer `{ slot: 0 }` to a request their own honeypot or time-trap caught:
+"serap diam-diam": so counting 2xx as agreement would have scored IXFE's own
 detections as the guard's false positives. Candidates now exclude any record with a
 violation of either strength, and hard violations are excluded outright because
 proof is not a false positive (D15).
@@ -3190,7 +3190,7 @@ proof is not a false positive (D15).
 - The roadmap's first item changes from *read the logs* to *run the observer and
   wait*. Calibration is now blocked on elapsed time and visitors, not on code.
 - Nothing is calibrated by this decision. It is the instrument, and it has never
-  been pointed at a population — the numbers in D36, D52 and D55 are exactly as
+  been pointed at a population, the numbers in D36, D52 and D55 are exactly as
   unvalidated as they were.
 - The proxy is not a defence and adds no authentication of its own. Everything the
   origin exposes stays exposed, which is what observational neutrality requires and
@@ -3198,14 +3198,14 @@ proof is not a false positive (D15).
 
 ---
 
-## D57 — Drive a real browser, because a real audience is not available
+## D57: Drive a real browser, because a real audience is not available
 
 **Decided, from a constraint rather than a preference.** D56 built the observer and
 concluded that calibration was now blocked on visitors and elapsed time. It is: the
 site has no audience, and promoting it is not work this project can do. Waiting was
 the plan and waiting produces nothing.
 
-So the visits are produced — by a real Chrome, against the real origin, through the
+So the visits are produced, by a real Chrome, against the real origin, through the
 observer.
 
 ### What this is and is not
@@ -3224,7 +3224,7 @@ about the *client* is invented any more:
 
 A threshold that fires against a real browser's timing is a stronger falsification
 than one that fires against invented numbers. How many such browsers, and in what
-mix, remains invented — and that is precisely what still cannot be calibrated from.
+mix, remains invented: and that is precisely what still cannot be calibrated from.
 
 The adversaries stay `fetch`-based on purpose. An attacker willing to drive a real
 browser produces human-shaped timing, and the design's own premise (§1) is that this
@@ -3244,7 +3244,7 @@ bug that generated persona traffic structurally could not have found, because ea
 lived in the gap between what the model assumed and what a real deployment does.
 
 **1. A 200 is not a success.** IXFE's landing service answers unknown `/api/*` paths
-with its SPA fallback — 200, and 94 KB of HTML. A path scanner asking for
+with its SPA fallback: 200, and 94 KB of HTML. A path scanner asking for
 `/api/admin/users` was therefore *credited with a positive* and ended with more trust
 than it started with. An API route answering a document did not complete an action;
 it is a 404 the origin failed to say. Now read as the refusal it is, and recorded as
@@ -3252,7 +3252,7 @@ it is a 404 the origin failed to say. Now read as the refusal it is, and recorde
 positive either.
 
 **2. One scope for every page reproduced D46's entropy bug.** All page views shared
-`ixfe.page`, and a single scope admits no balance — so `scopeEntropy` was 0 and
+`ixfe.page`, and a single scope admits no balance, so `scopeEntropy` was 0 and
 `distinctScopes` was 1 for *every* visitor who only browsed. Honest readers scored as
 monotonous by construction. Same lesson as D46, different hat: the feature was
 measuring the integration's coarseness, not the visitor's behavior. The scope is now
@@ -3261,19 +3261,19 @@ per path.
 **3. Weak signals on page views are a false positive on the operator's own
 monitoring.** Measured: a 20-request uptime check reached `INCREASE_FRICTION` at step
 15, from `SIG_UNIFORM_DELAY_SHAPE` and friends. Over HTTP alone an uptime monitor and
-a crawler are the same client — both are `GET /` at a fixed interval by a non-browser.
+a crawler are the same client: both are `GET /` at a fixed interval by a non-browser.
 D56 already decided a page view earns no evidence; signals are now attached only to
 actions, which carries that argument to its conclusion.
 
 The cost is stated rather than hidden: a crawler that only reads public pages now
 walks through at `ALLOW`. That is the honest answer for an instrument that sees only
 HTTP, and reading public pages is not an offence the guard is entitled to price. A
-404 *is* still negative evidence — asking for pages that are not there is the shape
+404 *is* still negative evidence: asking for pages that are not there is the shape
 of a wordlist, and that is what keeps the scanner caught.
 
 **4. Two harness bugs that would have looked like model behavior.** `scrollIntoView`
 and `getBoundingClientRect` in one expression returns pre-scroll coordinates, so
-every form click landed on empty space — producing focus events, no submission, and a
+every form click landed on empty space, producing focus events, no submission, and a
 plausible-looking "the persona did not convert". And an unbounded CDP command hung
 the entire run when the post-launch `/order` redirect pointed at an unreachable host.
 Both now fail one visitor instead of silently changing what was measured.
@@ -3284,7 +3284,7 @@ Ten clients, 145 observations, two rounds:
 
 ```
 legitimate
-  skimmer, researcher, mobile visitor,          ALLOW throughout, mean 0.500
+  skimmer, researcher, mobile visitor,        ALLOW throughout, mean 0.500
   stale bookmark, returning visitor
   uptime monitor (40 fixed-interval GETs)       ALLOW throughout, mean 0.500
 
@@ -3299,8 +3299,8 @@ False-positive candidates: 0. Hard violations: 24, all of them the missing `dwel
 
 ### Consequences
 
-- Calibration is no longer blocked on an audience. It is blocked on *distribution* —
-  how many real clients of each kind exist — which is the part generated traffic can
+- Calibration is no longer blocked on an audience. It is blocked on *distribution*:
+  how many real clients of each kind exist: which is the part generated traffic can
   never supply, and the honest residue of D45.
 - The silent crawler walking through is a real limit, recorded rather than patched. A
   host that cares about crawlers holds facts the proxy does not, and D42's

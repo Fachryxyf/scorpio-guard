@@ -3,7 +3,7 @@
  *
  * D59 deployed SG to a serverless endpoint and measured the consequence: the
  * statistical layer never engaged, because `memoryStore` is process-local and every
- * cold start discarded accumulated trust. `sqliteStore` does not help there either —
+ * cold start discarded accumulated trust. `sqliteStore` does not help there either:
  * the filesystem is as ephemeral as the process. Durability on serverless means a
  * store that lives somewhere else, which means the network.
  *
@@ -12,8 +12,8 @@
  * This talks HTTP through the global `fetch` rather than importing a Redis client.
  * That is not only about the dependency count (D7): a TCP connection pool is the
  * wrong shape for a function that may be frozen mid-request, and the managed KV
- * services that serverless platforms actually offer — Upstash Redis, Vercel KV,
- * Cloudflare KV — all expose an HTTP API for exactly that reason.
+ * services that serverless platforms actually offer: Upstash Redis, Vercel KV,
+ * Cloudflare KV, all expose an HTTP API for exactly that reason.
  *
  * ## The transport is injected, so this is not one vendor's adapter
  *
@@ -30,7 +30,7 @@ import { isExpired, type EntityState } from '../core/trust.ts';
  * The three operations a KV service has to offer.
  *
  * Deliberately narrower than the `StateStore` it backs: no sweep, no size, no
- * iteration. A networked store cannot scan keys cheaply, and it does not need to —
+ * iteration. A networked store cannot scan keys cheaply, and it does not need to:
  * `ttlSeconds` lets the service reclaim space, and expiry remains a read-time
  * decision (D6).
  */
@@ -48,7 +48,7 @@ export type KvStoreOptions = {
 
   /**
    * Prefix for every key, so SG's state cannot collide with the host's own data in
-   * a shared namespace. Joined with `:` — and the entity reference itself is never
+   * a shared namespace. Joined with `:`: and the entity reference itself is never
    * altered beyond that, because D1 makes it opaque.
    */
   readonly keyPrefix?: string;
@@ -58,7 +58,7 @@ export type KvStoreOptions = {
    *
    * `true` (the default) reads a failure as a cold start and swallows a failed
    * write. The reasoning is D9: the guard is advisory, so a KV outage must not take
-   * down the host's request path with it. The cost is stated rather than hidden —
+   * down the host's request path with it. The cost is stated rather than hidden:
    * an attacker who can make your KV unreachable resets every entity to `unknown`,
    * which is the most permissive state the trust dimension has.
    *
@@ -111,7 +111,7 @@ export function kvStore(options: KvStoreOptions): KvStore {
   /**
    * TTL is set beyond the retention horizon on purpose.
    *
-   * Retention has one definition — `isExpired` (D6) — and a service-side expiry
+   * Retention has one definition, `isExpired` (D6): and a service-side expiry
    * that fired first would become a second one, disagreeing with every other store
    * about when state dies. So the TTL is a generous upper bound whose only job is
    * reclaiming space, exactly as `sweep` is in the memory store.
@@ -162,7 +162,7 @@ export function kvStore(options: KvStoreOptions): KvStore {
       const key = keyFor(entity);
       try {
         // JSON preserves IEEE-754 doubles exactly, which the conformance kit's
-        // precision check depends on — a fixed-precision column would quietly
+        // precision check depends on: a fixed-precision column would quietly
         // change every trust value it held.
         await transport.set(key, JSON.stringify(state), ttlSeconds);
       } catch (error) {

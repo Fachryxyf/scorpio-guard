@@ -27,7 +27,7 @@ export function coverage(data) {
 
   const body = `
     <p class="lead">${t(
-      `The three headline numbers — ${testCount} tests, ${decisionCount} decisions, ${all.length} personas — and what sits behind each one. Every figure here is generated at build time; nothing was typed by hand.`,
+      `The three headline numbers, ${testCount} tests, ${decisionCount} decisions, ${all.length} personas: and what sits behind each one. Every figure here is generated at build time; nothing was typed by hand.`,
       `Tiga angka utama \u2014 ${testCount} test, ${decisionCount} keputusan, ${all.length} persona \u2014 dan apa yang ada di balik masing-masing. Setiap angka di sini dibangkitkan saat build; tidak ada yang diketik manual.`,
     )}</p>
 
@@ -98,7 +98,7 @@ ${all.map(personaRow).join('\n')}
       <thead><tr><th>${t('Part', 'Bagian')}</th><th class="num">${t('Entries', 'Entri')}</th></tr></thead>
       <tbody>
 ${data.design.parts.map((part) => {
-  const label = part.part.replace(/^Part ([IVX]+) — (.+)$/, (_m, roman, title) => `${roman}: ${title}`);
+  const label = part.part.replace(/^Part ([IVX]+): (.+)$/, (_m, roman, title) => `${roman}: ${title}`);
   return `        <tr><th>${label}</th><td class="num">${part.entries.length}</td></tr>`;
 }).join('\n')}
         <tr class="tot"><th>Total</th><td class="num">${decisionCount}</td></tr>
@@ -134,8 +134,8 @@ ${data.design.parts.map((part) => {
     file: 'coverage.html',
     titleEn: 'Coverage',
     titleId: 'Cakupan',
-    subtitleEn: 'What has been tested, decided, and exercised — and what none of that proves.',
-    subtitleId: 'Apa yang sudah diuji, diputuskan, dan dilatih — dan apa yang tak dibuktikan oleh semuanya.',
+    subtitleEn: 'What has been tested, decided, and exercised: and what none of that proves.',
+    subtitleId: 'Apa yang sudah diuji, diputuskan, dan dilatih, dan apa yang tak dibuktikan oleh semuanya.',
     sections,
     body,
   });

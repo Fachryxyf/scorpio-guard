@@ -2,7 +2,7 @@
  * Run the persona traffic and print the tables. D45, D47.
  *
  * Separate from `npm test` on purpose: the tests assert the two claims that must not
- * regress, while this exists to be *read* — a threshold gets argued about from
+ * regress, while this exists to be *read*, a threshold gets argued about from
  * numbers, not from prose.
  *
  *   npm run replay
@@ -36,13 +36,13 @@ async function report(title, personas, options) {
 
 // IXFE is the primary target (D47): three deployables, unauthenticated funnel, and
 // paid compute behind a public endpoint.
-await report('IXFE — ixfe.pro', [...IXFE_LEGITIMATE, ...IXFE_ADVERSARIES], {
+await report('IXFE: ixfe.pro', [...IXFE_LEGITIMATE, ...IXFE_ADVERSARIES], {
   invariants: ixfeInvariants,
 });
 
 // HealthMe is kept as the small-application regression: two scopes, one user. It is
 // what caught the entropy denominator in D46.
-await report('HealthMe — small-application regression', [...LEGITIMATE_PERSONAS, ...ADVERSARY_PERSONAS], {
+await report('HealthMe: small-application regression', [...LEGITIMATE_PERSONAS, ...ADVERSARY_PERSONAS], {
   invariants: healthmeInvariants,
   permits: (advice) => advice !== 'RESTRICT' && advice !== 'BLOCK',
 });
@@ -62,7 +62,7 @@ for (const perEntity of [1, 2, 3]) {
 }
 
 // The same rotation against IXFE, where the violation is a proof rather than
-// accumulated evidence — so one request per identity is enough.
+// accumulated evidence: so one request per identity is enough.
 for (const perEntity of [1, 2]) {
   const rotated = await replayAll([rotatingShooter(20, perEntity)], { invariants: ixfeInvariants });
   const felt = rotated.filter((result) => !result.walkedThrough).length;

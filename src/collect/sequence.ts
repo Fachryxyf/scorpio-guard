@@ -2,7 +2,7 @@
  * Sequence and environment signal collectors. D42.
  *
  * SIG_UNUSUAL_SEQUENCE needs to know what this entity has done before, which is
- * per-entity state the host already holds — so this module takes the history as
+ * per-entity state the host already holds, so this module takes the history as
  * an argument rather than storing it. SIG_ENVIRONMENT_MISMATCH reads coarse
  * client facts only, and records no fingerprint.
  */
@@ -16,7 +16,7 @@ export type SequenceObservation = {
 /**
  * SIG_UNUSUAL_SEQUENCE: a path no invariant forbids but this entity has not
  * taken before. Novel on a first visit, which is why the catalogue rates it
- * `notable` rather than `pronounced` — most first visits are legitimate.
+ * `notable` rather than `pronounced`: most first visits are legitimate.
  *
  * `knownTransitions` is the host's per-entity history, as `from>to` strings.
  */
@@ -35,7 +35,7 @@ export function checkSequence(
  * that says nothing about the client.
  *
  * Deliberately not a fingerprint. There is no canvas hash, no font enumeration,
- * no screen geometry — only the handful of facts whose *disagreement* is
+ * no screen geometry: only the handful of facts whose *disagreement* is
  * meaningful.
  */
 export type ClientFacts = {
@@ -59,7 +59,7 @@ export type EnvironmentObservation = {
  * SIG_ENVIRONMENT_MISMATCH: coarse facts that disagree with each other.
  *
  * A mobile client that reports touch capability but never produces a pointer
- * event is the canonical case — the declared modality never appeared. Privacy
+ * event is the canonical case, the declared modality never appeared. Privacy
  * tooling and managed devices produce the same shape, which is why this is
  * `faint` and only matters in combination.
  */

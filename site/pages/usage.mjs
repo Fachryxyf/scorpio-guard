@@ -18,7 +18,7 @@ export function usage(data) {
     ['weights.weak / .strong', `${parameters.weights.weak} / ${parameters.weights.strong}`, t('How much one observation moves the distribution. Symmetric on purpose.', 'Seberapa jauh satu observasi menggeser distribusi. Simetris dengan sengaja.')],
     ['softViolationWeight', parameters.softViolationWeight, t('What a soft violation weighs. Strong, not faint: the host declared this should not happen.', 'Bobot pelanggaran soft. Kuat, bukan samar: host menyatakan ini seharusnya tidak terjadi.')],
     ['windowSize', parameters.windowSize, t('Observations retained for anomaly features. Bounded on purpose.', 'Observasi yang disimpan untuk fitur anomali. Dibatasi dengan sengaja.')],
-    ['signalMassCap', parameters.signalMassCap, t('The most all weak signals of one interaction may contribute — one weak observation\u2019s worth.', 'Batas sumbangan semua weak signal dalam satu interaksi \u2014 setara satu observasi lemah.')],
+    ['signalMassCap', parameters.signalMassCap, t('The most all weak signals of one interaction may contribute, one weak observation\u2019s worth.', 'Batas sumbangan semua weak signal dalam satu interaksi \u2014 setara satu observasi lemah.')],
   ];
 
   const body = `
@@ -45,7 +45,7 @@ export function usage(data) {
         <tr><th>.</th><td>${t('the model', 'modelnya')}</td></tr>
         <tr><th>./collect</th><td>${t('the browser collector', 'collector peramban')}</td></tr>
         <tr><th>./sqlite</th><td>${t('durable store over node:sqlite, one host', 'store tahan restart di atas node:sqlite, satu host')}</td></tr>
-        <tr><th>./kv</th><td>${t('networked store over HTTP, for serverless — unreleased', 'store jaringan lewat HTTP, untuk serverless — belum dirilis')}</td></tr>
+        <tr><th>./kv</th><td>${t('networked store over HTTP, for serverless, unreleased', 'store jaringan lewat HTTP, untuk serverless, belum dirilis')}</td></tr>
       </tbody>
     </table>
 
@@ -63,11 +63,11 @@ const result = await guard.evaluate({
   },
 });
 
-result.decision;     // 'RESTRICT' — advice, never enforcement
-result.trust.stage;  // 'unknown' | 'developing' | 'established'
+result.decision;   // 'RESTRICT', advice, never enforcement
+result.trust.stage; // 'unknown' | 'developing' | 'established'
 result.hardViolated; // true when a proof decided it
-result.coldStart;    // true when no retained state existed
-result.trace;        // why, in the order that decided it</pre>
+result.coldStart;  // true when no retained state existed
+result.trace;      // why, in the order that decided it</pre>
 
     ${h2(3, 'invariants', 'Declare an invariant', 'Deklarasikan invariant')}
 

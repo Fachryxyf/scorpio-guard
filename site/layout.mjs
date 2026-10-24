@@ -2,13 +2,13 @@
  * Shared page shell for the site. D58.
  *
  * The site was one 2,600-line scroll containing every section of the README, and it
- * read like exactly that. The fix is not styling — it is that a reference work has
+ * read like exactly that. The fix is not styling: it is that a reference work has
  * *pages*, and that its navigation is segmented: a reader who wants a number should
  * not have to walk through the premise to reach it.
  *
  * Typography is a reference-work model rather than a product-page one: an ordinary
  * sans text face at an ordinary reading size for the prose, a serif for headings,
- * and no colour at all. Colour was doing the work that structure should do — one
+ * and no colour at all. Colour was doing the work that structure should do, one
  * accent hue made every heading, link and label compete, and nothing on a site
  * about *uncertainty* should be shouting. Black on white; emphasis by weight, rule
  * and space.
@@ -399,8 +399,8 @@ export const CHAPTERS = [
     blurbId: 'Masalah terbuka, angka yang belum tervalidasi, dan klaim yang sudah ditarik.' },
   { file: 'coverage.html', segment: 'findings', en: 'Coverage', id: 'Cakupan',
     titleEn: 'What has been tested', titleId: 'Apa yang sudah diuji',
-    blurbEn: 'Test count, decision index summary, persona coverage — generated from source.',
-    blurbId: 'Jumlah test, ringkasan indeks keputusan, cakupan persona — dibangkitkan dari sumber.' },
+    blurbEn: 'Test count, decision index summary, persona coverage, generated from source.',
+    blurbId: 'Jumlah test, ringkasan indeks keputusan, cakupan persona, dibangkitkan dari sumber.' },
   { file: 'protocol.html', segment: 'reference', en: 'Protocol', id: 'Protokol',
     titleEn: 'Symptom and prescription', titleId: 'Symptom dan prescription',
     blurbEn: 'What may cross the wire, what structurally cannot, and why nothing transmits yet.',
@@ -478,7 +478,7 @@ export function figure(svg, captionEn, captionId) {
 
 export function page({ file, titleEn, titleId, subtitleEn, subtitleId, sections, body, extraHead = '' }) {
   // Dropdown menus: the segment name is a button that opens a chapter list.
-  // No dead labels — every visible word is either a trigger or a destination.
+  // No dead labels: every visible word is either a trigger or a destination.
   const nav = SEGMENTS.map((segment) => {
     const chapters = CHAPTERS.filter((chapter) => chapter.segment === segment.id);
     const active = chapters.some((chapter) => chapter.file === file);
@@ -539,7 +539,7 @@ ${sections
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>${escape(titleEn)}${file === 'index.html' ? ' — adaptive trust evaluation for web interactions' : ' — Scorpio Guard'}</title>
+<title>${escape(titleEn)}${file === 'index.html' ? ': adaptive trust evaluation for web interactions' : ' | Scorpio Guard'}</title>
 <meta name="description" content="${escape(subtitleEn.replace(/<[^>]+>/g, ''))}">
 <meta name="color-scheme" content="light dark">
 <link rel="canonical" href="https://scorpio-guard.fachryxyf.com/${file === 'index.html' ? '' : file}">
