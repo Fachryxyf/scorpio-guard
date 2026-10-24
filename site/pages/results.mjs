@@ -34,7 +34,7 @@ export function results(data) {
           <td>${kind}</td>
           <td class="num">${row.steps}</td>
           <td><code>${row.worst}</code></td>
-          <td class="num">${row.worstAtStep ?? '\u2014'}</td>
+          <td class="num">${row.worstAtStep ?? '\u2013'}</td>
           <td>${verdict}</td>
         </tr>`;
     }).join('\n');
@@ -71,7 +71,7 @@ export function results(data) {
           <th><code>${client.client}</code></th>
           <td class="num">${client.requests}</td>
           <td><code>${client.worst}</code></td>
-          <td class="num">${client.worstAtRequest ?? '\u2014'}</td>
+          <td class="num">${client.worstAtRequest ?? '\u2013'}</td>
           <td class="num">${client.hardViolations}</td>
           <td class="num">${client.distinctPaths}</td>
         </tr>`).join('\n')
@@ -105,8 +105,8 @@ export function results(data) {
     ${h2(2, 'headstart', 'The cost of memory', 'Harga memori')}
 
     <p>${t(
-      'An entity with honest history absorbs abuse before feeling anything. That is the point of having a memory &mdash; and also its cost, because the same history shields an attacker who earned it. The question is how large the shield gets, and whether it saturates.',
-      'Entitas dengan riwayat jujur menyerap penyalahgunaan sebelum merasakan apa pun. Itu tujuan punya memori \u2014 dan juga harganya, karena riwayat yang sama melindungi penyerang yang mendapatkannya. Pertanyaannya seberapa besar tamengnya, dan apakah ia jenuh.',
+      'An entity with honest history absorbs abuse before feeling anything. That is the point of having a memory, and also its cost, because the same history shields an attacker who earned it. The question is how large the shield gets, and whether it saturates.',
+      'Entitas dengan riwayat jujur menyerap penyalahgunaan sebelum merasakan apa pun. Itu tujuan punya memori, dan juga harganya, karena riwayat yang sama melindungi penyerang yang mendapatkannya. Pertanyaannya seberapa besar tamengnya, dan apakah ia jenuh.',
     )}</p>
 
     <table>
@@ -128,8 +128,8 @@ ${headStarts.map((row) => `        <tr>
     ${h2(3, 'discount', 'The intake discount against farming', 'Diskon intake terhadap farming')}
 
     <p>${t(
-      'Farming means earning trust through volume. The answer is not a decision-layer ceiling &mdash; D49 showed those arrive too late &mdash; but pricing each positive at intake by the shape of the gaps it arrived in. Bursty human-shaped activity earns full credit; perfectly regular intervals do not.',
-      'Farming berarti mengumpulkan trust lewat volume. Jawabannya bukan ceiling di lapis keputusan \u2014 D49 menunjukkan itu datang terlambat \u2014 tapi menghargai setiap positive saat intake menurut bentuk jeda kedatangannya. Aktivitas bursty berbentuk manusia mendapat kredit penuh; interval sempurna teratur tidak.',
+      'Farming means earning trust through volume. The answer is not a decision-layer ceiling (D49 showed those arrive too late) but pricing each positive at intake by the shape of the gaps it arrived in. Bursty human-shaped activity earns full credit; perfectly regular intervals do not.',
+      'Farming berarti mengumpulkan trust lewat volume. Jawabannya bukan ceiling di lapis keputusan (D49 menunjukkan itu datang terlambat) tapi menghargai setiap positive saat intake menurut bentuk jeda kedatangannya. Aktivitas bursty berbentuk manusia mendapat kredit penuh; interval sempurna teratur tidak.',
     )}</p>
 
     <table>
@@ -179,7 +179,7 @@ ${automation.map((row) => `        <tr><th>${row.label}</th><td class="num">${ro
 
     <div class="scroll">
     <table>
-      <caption>IXFE \u2014 ${replay.ixfe.personas.length} ${t('personas', 'persona')} &middot; ${replay.ixfe.falsePositives} FP &middot; ${replay.ixfe.walkedThrough} ${t('walked through', 'lolos')}</caption>
+      <caption>IXFE: ${replay.ixfe.personas.length} ${t('personas', 'persona')} &middot; ${replay.ixfe.falsePositives} FP &middot; ${replay.ixfe.walkedThrough} ${t('walked through', 'lolos')}</caption>
       <thead><tr><th>${t('Persona', 'Persona')}</th><th>${t('Kind', 'Jenis')}</th><th class="num">${t('steps', 'langkah')}</th><th>${t('Worst', 'Terburuk')}</th><th class="num">@</th><th>${t('Verdict', 'Putusan')}</th></tr></thead>
       <tbody>
 ${personaRows(replay.ixfe.personas)}
@@ -189,7 +189,7 @@ ${personaRows(replay.ixfe.personas)}
 
     <div class="scroll">
     <table>
-      <caption>HealthMe \u2014 ${replay.healthme.personas.length} ${t('personas', 'persona')} &middot; ${replay.healthme.falsePositives} FP &middot; ${replay.healthme.walkedThrough} ${t('walked through', 'lolos')}</caption>
+      <caption>HealthMe: ${replay.healthme.personas.length} ${t('personas', 'persona')} &middot; ${replay.healthme.falsePositives} FP &middot; ${replay.healthme.walkedThrough} ${t('walked through', 'lolos')}</caption>
       <thead><tr><th>${t('Persona', 'Persona')}</th><th>${t('Kind', 'Jenis')}</th><th class="num">${t('steps', 'langkah')}</th><th>${t('Worst', 'Terburuk')}</th><th class="num">@</th><th>${t('Verdict', 'Putusan')}</th></tr></thead>
       <tbody>
 ${personaRows(replay.healthme.personas)}
@@ -244,8 +244,8 @@ ${liveRows}
       <caption>${t('Window percentiles over measurable observations', 'Persentil window atas observasi terukur')}</caption>
       <thead><tr><th></th><th class="num">p10</th><th class="num">p50</th><th class="num">p90</th><th class="num">max</th></tr></thead>
       <tbody>
-        <tr><th>${t('gap CV', 'CV jeda')}</th><td class="num">${live.summary.cv.p10.toFixed(3)}</td><td class="num">${live.summary.cv.p50.toFixed(3)}</td><td class="num">${live.summary.cv.p90.toFixed(3)}</td><td class="num">\u2014</td></tr>
-        <tr><th>${t('anomaly score', 'skor anomali')}</th><td class="num">\u2014</td><td class="num">${live.summary.anomaly.p50.toFixed(3)}</td><td class="num">${live.summary.anomaly.p90.toFixed(3)}</td><td class="num">${live.summary.anomaly.max.toFixed(3)}</td></tr>
+        <tr><th>${t('gap CV', 'CV jeda')}</th><td class="num">${live.summary.cv.p10.toFixed(3)}</td><td class="num">${live.summary.cv.p50.toFixed(3)}</td><td class="num">${live.summary.cv.p90.toFixed(3)}</td><td class="num">\u2013</td></tr>
+        <tr><th>${t('anomaly score', 'skor anomali')}</th><td class="num">\u2013</td><td class="num">${live.summary.anomaly.p50.toFixed(3)}</td><td class="num">${live.summary.anomaly.p90.toFixed(3)}</td><td class="num">${live.summary.anomaly.max.toFixed(3)}</td></tr>
       </tbody>
     </table>
     ` : `

@@ -86,27 +86,27 @@ ${items}
     </aside>
 
     <p class="lead">${t(
-      '<b>Scorpio Guard</b> is a trust-evaluation library that runs inside your own system. It never answers <i>human or bot</i>. It estimates, continuously, how much trust an interaction currently deserves &mdash; and it advises rather than acts, because every decision belongs to the operator of the system it runs in.',
-      '<b>Scorpio Guard</b> adalah library evaluasi trust yang jalan di dalam sistemmu sendiri. Ia tidak pernah menjawab <i>manusia atau bot</i>. Ia menaksir, terus-menerus, seberapa besar trust yang layak diterima sebuah interaksi &mdash; dan ia memberi saran, bukan bertindak, karena setiap keputusan milik operator sistem tempat ia berjalan.',
+      '<b>Scorpio Guard</b> is a trust-evaluation library that runs inside your own system. It never answers <i>human or bot</i>. It estimates, continuously, how much trust an interaction currently deserves, and it advises rather than acts, because every decision belongs to the operator of the system it runs in.',
+      '<b>Scorpio Guard</b> adalah library evaluasi trust yang jalan di dalam sistemmu sendiri. Ia tidak pernah menjawab <i>manusia atau bot</i>. Ia menaksir, terus-menerus, seberapa besar trust yang layak diterima sebuah interaksi, dan ia memberi saran, bukan bertindak, karena setiap keputusan milik operator sistem tempat ia berjalan.',
     )}</p>
 
     ${h2(1, 'premise', 'The premise', 'Premisnya')}
 
     <p>${t(
-      'No web behavior is inherently human. Mouse movement, dwell time, DOM interaction, navigation order &mdash; every one of them can be recorded, learned and replayed. A detector built on any of them is a detector with a shelf life.',
-      'Tidak ada perilaku web yang inheren manusiawi. Gerak mouse, lama berdiam, interaksi DOM, urutan navigasi &mdash; semuanya bisa direkam, dipelajari, dan diputar ulang. Detektor yang dibangun di atas salah satunya adalah detektor yang punya tanggal kedaluwarsa.',
+      'No web behavior is inherently human. Mouse movement, dwell time, DOM interaction, navigation order: every one of them can be recorded, learned and replayed. A detector built on any of them is a detector with a shelf life.',
+      'Tidak ada perilaku web yang inheren manusiawi. Gerak mouse, lama berdiam, interaksi DOM, urutan navigasi: semuanya bisa direkam, dipelajari, dan diputar ulang. Detektor yang dibangun di atas salah satunya adalah detektor yang punya tanggal kedaluwarsa.',
     )}</p>
 
     <p>${t(
-      'So the question is replaced. Not <i>is this a human</i>, which is unanswerable and gets a verdict wrong in both directions, but <i>how much has this party earned</i> &mdash; which is answerable from history, and wrong only by degrees.',
-      'Jadi pertanyaannya diganti. Bukan <i>ini manusia atau bukan</i>, yang tak terjawab dan salah di dua arah sekaligus, tapi <i>sudah seberapa banyak pihak ini menghasilkan</i> &mdash; yang bisa dijawab dari riwayat, dan salahnya cuma soal derajat.',
+      'So the question is replaced. Not <i>is this a human</i>, which is unanswerable and gets a verdict wrong in both directions, but <i>how much has this party earned</i>, which is answerable from history, and wrong only by degrees.',
+      'Jadi pertanyaannya diganti. Bukan <i>ini manusia atau bukan</i>, yang tak terjawab dan salah di dua arah sekaligus, tapi <i>sudah seberapa banyak pihak ini menghasilkan</i>, yang bisa dijawab dari riwayat, dan salahnya cuma soal derajat.',
     )}</p>
 
     ${eq(
       1,
       'T = &Pi;(A, C)',
-      '<b>T</b> treatment &mdash; a point on a five-rung spectrum, never a boolean. <b>A</b> accumulated evidence about this entity. <b>C</b> the context this request arrived in. The function is the guard; the treatment is advice.',
-      '<b>T</b> treatment &mdash; satu titik di spektrum lima tingkat, bukan boolean. <b>A</b> evidence terakumulasi tentang entitas ini. <b>C</b> konteks kedatangan request. Fungsinya adalah guard-nya; treatment-nya adalah saran.',
+      '<b>T</b> treatment: a point on a five-rung spectrum, never a boolean. <b>A</b> accumulated evidence about this entity. <b>C</b> the context this request arrived in. The function is the guard; the treatment is advice.',
+      '<b>T</b> treatment: satu titik di spektrum lima tingkat, bukan boolean. <b>A</b> evidence terakumulasi tentang entitas ini. <b>C</b> konteks kedatangan request. Fungsinya adalah guard-nya; treatment-nya adalah saran.',
     )}
 
     <p>${t(
@@ -122,8 +122,8 @@ ${items}
     )}</p>
 
     <p>${t(
-      'The eventual communication model is <b>prescription, not diagnosis</b>, and the analogy holds against the code: a patient says <i>&ldquo;I have a headache&rdquo;</i> &mdash; a category of complaint, a few bytes of information, not a transfer of the headache. A deployment reports the abstract <i>shape</i> it saw; it receives a general strategy for that class of shape; it acts locally on local data. That exchange is drafted and tested, and transmits nothing today.',
-      'Model komunikasi yang dituju adalah <b>resep, bukan diagnosis</b>, dan analoginya bertahan saat bertemu kode: seorang pasien berkata <i>&ldquo;saya sakit kepala&rdquo;</i> &mdash; sebuah kategori keluhan, beberapa byte informasi, bukan pemindahan sakit kepalanya. Sebuah deployment melaporkan <i>bentuk</i> abstrak yang ia lihat; ia menerima strategi umum untuk kelas bentuk itu; ia bertindak lokal atas data lokal. Pertukaran itu sudah didraf dan diuji, dan hari ini tidak mengirim apa pun.',
+      'The eventual communication model is <b>prescription, not diagnosis</b>, and the analogy holds against the code: a patient says <i>&ldquo;I have a headache&rdquo;</i>: a category of complaint, a few bytes of information, not a transfer of the headache. A deployment reports the abstract <i>shape</i> it saw; it receives a general strategy for that class of shape; it acts locally on local data. That exchange is drafted and tested, and transmits nothing today.',
+      'Model komunikasi yang dituju adalah <b>resep, bukan diagnosis</b>, dan analoginya bertahan saat bertemu kode: seorang pasien berkata <i>&ldquo;saya sakit kepala&rdquo;</i>: sebuah kategori keluhan, beberapa byte informasi, bukan pemindahan sakit kepalanya. Sebuah deployment melaporkan <i>bentuk</i> abstrak yang ia lihat; ia menerima strategi umum untuk kelas bentuk itu; ia bertindak lokal atas data lokal. Pertukaran itu sudah didraf dan diuji, dan hari ini tidak mengirim apa pun.',
     )}</p>
 
     ${h2(3, 'refuses', 'What it refuses to be', 'Yang ia tolak jadi')}
@@ -163,12 +163,12 @@ ${items}
         tenDays.callsMedian +
         ' abuse calls before friction is advised, against ' +
         data.headStarts[0].callsMedian +
-        ' with no history at all &mdash; and the curve flattens rather than climbing, because decay caps how much a history can be worth.',
+        ' with no history at all, and the curve flattens rather than climbing, because decay caps how much a history can be worth.',
       'Satu hasil, karena inilah tesisnya dalam sekali baca: <b>memori punya harga, dan harganya berbatas</b>. Entitas dengan sepuluh hari riwayat jujur menyerap ' +
         tenDays.callsMedian +
         ' panggilan abusif sebelum friksi disarankan, dibanding ' +
         data.headStarts[0].callsMedian +
-        ' tanpa riwayat sama sekali &mdash; dan kurvanya mendatar, bukan memanjat, karena decay membatasi seberapa berharga sebuah riwayat bisa jadi.',
+        ' tanpa riwayat sama sekali, dan kurvanya mendatar, bukan memanjat, karena decay membatasi seberapa berharga sebuah riwayat bisa jadi.',
     )}</p>
 
     ${figure(
@@ -204,8 +204,8 @@ ${items}
       <tbody>
         <tr><td>${t('Trust model, decay, retention', 'Model trust, decay, retensi')}</td><td class="yes">${t('built, tested', 'dibangun, teruji')}</td></tr>
         <tr><td>${t('Decision layer and its three ceilings', 'Lapis keputusan dan tiga ceiling-nya')}</td><td class="yes">${t('built, tested', 'dibangun, teruji')}</td></tr>
-        <tr><td>${t('Constraint taxonomy', 'Taksonomi constraint')}</td><td class="yes">${t('closed \u2014 ' + parameters.constraintClasses.length + ' classes over 6 proof sources', 'tertutup \u2014 ' + parameters.constraintClasses.length + ' kelas di atas 6 sumber bukti')}</td></tr>
-        <tr><td>${t('Weak-signal catalogue', 'Katalog weak signal')}</td><td class="yes">${t('closed \u2014 ' + parameters.signals.length + ' signals, no thresholds, a collector each', 'tertutup \u2014 ' + parameters.signals.length + ' sinyal, tanpa ambang, masing-masing punya collector')}</td></tr>
+        <tr><td>${t('Constraint taxonomy', 'Taksonomi constraint')}</td><td class="yes">${t('closed: ' + parameters.constraintClasses.length + ' classes over 6 proof sources', 'tertutup: ' + parameters.constraintClasses.length + ' kelas di atas 6 sumber bukti')}</td></tr>
+        <tr><td>${t('Weak-signal catalogue', 'Katalog weak signal')}</td><td class="yes">${t('closed: ' + parameters.signals.length + ' signals, no thresholds, a collector each', 'tertutup: ' + parameters.signals.length + ' sinyal, tanpa ambang, masing-masing punya collector')}</td></tr>
         <tr><td>${t('Durable store + conformance kit', 'Store tahan restart + kit conformance')}</td><td class="yes">${t('two implementations, both conformant', 'dua implementasi, keduanya conform')}</td></tr>
         <tr><td>${t('Anomaly classifier', 'Classifier anomali')}</td><td class="part">${t('built as distance-to-reference, deliberately untrained', 'dibangun sebagai jarak ke rujukan, sengaja tidak dilatih')}</td></tr>
         <tr><td>${t('Wire format', 'Format wire')}</td><td class="part">${t('v0.1 drafted and tested, never round-tripped', 'v0.1 didraf dan diuji, belum pernah di-round-trip')}</td></tr>
@@ -214,16 +214,16 @@ ${items}
       </tbody>
     </table>
     <p class="tnote">${t(
-      'The last row is the important one. Generated traffic can <i>falsify</i> a threshold &mdash; and has, ' +
+      'The last row is the important one. Generated traffic can <i>falsify</i> a threshold (and has, ' +
         data.falsifiedCount +
-        ' times &mdash; but it cannot calibrate one, because the distribution it was drawn from was invented. Legitimate personas currently take no friction (' +
+        ' times), but it cannot calibrate one, because the distribution it was drawn from was invented. Legitimate personas currently take no friction (' +
         (replay.ixfe.falsePositives + replay.healthme.falsePositives) +
         ' false positives across ' +
         personas +
         ' personas) and no adversary walks through untouched. Neither fact is evidence about real users.',
-      'Baris terakhir yang penting. Trafik buatan bisa <i>memfalsifikasi</i> ambang &mdash; dan sudah, ' +
+      'Baris terakhir yang penting. Trafik buatan bisa <i>memfalsifikasi</i> ambang (dan sudah, ' +
         data.falsifiedCount +
-        ' kali &mdash; tapi tidak bisa mengkalibrasinya, karena distribusi asalnya diciptakan sendiri. Persona yang sah saat ini tidak menerima friksi (' +
+        ' kali), tapi tidak bisa mengkalibrasinya, karena distribusi asalnya diciptakan sendiri. Persona yang sah saat ini tidak menerima friksi (' +
         (replay.ixfe.falsePositives + replay.healthme.falsePositives) +
         ' false positive dari ' +
         personas +
@@ -255,8 +255,8 @@ ${portals}
     file: 'index.html',
     titleEn: 'Scorpio Guard',
     titleId: 'Scorpio Guard',
-    subtitleEn: 'Trust is a spectrum, not a verdict. A local, advisory trust-evaluation library &mdash; published at 0.1.0, and calibrated against nothing.',
-    subtitleId: 'Trust itu spektrum, bukan putusan. Library evaluasi trust yang lokal dan bersifat saran &mdash; terbit di 0.1.0, dan belum dikalibrasi terhadap apa pun.',
+    subtitleEn: 'Trust is a spectrum, not a verdict. A local, advisory trust-evaluation library, published at 0.1.0 and calibrated against nothing.',
+    subtitleId: 'Trust itu spektrum, bukan putusan. Library evaluasi trust yang lokal dan bersifat saran, terbit di 0.1.0 dan belum dikalibrasi terhadap apa pun.',
     sections,
     body,
   });

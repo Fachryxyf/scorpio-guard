@@ -27,8 +27,8 @@ export function coverage(data) {
 
   const body = `
     <p class="lead">${t(
-      `The three headline numbers, ${testCount} tests, ${decisionCount} decisions, ${all.length} personas: and what sits behind each one. Every figure here is generated at build time; nothing was typed by hand.`,
-      `Tiga angka utama \u2014 ${testCount} test, ${decisionCount} keputusan, ${all.length} persona \u2014 dan apa yang ada di balik masing-masing. Setiap angka di sini dibangkitkan saat build; tidak ada yang diketik manual.`,
+      `The three headline numbers (${testCount} tests, ${decisionCount} decisions, ${all.length} personas), and what sits behind each one. Every figure here is generated at build time; nothing was typed by hand.`,
+      `Tiga angka utama (${testCount} test, ${decisionCount} keputusan, ${all.length} persona) dan apa yang ada di balik masing-masing. Setiap angka di sini dibangkitkan saat build; tidak ada yang diketik manual.`,
     )}</p>
 
     ${h2(1, 'counts', 'What the numbers are', 'Apa angka-angkanya')}
@@ -40,8 +40,8 @@ export function coverage(data) {
         <tr><th>Tests</th><td class="num"><b>${testCount}</b></td></tr>
         <tr><th>${t('Numbered decisions', 'Keputusan bernomor')}</th><td class="num"><b>${decisionCount}</b></td></tr>
         <tr><th>${t('Personas replayed', 'Persona diputar')}</th><td class="num"><b>${all.length}</b></td></tr>
-        <tr><th>&mdash; ${t('legitimate', 'sah')}</th><td class="num">${legit.length}</td></tr>
-        <tr><th>&mdash; adversary</th><td class="num">${adversary.length}</td></tr>
+        <tr><th>&ndash; ${t('legitimate', 'sah')}</th><td class="num">${legit.length}</td></tr>
+        <tr><th>&ndash; adversary</th><td class="num">${adversary.length}</td></tr>
         <tr><th>${t('False positives across all personas', 'False positive dari semua persona')}</th><td class="num">${totalFP}</td></tr>
         <tr><th>${t('Adversaries that walked through untouched', 'Adversary yang lolos tanpa terasa')}</th><td class="num">${totalWalk}</td></tr>
       </tbody>
@@ -50,8 +50,8 @@ export function coverage(data) {
     ${h2(2, 'tests', 'Test coverage', 'Cakupan test')}
 
     <p>${t(
-      `${testCount} tests run on every push via CI. They are not a coverage percentage; they pin the specific numeric and semantic properties the design argues from \u2014 decay factors, stage boundaries, ceiling behavior, signal mass caps, protocol degradation rules, store conformance. A threshold change that no test pins is a bug in the test suite, not a feature of the library.`,
-      `${testCount} test dijalankan di setiap push lewat CI. Mereka bukan persentase coverage; mereka memaku properti numerik dan semantik spesifik yang dipakai desain sebagai argumen \u2014 faktor decay, batas tahap, perilaku ceiling, cap massa sinyal, aturan degradasi protokol, konformansi store. Perubahan ambang yang tak dipaku test mana pun adalah bug dalam test suite-nya, bukan fitur library.`,
+      `${testCount} tests run on every push via CI. They are not a coverage percentage; they pin the specific numeric and semantic properties the design argues from: decay factors, stage boundaries, ceiling behavior, signal mass caps, protocol degradation rules, store conformance. A threshold change that no test pins is a bug in the test suite, not a feature of the library.`,
+      `${testCount} test dijalankan di setiap push lewat CI. Mereka bukan persentase coverage; mereka memaku properti numerik dan semantik spesifik yang dipakai desain sebagai argumen, faktor decay, batas tahap, perilaku ceiling, cap massa sinyal, aturan degradasi protokol, konformansi store. Perubahan ambang yang tak dipaku test mana pun adalah bug dalam test suite-nya, bukan fitur library.`,
     )}</p>
 
     <table>
@@ -89,8 +89,8 @@ ${all.map(personaRow).join('\n')}
     ${h2(4, 'decisions', 'Decision record', 'Rekaman keputusan')}
 
     <p>${t(
-      `${decisionCount} numbered decisions in DECISIONS.md, each recording the question, the answer, and what it commits the implementation to. The count is parsed from the file at build time \u2014 adding D59 makes it ${decisionCount + 1} without touching this page.`,
-      `${decisionCount} keputusan bernomor di DECISIONS.md, masing-masing merekam pertanyaan, jawaban, dan komitmennya pada implementasi. Jumlahnya diparse dari file saat build \u2014 menambah D59 membuatnya ${decisionCount + 1} tanpa menyentuh halaman ini.`,
+      `${decisionCount} numbered decisions in DECISIONS.md, each recording the question, the answer, and what it commits the implementation to. The count is parsed from the file at build time: adding D59 makes it ${decisionCount + 1} without touching this page.`,
+      `${decisionCount} keputusan bernomor di DECISIONS.md, masing-masing merekam pertanyaan, jawaban, dan komitmennya pada implementasi. Jumlahnya diparse dari file saat build, menambah D59 membuatnya ${decisionCount + 1} tanpa menyentuh halaman ini.`,
     )}</p>
 
     <table>
@@ -117,7 +117,7 @@ ${data.design.parts.map((part) => {
       <thead><tr><th></th><th>${t('Status', 'Status')}</th></tr></thead>
       <tbody>
         <tr><th>${t('Calibrated against a real population', 'Terkalibrasi terhadap populasi nyata')}</th><td class="no">${t('no', 'belum')}</td></tr>
-        <tr><th>${t('Wire format round-tripped', 'Format wire sudah di-round-trip')}</th><td class="no">${t('never \u2014 nothing transmits yet', 'belum pernah \u2014 belum ada yang dikirim')}</td></tr>
+        <tr><th>${t('Wire format round-tripped', 'Format wire sudah di-round-trip')}</th><td class="no">${t('never; nothing transmits yet', 'belum pernah; belum ada yang dikirim')}</td></tr>
         <tr><th>${t('Anomaly reference trained', 'Rujukan anomali dilatih')}</th><td class="no">${t('deliberately untrained', 'sengaja tidak dilatih')}</td></tr>
         <tr><th>${t('Signal false-positive stories', 'Cerita false-positive tiap sinyal')}</th><td class="part">${t('collectors built, stories not earned', 'collector dibangun, ceritanya belum didapat')}</td></tr>
       </tbody>

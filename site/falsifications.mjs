@@ -31,8 +31,8 @@ export const FALSIFICATIONS = [
   {
     ref: 'D49',
     source: 'personas',
-    en: 'The saturation guard did not do what it claimed. Farming produces a high mean, a high mean proposes <code>ALLOW</code>, and a ceiling can only lower a decision &mdash; so the D37 gate was unobservable for exactly the entity it targeted. Measured: 300 uniform positives absorbed 17 strong negatives before the advice moved.',
-    id: 'Saturation guard tidak melakukan apa yang diklaimnya. Farming menghasilkan mean tinggi, mean tinggi mengusulkan <code>ALLOW</code>, dan ceiling hanya bisa menurunkan keputusan &mdash; jadi gate D37 tak teramati justru bagi entitas yang ia sasar. Terukur: 300 positive seragam menyerap 17 negative kuat sebelum sarannya bergerak.',
+    en: 'The saturation guard did not do what it claimed. Farming produces a high mean, a high mean proposes <code>ALLOW</code>, and a ceiling can only lower a decision; so the D37 gate was unobservable for exactly the entity it targeted. Measured: 300 uniform positives absorbed 17 strong negatives before the advice moved.',
+    id: 'Saturation guard tidak melakukan apa yang diklaimnya. Farming menghasilkan mean tinggi, mean tinggi mengusulkan <code>ALLOW</code>, dan ceiling hanya bisa menurunkan keputusan; jadi gate D37 tak teramati justru bagi entitas yang ia sasar. Terukur: 300 positive seragam menyerap 17 negative kuat sebelum sarannya bergerak.',
   },
   {
     ref: 'D57',
@@ -49,8 +49,8 @@ export const FALSIFICATIONS = [
   {
     ref: 'D57',
     source: 'live',
-    en: 'Weak signals on page views made the operator&rsquo;s own uptime check a false positive &mdash; a 20-request monitor reached <code>INCREASE_FRICTION</code> at step 15. Over HTTP alone an uptime monitor and a crawler are the same client. Signals are attached only to actions now, and the cost is stated rather than hidden: a crawler that only reads public pages walks through at <code>ALLOW</code>.',
-    id: 'Weak signal pada page view membuat uptime check operatornya sendiri jadi false positive &mdash; monitor 20 request mencapai <code>INCREASE_FRICTION</code> di langkah 15. Lewat HTTP saja, uptime monitor dan crawler adalah klien yang sama. Sinyal sekarang hanya menempel pada aksi, dan biayanya dinyatakan bukan disembunyikan: crawler yang cuma membaca halaman publik lolos di <code>ALLOW</code>.',
+    en: 'Weak signals on page views made the operator&rsquo;s own uptime check a false positive: a 20-request monitor reached <code>INCREASE_FRICTION</code> at step 15. Over HTTP alone an uptime monitor and a crawler are the same client. Signals are attached only to actions now, and the cost is stated rather than hidden: a crawler that only reads public pages walks through at <code>ALLOW</code>.',
+    id: 'Weak signal pada page view membuat uptime check operatornya sendiri jadi false positive: monitor 20 request mencapai <code>INCREASE_FRICTION</code> di langkah 15. Lewat HTTP saja, uptime monitor dan crawler adalah klien yang sama. Sinyal sekarang hanya menempel pada aksi, dan biayanya dinyatakan bukan disembunyikan: crawler yang cuma membaca halaman publik lolos di <code>ALLOW</code>.',
   },
   {
     ref: 'D57',

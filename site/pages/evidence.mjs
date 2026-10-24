@@ -77,7 +77,7 @@ export function evidence(data) {
         </tr>
         <tr>
           <th>${t('Certainty', 'Kepastian')}</th>
-          <td>${t('proven &mdash; the request could not have come from the system', 'terbukti &mdash; request itu tak mungkin berasal dari sistem')}</td>
+          <td>${t('proven; the request could not have come from the system', 'terbukti; request itu tak mungkin berasal dari sistem')}</td>
           <td>${t('inconclusive by construction', 'tidak konklusif secara konstruksi')}</td>
         </tr>
         <tr>
@@ -93,7 +93,7 @@ export function evidence(data) {
         <tr>
           <th>${t('Learned?', 'Dipelajari?')}</th>
           <td>${t('never. Nothing becomes impossible for being rare.', 'tidak pernah. Tak ada yang jadi mustahil karena jarang.')}</td>
-          <td>${t('no thresholds ship at all &mdash; see below', 'tidak ada ambang yang dikirim sama sekali &mdash; lihat di bawah')}</td>
+          <td>${t('no thresholds ship at all; see below', 'tidak ada ambang yang dikirim sama sekali; lihat di bawah')}</td>
         </tr>
       </tbody>
     </table>
@@ -104,8 +104,8 @@ export function evidence(data) {
     )}</p>
 
     <p>${t(
-      'One asymmetry is worth stating plainly, because it is where the certainty lives. <b>&ldquo;Hard&rdquo; describes the certainty of the violation, never the severity of the response.</b> A proven impossibility means <i>something is wrong</i> &mdash; it does not prove the caller did it, since an internal accounting bug looks identical from outside. So the default advice for a proven violation is <code>RESTRICT</code> rather than <code>BLOCK</code>: withholding the expensive part until a human looks is correct whether the cause is an attacker or your own ledger.',
-      'Satu asimetri perlu dinyatakan terang, karena di sanalah kepastiannya berada. <b>&ldquo;Hard&rdquo; menggambarkan kepastian pelanggarannya, bukan keparahan responsnya.</b> Ketidakmungkinan yang terbukti berarti <i>ada yang salah</i> &mdash; itu tidak membuktikan si pemanggil yang melakukannya, karena bug pembukuan internal tampak identik dari luar. Jadi saran default untuk pelanggaran terbukti adalah <code>RESTRICT</code>, bukan <code>BLOCK</code>: menahan bagian yang mahal sampai ada manusia yang melihat itu benar, entah penyebabnya penyerang atau ledger-mu sendiri.',
+      'One asymmetry is worth stating plainly, because it is where the certainty lives. <b>&ldquo;Hard&rdquo; describes the certainty of the violation, never the severity of the response.</b> A proven impossibility means <i>something is wrong</i>; it does not prove the caller did it, since an internal accounting bug looks identical from outside. So the default advice for a proven violation is <code>RESTRICT</code> rather than <code>BLOCK</code>: withholding the expensive part until a human looks is correct whether the cause is an attacker or your own ledger.',
+      'Satu asimetri perlu dinyatakan terang, karena di sanalah kepastiannya berada. <b>&ldquo;Hard&rdquo; menggambarkan kepastian pelanggarannya, bukan keparahan responsnya.</b> Ketidakmungkinan yang terbukti berarti <i>ada yang salah</i>; itu tidak membuktikan si pemanggil yang melakukannya, karena bug pembukuan internal tampak identik dari luar. Jadi saran default untuk pelanggaran terbukti adalah <code>RESTRICT</code>, bukan <code>BLOCK</code>: menahan bagian yang mahal sampai ada manusia yang melihat itu benar, entah penyebabnya penyerang atau ledger-mu sendiri.',
     )}</p>
 
     ${h2(2, 'classes', 'Seven classes of proof', 'Tujuh kelas bukti')}
@@ -139,10 +139,10 @@ ${[...bySource.entries()]
     <p class="tnote">${t(
       'Six sources, ' +
         parameters.constraintClasses.length +
-        ' classes &mdash; <code>reachability</code> licenses two, because a forbidden jump between page segments and a forbidden state transition are proved the same way but declared differently. The seventh class, <code>IMPOSSIBLE_UNISSUED_REFERENCE</code>, is the one the original five could not express: a reference the system never issued cannot have come from the system.',
+        ' classes: <code>reachability</code> licenses two, because a forbidden jump between page segments and a forbidden state transition are proved the same way but declared differently. The seventh class, <code>IMPOSSIBLE_UNISSUED_REFERENCE</code>, is the one the original five could not express: a reference the system never issued cannot have come from the system.',
       'Enam sumber, ' +
         parameters.constraintClasses.length +
-        ' kelas &mdash; <code>reachability</code> mengizinkan dua, karena lompatan terlarang antar segmen halaman dan transisi state terlarang dibuktikan dengan cara yang sama tapi dideklarasikan berbeda. Kelas ketujuh, <code>IMPOSSIBLE_UNISSUED_REFERENCE</code>, adalah yang tak bisa diungkapkan lima kelas awal: referensi yang sistemnya sendiri tak pernah keluarkan tak mungkin berasal dari sistem itu.',
+        ' kelas: <code>reachability</code> mengizinkan dua, karena lompatan terlarang antar segmen halaman dan transisi state terlarang dibuktikan dengan cara yang sama tapi dideklarasikan berbeda. Kelas ketujuh, <code>IMPOSSIBLE_UNISSUED_REFERENCE</code>, adalah yang tak bisa diungkapkan lima kelas awal: referensi yang sistemnya sendiri tak pernah keluarkan tak mungkin berasal dari sistem itu.',
     )}</p>
 
     ${h2(3, 'completeness', 'Declaring <code>hard</code> is itself a claim', 'Mendeklarasikan <code>hard</code> itu sendiri sebuah klaim')}
@@ -153,8 +153,8 @@ ${[...bySource.entries()]
     )}</p>
 
     <blockquote>${t(
-      '&ldquo;Paid work requires enough credits&rdquo; looks provable and is not. The client\u2019s view of its balance is stale by construction &mdash; jobs bill asynchronously, another tab may have spent the difference, and a lapsed subscription changes the answer without the open page hearing about it. One refused request is how a person discovers their balance; a hundred is a script.',
-      '&ldquo;Kerja berbayar butuh kredit yang cukup&rdquo; tampak bisa dibuktikan, dan ternyata tidak. Pandangan klien atas saldonya usang secara konstruksi &mdash; job ditagih asinkron, tab lain mungkin sudah membelanjakan selisihnya, dan langganan yang lewat mengubah jawabannya tanpa halaman yang terbuka mendengarnya. Satu request yang ditolak adalah cara seseorang menemukan saldonya; seratus adalah skrip.',
+      '&ldquo;Paid work requires enough credits&rdquo; looks provable and is not. The client\u2019s view of its balance is stale by construction; jobs bill asynchronously, another tab may have spent the difference, and a lapsed subscription changes the answer without the open page hearing about it. One refused request is how a person discovers their balance; a hundred is a script.',
+      '&ldquo;Kerja berbayar butuh kredit yang cukup&rdquo; tampak bisa dibuktikan, dan ternyata tidak. Pandangan klien atas saldonya usang secara konstruksi; job ditagih asinkron, tab lain mungkin sudah membelanjakan selisihnya, dan langganan yang lewat mengubah jawabannya tanpa halaman yang terbuka mendengarnya. Satu request yang ditolak adalah cara seseorang menemukan saldonya; seratus adalah skrip.',
     )}</blockquote>
 
     <p>${t(
@@ -165,10 +165,10 @@ ${[...bySource.entries()]
     <p>${t(
       'A violated <code>soft</code> invariant is worth <code>' +
         parameters.softViolationWeight +
-        '</code> &mdash; the same as strong negative evidence, not weak. The host deliberately declared that this should not happen; that it is not <i>provable</i> does not make it faint. Weak weight is reserved for signals the library inferred on its own.',
+        '</code>: the same as strong negative evidence, not weak. The host deliberately declared that this should not happen; that it is not <i>provable</i> does not make it faint. Weak weight is reserved for signals the library inferred on its own.',
       'Invariant <code>soft</code> yang dilanggar bernilai <code>' +
         parameters.softViolationWeight +
-        '</code> &mdash; sama dengan evidence negatif kuat, bukan lemah. Host sengaja mendeklarasikan bahwa ini seharusnya tak terjadi; bahwa ia tak <i>terbukti</i> tidak membuatnya samar. Bobot lemah disimpan untuk sinyal yang library simpulkan sendiri.',
+        '</code>: sama dengan evidence negatif kuat, bukan lemah. Host sengaja mendeklarasikan bahwa ini seharusnya tak terjadi; bahwa ia tak <i>terbukti</i> tidak membuatnya samar. Bobot lemah disimpan untuk sinyal yang library simpulkan sendiri.',
     )}</p>
 
     <p>${t(
@@ -197,10 +197,10 @@ ${signalRows}
       </tbody>
     </table>
     <p class="tnote">${t(
-      'Three coarse weights rather than a per-signal number, because a continuous weight would imply calibration nobody has done &mdash; and the <i>ordering</i> is the only part likely to survive contact with real traffic. <b>Derived</b> means the library computes it from the retained window; <b>supplied</b> means it arrives from the browser collector or from the host. Total contribution per interaction is capped at ' +
+      'Three coarse weights rather than a per-signal number, because a continuous weight would imply calibration nobody has done, and the <i>ordering</i> is the only part likely to survive contact with real traffic. <b>Derived</b> means the library computes it from the retained window; <b>supplied</b> means it arrives from the browser collector or from the host. Total contribution per interaction is capped at ' +
         parameters.signalMassCap +
         ', so the whole catalogue firing at once is worth exactly one weak observation.',
-      'Tiga bobot kasar alih-alih angka per sinyal, karena bobot kontinu akan menyiratkan kalibrasi yang belum dilakukan siapa pun &mdash; dan <i>urutannya</i> adalah satu-satunya bagian yang mungkin bertahan saat bertemu trafik nyata. <b>Diturunkan</b> berarti library menghitungnya dari window yang disimpan; <b>disuplai</b> berarti ia datang dari collector browser atau dari host. Total sumbangan per interaksi dibatasi ' +
+      'Tiga bobot kasar alih-alih angka per sinyal, karena bobot kontinu akan menyiratkan kalibrasi yang belum dilakukan siapa pun, dan <i>urutannya</i> adalah satu-satunya bagian yang mungkin bertahan saat bertemu trafik nyata. <b>Diturunkan</b> berarti library menghitungnya dari window yang disimpan; <b>disuplai</b> berarti ia datang dari collector browser atau dari host. Total sumbangan per interaksi dibatasi ' +
         parameters.signalMassCap +
         ', jadi seluruh katalog yang menyala sekaligus bernilai tepat satu observasi lemah.',
     )}</p>
@@ -219,8 +219,8 @@ ${innocentRows}
     ${h2(5, 'nothresholds', 'Why the catalogue holds no thresholds', 'Kenapa katalognya tak memuat ambang')}
 
     <p>${t(
-      'Every entry names what is measured and what observing it is worth. Not one names <i>when it fires</i>. That is not an omission to be filled in later &mdash; it is the design.',
-      'Setiap entri menyebut apa yang diukur dan berapa nilainya kalau terobservasi. Tak satu pun menyebut <i>kapan ia menyala</i>. Itu bukan kekosongan yang akan diisi nanti &mdash; itu memang desainnya.',
+      'Every entry names what is measured and what observing it is worth. Not one names <i>when it fires</i>. That is not an omission to be filled in later: it is the design.',
+      'Setiap entri menyebut apa yang diukur dan berapa nilainya kalau terobservasi. Tak satu pun menyebut <i>kapan ia menyala</i>. Itu bukan kekosongan yang akan diisi nanti: itu memang desainnya.',
     )}</p>
 
     <ul>
@@ -246,8 +246,8 @@ ${innocentRows}
     ${h2(6, 'closed', 'Both lists are closed, and closed the same way', 'Kedua daftarnya tertutup, dan tertutup dengan cara yang sama')}
 
     <p>${t(
-      'Neither list is closed by exhausting attack shapes &mdash; that set is infinite and adversarial. Both are closed by exhausting <i>what can be observed at all</i>.',
-      'Kedua daftar tidak ditutup dengan menghabiskan bentuk-bentuk serangan &mdash; himpunan itu tak terbatas dan bersifat adversarial. Keduanya ditutup dengan menghabiskan <i>apa yang bisa diobservasi sama sekali</i>.',
+      'Neither list is closed by exhausting attack shapes; that set is infinite and adversarial. Both are closed by exhausting <i>what can be observed at all</i>.',
+      'Kedua daftar tidak ditutup dengan menghabiskan bentuk-bentuk serangan; himpunan itu tak terbatas dan bersifat adversarial. Keduanya ditutup dengan menghabiskan <i>apa yang bisa diobservasi sama sekali</i>.',
     )}</p>
 
     <div class="eq"><span class="eq-n">(4)</span>

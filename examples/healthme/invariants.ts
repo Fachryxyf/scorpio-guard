@@ -58,7 +58,7 @@ export type ApiCall = {
  *
  * `js/core.js` holds the only caller, and it is not fetched until the PIN
  * verifies. So a call with no successful unlock in the session did not come from
- * the application \u2014 provable from the app's own structure, not inferred from
+ * the application, provable from the app's own structure, not inferred from
  * how unusual it looks.
  */
 export const apiRequiresUnlock: Invariant = {
@@ -95,7 +95,7 @@ export const vaultRequiresUnlock: Invariant = {
  *
  * The PIN can only be submitted through a form that exists after render. A
  * populated field with zero interactions is the impossible idle action named in
- * the design notes \u2014 consistent with direct scripting rather than human input.
+ * the design notes, consistent with direct scripting rather than human input.
  *
  * Declared `soft`, not `hard`: assistive technology, password managers and paste
  * can all produce a populated field with few interaction events. The claim that

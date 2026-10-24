@@ -45,8 +45,8 @@ export type ObserverOptions = {
 /**
  * Treatments at or below `INCREASE_FRICTION` are read as "the guard would not
  * have stood in the way", which is what HealthMe's `allowed` means. Friction is
- * counted as agreement with allowing because HealthMe has no friction step \u2014 it
- * has only pass and lockout \u2014 so anything short of RESTRICT is closer to pass.
+ * counted as agreement with allowing because HealthMe has no friction step (it
+ * has only pass and lockout), so anything short of RESTRICT is closer to pass.
  */
 function permits(advice: Assessment['decision']): boolean {
   return advice === 'ALLOW' || advice === 'OBSERVE' || advice === 'INCREASE_FRICTION';
@@ -105,7 +105,7 @@ export function createObserver(options: ObserverOptions = {}) {
     records: (): readonly Record[] => records,
     forget: guard.forget,
 
-    /** Disagreements only \u2014 the whole point of running observationally. */
+    /** Disagreements only: the whole point of running observationally. */
     disagreements: (): readonly Record[] => records.filter((record) => !record.agrees),
 
     summary() {

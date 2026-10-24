@@ -79,8 +79,8 @@ export function model(data) {
     ${h2(1, 'entity', 'The entity', 'Entitasnya')}
 
     <p>${t(
-      'The unit of reference is an <b>entity</b>, and the library never decides what one is. The host supplies an opaque key &mdash; a session id, an account id, a salted hash of whatever it considers stable &mdash; and the guard holds one state per key. That is deliberate: choosing the key is choosing who you are willing to be wrong about, and the host is the only party that can make that choice legitimately.',
-      'Unit rujukannya adalah <b>entity</b>, dan library ini tidak pernah menentukan apa itu. Host memberi kunci opaque &mdash; id sesi, id akun, hash bersalt dari apa pun yang dianggapnya stabil &mdash; dan guard menyimpan satu state per kunci. Itu disengaja: memilih kuncinya berarti memilih tentang siapa kamu bersedia salah, dan host adalah satu-satunya pihak yang bisa membuat pilihan itu secara sah.',
+      'The unit of reference is an <b>entity</b>, and the library never decides what one is. The host supplies an opaque key (a session id, an account id, a salted hash of whatever it considers stable), and the guard holds one state per key. That is deliberate: choosing the key is choosing who you are willing to be wrong about, and the host is the only party that can make that choice legitimately.',
+      'Unit rujukannya adalah <b>entity</b>, dan library ini tidak pernah menentukan apa itu. Host memberi kunci opaque (id sesi, id akun, hash bersalt dari apa pun yang dianggapnya stabil), dan guard menyimpan satu state per kunci. Itu disengaja: memilih kuncinya berarti memilih tentang siapa kamu bersedia salah, dan host adalah satu-satunya pihak yang bisa membuat pilihan itu secara sah.',
     )}</p>
 
     <p>${t(
@@ -136,7 +136,7 @@ export function model(data) {
       <tbody>
         <tr>
           <th>${t('nothing yet (the prior)', 'belum ada (prior-nya)')}</th>
-          <td class="num">&mdash;</td>
+          <td class="num">&ndash;</td>
           <td class="num">${prior.mean}</td>
           <td class="num">${prior.variance}</td>
           <td class="num">${prior.mass}</td>
@@ -163,14 +163,14 @@ ${singleObservation
     <p class="tnote">${t(
       'Weights are symmetric and ' +
         parameters.weights.strong / parameters.weights.weak +
-        ':1 strong to weak. Symmetry is a claim: nothing is learned faster in the punishing direction than in the forgiving one. The last row is the guarantee that measurement cannot manufacture a verdict &mdash; an interaction that trips <i>every</i> signal in the catalogue contributes ' +
+        ':1 strong to weak. Symmetry is a claim: nothing is learned faster in the punishing direction than in the forgiving one. The last row is the guarantee that measurement cannot manufacture a verdict: an interaction that trips <i>every</i> signal in the catalogue contributes ' +
         parameters.signalMassCap +
         ', which leaves n = ' +
         (prior.mass + parameters.signalMassCap) +
         ', still inside the stage where the trust dimension asks for nothing.',
       'Bobotnya simetris dan ' +
         parameters.weights.strong / parameters.weights.weak +
-        ':1 antara strong dan weak. Simetri itu sebuah klaim: tak ada yang dipelajari lebih cepat ke arah menghukum daripada ke arah memaafkan. Baris terakhir adalah jaminan bahwa pengukuran tak bisa memproduksi putusan &mdash; interaksi yang memicu <i>semua</i> sinyal di katalog menyumbang ' +
+        ':1 antara strong dan weak. Simetri itu sebuah klaim: tak ada yang dipelajari lebih cepat ke arah menghukum daripada ke arah memaafkan. Baris terakhir adalah jaminan bahwa pengukuran tak bisa memproduksi putusan: interaksi yang memicu <i>semua</i> sinyal di katalog menyumbang ' +
         parameters.signalMassCap +
         ', yang menyisakan n = ' +
         (prior.mass + parameters.signalMassCap) +
@@ -213,8 +213,8 @@ ${singleObservation
     </figure>
 
     <p>${t(
-      'Evidence is applied <i>decay-then-add</i>, and the order is load-bearing. It bounds accumulated mass for a party arriving at a steady interval, where add-then-decay-on-read would let it grow without limit &mdash; which is what would make trust farmable by patience alone.',
-      'Evidence diterapkan <i>decay-lalu-tambah</i>, dan urutannya menentukan. Itu membatasi massa terakumulasi untuk pihak yang datang pada interval tetap, sementara tambah-lalu-decay-saat-dibaca akan membuatnya tumbuh tanpa batas &mdash; yang justru membuat trust bisa di-farming hanya dengan kesabaran.',
+      'Evidence is applied <i>decay-then-add</i>, and the order is load-bearing. It bounds accumulated mass for a party arriving at a steady interval, where add-then-decay-on-read would let it grow without limit, which is what would make trust farmable by patience alone.',
+      'Evidence diterapkan <i>decay-lalu-tambah</i>, dan urutannya menentukan. Itu membatasi massa terakumulasi untuk pihak yang datang pada interval tetap, sementara tambah-lalu-decay-saat-dibaca akan membuatnya tumbuh tanpa batas, yang justru membuat trust bisa di-farming hanya dengan kesabaran.',
     )}</p>
 
     <div class="eq"><span class="eq-n">(3)</span>
@@ -264,10 +264,10 @@ ${data.massBound
 
     <dl class="compact">
       <dt>ALLOW</dt><dd>${t('Proceed. The default, and where a legitimate visitor should live permanently.', 'Lanjut. Default-nya, dan tempat pengunjung yang sah semestinya tinggal permanen.')}</dd>
-      <dt>OBSERVE</dt><dd>${t('Proceed, and record. Costs the user nothing and tells the host something &mdash; the only rung that influences without intervening.', 'Lanjut, dan catat. Tidak memakan biaya pengguna dan memberi tahu host sesuatu &mdash; satu-satunya tingkat yang memengaruhi tanpa mengintervensi.')}</dd>
-      <dt>INCREASE_FRICTION</dt><dd>${t('The first rung a real user would <i>feel</i>. It is therefore both the false-positive line and the line at which abuse starts to cost something &mdash; one threshold, read from two sides.', 'Tingkat pertama yang benar-benar <i>terasa</i> oleh pengguna nyata. Karena itu ia sekaligus garis false positive dan garis di mana penyalahgunaan mulai memakan biaya &mdash; satu ambang, dibaca dari dua sisi.')}</dd>
+      <dt>OBSERVE</dt><dd>${t('Proceed, and record. Costs the user nothing and tells the host something, the only rung that influences without intervening.', 'Lanjut, dan catat. Tidak memakan biaya pengguna dan memberi tahu host sesuatu, satu-satunya tingkat yang memengaruhi tanpa mengintervensi.')}</dd>
+      <dt>INCREASE_FRICTION</dt><dd>${t('The first rung a real user would <i>feel</i>. It is therefore both the false-positive line and the line at which abuse starts to cost something, one threshold, read from two sides.', 'Tingkat pertama yang benar-benar <i>terasa</i> oleh pengguna nyata. Karena itu ia sekaligus garis false positive dan garis di mana penyalahgunaan mulai memakan biaya, satu ambang, dibaca dari dua sisi.')}</dd>
       <dt>RESTRICT</dt><dd>${t('Withhold the expensive or dangerous part, serve the rest.', 'Tahan bagian yang mahal atau berbahaya, layani sisanya.')}</dd>
-      <dt>BLOCK</dt><dd>${t('Refuse. Advice only &mdash; the library has no mechanism to enforce it and is not entitled to one.', 'Tolak. Hanya saran &mdash; library ini tak punya mekanisme untuk menegakkannya dan tidak berhak atasnya.')}</dd>
+      <dt>BLOCK</dt><dd>${t('Refuse. Advice only: the library has no mechanism to enforce it and is not entitled to one.', 'Tolak. Hanya saran: library ini tak punya mekanisme untuk menegakkannya dan tidak berhak atasnya.')}</dd>
     </dl>
 
     <table>
@@ -289,8 +289,8 @@ ${bands
       </tbody>
     </table>
     <p class="tnote">${t(
-      'Each band is read at its <i>least</i> interventionist rung, because a ceiling can only lower a decision &mdash; starting at the gentler end is what leaves the ceilings able to express themselves at all.',
-      'Setiap band dibaca pada tingkat yang <i>paling sedikit</i> mengintervensi, karena ceiling hanya bisa menurunkan keputusan &mdash; memulai dari ujung yang lebih lunak itulah yang membuat ceiling masih bisa berbicara.',
+      'Each band is read at its <i>least</i> interventionist rung, because a ceiling can only lower a decision: starting at the gentler end is what leaves the ceilings able to express themselves at all.',
+      'Setiap band dibaca pada tingkat yang <i>paling sedikit</i> mengintervensi, karena ceiling hanya bisa menurunkan keputusan: memulai dari ujung yang lebih lunak itulah yang membuat ceiling masih bisa berbicara.',
     )}</p>
 
     ${h2(6, 'ceilings', 'Three ceilings, and the lowest binds', 'Tiga ceiling, dan yang terendah yang mengikat')}
@@ -312,8 +312,8 @@ ${bands
       </tbody>
     </table>
     <p class="tnote">${t(
-      'An unknown entity contributes nothing: with no evidence, the trust dimension has no standing to ask for anything. It does not force <code>ALLOW</code> either &mdash; a proven violation still reaches the decision layer on its own authority. The <code>developing</code> ceiling was <code>INCREASE_FRICTION</code> until generated traffic gave two mistyped PINs and an autofilled password manager exactly that; see the Results chapter.',
-      'Entitas unknown tidak menyumbang apa pun: tanpa evidence, dimensi trust tak berhak menuntut apa pun. Ia juga tidak memaksa <code>ALLOW</code> &mdash; pelanggaran yang terbukti tetap sampai ke lapis keputusan atas otoritasnya sendiri. Ceiling <code>developing</code> dulunya <code>INCREASE_FRICTION</code> sampai trafik buatan memberikan tepat itu pada dua PIN salah ketik dan satu password manager yang autofill; lihat bab Hasil.',
+      'An unknown entity contributes nothing: with no evidence, the trust dimension has no standing to ask for anything. It does not force <code>ALLOW</code> either: a proven violation still reaches the decision layer on its own authority. The <code>developing</code> ceiling was <code>INCREASE_FRICTION</code> until generated traffic gave two mistyped PINs and an autofilled password manager exactly that; see the Results chapter.',
+      'Entitas unknown tidak menyumbang apa pun: tanpa evidence, dimensi trust tak berhak menuntut apa pun. Ia juga tidak memaksa <code>ALLOW</code>: pelanggaran yang terbukti tetap sampai ke lapis keputusan atas otoritasnya sendiri. Ceiling <code>developing</code> dulunya <code>INCREASE_FRICTION</code> sampai trafik buatan memberikan tepat itu pada dua PIN salah ketik dan satu password manager yang autofill; lihat bab Hasil.',
     )}</p>
 
     <table>
@@ -337,8 +337,8 @@ ${parameters.uncertaintyBands
     )}</p>
 
     <p>${t(
-      'That rule has a consequence the project records rather than hides: it protects a broken-but-legitimate client &mdash; a cron with a stale token, retrying uniformly &mdash; from <code>BLOCK</code>, which is the central constraint working. It also leaves a deliberate bot at <code>INCREASE_FRICTION</code> instead of <code>RESTRICT</code>, <i>because</i> behaving mechanically is what withholds the escalation. Which effect dominates is a question about real populations, so the behavior is left alone and the claim it was introduced under has been withdrawn.',
-      'Aturan itu punya konsekuensi yang proyek ini catat, bukan sembunyikan: ia melindungi klien yang rusak-tapi-sah &mdash; cron dengan token kedaluwarsa yang mencoba ulang secara seragam &mdash; dari <code>BLOCK</code>, dan itu constraint utamanya bekerja. Ia juga meninggalkan bot yang sengaja di <code>INCREASE_FRICTION</code> alih-alih <code>RESTRICT</code>, <i>karena</i> berperilaku mekanis itulah yang menahan eskalasinya. Efek mana yang dominan adalah pertanyaan tentang populasi nyata, jadi perilakunya dibiarkan dan klaim yang menyertainya ditarik.',
+      'That rule has a consequence the project records rather than hides: it protects a broken-but-legitimate client (a cron with a stale token, retrying uniformly) from <code>BLOCK</code>, which is the central constraint working. It also leaves a deliberate bot at <code>INCREASE_FRICTION</code> instead of <code>RESTRICT</code>, <i>because</i> behaving mechanically is what withholds the escalation. Which effect dominates is a question about real populations, so the behavior is left alone and the claim it was introduced under has been withdrawn.',
+      'Aturan itu punya konsekuensi yang proyek ini catat, bukan sembunyikan: ia melindungi klien yang rusak-tapi-sah (cron dengan token kedaluwarsa yang mencoba ulang secara seragam) dari <code>BLOCK</code>, dan itu constraint utamanya bekerja. Ia juga meninggalkan bot yang sengaja di <code>INCREASE_FRICTION</code> alih-alih <code>RESTRICT</code>, <i>karena</i> berperilaku mekanis itulah yang menahan eskalasinya. Efek mana yang dominan adalah pertanyaan tentang populasi nyata, jadi perilakunya dibiarkan dan klaim yang menyertainya ditarik.',
     )}</p>
 
     ${h2(7, 'trajectory', 'What accumulation actually looks like', 'Bentuk akumulasinya sebenarnya')}
@@ -355,10 +355,10 @@ ${parameters.uncertaintyBands
       ${stepFig}
       <figcaption>${t(
         '<b>Figure 3.</b> The same three parties, as advice. The staircase is the point: nothing is smooth, because the output is a rung. The adversary crosses into <code>INCREASE_FRICTION</code> at interaction ' +
-          (data.firstReached.find((run) => run.label === 'adversary').firstReached.INCREASE_FRICTION ?? '\u2014') +
+          (data.firstReached.find((run) => run.label === 'adversary').firstReached.INCREASE_FRICTION ?? '\u2013') +
           ', and neither positive-earning party ever leaves the gentle end.',
         '<b>Gambar 3.</b> Tiga pihak yang sama, sebagai saran. Bentuk tangganya itulah intinya: tak ada yang mulus, karena keluarannya adalah tingkat. Adversary-nya menyeberang ke <code>INCREASE_FRICTION</code> pada interaksi ' +
-          (data.firstReached.find((run) => run.label === 'adversary').firstReached.INCREASE_FRICTION ?? '\u2014') +
+          (data.firstReached.find((run) => run.label === 'adversary').firstReached.INCREASE_FRICTION ?? '\u2013') +
           ', dan tak satu pun pihak yang mengumpulkan positive pernah meninggalkan ujung yang lunak.',
       )}</figcaption>
     </figure>

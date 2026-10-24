@@ -13,7 +13,7 @@ export function record(data) {
           (entry) => `        <tr>
           <th><a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md#${entry.anchor}">${entry.id}</a></th>
           <td>${entry.superseded ? `<s>${entry.title}</s> <em>${t('superseded', 'digantikan')}</em>` : entry.title}</td>
-          <td><code>${entry.files || '\u2014'}</code></td>
+          <td><code>${entry.files || '\u2013'}</code></td>
         </tr>`,
         )
         .join('\n');
@@ -46,7 +46,7 @@ ${rows}
         'Seberapa banyak yang sudah terkumpul, n = α + β setelah decay. Massa adalah banyak keyakinan; trust adalah arahnya.')],
     ['stage', 'Epistemic stage', 'Tahap epistemik',
       t('unknown, developing, established, how much do I know?, read before trust answers what do I believe?',
-        'unknown, developing, established \u2014 seberapa banyak saya tahu? \u2014 dibaca sebelum trust menjawab apa yang saya yakini?')],
+        'unknown, developing, established (seberapa banyak saya tahu?), dibaca sebelum trust menjawab apa yang saya yakini?')],
     ['hard-constraint', 'Hard constraint', 'Constraint hard',
       t('A violation that is a proof, not a probability. Declaring hard claims both determinism and completeness over its scope.',
         'Pelanggaran yang merupakan bukti, bukan probabilitas. Mendeklarasikan hard menegaskan determinisme dan kelengkapan atas scope-nya sekaligus.')],

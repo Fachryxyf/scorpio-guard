@@ -21,8 +21,8 @@ export function protocol(data) {
 
   const body = `
     <p class="lead">${t(
-      'The protocol is the one part designed to outlive this library. It defines what may cross a network between deployments that share nothing but vocabulary \u2014 and it transmits nothing today, by design.',
-      'Protokol adalah satu bagian yang dirancang untuk hidup lebih lama dari library ini. Ia mendefinisikan apa yang boleh melintasi jaringan antar deployment yang tak berbagi apa pun kecuali kosakata \u2014 dan hari ini tidak mengirim apa pun, memang disengaja.',
+      'The protocol is the one part designed to outlive this library. It defines what may cross a network between deployments that share nothing but vocabulary, and it transmits nothing today, by design.',
+      'Protokol adalah satu bagian yang dirancang untuk hidup lebih lama dari library ini. Ia mendefinisikan apa yang boleh melintasi jaringan antar deployment yang tak berbagi apa pun kecuali kosakata, dan hari ini tidak mengirim apa pun, memang disengaja.',
     )}</p>
 
     ${h2(1, 'shape', 'The shape', 'Bentuknya')}
@@ -94,8 +94,8 @@ ${parameters.entityBuckets
 }</pre>
 
     <p>${t(
-      'A prescription is advice about a class of shape, never a verdict about an entity \u2014 the server has never been told which entities were involved. A receiver must ignore an unrecognised strategy rather than escalate on it.',
-      'Resep adalah saran tentang kelas bentuk, bukan putusan tentang entitas \u2014 server tak pernah diberi tahu entitas mana yang terlibat. Penerima harus mengabaikan strategi yang tak dikenalinya alih-alih mengeskalasi karena itu.',
+      'A prescription is advice about a class of shape, never a verdict about an entity: the server has never been told which entities were involved. A receiver must ignore an unrecognised strategy rather than escalate on it.',
+      'Resep adalah saran tentang kelas bentuk, bukan putusan tentang entitas: server tak pernah diberi tahu entitas mana yang terlibat. Penerima harus mengabaikan strategi yang tak dikenalinya alih-alih mengeskalasi karena itu.',
     )}</p>
 
     ${h2(4, 'degrade', 'Degradation rules', 'Aturan degradasi')}

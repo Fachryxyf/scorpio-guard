@@ -40,8 +40,8 @@ export function limits(data) {
     ${h2(3, 'signals', 'The collectors\u2019 outstanding debt', 'Utang collector yang belum dibayar')}
 
     <p>${t(
-      'Every catalogued signal now has a collector (D51). Not one has met a real false positive. Each needs its own false-positive story from real traffic before any earns a production threshold \u2014 the catalogue\u2019s promise that every signal has a written innocent cause is kept on paper, not in evidence.',
-      'Setiap sinyal di katalog kini punya collector (D51). Belum satu pun bertemu false positive nyata. Masing-masing butuh cerita false-positive-nya sendiri dari trafik nyata sebelum ada yang layak dapat ambang produksi \u2014 janji katalog bahwa setiap sinyal punya sebab tak-bersalah tertulis terpenuhi di atas kertas, bukan dalam bukti.',
+      'Every catalogued signal now has a collector (D51). Not one has met a real false positive. Each needs its own false-positive story from real traffic before any earns a production threshold; the catalogue\u2019s promise that every signal has a written innocent cause is kept on paper, not in evidence.',
+      'Setiap sinyal di katalog kini punya collector (D51). Belum satu pun bertemu false positive nyata. Masing-masing butuh cerita false-positive-nya sendiri dari trafik nyata sebelum ada yang layak dapat ambang produksi; janji katalog bahwa setiap sinyal punya sebab tak-bersalah tertulis terpenuhi di atas kertas, bukan dalam bukti.',
     )}</p>
 
     ${h2(4, 'wire', 'What the protocol does not decide yet', 'Apa yang belum diputuskan protokol')}

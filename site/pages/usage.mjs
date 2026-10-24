@@ -18,7 +18,7 @@ export function usage(data) {
     ['weights.weak / .strong', `${parameters.weights.weak} / ${parameters.weights.strong}`, t('How much one observation moves the distribution. Symmetric on purpose.', 'Seberapa jauh satu observasi menggeser distribusi. Simetris dengan sengaja.')],
     ['softViolationWeight', parameters.softViolationWeight, t('What a soft violation weighs. Strong, not faint: the host declared this should not happen.', 'Bobot pelanggaran soft. Kuat, bukan samar: host menyatakan ini seharusnya tidak terjadi.')],
     ['windowSize', parameters.windowSize, t('Observations retained for anomaly features. Bounded on purpose.', 'Observasi yang disimpan untuk fitur anomali. Dibatasi dengan sengaja.')],
-    ['signalMassCap', parameters.signalMassCap, t('The most all weak signals of one interaction may contribute, one weak observation\u2019s worth.', 'Batas sumbangan semua weak signal dalam satu interaksi \u2014 setara satu observasi lemah.')],
+    ['signalMassCap', parameters.signalMassCap, t('The most all weak signals of one interaction may contribute, one weak observation\u2019s worth.', 'Batas sumbangan semua weak signal dalam satu interaksi: setara satu observasi lemah.')],
   ];
 
   const body = `
@@ -72,8 +72,8 @@ result.trace;      // why, in the order that decided it</pre>
     ${h2(3, 'invariants', 'Declare an invariant', 'Deklarasikan invariant')}
 
     <p>${t(
-      'Declaring <code>hard</code> asserts two things at once: violations are deterministic, and your edge set is <i>complete</i> for that scope. If you cannot enumerate the legitimate set honestly, declare <code>soft</code> \u2014 evidence rather than proof.',
-      'Mendeklarasikan <code>hard</code> menegaskan dua hal sekaligus: pelanggarannya deterministik, dan himpunan edge-mu <i>lengkap</i> untuk scope itu. Kalau kamu tak bisa mendaftar himpunan yang sah dengan jujur, deklarasikan <code>soft</code> \u2014 evidence, bukan bukti.',
+      'Declaring <code>hard</code> asserts two things at once: violations are deterministic, and your edge set is <i>complete</i> for that scope. If you cannot enumerate the legitimate set honestly, declare <code>soft</code>: evidence rather than proof.',
+      'Mendeklarasikan <code>hard</code> menegaskan dua hal sekaligus: pelanggarannya deterministik, dan himpunan edge-mu <i>lengkap</i> untuk scope itu. Kalau kamu tak bisa mendaftar himpunan yang sah dengan jujur, deklarasikan <code>soft</code>: evidence, bukan bukti.',
     )}</p>
 
 <pre>import { transitionGraph } from '@fachryxyf/scorpio-guard';
@@ -91,8 +91,8 @@ const checkoutOrder = transitionGraph({
     ${h2(4, 'signals', 'Report a signal', 'Laporkan sinyal')}
 
     <p>${t(
-      'Signals go by catalogue id and become negative evidence \u2014 nothing more. Unknown ids are ignored, not treated as suspicious, so a host cannot widen the vocabulary by inventing tokens.',
-      'Sinyal dikirim lewat id katalog dan menjadi evidence negatif \u2014 tidak lebih. ID yang tak dikenal diabaikan, bukan dianggap mencurigakan, jadi host tak bisa melebarkan kosakata dengan mengarang token.',
+      'Signals go by catalogue id and become negative evidence; nothing more. Unknown ids are ignored, not treated as suspicious, so a host cannot widen the vocabulary by inventing tokens.',
+      'Sinyal dikirim lewat id katalog dan menjadi evidence negatif; tidak lebih. ID yang tak dikenal diabaikan, bukan dianggap mencurigakan, jadi host tak bisa melebarkan kosakata dengan mengarang token.',
     )}</p>
 
 <pre>import { WEAK_SIGNALS } from '@fachryxyf/scorpio-guard';
@@ -121,8 +121,8 @@ const guard = createGuard({ store: sqliteStore({ path: './trust.db' }) });</pre>
     )}</p>
 
     <p>${t(
-      'A serverless filesystem is as ephemeral as the process on it, so neither store above survives a cold start &mdash; which is exactly what stopped the trust model from ever accumulating in production (D59). The KV store talks HTTP through <code>fetch</code>, so there is still nothing to install.',
-      'Filesystem serverless sama sementaranya dengan prosesnya, jadi kedua store di atas tak bertahan melewati cold start &mdash; dan itu tepat yang menghentikan model trust dari pernah berakumulasi di produksi (D59). Store KV bicara HTTP lewat <code>fetch</code>, jadi tetap tak ada yang perlu dipasang.',
+      'A serverless filesystem is as ephemeral as the process on it, so neither store above survives a cold start, which is exactly what stopped the trust model from ever accumulating in production (D59). The KV store talks HTTP through <code>fetch</code>, so there is still nothing to install.',
+      'Filesystem serverless sama sementaranya dengan prosesnya, jadi kedua store di atas tak bertahan melewati cold start, dan itu tepat yang menghentikan model trust dari pernah berakumulasi di produksi (D59). Store KV bicara HTTP lewat <code>fetch</code>, jadi tetap tak ada yang perlu dipasang.',
     )}</p>
 
 <pre>import { kvStore, upstashTransport } from '@fachryxyf/scorpio-guard/kv';
@@ -169,7 +169,7 @@ ${policyRows.map(([name, value, meaning]) => `        <tr><th><code>${name}</cod
       <dt>${t('Run observationally', 'Jalankan observasional')}</dt>
       <dd>${t(`Log advised vs actual alongside the trace. Decide later whether to wire it to behavior.`, `Catat saran vs yang dilakukan bersama jejaknya. Putuskan nanti apakah disambungkan ke perilaku.`)}</dd>
       <dt>Honour a deletion request</dt>
-      <dd><code>guard.forget(entity)</code> \u2014 ${t('same code path retention uses, horizon forced to zero.', 'jalur kode yang sama dipakai retensi, horizon dipaksa nol.')}</dd>
+      <dd><code>guard.forget(entity)</code>: ${t('same code path retention uses, horizon forced to zero.', 'jalur kode yang sama dipakai retensi, horizon dipaksa nol.')}</dd>
       <dt>${t('Collect interaction in the browser', 'Kumpulkan interaksi di peramban')}</dt>
       <dd><code>watchInteraction(element)</code> \u2192 counts events, never values. Call <code>stop()</code> on unmount.</dd>
       <dt>${t('Survive more than one process', 'Bertahan lebih dari satu proses')}</dt>
