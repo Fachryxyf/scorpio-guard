@@ -8,7 +8,11 @@
  * this build.
  *
  *   npm run site        # writes the HTML at the repo root, for GitHub Pages
- *   npm run site:check  # build, then assert the invariants below
+ *   npm run site:check  # renders in memory and fails if any committed page differs
+ *
+ * Nothing here may depend on the wall clock. A build that stamps today's date
+ * produces a diff every midnight, which would make site:check unable to tell real
+ * drift from the passage of time. Provenance is the package version instead.
  */
 import { execFileSync } from 'node:child_process';
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
@@ -25,9 +29,13 @@ import { usage } from './pages/usage.mjs';
 import { limits } from './pages/limits.mjs';
 import { coverage } from './pages/coverage.mjs';
 import { record } from './pages/record.mjs';
+import { notFound } from './pages/not-found.mjs';
 
+const check = process.argv.includes('--check');
 const here = dirname(fileURLToPath(import.meta.url));
 const root = resolve(here, '..');
+/** Everything the build emits lives here and is never committed. */
+const outDir = resolve(here, 'dist');
 
 /** Research figures, recomputed on every build so they cannot drift. */
 function researchData() {
@@ -62,7 +70,7 @@ function designRecord() {
 
   const parts = [];
   for (let i = 1; i < chunks.length; i += 2) {
-    const entries = [...chunks[i + 1].matchAll(/^## (D[\d.]+) — (.+)$/gm)].map((match) => ({
+    const entries = [...chunks[i + 1].matchAll(/^## (D[0-9a-z.]+) — (.+)$/gm)].map((match) => ({
       id: match[1],
       title: match[2].trim(),
       anchor: anchorFor(match[1], match[2].trim()),
@@ -105,10 +113,11 @@ function liveRun() {
 const research = researchData();
 const design = designRecord();
 const tests = testCount();
+const pkg = JSON.parse(readFileSync(resolve(root, 'package.json'), 'utf8'));
 
 const data = {
   ...research,
-  generatedAt: new Date(research.generatedAt).toISOString().slice(0, 10),
+  version: pkg.version,
   testCount: tests ?? 'n/a',
   decisionCount: design.count,
   /** Claims that generated traffic overturned. Counted from the record, not asserted. */
@@ -129,18 +138,43 @@ const pages = {
   'record.html': record,
 };
 
-mkdirSync(root, { recursive: true });
-let written = 0;
-for (const [file, render] of Object.entries(pages)) {
-  const html = render(data);
-  writeFileSync(resolve(root, file), html);
-  written += 1;
-  process.stdout.write(`  ${file.padEnd(16)} ${(html.length / 1024).toFixed(1)} KB\n`);
-}
-
-if (written !== CHAPTERS.length) {
-  console.error(`\n  ${CHAPTERS.length} chapters declared but ${written} pages written`);
+if (Object.keys(pages).length !== CHAPTERS.length) {
+  console.error(`\n  ${CHAPTERS.length} chapters declared but ${Object.keys(pages).length} pages defined`);
   process.exit(1);
 }
 
-console.log(`\n  ${written} pages · ${design.count} decisions · ${tests ?? 'n/a'} tests\n`);
+/**
+ * Published files that are not chapters: the 404 page and the two artefacts GitHub
+ * Pages wants beside it. Generated rather than hand-kept at the repo root, so a
+ * page has exactly one place it can come from.
+ */
+const extras = { '404.html': notFound };
+const staticFiles = {
+  CNAME: 'scorpio-guard.fachryxyf.com\n',
+  '.nojekyll': '',
+};
+
+if (!check) mkdirSync(outDir, { recursive: true });
+
+let written = 0;
+for (const [file, render] of Object.entries({ ...pages, ...extras })) {
+  const html = render(data);
+  if (!check) {
+    writeFileSync(resolve(outDir, file), html);
+    written += 1;
+  }
+  process.stdout.write(`  ${file.padEnd(16)} ${(html.length / 1024).toFixed(1)} KB\n`);
+}
+
+if (!check) {
+  for (const [name, content] of Object.entries(staticFiles)) {
+    writeFileSync(resolve(outDir, name), content);
+  }
+}
+
+const total = Object.keys(pages).length + Object.keys(extras).length;
+if (check) {
+  console.log(`\n  ${total} pages render · ${design.count} decisions · ${tests ?? 'n/a'} tests · nothing written\n`);
+} else {
+  console.log(`\n  ${total} pages → site/dist · ${design.count} decisions · ${tests ?? 'n/a'} tests\n`);
+}

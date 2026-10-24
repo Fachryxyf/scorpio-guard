@@ -419,6 +419,34 @@ export const SEGMENTS = [
   { id: 'reference', en: 'Reference', id_: 'Rujukan' },
 ];
 
+/**
+ * Theme and language bootstrap, inlined before first paint so neither page ever
+ * flashes the wrong palette. Shared by the chapter shell and the 404 page: a second
+ * copy of this would drift, and it has to run before CSS is applied to be useful.
+ */
+export function headBootstrap({ defaultTheme = 'light' } = {}) {
+  // With no stored preference, fall back to the system one, and to `defaultTheme`
+  // when the system expresses none. The 404 keeps a dark-first default because its
+  // panel is designed that way; every chapter is light-first.
+  const pick =
+    defaultTheme === 'dark'
+      ? "matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark'"
+      : "matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'";
+  return `<script>
+  (function () {
+    try {
+      var t = localStorage.getItem('sg-theme');
+      if (!t) t = ${pick};
+      document.documentElement.dataset.theme = t;
+      var l = localStorage.getItem('sg-lang');
+      if (!l) l = (navigator.language || 'en').toLowerCase().startsWith('id') ? 'id' : 'en';
+      document.documentElement.lang = l;
+    } catch (e) {}
+  })();
+</script>`;
+}
+
+/** HTML-escape text that did not come from a template already trusted. */
 export const escape = (value) =>
   String(value).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
@@ -520,18 +548,7 @@ ${sections
 <meta property="og:url" content="https://scorpio-guard.fachryxyf.com/${file === 'index.html' ? '' : file}">
 <meta property="og:type" content="${file === 'index.html' ? 'website' : 'article'}">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%23ffffff'/><text y='24' x='7' font-size='22' font-family='Georgia,serif'>S</text></svg>">
-<script>
-  (function () {
-    try {
-      var t = localStorage.getItem('sg-theme');
-      if (!t) t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-      document.documentElement.dataset.theme = t;
-      var l = localStorage.getItem('sg-lang');
-      if (!l) l = (navigator.language || 'en').toLowerCase().startsWith('id') ? 'id' : 'en';
-      document.documentElement.lang = l;
-    } catch (e) {}
-  })();
-</script>
+${headBootstrap()}
 <style>${CSS}</style>${extraHead}
 </head>
 <body>

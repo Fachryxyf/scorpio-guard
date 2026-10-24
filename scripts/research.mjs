@@ -459,7 +459,6 @@ const replay = {
 console.log(
   JSON.stringify(
     {
-      generatedAt: new Date().toISOString(),
       parameters,
       prior,
       singleObservation,

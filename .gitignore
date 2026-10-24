@@ -1,12 +1,22 @@
-adaptive-trust-guard-design-notes.md
-adaptive-trust-guard-part2-protocol-and-governance.md
-adaptive-trust-guard-pre-plan.md
+# macOS metadata
+.DS_Store
+
+# Governance runtime state: seals minted by the arbiter/aufsicht gateway at session
+# start. Machine-local, never part of the published record.
+.arbiter
+.aufsicht
+
+# Early design notes, kept on disk for reference but outside the published record.
+docs/design/adaptive-trust-guard-*.md
+
 node_modules/
 dist/
 *.tsbuildinfo
 
 # Recorded live traffic and the observer's trust state (D56). Real visitors' shape;
-# never committed.
+# never committed. `var/` is where the observer writes now; the bare filenames stay
+# listed so a run from the repository root, before that move, stays ignored too.
+var/
 live-traffic.jsonl
 sg-live.db
 sg-live.db-*

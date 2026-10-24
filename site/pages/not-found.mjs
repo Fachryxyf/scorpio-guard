@@ -1,25 +1,17 @@
-<!DOCTYPE html>
-<html lang="en" data-theme="dark">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>404 — nothing here | Scorpio Guard</title>
-<meta name="robots" content="noindex">
-<meta name="color-scheme" content="dark light">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><text y='25' x='3' font-size='24' font-family='monospace'>%26gt;</text></svg>">
-<script>
-  (function () {
-    try {
-      var t = localStorage.getItem('sg-theme');
-      if (!t) t = matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
-      document.documentElement.dataset.theme = t;
-      var l = localStorage.getItem('sg-lang');
-      if (!l) l = (navigator.language || 'en').toLowerCase().startsWith('id') ? 'id' : 'en';
-      document.documentElement.lang = l;
-    } catch (e) {}
-  })();
-</script>
-<style>
+/**
+ * The 404 page. D58.
+ *
+ * Deliberately not put through the chapter shell: it is the one page a reader
+ * reaches by accident, so it gets its own panel rather than a table of contents for
+ * a site they were not looking for. What it does share with every other page is the
+ * theme and language bootstrap, so a preference set elsewhere survives arriving here.
+ *
+ * Generated like every other page. It used to be a hand-written file at the repo
+ * root, which meant it carried its own copy of that bootstrap and drifted silently.
+ */
+import { headBootstrap, t } from '../layout.mjs';
+
+const CSS = String.raw`
   :root {
     --bg: #101211;
     --bg-2: #171a18;
@@ -107,14 +99,26 @@
   @media (prefers-reduced-motion: reduce) {
     * { animation: none !important; transition: none !important; }
   }
-</style>
+`;
+
+export function notFound() {
+  return `<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>404 — nothing here | Scorpio Guard</title>
+<meta name="robots" content="noindex">
+<meta name="color-scheme" content="dark light">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><text y='25' x='3' font-size='24' font-family='monospace'>%26gt;</text></svg>">
+${headBootstrap({ defaultTheme: 'dark' })}
+<style>${CSS}</style>
 </head>
 <body>
 <main class="box">
   <div class="chrome">
     <span class="dots">• • •</span>
-    <span data-lang="en">trust.eval — no route</span>
-    <span data-lang="id">trust.eval — rute kosong</span>
+    ${t('trust.eval — no route', 'trust.eval — rute kosong')}
     <span class="grow"></span>
     <button class="ctl" id="lang" type="button" aria-label="Switch language / Ganti bahasa"></button>
     <button class="ctl" id="theme" type="button" aria-label="Switch theme / Ganti tema"></button>
@@ -122,17 +126,19 @@
 
   <div class="pad">
     <p class="code">40<span>4</span></p>
-    <p class="label" data-lang="en">Route not found</p>
-    <p class="label" data-lang="id">Rute tidak ditemukan</p>
+    <p class="label">${t('Route not found', 'Rute tidak ditemukan')}</p>
 
-    <p data-lang="en">This whole site is one page. One. So the honest question here is not what broke — it is how you managed to get <em>this</em> far off the path.</p>
-    <p data-lang="id">Situs ini isinya cuma satu halaman. Satu. Jadi pertanyaannya bukan apa yang rusak, tapi gimana caranya kamu bisa nyasar sejauh <em>ini</em>.</p>
+    <p>${t(
+      'This whole site is one page. One. So the honest question here is not what broke — it is how you managed to get <em>this</em> far off the path.',
+      'Situs ini isinya cuma satu halaman. Satu. Jadi pertanyaannya bukan apa yang rusak, tapi gimana caranya kamu bisa nyasar sejauh <em>ini</em>.',
+    )}</p>
 
-    <p class="aside" data-lang="en">verdict: unknown, not untrusted — Beta(1,1)<span class="caret">_</span></p>
-    <p class="aside" data-lang="id">putusan: belum diketahui, bukan tak dipercaya — Beta(1,1)<span class="caret">_</span></p>
+    <p class="aside">${t(
+      'verdict: unknown, not untrusted — Beta(1,1)<span class="caret">_</span>',
+      'putusan: belum diketahui, bukan tak dipercaya — Beta(1,1)<span class="caret">_</span>',
+    )}</p>
 
-    <a class="home" href="/" data-lang="en">&larr; back to homepage</a>
-    <a class="home" href="/" data-lang="id">&larr; balik ke halaman utama</a>
+    <a class="home" href="/">${t('&larr; back to homepage', '&larr; balik ke halaman utama')}</a>
   </div>
 </main>
 
@@ -164,3 +170,5 @@
 </script>
 </body>
 </html>
+`;
+}

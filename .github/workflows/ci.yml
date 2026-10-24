@@ -29,3 +29,9 @@ jobs:
 
       - name: Verify the built package imports and runs
         run: node scripts/smoke.mjs
+
+      # Renders every page without writing anything, so a broken generator fails in
+      # CI rather than in the deploy. The published HTML is not committed; Pages
+      # builds it in .github/workflows/pages.yml.
+      - name: Verify the site generator renders every page
+        run: npm run site:check

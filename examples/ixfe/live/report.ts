@@ -18,7 +18,7 @@
  * with the numbers in front of it, and writing it here would be D45's mistake with
  * better data.
  *
- *   node --experimental-strip-types examples/ixfe/live/report.ts live-traffic.jsonl
+ *   node --experimental-strip-types examples/ixfe/live/report.ts var/live-traffic.jsonl
  */
 import { readFileSync } from 'node:fs';
 
@@ -167,7 +167,7 @@ export function perClient(records: readonly LiveRecord[]) {
 }
 
 if (process.argv[1]?.endsWith('report.ts')) {
-  const path = process.argv[2] ?? 'live-traffic.jsonl';
+  const path = process.argv[2] ?? 'var/live-traffic.jsonl';
   const records = parseRecords(readFileSync(path, 'utf8'));
   const summary = summarise(records);
 

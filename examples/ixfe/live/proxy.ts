@@ -32,14 +32,15 @@
  * Usage:
  *   SG_LIVE_SALT=<stable-secret> \
  *   node --experimental-strip-types examples/ixfe/live/proxy.ts \
- *     --origin http://127.0.0.1:4000 --port 4100 --out live-traffic.jsonl
+ *     --origin http://127.0.0.1:4000 --port 4100 --out var/live-traffic.jsonl
  *
  * Then point the tunnel at 4100 instead of 4000. Read the result with
  * `examples/ixfe/live/report.ts`.
  */
 import { createServer, request as httpRequest, type IncomingMessage, type ServerResponse } from 'node:http';
 import { createHash, randomBytes } from 'node:crypto';
-import { appendFileSync } from 'node:fs';
+import { appendFileSync, mkdirSync } from 'node:fs';
+import { dirname } from 'node:path';
 
 import { createGuard } from '../../../src/core/guard.ts';
 import { sqliteStore } from '../../../src/store/sqlite.ts';
@@ -216,9 +217,23 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null;
 }
 
+/**
+ * Where the observer writes by default. Both live under var/, which is ignored:
+ * the record is real visitors' shape and the SQLite file is their trust state, so
+ * neither belongs in the published working tree (D56).
+ */
+const LIVE_RECORDS_PATH = 'var/live-traffic.jsonl';
+const LIVE_STORE_PATH = 'var/sg-live.db';
+
+/** Create the parent directory, so a fresh clone works on its first run. */
+function ensureParent(file: string): string {
+  mkdirSync(dirname(file), { recursive: true });
+  return file;
+}
+
 export function createLiveProxy(options: ProxyOptions) {
   const origin = new URL(options.origin);
-  const store = sqliteStore({ path: options.storePath ?? 'sg-live.db' });
+  const store = sqliteStore({ path: ensureParent(options.storePath ?? LIVE_STORE_PATH) });
   const guard = createGuard({ invariants: ixfeInvariants, store });
   const salt = options.salt ?? randomBytes(16).toString('hex');
   /**
@@ -236,7 +251,7 @@ export function createLiveProxy(options: ProxyOptions) {
    */
   const lastBehavior = new Map<string, BehaviorFeatures>();
   const MAX_TRACKED = 5000;
-  const out = options.out;
+  const out = options.out ? ensureParent(options.out) : undefined;
   const emit =
     options.sink ??
     ((record: LiveRecord) => {
@@ -427,7 +442,7 @@ function arg(name: string, fallback?: string): string | undefined {
 if (process.argv[1]?.endsWith('proxy.ts')) {
   const origin = arg('origin', 'http://127.0.0.1:4000')!;
   const port = Number(arg('port', '4100'));
-  const out = arg('out', 'live-traffic.jsonl')!;
+  const out = arg('out', LIVE_RECORDS_PATH)!;
   const salt = process.env['SG_LIVE_SALT'];
 
   const proxy = createLiveProxy({

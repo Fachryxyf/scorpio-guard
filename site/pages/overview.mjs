@@ -242,11 +242,11 @@ ${portals}
     </div>
 
     <p class="prov">${t(
-      'Generated from the repository at ' +
-        data.generatedAt +
+      'Generated from Scorpio Guard ' +
+        data.version +
         '. Figures and tables come from <code>scripts/research.mjs</code>, which imports the library directly; the live-traffic table from <code>examples/ixfe/live/</code>. No number on this site was typed by hand.',
-      'Dihasilkan dari repositori pada ' +
-        data.generatedAt +
+      'Dihasilkan dari Scorpio Guard ' +
+        data.version +
         '. Gambar dan tabelnya dari <code>scripts/research.mjs</code>, yang mengimpor library-nya langsung; tabel trafik langsung dari <code>examples/ixfe/live/</code>. Tidak ada angka di situs ini yang ditulis tangan.',
     )}</p>
   `;

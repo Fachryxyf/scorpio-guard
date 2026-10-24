@@ -144,7 +144,7 @@ the answer, the reasoning, and what each answer commits the implementation to.
 Read it before proposing a change to the model — several obvious-looking
 alternatives were considered and rejected there for reasons worth knowing.
 
-Fifty-two entries is more than anyone reads front to back, so the site carries a
+Sixty-three entries is more than anyone reads front to back, so the site carries a
 [decision index](https://scorpio-guard.fachryxyf.com/#decisions) — every entry
 grouped by what it decides, with the file it turned into — and a
 [glossary](https://scorpio-guard.fachryxyf.com/#glossary) for the terms used in a
@@ -302,11 +302,19 @@ npm test          # node:test, no framework
 npm run replay    # persona traffic against the HealthMe flow
 npm run observe   # observing proxy in front of a live origin (D56)
 npm run visitors  # drive a real browser at it (D57)
-npm run observed  # read what the observer recorded
-npm run site      # regenerate all 8 documentation pages from research data
+npm run observed  # read what the observer recorded (var/live-traffic.jsonl)
+npm run site      # build the documentation site into site/dist (gitignored)
 npm run typecheck
 npm run build     # emits dist/
 ```
+
+The observer writes into `var/` — `live-traffic.jsonl` for the record and
+`sg-live.db` for its trust state. That directory is ignored: the record is real
+visitors' shape, never committed.
+
+The documentation site is generated into `site/dist` and published from there by
+`.github/workflows/pages.yml`. No generated HTML is committed, so the site cannot
+drift from the code that renders it.
 
 ### What exists
 
@@ -329,8 +337,16 @@ npm run build     # emits dist/
 `src/store/sqlite.ts` — a durable store on `node:sqlite`, imported from
 `@fachryxyf/scorpio-guard/sqlite`. Still zero dependencies, since it is in the
 standard library. The in-memory default is process-local, so every restart is a cold
-start; this one survives a restart and is shared across processes on one host. Both
-pass the same conformance kit.
+start; this one survives a restart and is shared across processes on one host. All
+three pass the same conformance kit.
+
+`src/store/kv.ts` — a networked store over an injected KV transport, imported from
+`@fachryxyf/scorpio-guard/kv` (D60). This is the only adapter that survives a
+serverless deployment, where every invocation is a fresh process. Its default failure
+policy is fail-open: a transport error is read as missing state, which keeps the host
+available and the hard invariants enforced, but lets an attacker who can cause an
+outage reset an entity's statistical history to cold start. Pick fail-closed
+deliberately if that trade is wrong for the deployment.
 
 `examples/harness/` — the application-independent parts: a persona is a sequence of
 interactions with the gaps between them, and the replay drives one through a guard.
@@ -349,7 +365,7 @@ in SG costs a log line rather than a visitor's pre-order. `cdp.ts` is a ~180-lin
 DevTools Protocol client over Node's `WebSocket` global, written instead of installing
 Puppeteer so the zero-dependency promise holds in the examples too.
 
-Two hundred and twenty-two tests, which double as the record of every numeric and
+Two hundred and thirty-three tests, which double as the record of every numeric and
 semantic property the design depends on.
 
 Writing your own store? Prove it works before trusting it:
@@ -373,8 +389,14 @@ for how that was arrived at.
 
 ### What does not exist
 
-An anomaly *classifier* over the feature space, and the prescription client. Both
-wait on decisions in the design record rather than on effort.
+The prescription client, and a server to receive symptom reports. Both wait on
+decisions in the design record rather than on effort.
+
+An anomaly *classifier* over the feature space now exists — `src/core/anomaly.ts`,
+D52 — and its score is reported on every assessment. It does not drive the decision by
+default: it is a distance-to-reference model rather than a trained one, because no
+labelled traffic exists to train against (D34), and training on generated personas
+would report the author's assumptions back as findings.
 
 More importantly: nothing has met real production traffic. Every threshold in the
 model is a reasoned guess. The HealthMe harness replays its real flow, which is
@@ -567,4 +589,5 @@ does not claim, plus private vulnerability reporting.
 ## Links
 
 - Site: [scorpio-guard.fachryxyf.com](https://scorpio-guard.fachryxyf.com)
+- Audit: [docs/PROJECT_AUDIT.md](docs/PROJECT_AUDIT.md)
 - Author: [@Fachryxyf](https://github.com/Fachryxyf)
