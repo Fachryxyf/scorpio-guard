@@ -49,3 +49,32 @@ jobs:
       # typed count fails here instead of ageing in public.
       - name: Verify the documented counts match the rendered site
         run: npm run check:docs
+
+      # A decision with no test target is allowed; a stale index is not.
+      - name: Verify the claim index matches the decisions and tests
+        run: npm run check:claims
+
+      # Budget in bench/budget.json, failing at twice the recorded p95. This catches a
+      # change that makes evaluation cost more without anyone noticing.
+      - name: Verify an evaluation is still within the recorded budget
+        run: npm run bench
+
+  # The gate the registry readers care about: what a stranger gets, installed.
+  pack-and-install:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22.x'
+          cache: npm
+
+      - run: npm ci
+
+      - run: npm run build
+
+      # Packs the tarball, inspects its contents, installs it into an empty directory,
+      # and runs the published surface from there.
+      - name: Pack, inspect, and install the tarball
+        run: npm run pack:check

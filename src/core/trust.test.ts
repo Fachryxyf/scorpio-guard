@@ -142,7 +142,7 @@ test('D5: deny requires sustained negative evidence, not one observation', () =>
   assert.ok(uncertainty(sustained, 0) <= 0.02, 'sustained negatives should reach low uncertainty');
 });
 
-test('D6: retention runs from the last meaningful update, not the last sighting', () => {
+test('D6/D35: retention runs from the last meaningful update, not the last sighting', () => {
   let state = freshState(0);
   state = applyEvidence(state, { positive: DEFAULT_WEIGHTS.weak }, 0);
 

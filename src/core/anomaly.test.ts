@@ -1,3 +1,7 @@
+/**
+ * D52: the anomaly dimension is a distance to a reference profile, not a trained
+ * model, and it is reported on every assessment whether or not it decides.
+ */
 import test from 'node:test';
 import assert from 'node:assert/strict';
 

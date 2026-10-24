@@ -1,3 +1,6 @@
+/**
+ * D53: the wire format is v0.1, documented and tested, and still does not transmit.
+ */
 import test from 'node:test';
 import assert from 'node:assert/strict';
 

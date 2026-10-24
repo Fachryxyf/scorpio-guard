@@ -1,3 +1,7 @@
+/**
+ * D51: collectors for the catalogue entries that SG can measure itself, one per
+ * entry, each reporting measurement and never proof.
+ */
 import test from 'node:test';
 import assert from 'node:assert/strict';
 

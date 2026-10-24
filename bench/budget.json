@@ -1,0 +1,16 @@
+{
+  "measuredAt": "2026-10-24",
+  "iterations": 2000,
+  "note": "p95Ms is twice the p95 measured on the recording machine; the check fails at twice this value again.",
+  "stores": {
+    "memory": {
+      "p95Ms": 0.0414
+    },
+    "sqlite": {
+      "p95Ms": 1.2086
+    },
+    "kv": {
+      "p95Ms": 0.0245
+    }
+  }
+}

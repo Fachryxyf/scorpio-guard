@@ -54,7 +54,11 @@
     "site": "node site/build.mjs",
     "site:check": "node site/build.mjs --check",
     "check:manifest": "node scripts/check-manifest.mjs",
-    "check:docs": "node scripts/check-docs.mjs"
+    "check:docs": "node scripts/check-docs.mjs",
+    "check:claims": "node scripts/claim-index.mjs --check",
+    "claims": "node scripts/claim-index.mjs",
+    "bench": "node --experimental-strip-types scripts/bench.mjs",
+    "pack:check": "node scripts/pack-check.mjs"
   },
   "devDependencies": {
     "@types/express": "^5.0.6",

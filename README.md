@@ -331,10 +331,22 @@ npm run replay    # persona traffic against the HealthMe flow
 npm run observe   # observing proxy in front of a live origin (D56)
 npm run visitors  # drive a real browser at it (D57)
 npm run observed  # read what the observer recorded (var/live-traffic.jsonl)
+npm run example:integration  # the worked node:http and Express integration
 npm run site      # build the documentation site into site/dist (gitignored)
 npm run typecheck
 npm run build     # emits dist/
+npm run bench     # evaluation cost per store, checked against bench/budget.json
+npm run pack:check            # pack, inspect, install the tarball somewhere empty
+npm run claims    # regenerate docs/CLAIMS.md from DECISIONS.md and the tests
+npm run check:manifest        # manifest and lockfile must agree
+npm run check:docs            # numbers in the README must match the rendered site
+npm run check:claims          # docs/CLAIMS.md must not be stale
 ```
+
+Every command in that last group fails when a claim is false rather than when a file
+is missing, which is the only kind of gate worth having: they caught a pnpm field
+sneaking back into a repository that installs with npm, a lockfile two version bumps
+behind, and a test count that had been stale in the README since the suite grew.
 
 The observer writes into `var/`: `live-traffic.jsonl` for the record and
 `sg-live.db` for its trust state. That directory is ignored: the record is real
@@ -357,6 +369,7 @@ drift from the code that renders it.
 - `signals.ts`: the weak-signal catalogue and how observed signals become mass.
 - `store.ts`: the `StateStore` interface and an in-memory implementation.
 - `conformance.ts`: runnable contract checks for any store you write.
+- `event.ts`: the versioned assessment event and its optional hashed identity (D61).
 - `guard.ts`, `createGuard()` and `evaluate()`: composing the above.
 - `policy.ts`, `clock.ts`: tunable values in one place, and an injectable clock.
 
@@ -373,8 +386,11 @@ three pass the same conformance kit.
 serverless deployment, where every invocation is a fresh process. Its default failure
 policy is fail-open: a transport error is read as missing state, which keeps the host
 available and the hard invariants enforced, but lets an attacker who can cause an
-outage reset an entity's statistical history to cold start. Pick fail-closed
-deliberately if that trade is wrong for the deployment.
+outage reset an entity's statistical history to cold start. Failing open therefore
+requires an `onError` sink, in the type and at construction, because a store failing
+open in silence is indistinguishable from one that works (D62). Set `failOpen: false`
+if that trade is wrong for the deployment. All four topologies, and what each one
+loses when it fails, are in [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
 
 `examples/harness/`: the application-independent parts: a persona is a sequence of
 interactions with the gaps between them, and the replay drives one through a guard.
@@ -393,8 +409,10 @@ in SG costs a log line rather than a visitor's pre-order. `cdp.ts` is a ~180-lin
 DevTools Protocol client over Node's `WebSocket` global, written instead of installing
 Puppeteer so the zero-dependency promise holds in the examples too.
 
-Two hundred and forty-nine tests, which double as the record of every numeric and
-semantic property the design depends on.
+Two hundred and fifty-two tests, which double as the record of every numeric and
+semantic property the design depends on. [docs/CLAIMS.md](docs/CLAIMS.md) maps each
+design decision to the test that names it, and lists the ones that are still prose
+only, generated rather than maintained by hand.
 
 Writing your own store? Prove it works before trusting it:
 

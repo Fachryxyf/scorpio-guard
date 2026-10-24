@@ -104,16 +104,30 @@ login dengan hard constraint, dan baca data yang advisory. Bukti lulus:
 `npm run example:integration` menjalankan dua skenario (entity baru, entity dengan
 pelanggaran soft), mencetak treatment dan trace, dan dijalankan di CI.
 
+Status: selesai. `examples/integration/` berisi inti tanpa framework, server
+`node:http`, adapter Express, dan enam test yang memakai HTTP sungguhan. Demo
+menjalankan tiga skenario, bukan dua: entity baru (ALLOW), tiga baca tanpa login
+(INCREASE_FRICTION), dan token yang tidak pernah diterbitkan host (RESTRICT).
+
 **M1.2 Event keputusan terstruktur.**
 Opsi `onAssessment` di `createGuard`. Event berisi `schemaVersion`, keputusan, stage,
 trust, uncertainty, trace, dan durasi. Identitas entity di-hash dengan salt dari host,
 atau dimatikan lewat opsi. Bukti lulus: test snapshot schema, test bahwa tidak ada
 identitas mentah, test bahwa event tidak mengubah hasil `evaluate`.
 
+Status: selesai, D61. Identitas dimatikan secara default, bukan di-hash tanpa salt:
+hash tanpa salt pada ruang id yang kecil bisa dibalik. `src/core/event.test.ts`
+menutup bentuk schema, ketiadaan referensi mentah, kestabilan hash per salt, dan
+kesetaraan hasil dengan dan tanpa sink.
+
 **M1.3 Fail-open wajib terlihat.**
 Saat `kvStore` fail-open, event error wajib keluar, dan dokumentasi menyebut alert
 sebagai syarat deployment. Bukti lulus: test transport error memastikan event terjadi
 dan evaluasi tetap mengembalikan treatment.
+
+Status: selesai, D62. `onError` wajib di tipe dan saat konstruksi selama fail-open
+masih dipakai, jadi diam bukan lagi pilihan default. Alert disebut sebagai syarat di
+README dan di `docs/DEPLOYMENT.md`.
 
 **M1.4 Matriks deployment.**
 `docs/DEPLOYMENT.md` dengan empat baris: satu proses, multi-proses satu host,
@@ -121,11 +135,21 @@ serverless, multi-region. Kolom: store, konsistensi, yang hilang saat gagal, dan
 status dukungan. Bukti lulus: minimal dua baris punya contoh konfigurasi yang
 dijalankan di test.
 
+Status: selesai. `src/deployment.test.ts` menjalankan dua baris yang bisa dijalankan
+(SQLite lintas handle, KV lintas proses) dan satu kegagalan yang disengaja. Baris
+multi-region dinyatakan tidak didukung beserta alasannya, bukan diberi adapter palsu.
+
 **M1.5 Bench.**
 `scripts/bench.mjs` mengukur `evaluate()` untuk memory, sqlite, dan KV lokal, dengan
 p50, p95, p99. Budget ditetapkan setelah pengukuran pertama, lalu CI gagal kalau
 melewati dua kali budget. Bukti lulus: bench jalan di CI dan angkanya tercatat di
 CHANGELOG.
+
+Status: selesai. Pengukuran pertama pada mesin pengembang, 2000 iterasi per store:
+memory p50 0,0115 ms dan p95 0,0207 ms, sqlite p50 0,2241 ms dan p95 0,6043 ms, kv
+p50 0,0088 ms dan p95 0,0123 ms. `bench/budget.json` menyimpan dua kali p95 itu, dan
+check gagal di dua kali nilai tersebut. Baris di bawah 1 ms memakai lantai 1 ms supaya
+derau timer runner CI tidak jadi build merah. Angka ini ada di CHANGELOG.
 
 **M1.6 Rilis 0.2.0.**
 CHANGELOG gaya Keep a Changelog. Publish gate: `npm pack`, pasang tarball di direktori
@@ -133,6 +157,12 @@ kosong, jalankan smoke terhadap paket terpasang. Aturan semver ditulis eksplisit
 patch tidak boleh mengubah treatment untuk input yang sama, minor boleh dan wajib
 dicatat dengan contoh sebelum dan sesudah. Bukti lulus: job CI `pack-and-install`
 hijau dan 0.2.0 terbit. README tidak lagi menyebut `unreleased`.
+
+Status: sebagian. `CHANGELOG.md` ada dengan aturan semver tertulis, `npm run
+pack:check` memeriksa isi tarball lalu memasang dan menjalankannya di direktori kosong,
+dan job CI `pack-and-install` menjalankannya. Yang belum: 0.2.0 belum terbit ke npm,
+karena publikasi butuh kredensial yang bukan milik sesi ini. Sampai itu terjadi README
+memang masih menyebut 0.2.0 belum dirilis, dan itu benar. Kriteria ini belum lulus.
 
 **M1.7 Gate drift, dua bagian.**
 M1.7a, manifest: `scripts/check-manifest.mjs` memastikan `package.json` dan
@@ -142,17 +172,28 @@ M1.7b, angka: `scripts/check-docs.mjs` membandingkan angka di README (test, kepu
 halaman) dengan hasil render, dan menolak angka yang ditulis tangan. Bukti lulus
 keduanya: mengubah satu angka di README tanpa mengubah kode membuat CI gagal.
 
+Status: selesai keduanya. Gate angka diuji dengan empat mutasi: angka kata yang basi
+gagal, angka digit yang salah gagal, klaim yang dihapus gagal, angka digit yang benar
+lulus. Gate manifest sudah menangkap dua drift nyata dan satu drift ketiga setelah
+`npm install` menulis ulang `package.json`.
+
 **M1.8 Indeks klaim.**
 `scripts/claim-index.mjs` memetakan setiap klaim perilaku di `DECISIONS.md` ke test
 yang mengujinya. Klaim tanpa target dicetak sebagai daftar yang harus dijawab di
 `docs/CLAIMS.md`. Bukti lulus: daftar kosong, atau setiap sisa punya alasan tertulis.
+
+Status: selesai. `docs/CLAIMS.md` dibangkitkan, `docs/CLAIMS-NOTES.md` memuat alasan
+tertulis, dan gate gagal kalau ada keputusan tanpa test dan tanpa alasan, atau kalau
+alasan masih tersisa untuk keputusan yang sudah punya test. Keadaan sekarang: 65
+keputusan, 50 dinamai test, 15 beralasan, 0 tanpa alasan.
 
 ### Exit criteria MVP
 
 Semua harus benar, dan semuanya bisa diperiksa:
 
 1. `npm ci`, `typecheck`, `test`, `build`, `smoke`, `site:check`, `check:manifest`,
-   `bench`, dan `check-docs` hijau di CI.
+   `check:docs`, `check:claims`, `bench`, `pack:check`, dan `example:integration`
+   hijau di CI.
 2. 0.2.0 terpasang dari registry di proyek kosong, README diikuti tanpa membaca
    source.
 3. Contoh integrasi menghasilkan ALLOW untuk entity baru, INCREASE_FRICTION untuk
@@ -163,6 +204,10 @@ Semua harus benar, dan semuanya bisa diperiksa:
 
 Di luar MVP, disengaja: kalibrasi, server protokol, review keamanan eksternal,
 browser dan edge, dashboard, encoding symptom.
+
+Status per 2026-10-24: kriteria 1, 3, 4, 5, dan 6 lulus. Kriteria 2 belum, dan
+satu-satunya yang menahannya adalah publikasi ke npm. Empat dari lima hal yang bisa
+dikerjakan tanpa kredensial sudah dikerjakan dan punya gate sendiri.
 
 ---
 
