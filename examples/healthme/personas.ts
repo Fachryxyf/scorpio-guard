@@ -23,10 +23,7 @@ import {
 } from '../harness/persona.ts';
 import { API_SCOPE, UNLOCK_SCOPE, type ApiCall } from './invariants.ts';
 
-/* ------------------------------------------------------------------ *
- * Legitimate personas. Escalating any of these is a false positive,
- * which the design calls the central constraint.
- * ------------------------------------------------------------------ */
+// Legitimate personas. Escalating any of these is a false positive, which the design calls the central constraint.
 
 /** The actual HealthMe user: opens it once a day, types the PIN, reads the vault. */
 export function dailyRitual(days: number, seed = 1): Persona {
@@ -202,9 +199,7 @@ export function powerUser(reads: number, seed = 5): Persona {
   };
 }
 
-/* ------------------------------------------------------------------ *
- * Adversaries. Walking through untouched is the finding.
- * ------------------------------------------------------------------ */
+// Adversaries. Walking through untouched is the finding.
 
 /** The forged API call: HealthMe allows it, the guard should not. */
 export function forgedApiCall(): Persona {

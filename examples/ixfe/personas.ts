@@ -34,9 +34,7 @@ function fromPage(dwellMs: number, interactions = 12) {
   return { dwellMs, honeypot: '', fieldsFilled: 4, interactions };
 }
 
-/* ------------------------------------------------------------------ *
- * Legitimate. Escalating any of these is a false positive.
- * ------------------------------------------------------------------ */
+// Legitimate. Escalating any of these is a false positive.
 
 /** Someone lands, reads, picks a plan, and pre-orders. The funnel working. */
 export function preOrderBuyer(seed = 11): Persona {
@@ -316,9 +314,7 @@ export function activatedFounder(seed = 15): Persona {
   };
 }
 
-/* ------------------------------------------------------------------ *
- * Adversaries, each one named by a defence IXFE already wrote.
- * ------------------------------------------------------------------ */
+// Adversaries, each one named by a defence IXFE already wrote.
 
 /**
  * The endpoint-shooter: POSTs straight at `/api/waitlist` with no page involved.

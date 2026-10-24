@@ -430,9 +430,7 @@ function forwardedHeaders(req: IncomingMessage): Record<string, string | string[
   return headers;
 }
 
-/* ------------------------------------------------------------------ *
- * CLI
- * ------------------------------------------------------------------ */
+// CLI entry point.
 
 function arg(name: string, fallback?: string): string | undefined {
   const index = process.argv.indexOf(`--${name}`);

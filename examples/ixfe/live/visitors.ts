@@ -79,9 +79,7 @@ async function openPage(browser: Browser, agent: string, mobile: boolean): Promi
   });
 }
 
-/* ------------------------------------------------------------------ *
- * Legitimate visitors. None of these may be given friction.
- * ------------------------------------------------------------------ */
+// Legitimate visitors. None of these may be given friction.
 
 /** Lands, scrolls a bit, decides it is not for them, leaves. Most traffic is this. */
 const skimmer: VisitorSession = {
@@ -225,9 +223,7 @@ const returningVisitor: VisitorSession = {
   },
 };
 
-/* ------------------------------------------------------------------ *
- * Adversaries. Each must cost something.
- * ------------------------------------------------------------------ */
+// Adversaries. Each must cost something.
 
 /** Shoots the waitlist endpoint directly. No page, so no `dwell` — a proof (D47). */
 const endpointShooter: VisitorSession = {
@@ -343,9 +339,7 @@ export const ADVERSARIES: readonly VisitorSession[] = [
   silentCrawler,
 ];
 
-/* ------------------------------------------------------------------ *
- * CLI
- * ------------------------------------------------------------------ */
+// CLI entry point.
 
 function arg(name: string, fallback: string): string {
   const index = process.argv.indexOf(`--${name}`);

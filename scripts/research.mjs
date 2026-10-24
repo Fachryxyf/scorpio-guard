@@ -54,9 +54,7 @@ import {
 const HOUR = 3_600_000;
 const round = (value, places = 4) => Number(value.toFixed(places));
 
-/* ------------------------------------------------------------------ *
- * 1. The model as declared. Not measured — read off the code.
- * ------------------------------------------------------------------ */
+// 1. The model as declared: read off the code, not measured.
 
 const parameters = {
   halfLifeHours: DEFAULT_HALF_LIFE_HOURS,
@@ -96,9 +94,7 @@ const parameters = {
   })),
 };
 
-/* ------------------------------------------------------------------ *
- * 2. The prior, and what one observation is worth.
- * ------------------------------------------------------------------ */
+// 2. The prior, and what one observation is worth.
 
 const fresh = freshState(0);
 const prior = {
@@ -124,9 +120,7 @@ const singleObservation = [
   };
 });
 
-/* ------------------------------------------------------------------ *
- * 3. Decay, and the mass bound it implies.
- * ------------------------------------------------------------------ */
+// 3. Decay, and the mass bound it implies.
 
 const decayCurve = [];
 for (let hours = 0; hours <= 72; hours += 1) {
@@ -161,9 +155,7 @@ const massBound = [1, 6, 24, 72].map((intervalHours) => {
   };
 });
 
-/* ------------------------------------------------------------------ *
- * 4. Trajectories. What accumulation actually looks like.
- * ------------------------------------------------------------------ */
+// 4. Trajectories and what accumulation looks like.
 
 async function trajectory(label, options) {
   let now = 0;
@@ -228,9 +220,7 @@ const firstReached = trajectories.map((run) => {
   return { label: run.label, firstReached: seen };
 });
 
-/* ------------------------------------------------------------------ *
- * 5. The cost of a memory: how much honest history buys.
- * ------------------------------------------------------------------ */
+// 5. The cost of a memory: how much honest history buys.
 
 const ABUSE_LIMIT = 200;
 
@@ -319,9 +309,7 @@ for (const days of [0, 1, 2, 3, 5, 10, 20, 30]) {
   });
 }
 
-/* ------------------------------------------------------------------ *
- * 6. The intake discount. D55, measured again here so the page cannot drift.
- * ------------------------------------------------------------------ */
+// 6. The intake discount. D55, measured here so the page cannot drift.
 
 /**
  * Farm `count` positives at a fixed gap, then abuse. With the D55 discount on, a
@@ -401,9 +389,7 @@ const automation = [
   await automatedClient('cron', 15 * 60),
 ];
 
-/* ------------------------------------------------------------------ *
- * 7. Persona replay. The falsification harness, as a table.
- * ------------------------------------------------------------------ */
+// 7. Persona replay: the falsification harness as a table.
 
 function summarisePersonas(results) {
   return results.map((result) => ({

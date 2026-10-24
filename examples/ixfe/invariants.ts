@@ -23,9 +23,7 @@ export const AUTH_SCOPE = 'ixfe.auth';
 export const BILLING_SCOPE = 'ixfe.billing';
 export const WORK_SCOPE = 'ixfe.work';
 
-/* ------------------------------------------------------------------ *
- * reachability — the flow graph IXFE declared
- * ------------------------------------------------------------------ */
+// Reachability: the flow graph IXFE declared.
 
 /**
  * The pre-order funnel, exhaustively.
@@ -73,9 +71,7 @@ export const authFlow: Invariant = transitionGraph({
   ],
 });
 
-/* ------------------------------------------------------------------ *
- * precondition — state that must hold before an action exists
- * ------------------------------------------------------------------ */
+// Precondition: state that must hold before an action exists.
 
 export type WorkRequest = {
   /** `discover` | `scout` | `harvest` | `audit` | `marketplace`. */
@@ -141,9 +137,7 @@ export const workRequiresActiveSubscription: Invariant = {
   },
 };
 
-/* ------------------------------------------------------------------ *
- * causality — the input that must have produced an effect
- * ------------------------------------------------------------------ */
+// Causality: the input that must have produced an effect.
 
 export type FormSubmission = {
   /** `dwell` as the page reports it: ms from form-ready to submit. */
@@ -223,9 +217,7 @@ export const orderHoneypotUntouched: Invariant = {
   holds: honeypotUntouched.holds,
 };
 
-/* ------------------------------------------------------------------ *
- * order — timestamps the system itself recorded
- * ------------------------------------------------------------------ */
+// Order: timestamps the system itself recorded.
 
 export type OtpAttempt = {
   /** Whether IXFE ever issued a code for this address, for this purpose. */
@@ -273,9 +265,7 @@ export const otpWithinAttemptCap: Invariant = {
   },
 };
 
-/* ------------------------------------------------------------------ *
- * issuance — values the system itself handed out
- * ------------------------------------------------------------------ */
+// Issuance: values the system itself handed out.
 
 export type IssuedReference = {
   readonly kind: 'activation-token' | 'order-id' | 'invoice-external-id';
@@ -323,9 +313,7 @@ export const singleUseNotReplayed: Invariant = {
   },
 };
 
-/* ------------------------------------------------------------------ *
- * exclusivity — facts that cannot both be true
- * ------------------------------------------------------------------ */
+// Exclusivity: facts that cannot both be true.
 
 export type LaunchClaim = {
   /** Whether IXFE has passed its launch moment. `launched()`. */
@@ -373,10 +361,7 @@ export const ixfeInvariants: readonly Invariant[] = [
   launchClaimConsistent,
 ];
 
-/* ------------------------------------------------------------------ *
- * Shape guards. Each invariant must ignore observations that are not its
- * business — D32 says an undeclared shape is unknown, never forbidden.
- * ------------------------------------------------------------------ */
+// Shape guards. An invariant must ignore observations that are not its business; D32 says an undeclared shape is unknown, never forbidden.
 
 function isWorkRequest(value: unknown): value is WorkRequest {
   return isRecord(value) && typeof value.action === 'string' && typeof value.balance === 'number';

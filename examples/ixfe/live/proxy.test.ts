@@ -273,9 +273,7 @@ test('D56: request routing maps to the declared scopes', () => {
   assert.equal(scopeFor('OPTIONS', '/anything'), undefined);
 });
 
-/* ------------------------------------------------------------------ *
- * The report
- * ------------------------------------------------------------------ */
+// The report.
 
 function record(overrides: Partial<LiveRecord> = {}): LiveRecord {
   return {
