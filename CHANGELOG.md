@@ -77,6 +77,11 @@ Tagged in `package.json`, not yet published to npm. The registry has 0.1.0, and
 - An epistemic stage now precedes trust and uncertainty, and `developing` permits at
   most `OBSERVE`. Before, a third observation could turn silence into friction (D40,
   D46).
+- Erasure and retention are now proved against every shipped store rather than
+  asserted: after a forget and after the retention horizon the record is gone from the
+  storage itself, not only invisible to `get`, and the entity comes back cold. The event
+  stream carries no identity by default, so a host log holds nothing the store would have
+  had to erase (D69, H15).
 - A 404 for a path the site itself linked no longer counts as negative evidence: the
   observer learns the navigation it serves and treats the site's own dead links as the
   site's problem (D68, H19). Every other 404 is unchanged, and each record now says which

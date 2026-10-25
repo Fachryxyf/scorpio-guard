@@ -17,7 +17,7 @@ the answer given, and what that answer commits the implementation to.
   policy; the tests are what make a policy change visible.
 
 Status: every numbered question is answered, the original thirty, plus D31 to
-D68 arising from review, implementation, a live pentest, and the traffic lab. Nothing is blocked on
+D69 arising from review, implementation, a live pentest, and the traffic lab. Nothing is blocked on
 a decision. What remains is validation: the values recorded here have not met real
 traffic yet, and D47 names where they will.
 
@@ -120,6 +120,7 @@ Last updated: 2026-10-25
 - [D66: A persona is a population, and a repetition is a different visitor](#d66-a-persona-is-a-population-and-a-repetition-is-a-different-visitor)
 - [D67: Anomaly is reported and does not decide, and the dataset says why](#d67-anomaly-is-reported-and-does-not-decide-and-the-dataset-says-why)
 - [D68: A 404 behind the site's own link is not evidence](#d68-a-404-behind-the-sites-own-link-is-not-evidence)
+- [D69: Erasure is proved by counting what is underneath](#d69-erasure-is-proved-by-counting-what-is-underneath)
 
 **[Open questions](#open-questions)**
 
@@ -3821,3 +3822,58 @@ mutation in both directions: removing the rule fails the linked case, and treati
 
 `docs/DATASET.md` finding F3 states what the hole cost. The run recorded there predates
 this decision, so it still carries the false negative it caused; a later run should not.
+
+## D69: Erasure is proved by counting what is underneath
+
+### The hole
+
+H15. D1.2 makes deletion a requirement and D22 gave it a primitive, and the tests that
+existed checked the read path: after `forget`, `get` returns `undefined`, and the entity
+comes back at the prior. A store that marked a row as hidden instead of removing it
+satisfies every one of those checks and keeps the data. So does a guard that rewrites
+state without clearing the old record. "Deletion is a requirement" was a claim about the
+interface, not about the storage.
+
+### The decision
+
+Erasure is proved by counting what is underneath, per store, in the store's own terms:
+rows in SQLite, keys in the KV transport, entries in the map. The check is not that reads
+lie, it is that the record is gone. Two events trigger it, and both are tested: an
+explicit `forget`, and the retention horizon being crossed.
+
+The event stream is treated differently on purpose. D61 already omits the entity
+reference from decision events by default, so the library's obligation for a host log is
+that there is nothing in it to erase. That is asserted directly: the event has no `entity`
+field and the reference does not appear anywhere in its serialised form. A host that asks
+for a hashed identity has chosen to keep a correlation, and that choice is its own.
+
+### Limits
+
+- **Three stores, in their simplest form.** The SQLite store is opened in memory and the
+  KV store runs on the in-memory transport, because a test that needs Redis is a test
+  that does not run in CI. The claims are about the implementations, not about a
+  deployment.
+- **Gone, not overwritten.** No claim is made about secure erasure of the bytes underneath
+  a filesystem or a managed database. What is asserted is that the store no longer answers
+  for the entity and no longer counts it.
+- **Outside the interface is outside the proof.** A backup taken before the forget, a read
+  replica that lags, a host request log, or the observer's own JSONL are all still there.
+  Those are named in the roadmap rather than covered by this decision.
+
+### Alternatives rejected
+
+**Keep asserting the read path and call it deletion.** That is what existed, and it passes
+on a store that never deletes. A test that cannot fail on the bug it is about is the thing
+this whole record argues against.
+
+**Add a `purge` method that promises a stronger guarantee.** Every promise stronger than
+"the record is gone" needs a contract with the storage engine, and the interface is three
+methods over an opaque key by design (D8). A method whose guarantee cannot be checked is
+worse than a narrow one that can.
+
+### Gates
+
+`src/core/erasure.test.ts`: five tests across the three shipped stores, verified by
+mutation. Making `guard.forget` do nothing fails the residue test; the retention test
+fails on a store that appends a version instead of replacing one. The event test fails if
+identity is added back to the default event.

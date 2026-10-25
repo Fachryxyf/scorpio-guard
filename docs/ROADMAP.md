@@ -51,7 +51,7 @@ kalibrasi diulang dan halaman jaminan diperbarui.
 | Instrumen trafik nyata: proxy, browser, report | `examples/ixfe/live/`, D56, D57 |
 | Gate manifest dan lockfile | `scripts/check-manifest.mjs`, `npm run check:manifest` |
 
-Angka yang dipakai gate: 283 test, 70 keputusan, 10 halaman, 0 dependensi runtime,
+Angka yang dipakai gate: 288 test, 70 keputusan, 10 halaman, 0 dependensi runtime,
 versi terbit 0.1.0, versi di `main` 0.2.0.
 
 Belum ada sama sekali: server protokol, hook event keputusan, publish ke registry,
@@ -77,7 +77,7 @@ review keamanan.
 | H12 | Poisoning lambat belum terselesaikan. D55 baru menutup farming massal | 1.0 | M4.2 | eksperimen biaya penyerang dibanding waktu deteksi |
 | H13 | Belum ada review keamanan terarah. Test fungsional bukan audit (T7) | 1.0 | M4.3 | laporan, temuan ditutup atau dinyatakan terbuka |
 | H14 | Browser, edge, dan runtime lain belum diuji. Node floor 22.6 belum jadi positioning (T6) | 1.0 | M5.1 | matriks runtime dan smoke per target |
-| H15 | Retention dan erasure belum dibuktikan end-to-end di semua store dan di event log (D1.2, D22) | 1.0 | M5.2 | test: satu entity dilupakan, tidak ada sisa di store maupun log |
+| H15 | Retention dan erasure belum dibuktikan end-to-end di semua store dan di event log (D1.2, D22) | 1.0 | M5.2 (D69) | test: satu entity dilupakan, tidak ada sisa di store maupun log |
 | H16 | API belum dibekukan. Tidak ada kebijakan deprecation atau panduan migrasi | 1.0 | M5.3 | semver policy dan panduan migrasi |
 | H17 | Klaim di `DECISIONS.md` tidak punya indeks ke test yang membuktikannya | MVP | M1.8 | indeks dibangkitkan, klaim tanpa target muncul sebagai daftar |
 | H18 | Tidak ada soak atau load test untuk sweep dan store | 1.0 | M4.4 | soak 24 jam dengan batas memori dan jumlah state |
@@ -309,7 +309,7 @@ tertulis.
 | Task | Isi |
 |---|---|
 | M5.1 | Matriks runtime: Node 22.6, Node 24, browser bundler, edge. Didukung atau tidak, dengan smoke test |
-| M5.2 | Retention dan erasure end-to-end di semua store dan di event log |
+| M5.2 | Retention dan erasure end-to-end di semua store dan di event log. Selesai untuk tiga store yang dikirim (`src/core/erasure.test.ts`): yang dilupakan tidak tersisa di hitungan penyimpanan, yang kedaluwarsa terhapus bukan disembunyikan, dan event keputusan tidak membawa identitas sehingga log tidak perlu dihapus (D69) |
 | M5.3 | Semver final, panduan migrasi, kebijakan deprecation |
 | M5.4 | 1.0.0, dengan halaman jaminan di situs |
 

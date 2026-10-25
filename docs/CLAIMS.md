@@ -9,20 +9,21 @@ proving it and stronger than nothing: it means every design claim either has a p
 in the suite that would notice a change, or a written explanation of why it cannot
 have one.
 
-Total: 71 decisions, 52 named by a test, 19 explained, 0 unexplained.
+Total: 72 decisions, 54 named by a test, 18 explained, 0 unexplained.
 
 | Decision | Title | Tests |
 |---|---|---|
-| D1 | Entity is the fundamental reference unit | `src/core/store.test.ts`, `src/store/kv.test.ts`, +1 |
+| D1 | Entity is the fundamental reference unit | `src/core/erasure.test.ts`, `src/core/store.test.ts`, +2 |
 | D1.1 | Root of trust is outside SG | `examples/healthme/replay.test.ts` |
+| D1.2 | Data deletion is a requirement | `src/core/erasure.test.ts` |
 | D2 | One trust state per entity, not per entity-endpoint | `src/core/guard.test.ts`, `src/core/trust.test.ts` |
 | D2a | Trust is stored as a distribution, read as a number | `src/core/trust.test.ts` |
 | D3 | Decay is a half-life over real elapsed time | `src/core/guard.test.ts`, `src/core/trust.test.ts` |
 | D4 | Evidence weights, symmetric, 4:1 strong to weak | `src/core/guard.test.ts`, `src/core/trust.test.ts` |
-| D6 | Expiration is a retention boundary, separate from decay | `src/core/guard.test.ts`, `src/core/store.test.ts`, +3 |
+| D6 | Expiration is a retention boundary, separate from decay | `src/core/erasure.test.ts`, `src/core/guard.test.ts`, +4 |
 | D5 | Decision is a function of trust and uncertainty | `src/core/assess.test.ts`, `src/core/guard.test.ts`, +1 |
 | D37 | Saturation guard belongs in the decision layer, not the trust model | `src/core/assess.test.ts`, `src/core/behavior.test.ts`, +2 |
-| D40 | An epistemic stage precedes trust and uncertainty | `src/core/signals.test.ts`, `examples/healthme/observe.test.ts` |
+| D40 | An epistemic stage precedes trust and uncertainty | `src/core/erasure.test.ts`, `src/core/signals.test.ts`, +1 |
 | D39 | The cold-start band contradicted the zero-friction goal | `src/core/assess.test.ts` |
 | D46 | Two thresholds the traffic falsified | `src/core/assess.test.ts`, `src/core/behavior.test.ts`, +1 |
 | D49 | D37 does not do what it claims | `src/core/assess.test.ts`, `src/core/guard.test.ts` |
@@ -46,7 +47,7 @@ Total: 71 decisions, 52 named by a test, 19 explained, 0 unexplained.
 | D19 | Symptoms are local-first, never per request | `src/collect/interaction.test.ts` |
 | D43 | The symptom vocabulary is two tiers, split by rate of change | `src/core/symptoms.test.ts` |
 | D21 | Cold start, restated | `src/core/guard.test.ts` |
-| D22 | Purge primitive from the start; consent belongs to the host | `src/core/guard.test.ts`, `src/core/store.test.ts` |
+| D22 | Purge primitive from the start; consent belongs to the host | `src/core/erasure.test.ts`, `src/core/guard.test.ts`, +1 |
 | D23 | Decision trace is mandatory | `src/core/assess.test.ts`, `src/core/constraints.test.ts`, +1 |
 | D34 | PoC target: HealthMe, with its limits stated | `examples/healthme/observe.test.ts` |
 | D45 | Generate the traffic; do not wait for it | `examples/healthme/replay.test.ts`, `examples/ixfe/replay.test.ts` |
@@ -62,16 +63,16 @@ Total: 71 decisions, 52 named by a test, 19 explained, 0 unexplained.
 | D56 | Real traffic is recorded by an observing proxy, not by reading logs | `examples/ixfe/live/proxy.test.ts` |
 | D57 | Drive a real browser, because a real audience is not available | `examples/ixfe/live/proxy.test.ts` |
 | D61 | Reporting is a versioned event, and the entity reference is withheld | `src/core/event.test.ts` |
-| D62 | Fail-open requires a witness | `src/store/kv.test.ts` |
+| D62 | Fail-open requires a witness | `src/core/erasure.test.ts`, `src/store/kv.test.ts` |
 | D67 | Anomaly is reported and does not decide, and the dataset says why | `examples/lab/report.test.ts` |
 | D68 | A 404 behind the site's own link is not evidence | `examples/ixfe/live/proxy.test.ts` |
+| D69 | Erasure is proved by counting what is underneath | `src/core/erasure.test.ts` |
 
 ## Prose only, with the reason
 
 No test names these. Each reason says why a test cannot, and where the behaviour is
 covered instead when it is covered at all.
 
-- D1.2: Data deletion is a requirement. Data deletion is a requirement. A requirement on the host, not a behaviour of the library. Erasure is implemented (`guard.forget()`, retention expiry) and covered where D6 and D22 are; proving that nothing survives in every store and in the event log is M5.2.
 - D7: One package, multiple entry points. One package, multiple entry points. Checked by `npm run pack:check`, which inspects the tarball and imports every subpath from an installed copy in an empty directory. It is a gate rather than a test file, so no test names this decision.
 - D12: Core is framework-agnostic. Core is framework-agnostic. A property of the imports: nothing under `src/core` touches a platform API except the injectable clock. Enforced by review until the runtime matrix (M5.1) turns it into an executable check.
 - D17: No API key in the local core. No API key in the local core. There is no server to hold a key, so there is nothing to assert yet. It becomes testable when the protocol runs end to end (M3).

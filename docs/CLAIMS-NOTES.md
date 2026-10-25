@@ -8,7 +8,6 @@ by accident.
 Where the behaviour *is* covered by something that is not a `*.test.ts`, the reason
 names the gate instead of pretending no coverage exists.
 
-- D1.2: Data deletion is a requirement. A requirement on the host, not a behaviour of the library. Erasure is implemented (`guard.forget()`, retention expiry) and covered where D6 and D22 are; proving that nothing survives in every store and in the event log is M5.2.
 - D7: One package, multiple entry points. Checked by `npm run pack:check`, which inspects the tarball and imports every subpath from an installed copy in an empty directory. It is a gate rather than a test file, so no test names this decision.
 - D12: Core is framework-agnostic. A property of the imports: nothing under `src/core` touches a platform API except the injectable clock. Enforced by review until the runtime matrix (M5.1) turns it into an executable check.
 - D17: No API key in the local core. There is no server to hold a key, so there is nothing to assert yet. It becomes testable when the protocol runs end to end (M3).
