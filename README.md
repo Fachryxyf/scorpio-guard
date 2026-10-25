@@ -11,7 +11,7 @@
 
 > **Trust is a spectrum, not a verdict.** Adaptive trust evaluation for web interactions, a local library, not a centralized gatekeeper.
 
-**Status: 0.2.0, pre-1.0, not on npm yet.** The npm account behind the package is suspended for 72 hours as of 2026-10-25, so publishing is blocked until roughly 2026-10-28; the registry still serves 0.1.0. [docs/RELEASING.md](docs/RELEASING.md) carries the blocker and the runbook, and the versions page carries the dates.  The core model is built and tested, the package installs from its tarball, and the v0.1 protocol has fixtures, a reference receiver, and a batching sender. Three things still stand between this and 1.0.0: an independent security review, a 24 hour soak, and thresholds calibrated against a real traffic mix rather than the two lab runs recorded in [docs/DATASET.md](docs/DATASET.md). The claims a gate enforces today, the risks that are priced instead, and the size of each gap are on the [guarantees page](https://scorpio-guard.fachryxyf.com/guarantees.html), with the test or decision behind every row (D75). What follows is the design, and where the code has caught up to it.
+**Status: 0.2.0, pre-1.0, not on npm yet.** The npm account behind the package is suspended for 72 hours as of 2026-10-25, so publishing is blocked until roughly 2026-10-28; the registry still serves 0.1.0. [docs/RELEASING.md](docs/RELEASING.md) carries the blocker and the runbook, and the versions page carries the dates. The core model is built and tested, the package installs from its tarball, and the v0.1 protocol has fixtures, a reference receiver, and a batching sender. Three things still stand between this and 1.0.0: an independent security review, a 24 hour soak, and thresholds calibrated against a real traffic mix rather than the two lab runs recorded in [docs/DATASET.md](docs/DATASET.md). The claims a gate enforces today, the risks that are priced instead, and the size of each gap are on the [guarantees page](https://scorpio-guard.fachryxyf.com/guarantees.html), with the test or decision behind every row (D75). What follows is the design, and where the code has caught up to it.
 
 ---
 
@@ -629,7 +629,7 @@ conclusions.
 
 ## Roadmap
 
-Rencana bertahap, daftar hole, dan exit criteria tiap milestone: [docs/ROADMAP.md](docs/ROADMAP.md).
+Stages, the list of holes, and the exit criteria for each milestone: [docs/ROADMAP.md](docs/ROADMAP.md).
 
 Done: the core model, the pluggable store with its conformance kit and a durable
 SQLite implementation, the browser collector, two integration targets with declared
@@ -637,10 +637,6 @@ invariants, the three enumeration tasks, the constraint taxonomy closed over pro
 sources (D41), the weak-signal catalogue (D42), the two-tier symptom vocabulary
 (D43): and generated persona traffic that exercises the probabilistic model and has
 corrected it four times (D45–D49).
-
-Generated persona traffic against IXFE exercises the statistical layer and has
-falsified four claims so far.
-
 
 Since then, four things that needed no traffic: farming answered on mass through a
 velocity ceiling (D50), a collector for every catalogued signal (D51), the anomaly
