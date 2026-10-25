@@ -1,0 +1,7 @@
+{
+  "name": "reject-array",
+  "rule": "3",
+  "why": "A JSON array is not a message, and treating it as an object with no fields hides that.",
+  "request": [],
+  "expect": { "ok": false, "code": "NOT_OBJECT" }
+}

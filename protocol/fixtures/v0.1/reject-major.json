@@ -1,0 +1,14 @@
+{
+  "name": "reject-major",
+  "rule": "6.4",
+  "why": "A different major may mean something else by the same tokens; the whole message is rejected.",
+  "request": {
+    "protocol": "sg/1.0",
+    "schema": 1,
+    "reports": []
+  },
+  "expect": {
+    "ok": false,
+    "code": "UNSUPPORTED_MAJOR"
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "name": "accept-one",
+  "rule": "3",
+  "why": "The shape of a normal request: one report, tokens this receiver knows.",
+  "request": {
+    "protocol": "sg/0.1",
+    "schema": 1,
+    "reports": [
+      {
+        "category": "SYM_TIMING",
+        "detail": "SYM_UNIFORM_DELAY_SHAPE",
+        "entities": "few"
+      }
+    ]
+  },
+  "expect": {
+    "ok": true,
+    "reports": [
+      {
+        "category": "SYM_TIMING",
+        "detail": "SYM_UNIFORM_DELAY_SHAPE",
+        "entities": "few"
+      }
+    ],
+    "dropped": 0
+  }
+}

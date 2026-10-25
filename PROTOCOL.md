@@ -2,11 +2,14 @@
 
 Wire format for the symptom/prescription exchange.
 
-**Nothing implements this yet.** The library transmits nothing today (D17 removed
-the API key, D20 made a serverless guard fully functional), so this is a design
-commitment rather than a description of running code. It lives in this repository
-until `scorpio-guard-protocol` exists, so the vocabulary in `src/core/symptoms.ts`
-and the format described here cannot drift apart while both are moving.
+**The library still transmits nothing on its own.** D17 removed the API key and D20
+made a serverless guard fully functional, so there is no default destination and no
+sender started by an import. What exists is the executable side of this document:
+`src/core/protocol.ts` encodes and decodes, `protocol/fixtures/v0.1/` holds the cases
+a conforming implementation has to pass, and `examples/protocol/` contains a reference
+receiver and a batching sender. It lives in this repository until
+`scorpio-guard-protocol` exists, so the vocabulary in `src/core/symptoms.ts` and the
+format described here cannot drift apart while both are moving.
 
 The vocabulary is the normative part and is already written. This document adds
 only what a wire format has to decide beyond it: framing, versioning, what a
@@ -148,16 +151,16 @@ Named rather than glossed over:
 - **Transport encryption.** TLS is assumed and not specified. A future version has
   to say something about a server that sees traffic patterns even when it sees no
   content.
-- **Batching and cadence.** How often an instance reports, and whether reports
-  accumulate between sends, is a sender policy with a privacy consequence: a report
-  sent immediately after an event correlates with that event in the server's logs.
-  This needs a decision before anything transmits.
+- **Batching and cadence.** Decided for this implementation in section 10 and D71. The
+  numbers are policy and another sender may pick different ones; the guarantee is that
+  sending is periodic rather than triggered by the event being reported.
 - **Server-only readable encoding.** Still research, not design. If it lands it
   changes section 3 and nothing else.
 - **Replay and poisoning.** An unauthenticated endpoint accepting idempotent
   reports can be flooded with fabricated shapes. Bucketing limits the damage per
   request; nothing here stops a patient attacker from pushing `confidence` upward,
-  and that is an open problem rather than a solved one.
+  and that is an open problem rather than a solved one. The replay window in section 10
+  is a delay, not the defence.
 
 ## 8. Conformance
 
@@ -171,7 +174,15 @@ An implementation conforms to v0.1 when it:
 
 Point 6 is the one worth testing adversarially: it is the guarantee the whole
 privacy argument rests on, and the only one whose violation is invisible to the
-sender.
+sender. It is also the one point where an unknown field is not ignored: a field named in
+section 1 rejects the whole message with `FORBIDDEN_FIELD` before any other rule runs
+(D70). Rule 5 keeps its meaning for every other field.
+
+The cases live in `protocol/fixtures/v0.1/`, one JSON file each, twenty-two of them.
+Every implementation of this document runs them, on every test run: the encoder and
+decoder in `src/core/protocol.ts`, and the reference receiver in
+`examples/protocol/validate.ts`. When the two disagree, the fixture wins and one of them
+has a bug.
 
 ## 9. Relationship to the design record
 
@@ -181,6 +192,31 @@ sender.
 | D17, D20 | No API key, no required server - which is why nothing transmits yet |
 | D43 | Two-tier vocabulary, and the degradation rules of section 6 |
 | D19 | What data the project needs: pattern shape, not identity |
+| D70 | Why section 8 rejects a section 1 field instead of ignoring it |
+| D71 | The sender cadence, the receiver retention, and the abuse control below |
 
 Changes to this document belong in `DECISIONS.md` first. The format is downstream
 of the reasoning, not a place to make new decisions quietly.
+
+---
+
+## 10. Operational defaults
+
+Not part of the wire format. This is what the reference receiver and the shipped sender
+do, recorded so a second implementation starts from a decision instead of a guess (D71).
+A deployment may choose different numbers; a deployment that changes the shape of the
+guarantee has to change this document first.
+
+| Concern | Default | Reason |
+|---|---|---|
+| Send trigger | a batch of 20, or a 60 second cadence | periodic, never triggered by the reported event |
+| Undeliverable batch | dropped after one attempt | a retry log is a timeline with fresh timestamps |
+| Receiver retention | one hour of shape aggregates | nothing to erase, and the obligation expires with the window |
+| Replay | digest of the whole body, window equal to retention | a sender retry cannot inflate one sighting into corroboration |
+| Abuse control | 60 requests per minute per transport address | the address is the only identifying value and it is pruned with the window |
+| Body size | 64 KiB | refused before parsing |
+| Corroboration | three sightings of the same shape | provisional until then |
+
+A receiver that keeps aggregates instead of messages has no body to delete, which is the
+point: the privacy argument of section 1 is easier to hold when the data was never
+written down.

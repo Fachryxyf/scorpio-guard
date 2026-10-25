@@ -1,0 +1,13 @@
+{
+  "name": "reject-missing-reports",
+  "rule": "3",
+  "why": "A message with no report list is not an empty observation, it is a malformed one.",
+  "request": {
+    "protocol": "sg/0.1",
+    "schema": 1
+  },
+  "expect": {
+    "ok": false,
+    "code": "MISSING_REPORTS"
+  }
+}

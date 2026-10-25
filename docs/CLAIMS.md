@@ -9,7 +9,7 @@ proving it and stronger than nothing: it means every design claim either has a p
 in the suite that would notice a change, or a written explanation of why it cannot
 have one.
 
-Total: 72 decisions, 54 named by a test, 18 explained, 0 unexplained.
+Total: 74 decisions, 54 named by a test, 20 explained, 0 unexplained.
 
 | Decision | Title | Tests |
 |---|---|---|
@@ -75,7 +75,7 @@ covered instead when it is covered at all.
 
 - D7: One package, multiple entry points. One package, multiple entry points. Checked by `npm run pack:check`, which inspects the tarball and imports every subpath from an installed copy in an empty directory. It is a gate rather than a test file, so no test names this decision.
 - D12: Core is framework-agnostic. Core is framework-agnostic. A property of the imports: nothing under `src/core` touches a platform API except the injectable clock. Enforced by review until the runtime matrix (M5.1) turns it into an executable check.
-- D17: No API key in the local core. No API key in the local core. There is no server to hold a key, so there is nothing to assert yet. It becomes testable when the protocol runs end to end (M3).
+- D17: No API key in the local core. No API key in the local core. There is no server to hold a key, so there is nothing to assert yet. The protocol now runs end to end against a reference receiver and the endpoint is still unauthenticated by decision, so there is still no key to miss.
 - D31: `Relationship : E x E -> R` is deferred out of the PoC. `Relationship : E x E -> R` is deferred out of the PoC. A deferral: the absence of an API is not something a test can assert. Its consequence (trust is per entity, not per pair) is covered where D2 is.
 - D24: Licence: MIT. Licence: MIT. `package.json` plus `LICENSE`, and `npm run pack:check` asserts the tarball carries the licence text. No test names the decision.
 - D25: npm: `@fachryxyf/scorpio-guard`. npm: `@fachryxyf/scorpio-guard`. Asserted by `pack:check`, which imports the installed tarball under exactly that name and fails if the subpaths do not resolve.
@@ -91,6 +91,8 @@ covered instead when it is covered at all.
 - D64: Calibration refuses a dataset it cannot learn from. Calibration refuses a dataset it cannot learn from. A policy about what may be published, not a behaviour of the library. The refusals, the grid and the per-persona counting are all in `examples/lab/calibration.test.ts`, verified by mutation; what no test can hold is the rule that a refusal must be printed instead of a table.
 - D65: The frozen fixture is how a treatment change becomes visible. The frozen fixture is how a treatment change becomes visible. The freeze itself is a script, and its consequences are in `examples/lab/fixture.test.ts` (a fixture exists, replays to its frozen decisions, and holds no hashed identifier), verified by mutation; what no test can hold is the promise that a fixture is only regenerated on purpose.
 - D66: A persona is a population, and a repetition is a different visitor. A persona is a population, and a repetition is a different visitor. The identity rule is a function in `examples/lab/personas.ts` and its consequences are in `examples/lab/lab.test.ts` (eight repetitions claim eight stable, distinct identities; one treated repetition is a false positive for the persona), verified by mutation; what no test can hold is the judgement that eight scripted runs of one trace are enough of a population to publish a threshold against.
+- D70: An identity field is a rejection, not an ignore. An identity field is a rejection, not an ignore. The rule is a walk of the raw body, written twice on purpose (`forbiddenFieldIn` in `src/core/protocol.ts` and in `examples/protocol/validate.ts`), and its consequences are in `examples/protocol/interop.test.ts` (every section 1 name rejected by both implementations, the scan running before the major check, the same answer from both) and in `protocol/fixtures/v0.1/reject-forbidden-*.json`. Verified by mutation: removing the scan from the library fails six tests. No test names this decision, the fixtures name the protocol section instead.
+- D71: The protocol transmits on a sender schedule, and the server keeps aggregates. The protocol transmits on a sender schedule, and the server keeps aggregates. Covered by `examples/protocol/interop.test.ts`: the cadence fires without a caller, a replayed body is counted once, the third request over the limit gets 429, aggregates and the address table are empty after the window, and an oversize body gets 413 before parsing. No test names this decision. What no test can hold is the choice of one hour for retention, which is a number nobody measured.
 
 ## Prose only, and not yet explained
 

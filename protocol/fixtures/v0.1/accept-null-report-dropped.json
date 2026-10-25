@@ -1,0 +1,28 @@
+{
+  "name": "accept-null-report-dropped",
+  "rule": "3",
+  "why": "A null entry in the array is one unusable report, not a reason to reject the message.",
+  "request": {
+    "protocol": "sg/0.1",
+    "schema": 1,
+    "reports": [
+      null,
+      {
+        "category": "SYM_TARGET",
+        "detail": "SYM_BROAD_ENUMERATION",
+        "entities": "several"
+      }
+    ]
+  },
+  "expect": {
+    "ok": true,
+    "reports": [
+      {
+        "category": "SYM_TARGET",
+        "detail": "SYM_BROAD_ENUMERATION",
+        "entities": "several"
+      }
+    ],
+    "dropped": 1
+  }
+}

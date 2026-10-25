@@ -119,6 +119,11 @@ ${parameters.entityBuckets
       'Implementasi konform ketika ia hanya mengirim token yang dikirimnya saat rilis, menyertakan kategori bersama setiap detail, membuat hitungan entitas jadi bucket, menerapkan semua aturan degradasi, mengabaikan strategi tak dikenal, dan tidak memuat field pembawa observasi mentah atau identitas. Poin terakhir layak diuji secara adversarial: itu jaminan tempat argumen privasi berdiri, dan satu-satunya yang pelanggarannya tak terlihat oleh pengirim.',
     )}</p>
 
+    <p>${t(
+      'Twenty-two cases pin that list in <code>protocol/fixtures/v0.1/</code>, one JSON file each, and they run through two implementations on every push: the encoder and decoder the library ships, and a reference receiver written from the document rather than from the library. When the two disagree the fixture wins and one of them has a bug. The receiver answers with stable rejection codes, keeps an hour of shape aggregates and no message body, and the sender waits for a batch or a 60 second cadence instead of sending at the moment of the event.',
+      'Dua puluh dua kasus mengunci daftar itu di <code>protocol/fixtures/v0.1/</code>, satu file JSON per kasus, dan semuanya diputar lewat dua implementasi pada setiap push: encoder dan decoder yang dikirim library, dan receiver referensi yang ditulis dari dokumen, bukan dari library. Kalau keduanya berbeda, fixture yang menang dan salah satunya punya bug. Receiver menjawab dengan kode penolakan yang stabil, menyimpan agregat bentuk selama satu jam dan tidak menyimpan badan pesan, dan sender menunggu batch atau cadence 60 detik, bukan mengirim saat peristiwanya terjadi.',
+    )}</p>
+
     <p class="seealso"><b>${t('See also', 'Lihat juga')}</b>
       <a href="https://github.com/Fachryxyf/scorpio-guard/blob/main/PROTOCOL.md">${t('Full protocol draft', 'Draf protokol lengkap')}</a>
       <a href="evidence.html#catalogue">${t('Weak-signal catalogue', 'Katalog weak signal')}</a>
@@ -130,8 +135,8 @@ ${parameters.entityBuckets
     file: 'protocol.html',
     titleEn: 'Symptom and prescription',
     titleId: 'Symptom dan prescription',
-    subtitleEn: 'What may cross the wire, what structurally cannot, and why nothing transmits yet.',
-    subtitleId: 'Apa yang boleh lewat kabel, apa yang secara struktural tak bisa, dan kenapa belum ada yang dikirim.',
+    subtitleEn: 'What may cross the wire, what structurally cannot, and why the library still sends nothing.',
+    subtitleId: 'Apa yang boleh lewat kabel, apa yang secara struktural tak bisa, dan kenapa library ini masih tidak mengirim apa pun.',
     sections,
     body,
   });

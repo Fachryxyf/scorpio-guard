@@ -1,0 +1,16 @@
+{
+  "name": "reject-forbidden-field-path",
+  "rule": "1",
+  "why": "An endpoint path is raw observation, and the server never needs it to answer.",
+  "request": {
+    "protocol": "sg/0.1",
+    "schema": 1,
+    "reports": [],
+    "path": "/api/waitlist"
+  },
+  "expect": {
+    "ok": false,
+    "code": "FORBIDDEN_FIELD",
+    "field": "path"
+  }
+}

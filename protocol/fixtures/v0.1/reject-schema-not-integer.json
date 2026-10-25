@@ -1,0 +1,7 @@
+{
+  "name": "reject-schema-not-integer",
+  "rule": "3",
+  "why": "The schema field is an integer version; 1.5 has no meaning and cannot be rounded into one.",
+  "request": { "protocol": "sg/0.1", "schema": 1.5, "reports": [] },
+  "expect": { "ok": false, "code": "INVALID_SCHEMA" }
+}

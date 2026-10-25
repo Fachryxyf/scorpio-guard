@@ -1,0 +1,14 @@
+{
+  "name": "reject-reports-not-array",
+  "rule": "3",
+  "why": "The report list has one shape only.",
+  "request": {
+    "protocol": "sg/0.1",
+    "schema": 1,
+    "reports": {}
+  },
+  "expect": {
+    "ok": false,
+    "code": "MISSING_REPORTS"
+  }
+}

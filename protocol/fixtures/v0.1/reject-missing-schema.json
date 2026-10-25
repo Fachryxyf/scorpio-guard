@@ -1,0 +1,13 @@
+{
+  "name": "reject-missing-schema",
+  "rule": "3",
+  "why": "The schema is required even though a newer one is accepted.",
+  "request": {
+    "protocol": "sg/0.1",
+    "reports": []
+  },
+  "expect": {
+    "ok": false,
+    "code": "MISSING_SCHEMA"
+  }
+}

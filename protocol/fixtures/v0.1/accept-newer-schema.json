@@ -1,0 +1,27 @@
+{
+  "name": "accept-newer-schema",
+  "rule": "6.3",
+  "why": "A higher schema only promises details this receiver may not know, which rule 1 covers.",
+  "request": {
+    "protocol": "sg/0.1",
+    "schema": 99,
+    "reports": [
+      {
+        "category": "SYM_TIMING",
+        "detail": "SYM_UNIFORM_DELAY_SHAPE",
+        "entities": "few"
+      }
+    ]
+  },
+  "expect": {
+    "ok": true,
+    "reports": [
+      {
+        "category": "SYM_TIMING",
+        "detail": "SYM_UNIFORM_DELAY_SHAPE",
+        "entities": "few"
+      }
+    ],
+    "dropped": 0
+  }
+}

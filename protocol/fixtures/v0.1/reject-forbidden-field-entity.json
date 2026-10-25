@@ -1,0 +1,22 @@
+{
+  "name": "reject-forbidden-field-entity",
+  "rule": "1",
+  "why": "The entity key is the one token section 1 forbids first; \"entities\" is a bucket and not this.",
+  "request": {
+    "protocol": "sg/0.1",
+    "schema": 1,
+    "reports": [
+      {
+        "category": "SYM_TIMING",
+        "detail": "SYM_UNIFORM_DELAY_SHAPE",
+        "entities": "few",
+        "entity": "e01"
+      }
+    ]
+  },
+  "expect": {
+    "ok": false,
+    "code": "FORBIDDEN_FIELD",
+    "field": "entity"
+  }
+}

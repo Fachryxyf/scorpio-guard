@@ -1,0 +1,22 @@
+{
+  "name": "reject-forbidden-field-count",
+  "rule": "1",
+  "why": "An exact count is a raw observation and a fingerprint at small scale.",
+  "request": {
+    "protocol": "sg/0.1",
+    "schema": 1,
+    "reports": [
+      {
+        "category": "SYM_REPETITION",
+        "detail": "SYM_REQUEST_BURST",
+        "entities": "many",
+        "count": 47
+      }
+    ]
+  },
+  "expect": {
+    "ok": false,
+    "code": "FORBIDDEN_FIELD",
+    "field": "count"
+  }
+}

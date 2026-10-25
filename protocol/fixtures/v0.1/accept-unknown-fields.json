@@ -1,0 +1,29 @@
+{
+  "name": "accept-unknown-fields",
+  "rule": "6.5",
+  "why": "An instance that ships tomorrow must be able to add a field without breaking a server deployed today.",
+  "request": {
+    "protocol": "sg/0.1",
+    "schema": 1,
+    "reports": [
+      {
+        "category": "SYM_TIMING",
+        "detail": "SYM_UNIFORM_DELAY_SHAPE",
+        "entities": "few",
+        "source": "edge"
+      }
+    ],
+    "somethingAddedTomorrow": true
+  },
+  "expect": {
+    "ok": true,
+    "reports": [
+      {
+        "category": "SYM_TIMING",
+        "detail": "SYM_UNIFORM_DELAY_SHAPE",
+        "entities": "few"
+      }
+    ],
+    "dropped": 0
+  }
+}

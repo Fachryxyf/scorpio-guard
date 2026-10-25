@@ -1,0 +1,16 @@
+{
+  "name": "reject-forbidden-beats-major",
+  "rule": "1",
+  "why": "The identity scan runs before every other rule, so a malformed message cannot smuggle a field past it.",
+  "request": {
+    "protocol": "sg/1.0",
+    "schema": 1,
+    "reports": [],
+    "ip": "127.0.0.1"
+  },
+  "expect": {
+    "ok": false,
+    "code": "FORBIDDEN_FIELD",
+    "field": "ip"
+  }
+}

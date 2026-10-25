@@ -1,0 +1,27 @@
+{
+  "name": "accept-unknown-detail",
+  "rule": "6.1",
+  "why": "A detail from a newer instance degrades to its category and is kept, not rejected.",
+  "request": {
+    "protocol": "sg/0.1",
+    "schema": 1,
+    "reports": [
+      {
+        "category": "SYM_TIMING",
+        "detail": "SYM_SHAPE_FROM_A_NEWER_INSTANCE",
+        "entities": "few"
+      }
+    ]
+  },
+  "expect": {
+    "ok": true,
+    "reports": [
+      {
+        "category": "SYM_TIMING",
+        "detail": null,
+        "entities": "few"
+      }
+    ],
+    "dropped": 0
+  }
+}

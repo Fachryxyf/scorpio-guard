@@ -1,0 +1,14 @@
+{
+  "name": "reject-protocol-unparseable",
+  "rule": "6.4",
+  "why": "A version that is not sg/major.minor cannot be compared, so it cannot be accepted.",
+  "request": {
+    "protocol": "1.0",
+    "schema": 1,
+    "reports": []
+  },
+  "expect": {
+    "ok": false,
+    "code": "UNPARSEABLE_PROTOCOL"
+  }
+}

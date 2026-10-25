@@ -49,13 +49,14 @@ kalibrasi diulang dan halaman jaminan diperbarui.
 | Collector browser | `src/collect/` |
 | Situs 10 halaman, dibangkitkan dari repo | `site/`, `npm run site:check` |
 | Instrumen trafik nyata: proxy, browser, report | `examples/ixfe/live/`, D56, D57 |
+| Protokol v0.1: fixture, receiver referensi, sender batching | `protocol/fixtures/v0.1/`, `examples/protocol/`, D70, D71 |
 | Gate manifest dan lockfile | `scripts/check-manifest.mjs`, `npm run check:manifest` |
 
-Angka yang dipakai gate: 288 test, 70 keputusan, 10 halaman, 0 dependensi runtime,
+Angka yang dipakai gate: 342 test, 74 keputusan, 10 halaman, 0 dependensi runtime,
 versi terbit 0.1.0, versi di `main` 0.2.0.
 
-Belum ada sama sekali: server protokol, hook event keputusan, publish ke registry,
-review keamanan.
+Belum ada sama sekali: hook event keputusan yang dipakai host lain, publish ke
+registry, review keamanan, dan pengirim protokol dari luar repo ini.
 
 ---
 
@@ -186,8 +187,8 @@ yang mengujinya. Klaim tanpa target dicetak sebagai daftar yang harus dijawab di
 
 Status: selesai. `docs/CLAIMS.md` dibangkitkan, `docs/CLAIMS-NOTES.md` memuat alasan
 tertulis, dan gate gagal kalau ada keputusan tanpa test dan tanpa alasan, atau kalau
-alasan masih tersisa untuk keputusan yang sudah punya test. Keadaan sekarang: 65
-keputusan, 50 dinamai test, 15 beralasan, 0 tanpa alasan.
+alasan masih tersisa untuk keputusan yang sudah punya test. Keadaan sekarang: 74
+keputusan, 54 dinamai test, 20 beralasan, 0 tanpa alasan.
 
 ### Exit criteria MVP
 
@@ -284,13 +285,21 @@ begitu juga keputusan (D64, D66, D67), dan bagian situs yang menerbitkan angkany
 
 | Task | Isi |
 |---|---|
-| M3.1 | Fixture JSON v0.1 di repo terpisah, termasuk kasus yang harus ditolak |
-| M3.2 | Server referensi minimal: terima, validasi, tolak, tanpa menyimpan identitas |
-| M3.3 | Interop: sender library, server, receiver, lewat HTTP, termasuk degradasi, replay, dan batching |
-| M3.4 | Operasional: cadence, retensi server, abuse control |
+| M3.1 | Fixture JSON v0.1, termasuk kasus yang harus ditolak. Selesai: `protocol/fixtures/v0.1/` berisi 22 kasus, satu file per kasus, masing-masing dengan hasil normalisasi yang harus sama untuk setiap implementasi. Direktori ini baru bisa pindah ke repo terpisah setelah pengirim luar ada |
+| M3.2 | Server referensi minimal: terima, validasi, tolak, tanpa menyimpan identitas. Selesai: `examples/protocol/server.ts` memvalidasi dengan implementasi kedua (`examples/protocol/validate.ts` yang ditulis dari dokumen, bukan dari library), menjawab dengan kode penolakan, dan menyimpan agregat bentuk saja |
+| M3.3 | Interop: sender library, server, receiver, lewat HTTP, termasuk degradasi, replay, dan batching. Selesai: `examples/protocol/sender.ts` mengirim per batch dengan cadence, dan `examples/protocol/interop.test.ts` memutar 22 fixture lewat dua implementasi lalu menguji jalur HTTP termasuk replay dan penolakan |
+| M3.4 | Operasional: cadence, retensi server, abuse control. Selesai: batch 20 atau 60 detik, retensi satu jam berisi agregat, 60 request per menit per alamat transport, badan 64 KiB, dan jendela replay sepanjang retensi (D71, bagian 10 `PROTOCOL.md`) |
 
 Exit: dua implementasi berbeda lulus fixture yang sama, dan envelope yang dimanipulasi
 ditolak oleh test, bukan oleh klaim.
+
+Status: selesai. Encoder dan decoder di `src/core/protocol.ts` dan receiver referensi di
+`examples/protocol/validate.ts` lulus 22 fixture yang sama, dan
+`examples/protocol/interop.test.ts` menutup jalur HTTP: 54 test, 44 di antaranya
+pemutaran fixture. Dua mutasi membuktikan test itu bisa gagal: menghapus pemindaian field
+terlarang dari library menggagalkan enam test, mengubah major yang didukung di receiver
+menggagalkan sembilan belas. Yang belum ada: pengirim dari luar repo ini, dan keputusan
+memindahkan fixture ke repo terpisah.
 
 ### M4, pengerasan
 
@@ -380,7 +389,8 @@ karena review keamanan perlu tahu angka FP/FN dan permukaan server.
 ## 10. Keputusan yang menunggu jawabanmu
 
 1. Review keamanan 1.0: oleh pihak lain, atau cukup dua orang di luar penulis.
-2. Protokol pindah ke repo terpisah sekarang, atau setelah M3.3 lulus.
+2. Protokol pindah ke repo terpisah sekarang, atau menunggu sampai ada pengirim luar.
+   Syarat yang tertulis sebelumnya, yaitu setelah M3.3 lulus, sudah terpenuhi.
 3. Express sebagai `devDependencies` untuk adapter M1.1. Rekomendasi saya ya, selama
    ia tidak pernah masuk dependensi paket.
 

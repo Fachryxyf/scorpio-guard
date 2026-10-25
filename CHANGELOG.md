@@ -71,6 +71,18 @@ Tagged in `package.json`, not yet published to npm. The registry has 0.1.0, and
   three targets, eight visitors per persona, zero false positives and seven misses. The
   grid it produces has the shipped policy as its best cell, and the fixture replays all
   1656 decisions on every push (D64, D66).
+- The protocol runs end to end outside the package: 22 fixtures in `protocol/fixtures/v0.1/`
+  that every implementation has to pass, a reference receiver in `examples/protocol/server.ts`
+  with its own validator written from `PROTOCOL.md` rather than from the library, and a
+  batching sender in `examples/protocol/sender.ts`. The decoder now rejects a field that
+  section 1 forbids instead of ignoring it, with a stable code, and both implementations
+  answer the same fixture with the same result (D70).
+- Operational defaults for the exchange, recorded rather than implied: a send every 20
+  shapes or 60 seconds, an undeliverable batch dropped instead of retried, one hour of
+  shape aggregates on the receiver, a replay window as long as retention, 60 requests per
+  minute per transport address, and a 64 KiB body limit (D71).
+- `npm run protocol:serve` starts the reference receiver. The package still transmits
+  nothing on its own: no import opens a socket.
 
 ### Changed
 

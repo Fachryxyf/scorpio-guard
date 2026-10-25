@@ -1,0 +1,10 @@
+{
+  "name": "reject-not-object",
+  "rule": "3",
+  "why": "The body is one JSON object; a bare string never was a message.",
+  "request": "sg/0.1",
+  "expect": {
+    "ok": false,
+    "code": "NOT_OBJECT"
+  }
+}

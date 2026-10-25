@@ -17,9 +17,9 @@ the answer given, and what that answer commits the implementation to.
   policy; the tests are what make a policy change visible.
 
 Status: every numbered question is answered, the original thirty, plus D31 to
-D69 arising from review, implementation, a live pentest, and the traffic lab. Nothing is blocked on
-a decision. What remains is validation: the values recorded here have not met real
-traffic yet, and D47 names where they will.
+D71 arising from review, implementation, a live pentest, the traffic lab, and the
+protocol work. Nothing is blocked on a decision. What remains is validation: the values
+recorded here have not met real traffic yet, and D47 names where they will.
 
 Last updated: 2026-10-25
 
@@ -121,6 +121,8 @@ Last updated: 2026-10-25
 - [D67: Anomaly is reported and does not decide, and the dataset says why](#d67-anomaly-is-reported-and-does-not-decide-and-the-dataset-says-why)
 - [D68: A 404 behind the site's own link is not evidence](#d68-a-404-behind-the-sites-own-link-is-not-evidence)
 - [D69: Erasure is proved by counting what is underneath](#d69-erasure-is-proved-by-counting-what-is-underneath)
+- [D70: An identity field is a rejection, not an ignore](#d70-an-identity-field-is-a-rejection-not-an-ignore)
+- [D71: The protocol transmits on a sender schedule, and the server keeps aggregates](#d71-the-protocol-transmits-on-a-sender-schedule-and-the-server-keeps-aggregates)
 
 **[Open questions](#open-questions)**
 
@@ -3877,3 +3879,118 @@ worse than a narrow one that can.
 mutation. Making `guard.forget` do nothing fails the residue test; the retention test
 fails on a store that appends a version instead of replacing one. The event test fails if
 identity is added back to the default event.
+
+---
+
+## D70: An identity field is a rejection, not an ignore
+
+### The hole
+
+H10. Section 6 rule 5 says unknown fields are ignored. Section 8 point 6 says a
+conforming message carries no identity and no raw observation. Those two agree until
+someone sends `sessionId`: a receiver that follows rule 5 keeps the value out of its
+logic and still has it in the request body it read, the error reporter it fed, and the
+access log beside it. The rule meant to protect the privacy argument was the one that
+made the leak invisible to everyone involved.
+
+### The decision
+
+A field named in section 1 is rejected whole, with code `FORBIDDEN_FIELD`, before any
+other rule runs, by walking the raw body rather than the shape the receiver knows. The
+list is the list in section 1, and both implementations carry their own copy of it.
+Rejection is the fail-loud option: a sender that leaks identity finds out at the first
+request instead of shipping a message that is quietly dropped or quietly logged.
+
+The scan is case-insensitive, descends into arrays and objects, and reports the
+alphabetically first canonical name, so two implementations that walk the tree
+differently still agree on the answer. `entities` is a bucket and allowed; `entity` is
+the key and is not.
+
+### Limits
+
+- **A denylist is not a guarantee.** A sender can name a field `note` and put an identity
+  in it. What is covered is accident and the specific shapes section 1 names, not an
+  adversary. Section 7 already says an unauthenticated endpoint can be fed fabricated
+  shapes.
+- **The list is duplicated data.** A name added to one implementation and not the other
+  shows up as a fixture disagreement, which is the point, but only for names a fixture
+  exercises.
+- **The transport is outside this.** The address stays in the TCP connection, and the
+  receiver keeps it only as a rate-limit key with an expiry (D71).
+
+### Alternatives rejected
+
+**Whitelist the fields and reject everything else.** Stricter, and it breaks rule 5,
+which is the rule a newer sender depends on for a rolling deploy. The denylist keeps rule
+5 intact for fields that carry nothing section 1 forbids.
+
+**Strip the field and accept the message.** Silently rewriting hides the sender bug, and
+the value has already been read by then.
+
+### Gates
+
+`protocol/fixtures/v0.1/reject-forbidden-*.json` and `examples/protocol/interop.test.ts`
+run each case through both implementations. Verified by mutation: removing the scan from
+the library fails six tests, and changing the supported major in the receiver fails
+nineteen.
+
+---
+
+## D71: The protocol transmits on a sender schedule, and the server keeps aggregates
+
+### The hole
+
+Section 7 named batching and cadence as undecided for a privacy reason: a report sent
+immediately after an event lines up with that event in the log of the server. The same
+section named replay and poisoning as open, and left retention and abuse control
+unstated. A reference receiver built before those were decided would have invented them
+without saying so.
+
+### The decision
+
+Sender: a shape waits. It leaves when the queue reaches the batch size or when the
+cadence tick arrives, whichever comes first, and a batch that cannot be delivered is
+dropped rather than retried, because a retry log is a timeline with fresh timestamps.
+Defaults are a batch of 20, a cadence of 60 seconds, a queue cap of 200, and a request
+timeout of 2 seconds. A prescription whose strategy the instance does not know is
+counted and ignored, never escalated on.
+
+Receiver: one hour of shape aggregates, keyed by category, detail, and bucket. No message
+body is retained, so there is no row to erase and the obligation expires with the window.
+A replay inside that window is answered with an empty prescription list and counted, so a
+sender retry cannot inflate one sighting into corroboration. Abuse control is 60 requests
+per minute per transport address, with the address kept only as a rate-limit key and
+pruned with the window. A body over 64 KiB is refused before parsing. A shape becomes
+`corroborated` at three sightings.
+
+All of it is a default, not a requirement of the wire format: PROTOCOL.md states the
+guarantees and names these numbers as choices of this implementation.
+
+### Limits
+
+- **One hour is arbitrary.** Long enough for three sightings in a session, short enough
+  that a receiver that crashes loses little. Nothing measured it.
+- **The replay window lasts as long as retention.** A patient attacker waits it out and
+  re-sends. Bucketing limits the damage per request; the window adds a delay, not a
+  defence, and section 7 still calls poisoning open.
+- **The rate limit is per address.** A distributed sender is not limited, and a
+  population behind one address is limited together.
+- **One receiver exists.** The fixtures are the contract, and they have met exactly one
+  implementation besides the sender in this repository.
+
+### Alternatives rejected
+
+**Send immediately and let the server add jitter.** The correlation happened on the wire;
+a server delaying its own write does not remove the timestamp.
+
+**Retain messages for debugging.** A retained message is a retained body, which is what
+the format exists to avoid. Counters answer what a debugging window would.
+
+**Retry until delivered.** Delivery is not worth a timeline.
+
+### Gates
+
+`examples/protocol/interop.test.ts`: 54 tests, 44 of them fixture runs over 22 cases.
+Cadence fires without a caller, a replay is counted once, the third request over the limit
+gets 429, aggregates and the address table are empty after the window, an oversize body
+gets 413, and an unknown strategy is ignored.

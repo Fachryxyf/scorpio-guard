@@ -1,0 +1,21 @@
+{
+  "name": "accept-numeric-entities-dropped",
+  "rule": "4",
+  "why": "An exact count is a fingerprint; a report that carries one is unusable rather than trusted.",
+  "request": {
+    "protocol": "sg/0.1",
+    "schema": 1,
+    "reports": [
+      {
+        "category": "SYM_TIMING",
+        "detail": "SYM_UNIFORM_DELAY_SHAPE",
+        "entities": 3
+      }
+    ]
+  },
+  "expect": {
+    "ok": true,
+    "reports": [],
+    "dropped": 1
+  }
+}

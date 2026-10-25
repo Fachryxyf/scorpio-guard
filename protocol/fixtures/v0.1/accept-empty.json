@@ -1,0 +1,15 @@
+{
+  "name": "accept-empty",
+  "rule": "3",
+  "why": "An empty report list is valid and means nothing was observed.",
+  "request": {
+    "protocol": "sg/0.1",
+    "schema": 1,
+    "reports": []
+  },
+  "expect": {
+    "ok": true,
+    "reports": [],
+    "dropped": 0
+  }
+}

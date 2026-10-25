@@ -1,0 +1,32 @@
+{
+  "name": "accept-unknown-category-dropped",
+  "rule": "6.2",
+  "why": "An unknown category leaves nothing to fall back to, so that report is dropped and counted.",
+  "request": {
+    "protocol": "sg/0.1",
+    "schema": 1,
+    "reports": [
+      {
+        "category": "SYM_TIMING",
+        "detail": "SYM_UNIFORM_DELAY_SHAPE",
+        "entities": "few"
+      },
+      {
+        "category": "SYM_NONSENSE",
+        "detail": "SYM_WHAT",
+        "entities": "one"
+      }
+    ]
+  },
+  "expect": {
+    "ok": true,
+    "reports": [
+      {
+        "category": "SYM_TIMING",
+        "detail": "SYM_UNIFORM_DELAY_SHAPE",
+        "entities": "few"
+      }
+    ],
+    "dropped": 1
+  }
+}

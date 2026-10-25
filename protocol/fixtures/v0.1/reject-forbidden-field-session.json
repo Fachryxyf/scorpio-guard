@@ -1,0 +1,16 @@
+{
+  "name": "reject-forbidden-field-session",
+  "rule": "1",
+  "why": "A session id is identity: a receiver that ignores the field has already logged it.",
+  "request": {
+    "protocol": "sg/0.1",
+    "schema": 1,
+    "reports": [],
+    "sessionId": "abc123"
+  },
+  "expect": {
+    "ok": false,
+    "code": "FORBIDDEN_FIELD",
+    "field": "sessionId"
+  }
+}

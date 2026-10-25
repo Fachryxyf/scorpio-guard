@@ -1,0 +1,13 @@
+{
+  "name": "reject-missing-protocol",
+  "rule": "3",
+  "why": "Without a version there is no way to know which rules apply.",
+  "request": {
+    "schema": 1,
+    "reports": []
+  },
+  "expect": {
+    "ok": false,
+    "code": "MISSING_PROTOCOL"
+  }
+}
