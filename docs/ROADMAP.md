@@ -51,11 +51,11 @@ kalibrasi diulang dan halaman jaminan diperbarui.
 | Instrumen trafik nyata: proxy, browser, report | `examples/ixfe/live/`, D56, D57 |
 | Gate manifest dan lockfile | `scripts/check-manifest.mjs`, `npm run check:manifest` |
 
-Angka yang dipakai gate: 233 test, 63 keputusan, 10 halaman, 0 dependensi runtime,
+Angka yang dipakai gate: 275 test, 70 keputusan, 10 halaman, 0 dependensi runtime,
 versi terbit 0.1.0, versi di `main` 0.2.0.
 
-Belum ada sama sekali: server protokol, hook event keputusan, bench, publish gate,
-alat kalibrasi, review keamanan.
+Belum ada sama sekali: server protokol, hook event keputusan, publish ke registry,
+review keamanan.
 
 ---
 
@@ -70,7 +70,7 @@ alat kalibrasi, review keamanan.
 | H5 | Tidak ada anggaran performa dan tidak ada bench, jadi "murah" masih klaim | MVP | M1.5 | bench di CI, gagal kalau melewati budget hasil pengukuran |
 | H6 | 0.2.0 belum terbit. Tidak ada CHANGELOG, publish gate, atau aturan semver untuk perilaku advisory | MVP | M1.6 | install dari registry di CI, isi tarball diperiksa |
 | H7 | Drift dokumen tidak dicegah mesin. Bukti: `packageManager` kembali masuk lewat commit penyuntingan massal, dan audit sempat mengklaim field itu sudah dihapus | MVP | M1.7a, M1.7b | gate gagal kalau manifest tidak cocok dengan lockfile, atau angka dokumen tidak cocok dengan hasil render |
-| H8 | Classifier anomali tidak ikut memutuskan. Belum ada jalur memilih dari pengukuran (D52) | 1.0 | M2.4 | laporan pemilihan dan D baru |
+| H8 | Classifier anomali tidak ikut memutuskan. Belum ada jalur memilih dari pengukuran (D52) | 1.0 | M2.4 (D67) | pengukuran F7: tidak ada threshold yang mengalahkan policy bukti (0 false positive, 7 false negative dari 24 persona) |
 | H9 | Semua threshold adalah tebakan. Dataset berlabel belum ada, dan populasi nyata tidak bisa ditunggu (T1) | 1.0 | M2.1 sampai M2.5 | confusion matrix dari dataset berlabel, komposisinya tertulis |
 | H10 | Protokol belum pernah jalan end-to-end. Tidak ada fixture interop atau server (T4) | 1.0 | M3.1 sampai M3.4 | sender dan receiver lulus fixture yang sama lewat HTTP |
 | H11 | Root of trust di luar SG. Entity key yang mudah diganti mengalahkan seluruh pertahanan berbasis riwayat (D1.1) | 1.0 | M4.1 | panduan dan test yang membuktikan batasnya |
@@ -82,6 +82,7 @@ alat kalibrasi, review keamanan.
 | H17 | Klaim di `DECISIONS.md` tidak punya indeks ke test yang membuktikannya | MVP | M1.8 | indeks dibangkitkan, klaim tanpa target muncul sebagai daftar |
 | H18 | Tidak ada soak atau load test untuk sweep dan store | 1.0 | M4.4 | soak 24 jam dengan batas memori dan jumlah state |
 | H19 | 404 untuk path yang ditautkan build sendiri dibaca sebagai bukti negatif, jadi crawler sah mewarisi link mati situs. Ditemukan lab (F3 di `docs/DATASET.md`) | 1.0 | M2.6 | dua 404 identik: yang tertaut tidak menaikkan stage, yang tidak tertaut menaikkannya |
+| H20 | Lab menjalankan satu kunjungan per persona, jadi persona yang memang pendek (skimmer, stale bookmark) tidak pernah punya cukup baris untuk dikalibrasi, dan repetisi dengan identitas sama akan menyatu jadi satu entity. Ditemukan penolakan M2.2 | MVP | M2.7 | persona dijalankan N kali sebagai N pengunjung berbeda, komposisinya tercatat di manifest |
 
 ---
 
@@ -234,38 +235,50 @@ yang cukup untuk memilih threshold:
 | M2.4 | Keputusan D baru: classifier atau konjungsi ambang yang memutuskan (D52), plus threshold terpilih, dengan komposisi dataset ditulis di samping angkanya |
 | M2.5 | Re-kalibrasi dengan campuran nyata begitu ada data produksi. Sampai itu ada, halaman jaminan menyebut batas ini secara eksplisit |
 | M2.6 | 404 yang tertaut bukan bukti (H19). Observer mencatat path yang pernah ia sajikan dari `<a href>` di HTML yang lewat, dan 404 untuk path itu tidak menambah bukti negatif |
+| M2.7 | Persona sebagai populasi (H20). `--repeat=N` menjalankan tiap persona N kali sebagai pengunjung berbeda: identitas sendiri, seed sendiri, profil Chrome sendiri, dan label tetap di level persona (D66) |
+| M2.8 | Terbitkan angka FP/FN run lab di situs, dibangkitkan dari file run dan bukan diketik, supaya halaman jaminan menyebut komposisi dan batasnya |
 
-Status: M2.1 selesai sebagai harness, bukan sebagai kalibrasi (D63). Satu run
-terekam: 129 request, 14 persona-run, dua target, 0 false positive, 6 false
-negative. Keenam false negative punya satu sebab yang sama dan bukan soal
-penempatan threshold: di target yang tidak mendeklarasikan apa pun, satu page view
-tidak membawa bukti, jadi mass tetap 2.00, stage tetap `unknown`, dan plafonnya
-`ALLOW` berapa pun skor anomalinya (F1 di `docs/DATASET.md`). Karena itu M2.2 belum
-bisa menghasilkan threshold: yang bisa dikalibrasi belum ada di dataset ini. Yang
-dibutuhkan lebih dulu adalah target yang punya aksi untuk berhasil, yaitu
-`npm run lab -- --target=ixfe`, tempat endpoint waitlist dan order membawa bukti.
+Status: M2.1 selesai (D63). Dua run terekam. Run pertama, dua build statis: 129
+request, 14 persona-run, 0 false positive, 6 false negative, dan keenamnya punya satu
+sebab yang sama: page view tidak membawa bukti, jadi mass tetap 2.00, stage tetap
+`unknown`, dan plafonnya `ALLOW` (F1). Run kedua menambahkan IXFE, tempat form dan
+hidden field bisa dinilai: 1656 request, 24 persona, tiga target, 0 false positive,
+7 false negative (F5). Komposisi dan temuannya di `docs/DATASET.md`.
 
-Status: M2.2 selesai sebagai alat, belum sebagai hasil (D64). `npm run calibrate`
-memutar ulang satu run di bawah sembilan sel (half-life 24, 72, 168 jam kali
-developingAt 3, 4, 5) dan menghitung dua kesalahan per sel, per persona. Untuk run
-yang ada sekarang ia menolak, dan penolakan itu keluarannya: 129 request di bawah
-lantai 240, dan dua persona yang hanya membuat satu sampai empat request sebelum
-pergi. Menurunkan lantai bukan jawaban; menambah persona dan memakai target yang
-punya aksi adalah jawabannya. Gate: `examples/lab/calibration.test.ts`, diverifikasi
-dengan tiga mutasi.
+Status: M2.2 selesai sebagai hasil, bukan hanya sebagai alat (D64). `npm run calibrate`
+lulus audit pada run kedua dan mencetak sembilan sel: half-life 24, 72, 168 jam kali
+developingAt 3, 4, 5. Sel yang dikirim (24 jam, 3, 7) adalah yang terbaik dari sembilan,
+0 false positive dan 7 false negative, 17 dari 24 persona. Menaikkan developingAt ke 4
+atau 5 kehilangan satu tangkapan lagi. Sumbu half-life tidak menggeser satu baris pun,
+karena run hanya berlangsung beberapa menit dan tidak ada yang meluruh di dalamnya; itu
+dicetak apa adanya, bukan disembunyikan. Gate: `examples/lab/calibration.test.ts`,
+diverifikasi dengan tiga mutasi.
 
 Status: M2.3 selesai. `scripts/freeze-lab.mjs` menyimpan satu run ke
-`examples/lab/fixtures/`, hanya dengan field yang dibutuhkan replay: waktu relatif,
-id entity pendek yang stabil, persona, label, dan observation yang dievaluasi, plus
-keputusan model untuk tiap baris. `examples/lab/fixture.test.ts` memutar ulang fixture
-itu dengan policy yang dikirim setiap push, jadi perubahan model yang menggeser
-treatment gagal di CI dan harus diterima dengan sengaja lewat `npm run freeze:lab`.
-Saat dibekukan, replay juga dibandingkan dengan advice yang dicatat observer dan cocok
-di keempat belas persona. Batasnya dicatat di D65: ini gate perilaku, bukan gate
-parameter, karena menaikkan developingAt dari 3 ke 5 tidak menggeser satu pun keputusan
-beku.
+`examples/lab/fixtures/`, hanya dengan field yang dibutuhkan replay: waktu relatif, id
+entity pendek yang stabil, persona, label, profile yang mendeklarasikan invariant, dan
+observation yang dievaluasi, plus keputusan model untuk tiap baris.
+`examples/lab/fixture.test.ts` memutar ulang kedua fixture pada setiap push, jadi
+perubahan model yang menggeser treatment gagal di CI dan harus diterima dengan sengaja
+lewat `npm run freeze:lab`. Run kedua menghasilkan nol drift di 24 persona setelah
+profile ikut di baris (F8). Batasnya di D65: ini gate perilaku, bukan gate parameter.
+
+Status: M2.4 selesai sebagai penolakan terukur (D67). Anomali tetap dilaporkan dan tidak
+memutuskan. Pada run kedua tidak ada threshold yang mengalahkan policy bukti: 0.80
+memberi 6 false positive, 0.95 memberi 8 false negative, 0.99 tidak menandai apa pun,
+sementara policy bukti 0 false positive dan 7 false negative. Sebabnya terlihat di
+peringkat skor: monitor sah dengan irama tetap mencapai 0.9610, sebanding dengan
+penembak endpoint, sementara hammer yang mengirim 160 request ke satu URL hanya 0.7037.
+
+Status: M2.7 selesai (D66, H20). `--repeat=8` menjalankan tiap persona sebagai delapan
+pengunjung berbeda: identitas sendiri, seed sendiri, profil Chrome sendiri. Baris tetap
+dikelompokkan per persona, satu repetisi yang kena treatment sudah cukup membuat persona
+itu false positive, dan jumlah repetisi tercatat di manifest sebagai bagian komposisi.
+
 Exit: laporan FP/FN terbit di situs, komposisi dataset tertulis, fixture beku diputar
-di CI, dan keputusan baru tercatat di `DECISIONS.md`.
+di CI, dan keputusan baru tercatat di `DECISIONS.md`. Komposisi dan fixture sudah ada,
+begitu juga keputusan (D64, D66, D67). Yang belum: bagian situs yang menerbitkan angka
+run kedua, dicatat sebagai M2.8.
 
 ### M3, protokol end-to-end
 

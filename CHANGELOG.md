@@ -58,12 +58,25 @@ Tagged in `package.json`, not yet published to npm. The registry has 0.1.0, and
 - `npm run freeze:lab`: freezes a recorded run into `examples/lab/fixtures/`, and a CI
   test replays it on every push, so a model change that moves any decision fails the
   build instead of being found in production (D65).
+- `npm run lab -- --repeat=N`: every persona runs as N distinct visitors, each with its
+  own identity and profile, so a persona defined as a short visit still contributes
+  enough rows to calibrate and one treated repetition counts as a false positive for
+  the whole persona (D66).
+- A second recorded lab dataset and its frozen fixture: 1656 rows, 24 personas across
+  three targets, eight visitors per persona, zero false positives and seven misses. The
+  grid it produces has the shipped policy as its best cell, and the fixture replays all
+  1656 decisions on every push (D64, D66).
 
 ### Changed
 
 - An epistemic stage now precedes trust and uncertainty, and `developing` permits at
   most `OBSERVE`. Before, a third observation could turn silence into friction (D40,
   D46).
+- The anomaly score stays reported and outside the decision, which is what it already
+  did, but the reason is now a measurement instead of a postponed question: on the
+  recorded traffic no threshold on the score beat the evidence policy, and the score
+  ranks a legitimate monitor and a form-posting attacker almost identically (D67, H8
+  closed). No library behaviour changed.
 - Positive evidence earned at machine-regular gaps is discounted at intake; negative
   evidence never is (D54, D55).
 - A soft invariant violation is strong negative evidence rather than its own
@@ -81,6 +94,16 @@ Tagged in `package.json`, not yet published to npm. The registry has 0.1.0, and
   failure mode: a store failing open looks exactly like one that works (D62). This is
   a **breaking change** to `KvStoreOptions`, which is why it lands in 0.2.0 while
   0.1.0 is the only published version.
+- The lab built every IXFE session URL with a doubled slash, so its two form-posting
+  adversaries silently recorded nothing and page scopes split between `/order` and
+  `//order`. Found by reading the first recorded run, fixed before any number from it
+  was used.
+- Chrome is launched on a port the kernel chooses instead of a fixed one. The fixed
+  range collided with a local service listening on 5432, and the personas that mapped
+  to it failed to start while the rest of the run looked healthy.
+- A persona instance that fails is recorded as a failed instance instead of ending the
+  persona. One hung page used to cost seven of eight reader instances, which shrank the
+  sample to whichever instance happened to work (D66).
 
 ### Removed
 

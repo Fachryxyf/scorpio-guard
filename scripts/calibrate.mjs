@@ -52,7 +52,9 @@ for (const target of manifest.targets) {
   const file = join(dir, target.id + '.jsonl');
   if (!existsSync(file)) continue;
   for (const record of parseRecords(readFileSync(file, 'utf8'))) {
-    records.push({ ...record, persona: target.id + ':' + record.persona });
+    // The profile id decides which invariants the row is replayed against. Older rows
+    // carry it from the manifest; a row written without one proves nothing.
+    records.push({ ...record, persona: target.id + ':' + record.persona, profile: record.profile ?? target.profile });
   }
 }
 

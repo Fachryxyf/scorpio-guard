@@ -21,7 +21,33 @@ export type RunContext = {
   readonly browser: Browser;
   /** Seeded, so a run can be repeated exactly. */
   readonly rng: () => number;
+  /**
+   * The identity this instance presents, already varied per repetition (D66). A
+   * persona that ignores it repeats as the same entity, and the observer would then
+   * be reading one client history rather than two visitors.
+   */
+  readonly userAgent: string;
+  /** Zero-based repetition, for anything that wants to say so in a header. */
+  readonly instance: number;
 };
+
+/**
+ * One repetition, one identity.
+ *
+ * The observer keys an entity on address and user-agent (D56), and every instance in
+ * this lab arrives from loopback, so two repetitions of a persona sharing a user-agent
+ * are one entity carrying one history. This bumps the last number in the declared
+ * agent instead. It is not a claim about any released browser; it is the smallest
+ * difference that makes the observer see a second client.
+ */
+export function instanceIdentity(userAgent: string, instance: number): string {
+  if (instance === 0) return userAgent;
+  const match = /(\d+)(?!.*\d)/.exec(userAgent);
+  if (match === null) return userAgent + ' instance/' + String(instance);
+  const digits = match[1] ?? '';
+  const bumped = String(Number(digits) + instance).padStart(digits.length, '0');
+  return userAgent.slice(0, match.index) + bumped + userAgent.slice(match.index + digits.length);
+}
 
 export type LabPersona = {
   readonly id: string;
@@ -69,14 +95,36 @@ function openPage(browser: Browser, userAgent: string, mobile: boolean): Promise
  * `Input.dispatchMouseEvent: no reply in 15000 ms` for exactly that reason.
  */
 function scroll(page: Page, pixels: number): Promise<void> {
-  return page.evaluate('window.scrollBy(0, ' + String(Math.round(pixels)) + ')').then(() => undefined);
+  return page
+    .evaluate('window.scrollBy(0, ' + String(Math.round(pixels)) + ')')
+    .then(() => undefined)
+    .catch(() => undefined);
+}
+
+/**
+ * Navigating is allowed to fail without ending the persona.
+ *
+ * The request has already been made and recorded by the time the load event goes
+ * missing, and a visitor does not stop visiting because one page never settled. The
+ * recorded run that made this necessary lost seven of eight reader instances to a
+ * single hung evaluate on a build whose scripts wait on an outside host.
+ */
+async function navigate(page: Page, url: string): Promise<void> {
+  await page.goto(url).catch(() => undefined);
 }
 
 /** Same-origin links the page offers, so a persona can browse a site it never saw. */
 async function discoveredLinks(page: Page): Promise<string[]> {
-  const hrefs = await page.evaluate<string[]>(
-    "Array.from(document.querySelectorAll('a[href]')).map((anchor) => anchor.getAttribute('href') ?? '')",
-  );
+  let hrefs: string[] | undefined;
+  try {
+    hrefs = await page.evaluate<string[]>(
+      "Array.from(document.querySelectorAll('a[href]')).map((anchor) => anchor.getAttribute('href') ?? '')",
+    );
+  } catch {
+    // A page whose scripts never settle cannot be read. The persona stops browsing and
+    // its visit is shorter, which is what a reader on a broken page does.
+    return [];
+  }
   return (hrefs ?? []).filter(
     (href) => href !== '' && !href.startsWith('#') && !href.startsWith('mailto:') && !/^[a-z]+:/i.test(href),
   );
@@ -105,15 +153,15 @@ export function staticPersonas(): LabPersona[] {
       what: 'lands, reads, follows three links, leaves without converting',
       userAgent: AGENTS.desktopChrome,
       entry: landing('/index.html'),
-      async run({ base, browser, rng }) {
-        const page = await openPage(browser, AGENTS.desktopChrome, false);
+      async run({ base, browser, rng, userAgent }) {
+        const page = await openPage(browser, userAgent, false);
         try {
-          await page.goto(base + '/index.html');
+          await navigate(page, base + '/index.html');
           await pause(rng, 1800);
           const links = (await discoveredLinks(page)).slice(0, 3);
           for (const href of links) {
             await scroll(page, 400 + rng() * 600);
-            await page.goto(base + (href.startsWith('/') ? href : '/' + href));
+            await navigate(page, base + (href.startsWith('/') ? href : '/' + href));
             await pause(rng, 2200);
           }
         } finally {
@@ -128,10 +176,10 @@ export function staticPersonas(): LabPersona[] {
       userAgent: AGENTS.androidChrome,
       mobile: true,
       entry: landing('/index.html'),
-      async run({ base, browser, rng }) {
-        const page = await openPage(browser, AGENTS.androidChrome, true);
+      async run({ base, browser, rng, userAgent }) {
+        const page = await openPage(browser, userAgent, true);
         try {
-          await page.goto(base + '/index.html');
+          await navigate(page, base + '/index.html');
           for (let step = 0; step < 3; step += 1) {
             await scroll(page, 500 + rng() * 400);
             await pause(rng, 1200);
@@ -147,11 +195,11 @@ export function staticPersonas(): LabPersona[] {
       what: 'uptime monitor: eight fixed-interval reads of the landing page',
       userAgent: AGENTS.uptimeRobot,
       entry: landing('/index.html'),
-      async run({ base, browser }) {
-        const page = await openPage(browser, AGENTS.uptimeRobot, false);
+      async run({ base, browser, userAgent }) {
+        const page = await openPage(browser, userAgent, false);
         try {
           for (let check = 0; check < 8; check += 1) {
-            await page.goto(base + '/index.html');
+            await navigate(page, base + '/index.html');
             // Fixed, not exponential: that regularity is what the monitor looks like,
             // and pricing it would charge the operator for their own instrumentation.
             await sleep(700);
@@ -167,13 +215,13 @@ export function staticPersonas(): LabPersona[] {
       what: 'indexer reading every link it finds, quickly, and nothing else',
       userAgent: AGENTS.crawler,
       entry: landing('/index.html'),
-      async run({ base, browser }) {
-        const page = await openPage(browser, AGENTS.crawler, false);
+      async run({ base, browser, userAgent }) {
+        const page = await openPage(browser, userAgent, false);
         try {
-          await page.goto(base + '/index.html');
+          await navigate(page, base + '/index.html');
           const links = (await discoveredLinks(page)).slice(0, 8);
           for (const href of links) {
-            await page.goto(base + (href.startsWith('/') ? href : '/' + href));
+            await navigate(page, base + (href.startsWith('/') ? href : '/' + href));
             await sleep(150);
           }
         } finally {
@@ -187,11 +235,11 @@ export function staticPersonas(): LabPersona[] {
       what: 'asks for eight paths no page links to, looking for an exposed surface',
       userAgent: AGENTS.scanner,
       entry: landing('/admin'),
-      async run({ base, browser }) {
-        const page = await openPage(browser, AGENTS.scanner, false);
+      async run({ base, browser, userAgent }) {
+        const page = await openPage(browser, userAgent, false);
         try {
           for (const path of sensitivePaths) {
-            await page.goto(base + path);
+            await navigate(page, base + path);
             await sleep(120);
           }
         } finally {
@@ -205,8 +253,8 @@ export function staticPersonas(): LabPersona[] {
       what: 'probes slowly, blending with page views, staying under any velocity rule',
       userAgent: AGENTS.patient,
       entry: landing('/index.html'),
-      async run({ base, browser, rng }) {
-        const page = await openPage(browser, AGENTS.patient, false);
+      async run({ base, browser, rng, userAgent }) {
+        const page = await openPage(browser, userAgent, false);
         try {
           // Sixteen requests spread over roughly half a minute: no burst to see, which
           // is the point. A rule that only counts requests per second reads this as a
@@ -214,7 +262,7 @@ export function staticPersonas(): LabPersona[] {
           const paths = [...sensitivePaths.slice(0, 4)];
           for (let step = 0; step < 16; step += 1) {
             const path = step % 3 === 2 ? (paths[step % paths.length] ?? '/') : '/index.html';
-            await page.goto(base + path);
+            await navigate(page, base + path);
             await pause(rng, 1800);
           }
         } finally {
@@ -228,11 +276,11 @@ export function staticPersonas(): LabPersona[] {
       what: 'twenty reads of the same URL back to back, no dwell',
       userAgent: AGENTS.pythonBot,
       entry: landing('/index.html'),
-      async run({ base, browser }) {
-        const page = await openPage(browser, AGENTS.pythonBot, false);
+      async run({ base, browser, userAgent }) {
+        const page = await openPage(browser, userAgent, false);
         try {
           for (let request = 0; request < 20; request += 1) {
-            await page.goto(base + '/index.html');
+            await navigate(page, base + '/index.html');
           }
         } finally {
           await page.close();

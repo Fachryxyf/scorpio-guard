@@ -41,7 +41,7 @@ const dir = resolve('var', 'lab', runId);
 /** @type {{ runId: string, seed: number, chrome: string, node: string, targets: Array<{ id: string }> }} */
 const manifest = JSON.parse(readFileSync(join(dir, 'manifest.json'), 'utf8'));
 
-/** @type {Array<{ at: number, entity: string, persona: string, groundTruth: 'legitimate' | 'adversarial', observation: unknown }>} */
+/** @type {Array<{ at: number, entity: string, persona: string, groundTruth: 'legitimate' | 'adversarial', profile: string, observation: unknown }>} */
 const rows = [];
 const recorded = new Map();
 let origin = Number.POSITIVE_INFINITY;
@@ -54,11 +54,15 @@ for (const target of manifest.targets) {
   const entities = new Map();
   for (const record of parsed) {
     const persona = target.id + ':' + record.persona;
-    let entity = entities.get(record.persona);
+    // Keyed by instance, not only by persona: with repetitions (D66) one persona is
+    // several visitors, and one shared fixture entity would replay them as a single
+    // client carrying eight visits of history.
+    const handle = record.persona + '#' + record.entity;
+    let entity = entities.get(handle);
     if (entity === undefined) {
       key += 1;
       entity = 'e' + String(key).padStart(2, '0');
-      entities.set(record.persona, entity);
+      entities.set(handle, entity);
     }
     origin = Math.min(origin, record.at);
     rows.push({
@@ -66,6 +70,9 @@ for (const target of manifest.targets) {
       entity,
       persona,
       groundTruth: record.groundTruth,
+      // The profile id travels with the row: the replay needs the invariants the row was
+      // judged against, and they are code rather than data (see invariantsFor).
+      profile: record.profile ?? target.profile,
       observation: record.observation,
     });
     const bucket = recorded.get(persona) ?? {};

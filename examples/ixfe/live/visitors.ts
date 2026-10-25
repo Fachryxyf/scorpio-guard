@@ -34,8 +34,6 @@
  */
 import { connect, launch, sleep, type Browser, type Page } from './cdp.ts';
 
-const CHROME_PORT = 9444;
-
 /**
  * One user-agent per persona, all of them real strings.
  *
@@ -61,9 +59,11 @@ export type VisitorSession = {
   readonly id: string;
   readonly legitimate: boolean;
   readonly what: string;
+  /** The agent this session presents unless the caller supplies one (D66). */
+  readonly userAgent: string;
   /** `browser` sessions render the page; `client` sessions issue bare HTTP. */
   readonly kind: 'browser' | 'client';
-  run(context: { target: string; browser: Browser }): Promise<void>;
+  run(context: { target: string; browser: Browser; userAgent?: string }): Promise<void>;
 };
 
 /** Human reading pauses. Exponential, because attention is bursty (D54). */
@@ -86,9 +86,10 @@ const skimmer: VisitorSession = {
   id: 'skimmer',
   legitimate: true,
   what: 'lands, scrolls, leaves without acting',
+  userAgent: AGENTS.desktopChrome,
   kind: 'browser',
-  async run({ target, browser }) {
-    const page = await openPage(browser, AGENTS.desktopChrome, false);
+  async run({ target, browser, userAgent }) {
+    const page = await openPage(browser, userAgent ?? AGENTS.desktopChrome, false);
     try {
       await page.goto(target);
       for (let i = 0; i < 4; i += 1) {
@@ -113,9 +114,10 @@ const researcher: VisitorSession = {
   id: 'researcher',
   legitimate: true,
   what: 'reads pricing, opens the order page, does not submit',
+  userAgent: AGENTS.desktopSafari,
   kind: 'browser',
-  async run({ target, browser }) {
-    const page = await openPage(browser, AGENTS.desktopSafari, false);
+  async run({ target, browser, userAgent }) {
+    const page = await openPage(browser, userAgent ?? AGENTS.desktopSafari, false);
     try {
       await page.goto(target);
       for (let i = 0; i < 6; i += 1) {
@@ -124,7 +126,10 @@ const researcher: VisitorSession = {
       }
       await page.goto(`${target}/order?plan=pro`);
       await readPause(3500);
-      await page.scrollBy(500);
+      // The order page 302s to app.ixfe.pro, which is not reachable from here, so a
+      // scroll on it can hang until the CDP timeout. A visitor whose scroll does nothing
+      // still reads the page and leaves; the persona has to survive it to say so.
+      await page.scrollBy(500).catch(() => undefined);
       await readPause(2800);
       // Comparing plans is clicking, which is interaction the page can see.
       await page.click('[data-plan="starter"]').catch(() => {});
@@ -144,9 +149,10 @@ const mobileVisitor: VisitorSession = {
   id: 'mobile-visitor',
   legitimate: true,
   what: 'phone, fast scroll, short session',
+  userAgent: AGENTS.androidChrome,
   kind: 'browser',
-  async run({ target, browser }) {
-    const page = await openPage(browser, AGENTS.androidChrome, true);
+  async run({ target, browser, userAgent }) {
+    const page = await openPage(browser, userAgent ?? AGENTS.androidChrome, true);
     try {
       await page.goto(target);
       for (let i = 0; i < 7; i += 1) {
@@ -182,9 +188,10 @@ const staleBookmark: VisitorSession = {
   id: 'stale-bookmark',
   legitimate: true,
   what: 'joins the waiting list from a cached pre-launch page, and is refused',
+  userAgent: AGENTS.iphoneSafari,
   kind: 'browser',
-  async run({ target, browser }) {
-    const page = await openPage(browser, AGENTS.iphoneSafari, true);
+  async run({ target, browser, userAgent }) {
+    const page = await openPage(browser, userAgent ?? AGENTS.iphoneSafari, true);
     try {
       await page.goto(target);
       await page.evaluate(`document.documentElement.dataset.phase = 'prelaunch'`);
@@ -206,10 +213,11 @@ const returningVisitor: VisitorSession = {
   id: 'returning-visitor',
   legitimate: true,
   what: 'two visits separated by a real gap',
+  userAgent: AGENTS.desktopFirefox,
   kind: 'browser',
-  async run({ target, browser }) {
+  async run({ target, browser, userAgent }) {
     for (const visit of [0, 1]) {
-      const page = await openPage(browser, AGENTS.desktopFirefox, false);
+      const page = await openPage(browser, userAgent ?? AGENTS.desktopFirefox, false);
       try {
         await page.goto(visit === 0 ? target : `${target}/order?plan=pro`);
         await readPause(2600);
@@ -230,12 +238,13 @@ const endpointShooter: VisitorSession = {
   id: 'endpoint-shooter',
   legitimate: false,
   what: 'posts the waitlist endpoint directly, no page involved',
+  userAgent: AGENTS.pythonBot,
   kind: 'client',
-  async run({ target }) {
+  async run({ target, userAgent }) {
     for (let i = 0; i < 12; i += 1) {
       await fetch(`${target}/api/waitlist`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'User-Agent': AGENTS.pythonBot },
+        headers: { 'Content-Type': 'application/json', 'User-Agent': userAgent ?? AGENTS.pythonBot },
         body: JSON.stringify({ email: `lead${i}@throwaway.test`, locale: 'en' }),
       }).catch(() => {});
       await sleep(280);
@@ -248,12 +257,13 @@ const honeypotFiller: VisitorSession = {
   id: 'honeypot-filler',
   legitimate: false,
   what: 'fills the hidden website field with a plausible dwell',
+  userAgent: AGENTS.curl,
   kind: 'client',
-  async run({ target }) {
+  async run({ target, userAgent }) {
     for (let i = 0; i < 10; i += 1) {
       await fetch(`${target}/api/order`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'User-Agent': AGENTS.curl },
+        headers: { 'Content-Type': 'application/json', 'User-Agent': userAgent ?? AGENTS.curl },
         body: JSON.stringify({
           plan: 'pro',
           name: `Agen SEO ${i}`,
@@ -273,14 +283,15 @@ const pathScanner: VisitorSession = {
   id: 'path-scanner',
   legitimate: false,
   what: 'walks scanner paths at machine pace',
+  userAgent: AGENTS.scanner,
   kind: 'client',
-  async run({ target }) {
+  async run({ target, userAgent }) {
     const paths = [
       '/.env', '/.git/config', '/wp-login.php', '/wp-admin/', '/phpmyadmin/',
       '/api/admin/users', '/internal/stats', '/backup.zip', '/xmlrpc.php', '/.aws/credentials',
     ];
     for (const path of paths) {
-      await fetch(`${target}${path}`, { headers: { 'User-Agent': AGENTS.scanner } }).catch(() => {});
+      await fetch(`${target}${path}`, { headers: { 'User-Agent': userAgent ?? AGENTS.scanner } }).catch(() => {});
       await sleep(200);
     }
   },
@@ -291,11 +302,12 @@ const silentCrawler: VisitorSession = {
   id: 'silent-crawler',
   legitimate: false,
   what: 'crawls every page at a fixed interval',
+  userAgent: AGENTS.desktopEdge,
   kind: 'client',
-  async run({ target }) {
+  async run({ target, userAgent }) {
     const paths = ['/', '/order', '/privacy', '/terms', '/', '/order', '/privacy', '/terms', '/', '/order'];
     for (const path of paths) {
-      await fetch(`${target}${path}`, { headers: { 'User-Agent': AGENTS.desktopEdge } }).catch(() => {});
+      await fetch(`${target}${path}`, { headers: { 'User-Agent': userAgent ?? AGENTS.desktopEdge } }).catch(() => {});
       await sleep(500);
     }
   },
@@ -314,10 +326,11 @@ const uptimeMonitor: VisitorSession = {
   id: 'uptime-monitor',
   legitimate: true,
   what: 'GET / on a fixed interval, like any uptime check',
+  userAgent: AGENTS.uptimeRobot,
   kind: 'client',
-  async run({ target }) {
+  async run({ target, userAgent }) {
     for (let i = 0; i < 20; i += 1) {
-      await fetch(target, { headers: { 'User-Agent': AGENTS.uptimeRobot } }).catch(() => {});
+      await fetch(target, { headers: { 'User-Agent': userAgent ?? AGENTS.uptimeRobot } }).catch(() => {});
       await sleep(600);
     }
   },
@@ -363,8 +376,8 @@ if (process.argv[1]?.endsWith('visitors.ts')) {
   console.log(`    ${sessions.length} session type(s), ${rounds} round(s)`);
   console.log(`    still generated traffic; this falsifies, it does not calibrate (D45)\n`);
 
-  const kill = await launch({ port: CHROME_PORT, profileDir: '/tmp/sg-visitors-profile' });
-  const browser = await connect(CHROME_PORT);
+  const launched = await launch({ profileDir: '/tmp/sg-visitors-profile' });
+  const browser = await connect(launched.port);
 
   try {
     for (let round = 1; round <= rounds; round += 1) {
@@ -384,7 +397,7 @@ if (process.argv[1]?.endsWith('visitors.ts')) {
     }
   } finally {
     await browser.close();
-    kill();
+    launched.kill();
   }
 
   console.log(`\n  Done. Read what the observer made of it:  npm run observed\n`);

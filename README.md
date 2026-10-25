@@ -411,16 +411,21 @@ Puppeteer so the zero-dependency promise holds in the examples too.
 
 A traffic lab in `examples/lab/`: real Chrome instances against shipped sites, one
 declared persona per instance, each run recorded as a labelled dataset with its seed
-and browser version. [docs/DATASET.md](docs/DATASET.md) is the first run, 129 requests
-across two live builds, and it reports what it found rather than what it hoped: zero
-false positives on legitimate automation, and six adversarial misses with one shared
-cause (D63). `npm run calibrate` replays such a run under a grid of policies and
-refuses the one recorded so far, with five reasons, rather than printing a table that
-would describe nothing (D64). The recorded run is frozen into `examples/lab/fixtures/`
-and replayed on every push, so a change that moves any decision fails CI rather than
-being found in production (D65).
+and browser version. [docs/DATASET.md](docs/DATASET.md) carries both recorded runs and
+reports what they found rather than what they hoped. The first, 129 requests across two
+static builds, showed that a page view carries no evidence: zero false positives, six
+adversarial misses, all with one cause (D63). The second added the IXFE landing service,
+where a form post and a hidden field can be priced, and ran every persona as eight
+different visitors so a short visit still counts: 1656 requests, 24 personas, zero false
+positives, seven misses (D66). `npm run calibrate` replays those rows under a grid of
+nine policies; the shipped cell is the best of the nine, and the half-life axis is a
+measured plateau because the run lasts minutes (D64). The anomaly score is not one of
+the axes: on the recorded traffic no threshold on it beat the evidence policy, so it
+stays reported and does not decide (D67). Both runs are frozen into
+`examples/lab/fixtures/` and replayed on every push, so a change that moves any decision
+fails CI rather than being found in production (D65).
 
-Two hundred and seventy-one tests, which double as the record of every numeric and
+Two hundred and seventy-five tests, which double as the record of every numeric and
 semantic property the design depends on. [docs/CLAIMS.md](docs/CLAIMS.md) maps each
 design decision to the test that names it, and lists the ones that are still prose
 only, generated rather than maintained by hand.

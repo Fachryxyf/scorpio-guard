@@ -18,6 +18,17 @@ import type { PersonaLabel } from './personas.ts';
 export type LabRecord = LiveRecord & {
   readonly persona: string;
   readonly groundTruth: PersonaLabel;
+  /**
+   * Which repetition of the persona produced this row (D66). Absent in runs made
+   * before repetitions existed, which is why it is optional rather than defaulted.
+   */
+  readonly instance?: number;
+  /**
+   * Which profile declared the invariants the row was judged against. The replay needs
+   * it: without the invariants a proven violation cannot be reproduced, and the missing
+   * RESTRICT looks like drift in the model rather than a missing input.
+   */
+  readonly profile?: string;
 };
 
 /** Decisions that change what the visitor can do. */

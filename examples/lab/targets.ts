@@ -14,6 +14,8 @@
 import { existsSync } from 'node:fs';
 
 import type { LiveProfile } from '../ixfe/live/proxy.ts';
+import { ixfeInvariants } from '../ixfe/invariants.ts';
+import type { Invariant } from '../../src/core/constraints.ts';
 
 export type LabTarget = {
   readonly id: string;
@@ -92,4 +94,17 @@ export function unavailableReason(target: LabTarget): string | undefined {
   }
   if (target.root === undefined && target.origin === undefined) return 'no root and no origin';
   return undefined;
+}
+
+/**
+ * The invariants a recorded profile declared, by the id the fixture carries.
+ *
+ * A replay that judges a row against no invariants cannot reproduce a hard violation,
+ * and the missing RESTRICT then looks exactly like drift in the model. The declarations
+ * are code, so the fixture stores the profile id and this resolves it; a change to the
+ * declarations therefore shows up as a fixture diff, which is the point of freezing.
+ */
+export function invariantsFor(profileId: string): readonly Invariant[] {
+  if (profileId === 'ixfe') return ixfeInvariants;
+  return [];
 }

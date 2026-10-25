@@ -10,7 +10,7 @@
 import { strict as assert } from 'node:assert';
 import { test } from 'node:test';
 
-import { seeded, staticPersonas, type PersonaLabel } from './personas.ts';
+import { instanceIdentity, seeded, staticPersonas, type PersonaLabel } from './personas.ts';
 import { parseRecords, summarise, verdicts, type LabRecord } from './summary.ts';
 import { staticProfile } from './targets.ts';
 
@@ -153,6 +153,49 @@ test('M2.1: watching is not a treatment, and the two mistakes are named', () => 
   assert.deepEqual(verdict.falsePositives, ['monitor']);
   assert.deepEqual(verdict.falseNegatives, ['scanner']);
   assert.deepEqual(verdict.correct, ['reader', 'hammer']);
+});
+
+test('M2.2: a repetition presents a different identity, because a shared one is one visitor', () => {
+  const personas = staticPersonas();
+  const claimed = new Map<string, string>();
+
+  for (const persona of personas) {
+    for (let instance = 0; instance < 8; instance += 1) {
+      const agent = instanceIdentity(persona.userAgent, instance);
+      const who = persona.id + '#' + String(instance);
+      const clash = claimed.get(agent);
+      assert.equal(clash, undefined, who + ' would merge with ' + String(clash));
+      claimed.set(agent, who);
+      assert.equal(
+        instanceIdentity(persona.userAgent, instance),
+        agent,
+        who + ' is the same identity on every run, or the dataset is not reproducible',
+      );
+    }
+    assert.equal(
+      instanceIdentity(persona.userAgent, 0),
+      persona.userAgent,
+      persona.id + ' keeps its declared agent on the first instance',
+    );
+  }
+});
+
+test('M2.2: one treated repetition is a false positive for the whole persona', () => {
+  const records = [
+    record('reader', 'legitimate', 'ALLOW'),
+    { ...record('reader', 'legitimate', 'ALLOW'), instance: 1, entity: 'entity-reader-1' },
+    { ...record('reader', 'legitimate', 'INCREASE_FRICTION'), instance: 2, entity: 'entity-reader-2' },
+    { ...record('reader', 'legitimate', 'ALLOW'), instance: 3, entity: 'entity-reader-3' },
+  ];
+
+  const summaries = summarise(records);
+  assert.equal(summaries.length, 1, 'the unit of judgement is the persona, not the instance');
+  assert.equal(summaries[0]?.requests, 4, 'every instance counts towards the persona row count');
+  assert.deepEqual(
+    verdicts(summaries).falsePositives,
+    ['reader'],
+    'one instance given friction is a false positive even when the other three were allowed',
+  );
 });
 
 test('M2.1: records parse as JSONL and keep their label', () => {

@@ -17,11 +17,11 @@ the answer given, and what that answer commits the implementation to.
   policy; the tests are what make a policy change visible.
 
 Status: every numbered question is answered, the original thirty, plus D31 to
-D65 arising from review, implementation, a live pentest, and the traffic lab. Nothing is blocked on
+D67 arising from review, implementation, a live pentest, and the traffic lab. Nothing is blocked on
 a decision. What remains is validation: the values recorded here have not met real
 traffic yet, and D47 names where they will.
 
-Last updated: 2026-10-24
+Last updated: 2026-10-25
 
 ---
 
@@ -117,6 +117,8 @@ Last updated: 2026-10-24
 - [D63: The traffic lab is one browser per persona, labelled in the sink](#d63-the-traffic-lab-is-one-browser-per-persona-labelled-in-the-sink)
 - [D64: Calibration refuses a dataset it cannot learn from](#d64-calibration-refuses-a-dataset-it-cannot-learn-from)
 - [D65: The frozen fixture is how a treatment change becomes visible](#d65-the-frozen-fixture-is-how-a-treatment-change-becomes-visible)
+- [D66: A persona is a population, and a repetition is a different visitor](#d66-a-persona-is-a-population-and-a-repetition-is-a-different-visitor)
+- [D67: Anomaly is reported and does not decide, and the dataset says why](#d67-anomaly-is-reported-and-does-not-decide-and-the-dataset-says-why)
 
 **[Open questions](#open-questions)**
 
@@ -3612,3 +3614,140 @@ Gates: `examples/lab/fixture.test.ts`, three tests (a fixture exists, it replays
 to the frozen decisions, and it carries no hashed identifier), verified by mutation
 twice: making weak evidence heavy, and dropping the `developing` ceiling, both
 fail. All eleven repository gates pass.
+
+## D66: A persona is a population, and a repetition is a different visitor
+
+The first IXFE run produced 76 rows and calibration refused it: 240 was the floor, and
+several personas sat at two to four requests. The refusal was right, and the reason was
+not the target. It was the composition. The lab ran one visit per persona, and some
+personas are defined as short visits: a skimmer lands, scrolls, and leaves, which is two
+requests. A label cannot be calibrated from one visit.
+
+### The decision
+
+`--repeat=N` runs every persona N times. Each repetition is a different visitor: its
+own identity, its own seeded timing, its own Chrome profile directory. Rows from all
+repetitions aggregate under the persona, because the persona is still the unit of
+judgement; one repetition given friction is a false positive for the whole persona, even
+when the other seven were allowed. The manifest records the repetition count and the
+identity rule, so the composition is publishable rather than implied.
+
+The audit floor in D64 did not move. Making the composition satisfying it is the point;
+lowering the bar would have been the same fiction the refusal was written to prevent.
+
+### Why the identity has to differ
+
+The observer keys an entity on address and user-agent (D56), and every instance in the
+lab arrives from loopback. Two repetitions that present the same agent are one entity
+with one continuing history, so eight skimmers become one client who visited eight
+times, and the uptime monitor becomes a flood rather than eight operators checking a
+page. The label would then be false by construction, which is the one mistake a
+generated dataset cannot afford.
+
+The declared agent's last number is bumped per repetition. That is generated, and it is
+recorded as generated: it is not a claim about any released browser.
+
+### Alternatives rejected
+
+**An identity header the observer trusts.** It would have been one line, and it would
+have made the dataset measure a protocol nobody deploys. The observer has to derive
+identity the way a deployment would, or the thresholds learned from it describe the
+lab's own header.
+
+**Repeating with the same identity.** Cheaper and wrong: see above. It also hides in a
+way that looks like a result, because the monitor's escalation would read as a false
+positive against a legitimate persona.
+
+**Lowering the per-persona floor instead.** The floor was the only thing standing
+between this project and a grid with two samples in a cell.
+
+### A failed instance is not a failed persona
+
+An instance whose page hangs is recorded as a failure and the remaining instances still
+run. The first version stopped at the first failure, which turned one hung evaluate on
+one build into seven missing reader instances, and the persona was then under-sampled by
+exactly the accident that should have been reported. A browser that will not start is
+different: that is systemic, so it stops the persona and says so.
+
+### What it does not buy
+
+A repetition varies timing, not behaviour. Eight skimmers are eight runs of the same
+script, so the spread within a cell understates the spread between real visitors, and
+the browser mix is generated rather than observed. Thresholds calibrated this way are
+lab thresholds with a published composition, which is what 1.0.0 asks for, and they are
+not a claim about how many real visitors resemble each persona. D45 and D64 still apply
+to every number read off the grid.
+
+### Consequence for the version number
+
+None on its own. It makes the audit passable; the grid still has to be read, and whether
+the anomaly score may drive a decision (M2.4) is a separate question that a wider
+dataset answers better than a narrower one.
+
+Gates: `examples/lab/lab.test.ts`, two tests. Eight repetitions of every persona claim
+eight distinct identities that are stable across runs, and one treated repetition makes
+the persona a false positive. Verified by mutation twice: returning the declared agent
+for every repetition fails the first, and treating only the last repetition's decision
+fails the second.
+
+## D67: Anomaly is reported and does not decide, and the dataset says why
+
+D52 left the anomaly score outside the decision and H8 said plainly that nothing had been
+chosen, only postponed: a score that is reported and ignored is either caution or
+cowardice, and the difference is a measurement. Run 2 of the traffic lab is that
+measurement, so M2.4 has to answer now instead of waiting for 1.0.
+
+### The measurement
+
+Every one of the 1656 rows carries an anomaly score, and the label of the visitor that
+produced it is known by construction. Reading the score as a decision, at each threshold,
+counted per persona because that is the unit of judgement:
+
+| threshold | false positives | misses | correct |
+| --- | --- | --- | --- |
+| 0.80 | 6 | 4 | 14/24 |
+| 0.90 | 4 | 5 | 15/24 |
+| 0.95 | 1 | 8 | 15/24 |
+| 0.99 | 0 | 10 | 14/24 |
+| the shipped evidence policy | 0 | 7 | 17/24 |
+
+There is no threshold that does better than ignoring the score, and the reason is in the
+ranking. The legitimate uptime monitor scores 0.9610 on its fixed cadence; the
+`endpoint-shooter` scores 0.9611 for posting a form. A hammer that sends 160 requests to
+one URL scores 0.7037, because a tight, regular client is exactly what the reference
+profile looks like. The score measures how unlike the profile a client's shape is. The
+label is about intent. On this data those are different axes, and the overlap is not a
+tuning problem.
+
+### The decision
+
+The anomaly score stays an output. It may still withhold the D37 concurrence ceiling,
+which is a statement about diversity measured inside the window, and it may not become a
+treatment on its own. M2.4 closes as measured and refused, not as pending.
+
+### Alternatives rejected
+
+**Pick 0.95 and accept one false positive.** The one is a monitor the operator configured
+themselves, and it buys two fewer misses than the policy that ignores the score, at a
+worse total. Trading a configured client for an adversary that a higher threshold would
+have caught anyway is the wrong direction for the central constraint.
+
+**Weight the score against the evidence instead of thresholding it.** There is no dataset
+on which to fit a weight that is not fitted to these twenty-four personas, and a weight
+fitted here would be a memorised answer dressed as a model.
+
+**Wait for real traffic.** That is what H8 originally said, and it is not free: while it
+waits, nothing prevents the next implementer from wiring the score into a decision as an
+obvious improvement. Recording the refusal is the thing that makes the wait honest.
+
+### What would change this
+
+A dataset with real traffic where some threshold on the score separates legitimate from
+adversarial visitors with zero false positives. That is M2.5, and it would be a new
+decision supported by its own measurement rather than a re-tuning of this one.
+
+Gates: none new, and that is deliberate. The score's role is pinned by the tests that own
+D18 and D37 in `src/core/anomaly.test.ts` and `src/core/assess.test.ts`; what this
+decision adds is a reading of the dataset, which lives in `docs/DATASET.md` finding F7 and
+is reproduced by `npm run calibrate` against the frozen rows. A test asserting a number
+from a ninety-minute lab run would freeze the number and not the reasoning.

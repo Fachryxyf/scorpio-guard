@@ -2,9 +2,11 @@
  * The frozen fixture: a recorded run, replayed on every push. M2.3.
  *
  * A threshold change is not visible in a test that only asserts shapes. It is visible
- * here: the fixture holds 129 labelled rows and the exact decisions the model produced at
+ * here: each fixture holds labelled rows and the exact decisions the model produced at
  * the moment it was frozen, so a change that moves treatment fails CI and has to be
- * accepted on purpose rather than discovered in production.
+ * accepted on purpose rather than discovered in production. There are two: the first
+ * static-only run (129 rows, no invariants to replay) and the run with repetitions and
+ * the IXFE target (1656 rows, three targets, eight visitors per persona).
  *
  * The remedy is not to edit the expectation. It is `npm run freeze:lab`, which rewrites
  * the file from a fresh run so the diff shows what moved.
@@ -72,7 +74,7 @@ for (const name of files) {
     for (const row of fixture.rows) {
       assert.match(
         row.entity,
-        /^e[0-9]{2}$/,
+        /^e[0-9]{2,3}$/,
         'entities in the fixture are stable short ids, not the run\'s hashes',
       );
       assert.ok(row.observation !== undefined, 'a row without its observation cannot be replayed');

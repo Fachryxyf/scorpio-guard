@@ -187,15 +187,28 @@ export function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-/** Launch a headless Chrome and wait for its debugging port. Returns a kill function. */
-export async function launch(options: { port: number; binary?: string; profileDir: string }): Promise<() => void> {
+/**
+ * Launch a headless Chrome and wait for its debugging port.
+ *
+ * The port is chosen by the kernel (`--remote-debugging-port=0`) and read back from
+ * `DevToolsActivePort` in the profile directory. A fixed range was tried first and it
+ * collided: 5432 is where a local PostgreSQL listens, so every persona that mapped to
+ * it failed to start while the rest of the run looked healthy. A port the kernel picks
+ * cannot collide with a service nobody in this repository started.
+ */
+export async function launch(options: {
+  binary?: string;
+  profileDir: string;
+}): Promise<{ kill: () => void; port: number }> {
   const { spawn } = await import('node:child_process');
+  const { existsSync, readFileSync } = await import('node:fs');
+  const { join } = await import('node:path');
   const binary = options.binary ?? '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
   const child = spawn(
     binary,
     [
       '--headless=new',
-      `--remote-debugging-port=${options.port}`,
+      '--remote-debugging-port=0',
       `--user-data-dir=${options.profileDir}`,
       '--no-first-run',
       '--no-default-browser-check',
@@ -205,13 +218,21 @@ export async function launch(options: { port: number; binary?: string; profileDi
     { stdio: 'ignore', detached: false },
   );
 
-  for (let i = 0; i < 100; i += 1) {
-    try {
-      const res = await fetch(`http://127.0.0.1:${options.port}/json/version`);
-      if (res.ok) return () => child.kill('SIGKILL');
-    } catch { /* not listening yet */ }
+  const kill = () => child.kill('SIGKILL');
+  const activePort = join(options.profileDir, 'DevToolsActivePort');
+
+  for (let attempt = 0; attempt < 150; attempt += 1) {
     await sleep(200);
+    if (child.exitCode !== null) break;
+    if (existsSync(activePort) === false) continue;
+    const port = Number(readFileSync(activePort, 'utf8').split('\n')[0]);
+    if (Number.isInteger(port) === false || port === 0) continue;
+    try {
+      const res = await fetch(`http://127.0.0.1:${port}/json/version`);
+      if (res.ok) return { kill, port };
+    } catch { /* the listener is not answering yet */ }
   }
-  child.kill('SIGKILL');
-  throw new Error(`Chrome did not open a debugging port on ${options.port}`);
+
+  kill();
+  throw new Error('Chrome did not open a debugging port (profile ' + options.profileDir + ')');
 }

@@ -31,7 +31,7 @@ import { join, resolve } from 'node:path';
 import { connect, launch } from '../ixfe/live/cdp.ts';
 import { IXFE_PROFILE, createLiveProxy } from '../ixfe/live/proxy.ts';
 import { ADVERSARIES, LEGITIMATE } from '../ixfe/live/visitors.ts';
-import { seeded, staticPersonas, type LabPersona } from './personas.ts';
+import { instanceIdentity, seeded, staticPersonas, type LabPersona } from './personas.ts';
 import { createStaticServer } from './serve.ts';
 import { labTargets, unavailableReason, type LabTarget } from './targets.ts';
 import {
@@ -46,6 +46,8 @@ type RunOptions = {
   readonly targets: readonly string[] | undefined;
   readonly personas: readonly string[] | undefined;
   readonly seed: number;
+  /** How many times each persona runs, as distinct visitors (D66). */
+  readonly repeat: number;
   readonly strict: boolean;
   readonly report: string | undefined;
 };
@@ -57,6 +59,10 @@ type PersonaResult = {
   readonly userAgent: string;
   readonly landingPath: string;
   readonly requests: number;
+  /** Repetitions this persona ran as distinct visitors. */
+  readonly instances: number;
+  /** Instances whose visit could not be completed. */
+  readonly failures: number;
   readonly error?: string;
 };
 
@@ -85,10 +91,19 @@ function parseOptions(): RunOptions {
   const personas = option('persona')?.split(',').map((id) => id.trim()).filter(Boolean);
   const seed = Number(option('seed') ?? '1');
   if (!Number.isFinite(seed)) throw new Error('--seed must be a number');
+  const repeat = Number(option('repeat') ?? '1');
+  if (
+    Number.isInteger(repeat) === false ||
+    Math.max(repeat, 1) !== repeat ||
+    Math.min(repeat, 20) !== repeat
+  ) {
+    throw new Error('--repeat must be a whole number from 1 to 20');
+  }
   return {
     targets,
     personas,
     seed,
+    repeat,
     strict: process.argv.slice(2).includes('--strict'),
     report: option('report'),
   };
@@ -96,8 +111,9 @@ function parseOptions(): RunOptions {
 
 /**
  * The IXFE rows come from the sessions D56 and D57 already wrote, wrapped so the same
- * runner can label them. Their user-agent is chosen inside the session, which is why
- * the manifest says so instead of quoting one.
+ * runner can label them. Each session declares the agent it presents, and a repetition
+ * is handed a different one, so eight skimmers are eight visitors rather than one
+ * visitor whose history never resets (D66).
  */
 function personasFor(target: LabTarget): LabPersona[] {
   if (target.id !== 'ixfe') return staticPersonas();
@@ -105,9 +121,9 @@ function personasFor(target: LabTarget): LabPersona[] {
     id: 'ixfe-' + session.id,
     label: session.legitimate ? ('legitimate' as const) : ('adversarial' as const),
     what: session.what,
-    userAgent: 'chosen by the session',
+    userAgent: session.userAgent,
     entry: (base: string) => base + '/',
-    run: ({ base, browser }) => session.run({ target: base + '/', browser }),
+    run: ({ base, browser, userAgent }) => session.run({ target: base, browser, userAgent }),
   }));
 }
 
@@ -135,6 +151,7 @@ async function observeTarget(
   runId: string,
   seed: number,
   index: number,
+  instances: number,
 ): Promise<TargetResult> {
   const outDir = resolve('var', 'lab', runId);
   mkdirSync(outDir, { recursive: true });
@@ -151,6 +168,7 @@ async function observeTarget(
 
   const base = 'http://127.0.0.1:' + String(4800 + index);
   let current: LabPersona | undefined;
+  let currentInstance = 0;
   const sinkFailures: string[] = [];
 
   const proxy = createLiveProxy({
@@ -164,7 +182,13 @@ async function observeTarget(
         sinkFailures.push('a record arrived with no persona running');
         return;
       }
-      const labelled: LabRecord = { ...record, persona: persona.id, groundTruth: persona.label };
+      const labelled: LabRecord = {
+        ...record,
+        persona: persona.id,
+        groundTruth: persona.label,
+        instance: currentInstance,
+        profile: profile.id,
+      };
       try {
         appendFileSync(recordsPath, JSON.stringify(labelled) + '\n');
       } catch (error) {
@@ -179,24 +203,48 @@ async function observeTarget(
   const results: PersonaResult[] = [];
   let version: string | undefined;
   try {
-    for (const [position, persona] of personas.entries()) {
-      current = persona;
-      const debugPort = 5400 + position;
-      const profileDir = join(tmpdir(), 'sg-lab-' + runId + '-' + target.id + '-' + persona.id);
+    for (const persona of personas) {
       let error: string | undefined;
+      let failures = 0;
 
-      try {
-        const kill = await launch({ port: debugPort, profileDir });
+      for (let instance = 0; instance < instances; instance += 1) {
+        current = persona;
+        currentInstance = instance;
+        const profileDir = join(
+          tmpdir(),
+          'sg-lab-' + runId + '-' + target.id + '-' + persona.id + '-' + String(instance),
+        );
+
+        let launched: { kill: () => void; port: number };
         try {
-          const browser = await connect(debugPort);
-          version ??= await chromeVersion(debugPort);
-          await persona.run({ base, browser, rng: seeded(seed + offsetFor(persona.id)) });
-          await browser.close();
-        } finally {
-          kill();
+          launched = await launch({ profileDir });
+        } catch (failure) {
+          // A browser that will not start will not start for the next instance either.
+          error ??= failure instanceof Error ? failure.message : String(failure);
+          failures += 1;
+          break;
         }
-      } catch (failure) {
-        error = failure instanceof Error ? failure.message : String(failure);
+
+        try {
+          const browser = await connect(launched.port);
+          version ??= await chromeVersion(launched.port);
+          await persona.run({
+            base,
+            browser,
+            rng: seeded(seed + offsetFor(persona.id) + instance),
+            userAgent: instanceIdentity(persona.userAgent, instance),
+            instance,
+          });
+          await browser.close();
+        } catch (failure) {
+          // A page that hangs loses this visitor, not the persona: the other instances
+          // still describe the same behaviour, and dropping them would shrink the
+          // sample to whatever happened to work first.
+          error ??= failure instanceof Error ? failure.message : String(failure);
+          failures += 1;
+        } finally {
+          launched.kill();
+        }
       }
 
       results.push({
@@ -205,6 +253,8 @@ async function observeTarget(
         what: persona.what,
         userAgent: persona.userAgent,
         landingPath: persona.entry(''),
+        instances,
+        failures,
         requests: 0,
         ...(error === undefined ? {} : { error }),
       });
@@ -243,22 +293,44 @@ function printTarget(result: TargetResult): void {
   const records = result.summaries.reduce((total, summary) => total + summary.requests, 0);
   console.log('\n  ' + result.id + '  (' + result.label + ')');
   console.log('    origin ' + result.origin + ', profile ' + result.profile + ', ' + String(result.invariants) + ' invariants');
-  console.log('    ' + String(result.personas.length) + ' personas, ' + String(records) + ' recorded requests');
+  const instances = result.personas[0]?.instances ?? 1;
+  console.log(
+    '    ' +
+      String(result.personas.length) +
+      ' personas x ' +
+      String(instances) +
+      ' instances, ' +
+      String(records) +
+      ' recorded requests',
+  );
   if (result.error !== undefined) console.log('    problem: ' + result.error);
 
-  for (const summary of result.summaries) {
+  const summaryFor = new Map(result.summaries.map((summary) => [summary.persona, summary]));
+  for (const persona of result.personas) {
+    const summary = summaryFor.get(persona.id);
     const treated =
-      summary.escalatedAt === null
+      summary === undefined || summary.escalatedAt === null
         ? 'no treatment'
         : summary.firstTreatment + ' at request ' + String(summary.escalatedAt);
+    // A persona whose instances failed is not the same as one that was never treated,
+    // and the printed table has to say which it is.
+    const note = [
+      persona.failures === 0
+        ? ''
+        : String(persona.failures) + ' of ' + String(persona.instances) + ' failed',
+      persona.error ?? '',
+    ]
+      .filter((part) => part !== '')
+      .join(', ');
     console.log(
       '      ' +
-        summary.persona.padEnd(18) +
-        summary.groundTruth.padEnd(13) +
-        String(summary.requests).padStart(3) +
+        persona.id.padEnd(18) +
+        persona.label.padEnd(13) +
+        String(summary?.requests ?? 0).padStart(3) +
         ' requests  ' +
         treated.padEnd(28) +
-        decisions(summary),
+        (summary === undefined ? '' : decisions(summary)) +
+        (note === '' ? '' : '  [' + note + ']'),
     );
   }
 }
@@ -333,7 +405,7 @@ async function main(): Promise<void> {
 
     console.log('\n  running ' + target.id + ' with ' + String(personas.length) + ' personas');
     try {
-      const result = await observeTarget(target, personas, runId, options.seed, index);
+      const result = await observeTarget(target, personas, runId, options.seed, index, options.repeat);
       results.push(result);
       printTarget(result);
     } catch (failure) {
@@ -362,6 +434,11 @@ async function main(): Promise<void> {
     platform: process.platform + '-' + process.arch,
     chrome: results.find((result) => result.chrome !== undefined)?.chrome ?? 'not observed',
     seed: options.seed,
+    repeat: options.repeat,
+    identity:
+      'Repetitions of a persona differ only in the identity they present, so the observer' +
+      ' sees a new client instead of one long history. The variation is generated, and' +
+      ' the browser mix it produces is not a sample of any real population (D66).',
     /** Entity keys are hashed with a per-run random salt, so runs do not correlate. */
     entitySalt: 'random per run, not recorded',
     note:

@@ -55,6 +55,7 @@ npm run lab                                  # every available target
 npm run lab -- --target=aufsicht              # one target
 npm run lab -- --persona=reader,hammer        # one persona on each target
 npm run lab -- --seed=7                       # a different, repeatable stream
+npm run lab -- --repeat=8                      # every persona as eight different visitors
 npm run lab -- --strict                       # non-zero exit on any false positive or negative
 npm run lab -- --report=<runId>               # re-read a run without a browser
 ```
@@ -64,15 +65,39 @@ built elsewhere on disk; override their locations with `LAB_AUFSICHT_ROOT` and
 `LAB_TALKHERE_ROOT`, and the live IXFE origin with `LAB_IXFE_ORIGIN`. A target whose
 build is missing is reported and skipped rather than silently dropped.
 
-Ports are fixed per target: site `4700+n`, observer `4800+n`, Chrome `5400+n`. One
-Chrome per persona, launched with its own `--user-data-dir` and killed when the
-persona is done, because a shared instance shares a cache and a cookie jar and would
-quietly contaminate the next persona.
+Ports are fixed per target for the site (`4700+n`) and the observer (`4800+n`).
+Chrome gets no port at all: it is launched with `--remote-debugging-port=0` and the
+port the kernel chose is read back from `DevToolsActivePort` in its profile directory.
+A fixed range was tried first and it collided with a local service on 5432, so every
+persona that mapped to that port failed to start while the rest of the run looked
+healthy. One Chrome per persona instance, launched with its own `--user-data-dir` and
+killed when the instance is done, because a shared instance shares a cache and a cookie
+jar and would quietly contaminate the next persona.
+
+## Repetitions
+
+`--repeat=N` runs every persona N times. Each repetition is a different visitor: its
+own identity, its own seeded timing, its own profile directory (D66). Rows from all
+repetitions are grouped under the persona, and one treated repetition is a false
+positive for the whole persona even when the other seven were allowed.
+
+The identity has to differ for that to be true. The observer keys an entity on address
+and user-agent, and every instance here arrives from loopback, so repetitions sharing an
+agent would be one client with eight visits of history instead of eight clients. The
+declared agent's last number is bumped per repetition, which is generated on purpose and
+is not a claim about any released browser.
+
+A repetition varies timing, not behaviour. Eight skimmers are eight runs of the same
+script, so the spread inside a cell understates the spread between real visitors. Use it
+to get enough rows per persona to calibrate at all, not as a substitute for traffic.
 
 ## What the numbers do not say
 
 - **They are not a population.** The personas were written here, so the composition
   is a design decision and not a measurement of who visits a site. D45 applies.
+- **Repetitions are not variety.** `--repeat` multiplies instances of one script with
+  independent timing. It satisfies the rows a grid needs; it does not estimate how much
+  real visitors of the same kind differ from each other.
 - **A static site can prove nothing.** Its profile declares no invariants, so a run
   against it measures the statistical dimension only. A `BLOCK` there came from
   behaviour, never from a proven violation.

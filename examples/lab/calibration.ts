@@ -18,6 +18,7 @@ import { epistemicStage } from '../../src/core/assess.ts';
 import type { Policy } from '../../src/core/policy.ts';
 import { memoryStore } from '../../src/core/store.ts';
 import { classify, isTreatment, type LabRecord } from './summary.ts';
+import { invariantsFor } from './targets.ts';
 
 /** Below this, a confusion matrix is a description of one afternoon. */
 export const MIN_RECORDS = 240;
@@ -133,6 +134,14 @@ export type ReplayRow = {
   readonly persona: string;
   readonly groundTruth: 'legitimate' | 'adversarial';
   readonly observation?: Observation | undefined;
+  /**
+   * Which profile declared the invariants this row was judged against.
+   *
+   * Without it the replay has nothing to check a proven violation against, and a
+   * recorded RESTRICT comes back as ALLOW: the replay then reports drift that is
+   * really a missing input. Absent means a profile that proves nothing.
+   */
+  readonly profile?: string | undefined;
 };
 
 export type CellOutcome = {
@@ -163,7 +172,21 @@ export async function evaluateCell(
     developingAt: cell.developingAt,
     establishedAt: cell.establishedAt,
   };
-  const guard = createGuard({ clock, store: memoryStore(), policy });
+  /**
+   * One guard per profile, because the invariants belong to the target.
+   *
+   * The store is per guard as well. Entities are already distinct across targets (the
+   * observer salts its hashes per run and per proxy), so sharing one would only risk
+   * mixing histories the recording kept apart.
+   */
+  const guards = new Map<string, ReturnType<typeof createGuard>>();
+  function guardFor(profileId: string) {
+    const existing = guards.get(profileId);
+    if (existing !== undefined) return existing;
+    const created = createGuard({ clock, store: memoryStore(), policy, invariants: invariantsFor(profileId) });
+    guards.set(profileId, created);
+    return created;
+  }
 
   const decisions = new Map<string, Record<string, number>>();
   const labels = new Map<string, 'legitimate' | 'adversarial'>();
@@ -174,7 +197,10 @@ export async function evaluateCell(
       throw new Error('a row at ' + String(record.at) + ' carries no observation');
     }
     now = record.at;
-    const assessment = await guard.evaluate({ entity: record.entity, observation: record.observation });
+    const assessment = await guardFor(record.profile ?? 'static').evaluate({
+      entity: record.entity,
+      observation: record.observation,
+    });
 
     const counts = decisions.get(record.persona) ?? {};
     counts[assessment.decision] = (counts[assessment.decision] ?? 0) + 1;
