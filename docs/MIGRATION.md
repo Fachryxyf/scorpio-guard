@@ -1,8 +1,8 @@
 # Migrating from 0.1.0 to 0.2.0
 
-0.1.0 is what npm serves. 0.2.0 is tagged on `main` and waits for a publish window; the
-reason is in [RELEASING.md](RELEASING.md). This document is what changes when 0.2.0 becomes
-installable, measured against the published tarball rather than remembered.
+0.1.0 is what npm serves. 0.2.0 is set in `package.json` on `main` and waits for a publish
+window; the reason is in [RELEASING.md](RELEASING.md). This document is what changes when
+0.2.0 becomes installable, measured against the published tarball rather than remembered.
 
 ## The API moved additively, measured
 
@@ -84,5 +84,5 @@ readable, so the rollback is a version change rather than a data operation.
 ## See also
 
 - [SEMVER.md](SEMVER.md): what each number promises, and the API gate that enforces it.
-- [RELEASING.md](RELEASING.md): why 0.2.0 is tagged and not published, with dates.
+- [RELEASING.md](RELEASING.md): why 0.2.0 is set and not published, with dates.
 - CHANGELOG.md: the same changes with the release grouping.

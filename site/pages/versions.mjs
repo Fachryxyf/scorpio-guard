@@ -25,7 +25,7 @@ export function versions(data) {
 
   const body = `
     <p class="lead">${t(
-      "Two versions exist: 0.1.0, which the registry serves, and " + version + ", which is tagged on main and blocked from publishing. This page says what each number promises, what the upgrade moves, and how the freeze is enforced.",
+      "Two versions exist: 0.1.0, which the registry serves, and " + version + ", which is set in package.json on main and blocked from publishing. This page says what each number promises, what the upgrade moves, and how the freeze is enforced.",
       "Ada dua versi: 0.1.0 yang dilayani registry, dan " + version + " yang sudah ditandai di main dan tertahan publikasinya. Halaman ini menjelaskan arti tiap nomor, apa yang berubah saat naik versi, dan bagaimana pembekuannya ditegakkan.",
     )}</p>
 

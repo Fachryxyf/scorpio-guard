@@ -41,7 +41,8 @@ decided will be closed with a pointer to the entry.
 
 ## Working on the code
 
-Requires Node 22.6 or newer. Tests run TypeScript directly, with no build step.
+Requires Node 22.13 or newer, because `./sqlite` uses `node:sqlite`, which stopped needing a
+flag there. Tests run TypeScript directly, with no build step.
 
 ```
 npm install
@@ -76,6 +77,31 @@ House rules, in order of how likely they are to get a change sent back:
    route around. Thresholds live in policy an adopter overrides.
 8. **The guard advises. It never enforces.** Any API that acts on its own belongs
    in the host application, not here.
+
+## How a change lands
+
+One public branch, `main`, one maintainer. That is the whole of the governance, and it is
+written down so nobody has to guess what the silence after a pull request means.
+
+- **Only the maintainer has write access.** For anyone else a pull request is the only way
+  in. There is no second reviewer to assign, and pretending otherwise would be a review
+  process with one participant wearing two hats.
+- **`main` cannot be force pushed or deleted.** A repository ruleset blocks both, so a
+  published commit stays reachable. A wrong change is corrected forward, never rewritten out
+  of the history.
+- **CI has to be green before a merge.** That rule is discipline, not a required status
+  check: the maintainer reads the run and does not merge a red one. A pull request that
+  fails the gates is not merged on the argument that the failure looks unrelated.
+- **Contributions ship under the same licence.** MIT in, MIT out, no CLA and no copyright
+  assignment. Opening a pull request is agreeing to that.
+- **A patch does not overrule a decision.** A change that reopens a recorded decision
+  changes that entry in the same pull request, with the reason. Otherwise the decision wins,
+  and the answer names which entry.
+
+A typo or a broken link is one commit. Anything that moves a threshold needs a test name that
+says which decision it depends on, and a CHANGELOG entry written with the change rather than
+after it. A vulnerability is not a pull request: [SECURITY.md](SECURITY.md) says where it goes,
+and [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) says what kind of disagreement this project wants.
 
 ## Reporting a false positive
 

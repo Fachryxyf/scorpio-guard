@@ -174,8 +174,8 @@ npm install @fachryxyf/scorpio-guard@0.1.0   # recommended
 npm install github:Fachryxyf/scorpio-guard   # from source, builds on install
 ```
 
-`0.2.0` is tagged on `main` and blocked from publishing by the account suspension
-above, not by a gate. It adds the networked KV store (D60), the only way to get
+`0.2.0` is set in `package.json` on `main` and blocked from publishing by the account
+suspension above, not by a gate. It adds the networked KV store (D60), the only way to get
 durable trust state on serverless, so install from source until it is published.
 
 The version policy is in [docs/SEMVER.md](docs/SEMVER.md): a patch keeps the advice, a

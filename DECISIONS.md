@@ -93,7 +93,7 @@ Last updated: 2026-10-25
 
 - [D24: Licence: MIT](#d24-licence-mit)
 - [D25: npm: `@fachryxyf/scorpio-guard`](#d25-npm-fachryxyfscorpio-guard)
-- [D26: Node floor: `>=22.6`](#d26-node-floor-226)
+- [D26: Node floor: `>=22.13`](#d26-node-floor-2213)
 - [D27: CI now: typecheck and test](#d27-ci-now-typecheck-and-test)
 - [D28: Site stays where it is](#d28-site-stays-where-it-is)
 - [D29: No empty repositories](#d29-no-empty-repositories)
@@ -2102,10 +2102,15 @@ Naming it scoped now rather than at publish time means the import path in every
 example, the README, and the site is the path that will keep working, instead of a
 bare `scorpio-guard` that silently becomes wrong on the day it is published.
 
-## D26: Node floor: `>=22.6`
+## D26: Node floor: `>=22.13`
 
 **Decided.** Keeps tests running TypeScript directly with no build step and no
 extra dependency.
+
+The number moved once. 22.6 was enough for stripping types with no build step; adding
+`./sqlite` moved the floor to 22.13.0, where `node:sqlite` stopped needing a flag. The
+entry keeps the reason rather than the number, and the number lives in `engines` where CI
+can check it.
 
 ## D27: CI now: typecheck and test
 

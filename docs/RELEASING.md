@@ -2,7 +2,7 @@
 
 ## Status as of 2026-10-25
 
-- 0.2.0 is tagged in `package.json` on `main` and is **not** published.
+- 0.2.0 is set in `package.json` on `main` and is **not** published.
 - The npm account that owns the package is **suspended for 72 hours as of 2026-10-25**,
   which blocks publishing until roughly 2026-10-28. This is an account problem, not a code
   problem: every gate below is green on `main`, and CI has passed on the commit that holds
@@ -54,12 +54,26 @@ that has to explain why.
 6. `npm publish --access public` with the maintainer account. There is no token in this
    repository and none in CI; publishing is a person with a second factor, not an
    automation.
-7. `git tag v0.2.0` and push the commit and the tag.
+7. `git tag v0.2.0` and push the commit and the tag. The tag is what ties the registry to a
+   commit, and npm records it as `gitHead` in the package metadata.
 8. Verify from the registry, not from the local build: `npm view @fachryxyf/scorpio-guard
    dist-tags`, then install into an empty directory and run `node -e` with an import and
    one evaluation.
 9. Update the versions page on the site in the same commit as the release, so the site
    never claims a version the registry does not have.
+
+### If a tag was missed
+
+0.1.0 was published on 2026-08-24 with no tag, and was tagged `v0.1.0` on 2026-10-25 instead.
+The repair is mechanical, and it must not be done from memory:
+
+```
+npm view @fachryxyf/scorpio-guard@0.1.0 gitHead
+```
+
+That is the commit the tarball was built from, and that is the commit the tag goes on, never
+the current tip. The CHANGELOG says the tag was made late and why, so the gap reads as a gap
+and not as a release that always had a tag.
 
 ## What never happens
 

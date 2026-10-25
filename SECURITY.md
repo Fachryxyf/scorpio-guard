@@ -2,8 +2,9 @@
 
 ## Status
 
-Pre-alpha. Not calibrated against real traffic, and not audited. Do not deploy it
-as your only defence for anything that matters.
+Uncalibrated and unaudited. The registry serves 0.1.0; `main` is 0.2.0 and is not published
+while the npm account is suspended. Do not deploy it as your only defence for anything that
+matters.
 
 ## What the guard is, and is not
 
@@ -51,7 +52,9 @@ up or encrypt it accordingly.
 
 Report privately through
 [GitHub's private vulnerability reporting](https://github.com/Fachryxyf/scorpio-guard/security/advisories/new).
-Do not open a public issue for something exploitable.
+Do not open a public issue for something exploitable. If the form does not work for you, open
+an issue that says only that you have a private report, with no detail, and it will be moved
+to a private channel.
 
 Include what you can reproduce, and the trace if the guard produced one. Expect a
 first response within a week. There is one maintainer, so that is a realistic

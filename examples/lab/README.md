@@ -60,10 +60,11 @@ npm run lab -- --strict                       # non-zero exit on any false posit
 npm run lab -- --report=<runId>               # re-read a run without a browser
 ```
 
-Chrome is expected at `/Applications/Google Chrome.app`. The two static targets are
-built elsewhere on disk; override their locations with `LAB_AUFSICHT_ROOT` and
-`LAB_TALKHERE_ROOT`, and the live IXFE origin with `LAB_IXFE_ORIGIN`. A target whose
-build is missing is reported and skipped rather than silently dropped.
+Chrome is expected at `/Applications/Google Chrome.app`. The two static targets are built
+elsewhere on disk and are deliberately not in this repository: set `LAB_AUFSICHT_ROOT` and
+`LAB_TALKHERE_ROOT`, or put both paths in `var/lab-paths.json` (`var/` is ignored by git),
+and set the live IXFE origin with `LAB_IXFE_ORIGIN`. A target whose build is missing is
+reported and skipped rather than silently dropped, and the message names the variable to set.
 
 Ports are fixed per target for the site (`4700+n`) and the observer (`4800+n`).
 Chrome gets no port at all: it is launched with `--remote-debugging-port=0` and the

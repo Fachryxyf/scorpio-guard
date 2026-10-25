@@ -202,7 +202,7 @@ Area-area berikut sudah tepat:
 | Resistansi poisoning terbatas, belum terselesaikan | Adversary yang lambat dapat menggeser trust atau mengeksploitasi riwayat positif yang terakumulasi | Masalah terbuka |
 | Tidak ada integrasi penegakan oleh operator | Library mengembalikan saran, tetapi adopsi tetap mengharuskan setiap host memetakan keputusan ke friction/restriction | Disengaja, tetapi meningkatkan pekerjaan integrasi |
 | Tidak ada kontrak observability production | Trace tersedia, tetapi metrics, decision logging, alerting, dan alur kalibrasi belum distandardisasi | Memerlukan productization |
-| Node floor tinggi | `node >=22.6`, ESM, dan `node:sqlite` mempersempit permukaan adopsi | Tradeoff yang disengaja, perlu ditonjolkan dalam positioning |
+| Node floor tinggi | `node >=22.13`, ESM, dan `node:sqlite` mempersempit permukaan adopsi | Tradeoff yang disengaja, perlu ditonjolkan dalam positioning |
 
 ### 4.2 Risiko teknis dan temuan
 
@@ -249,7 +249,7 @@ Inkonsistensi yang diamati mencakup:
 #### Temuan T6, Public API berorientasi Node meskipun memiliki browser collector
 
 **Severity:** Sedang.  
-Collector berorientasi browser, tetapi paket memerlukan Node 22.6+ dan menggunakan export paket ESM. Core bersifat framework-agnostic, tetapi kisah distribusi untuk browser bundler, edge runtime, dan Node versi lama belum didemonstrasikan.
+Collector berorientasi browser, tetapi paket memerlukan Node 22.13+ dan menggunakan export paket ESM. Core bersifat framework-agnostic, tetapi kisah distribusi untuk browser bundler, edge runtime, dan Node versi lama belum didemonstrasikan.
 
 **Rekomendasi:** dokumentasikan runtime yang didukung per entry point dan tambahkan browser/edge packaging smoke test jika lingkungan tersebut memang menjadi target.
 

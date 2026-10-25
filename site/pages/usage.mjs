@@ -50,7 +50,7 @@ export function usage(data) {
     </table>
 
     <p class="tnote">${t(
-      'The registry serves 0.1.0. 0.2.0 is tagged on main and not published yet, because the npm account is suspended for 72 hours as of 2026-10-25; the dates are on the <a href="versions.html">Versions page</a>.',
+      'The registry serves 0.1.0. 0.2.0 is set in package.json on main and not published yet, because the npm account is suspended for 72 hours as of 2026-10-25; the dates are on the <a href="versions.html">Versions page</a>.',
       'Registry melayani 0.1.0. 0.2.0 sudah ditandai di main dan belum terbit, karena akun npm disuspend 72 jam per 2026-10-25; tanggalnya ada di <a href="versions.html">halaman Versi</a>.',
     )}</p>
 

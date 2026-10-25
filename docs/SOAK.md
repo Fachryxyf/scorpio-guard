@@ -93,6 +93,11 @@ a 1012 allowance is the amortised sweep overshooting by design, which is why the
   unpaced, and 5.229 ms p99 at a 10 ms pace, where every write waits for its own sync. The
   paced number is the honest one for a quiet server, and it is above the budget. It is
   recorded rather than smoothed, and the check is read with the store named.
+- **A soak and the bench measure each other.** With the 24 hour soak running on the same
+  machine, `npm run bench` reported sqlite p95 2.5310 ms against a 2.4172 ms budget and
+  failed. Paused for the length of the bench, the same build reported 1.3711 ms. CI runs the
+  bench before the soak, in that order, so the gate is not measuring a neighbour there; a
+  local soak will make a local bench lie, which is worth knowing before blaming the change.
 
 ## The 24 hour run
 

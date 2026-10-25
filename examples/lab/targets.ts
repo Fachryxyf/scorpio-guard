@@ -11,7 +11,8 @@
  * The static builds live outside this repository, so a missing directory is reported
  * as an unavailable target instead of being silently skipped.
  */
-import { existsSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 
 import type { LiveProfile } from '../ixfe/live/proxy.ts';
 import { ixfeInvariants } from '../ixfe/invariants.ts';
@@ -57,6 +58,29 @@ export function staticProfile(id: string): LiveProfile {
   };
 }
 
+/**
+ * Where a static build lives on this machine. The repository does not carry those paths:
+ * they are one person disk layout, they differ per contributor, and a public repository
+ * that hardcodes them hands every reader a description of the maintainer machine. An
+ * environment variable wins, then `var/lab-paths.json`, which git ignores, then nothing, and
+ * the target reports itself unavailable instead of quietly disappearing from the run.
+ */
+function localPath(id: string, envName: string): string | undefined {
+  const fromEnv = process.env[envName];
+  if (fromEnv !== undefined && fromEnv !== '') return fromEnv;
+  const file = resolve('var/lab-paths.json');
+  if (!existsSync(file)) return undefined;
+  const parsed = JSON.parse(readFileSync(file, 'utf8')) as Record<string, unknown>;
+  const value = parsed[id];
+  return typeof value === 'string' && value !== '' ? value : undefined;
+}
+
+/** Absent, not undefined: exactOptionalPropertyTypes is on, and a target with no root is
+ * a target with no root rather than one whose root is undefined. */
+function withRoot(root: string | undefined): { root?: string } {
+  return root === undefined ? {} : { root };
+}
+
 export function labTargets(): LabTarget[] {
   return [
     {
@@ -72,7 +96,7 @@ export function labTargets(): LabTarget[] {
     {
       id: 'aufsicht',
       label: 'aufsicht.dev',
-      root: process.env.LAB_AUFSICHT_ROOT ?? '/Users/user/XYF TECH SOLUTION/PRODUK/ARBITERAI/landing',
+      ...withRoot(localPath('aufsicht', 'LAB_AUFSICHT_ROOT')),
       entry: '/index.html',
       source: 'the static build in ARBITERAI/landing, served locally',
       profile: staticProfile('aufsicht'),
@@ -80,7 +104,7 @@ export function labTargets(): LabTarget[] {
     {
       id: 'talkhere',
       label: 'talkhere.life',
-      root: process.env.LAB_TALKHERE_ROOT ?? '/Users/user/XYF TECH SOLUTION/PRODUK/TalkHere/dist',
+      ...withRoot(localPath('talkhere', 'LAB_TALKHERE_ROOT')),
       entry: '/index.html',
       source: 'the static build in TalkHere/dist, served locally',
       profile: staticProfile('talkhere'),
@@ -92,7 +116,11 @@ export function unavailableReason(target: LabTarget): string | undefined {
   if (target.root !== undefined && !existsSync(target.root)) {
     return 'no build at ' + target.root + ' (set LAB_' + target.id.toUpperCase() + '_ROOT)';
   }
-  if (target.root === undefined && target.origin === undefined) return 'no root and no origin';
+  if (target.root === undefined && target.origin === undefined) {
+    return (
+      'no build root (set LAB_' + target.id.toUpperCase() + '_ROOT, or put a path in var/lab-paths.json)'
+    );
+  }
   return undefined;
 }
 

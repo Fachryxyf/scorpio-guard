@@ -133,7 +133,7 @@ Tagged in `package.json`, not yet published to npm. The registry has 0.1.0, and
   the numbers: one changed key discards six observations of distrust, earning the same
   standing back costs 25 positives, a shared key hands one visitor history to everyone, and
   a per-request proof is the one thing a rotated key cannot erase (D72).
-- Runtime matrix in CI: Node 22.6.0 (the floor in `engines`), 22.x, and 24.x each run the
+- Runtime matrix in CI: Node 22.13.0 (the floor in `engines`), 22.x, and 24.x each run the
   suite, the build, and a smoke import of `dist/`. `src/core/runtime-surface.test.ts` walks
   the import graph from `.` and `./collect` and fails on any Node-only global, verified by
   mutation, and `docs/RUNTIME.md` records which targets are executed and which are still
@@ -175,9 +175,27 @@ Tagged in `package.json`, not yet published to npm. The registry has 0.1.0, and
   that also caught legitimate automation (D50, D55).
 - The cold-start band is gone: an entity with no history is `unknown`, which is not
   the same as suspicious (D39).
+- The repository states its own governance. `main` cannot be force pushed or deleted, and a
+  ruleset enforces that and nothing else. One maintainer has write access, so a pull request
+  is the only way in for anyone else. CI green is a rule the maintainer keeps rather than a
+  required status check, and CONTRIBUTING.md says that instead of implying a review process
+  with one participant. CODE_OF_CONDUCT.md and a pull request template are new.
+- GitHub private vulnerability reporting is on. SECURITY.md and the issue template have
+  pointed at that form since the first version, and until 0.2.0 it answered 404 for everyone
+  except the owner.
+- Dependabot alerts and security updates are on, the wiki is off, and a workflow may only use
+  actions published by GitHub or a verified publisher.
+- The public tree no longer carries one machine disk layout. The two static lab targets and
+  the pentest checkout are read from `LAB_*` variables or from `var/lab-paths.json`, which
+  git ignores, and a missing path names the variable to set instead of failing quietly.
 
 ### Fixed
 
+- The 0.1.0 heading said 2026-08-15. The registry published 0.1.0 on 2026-08-24 from commit
+  `c488012`, which is tagged `v0.1.0` now; no tag existed at release time, and the entry says
+  so.
+- CONTRIBUTING.md said Node 22.6, D26 was titled with 22.6, and the audit document repeated
+  it. The floor has been 22.13 since `./sqlite` landed, and `engines` said so the whole time.
 - Two thresholds that generated traffic showed to be wrong: the boundary where
   friction begins, and the one that let a third observation escalate (D46).
 - `kvStore` no longer accepts fail-open without an error sink. Silence was the
@@ -205,9 +223,13 @@ Tagged in `package.json`, not yet published to npm. The registry has 0.1.0, and
   reported, because "was this entity farming" is worth reading, but nothing escalates
   on it (D54, superseded by D55).
 
-## [0.1.0] - 2026-08-15
+## [0.1.0] - 2026-08-24
 
 First published version: the guard, the trust model, the decision spectrum, the
 memory store, and the original thirty design decisions. The npm tarball is the
 record, since this file was added in 0.2.0 and back-filling it from memory would be
 invention.
+
+The heading said 2026-08-15 until 2026-10-25. The registry is the record for this: 0.1.0
+was published on 2026-08-24 from commit `c488012`. That commit is tagged `v0.1.0` now,
+retroactively, because no tag was made when the package was released.
