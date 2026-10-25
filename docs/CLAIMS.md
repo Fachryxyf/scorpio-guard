@@ -9,7 +9,7 @@ proving it and stronger than nothing: it means every design claim either has a p
 in the suite that would notice a change, or a written explanation of why it cannot
 have one.
 
-Total: 70 decisions, 50 named by a test, 20 explained, 0 unexplained.
+Total: 70 decisions, 51 named by a test, 19 explained, 0 unexplained.
 
 | Decision | Title | Tests |
 |---|---|---|
@@ -63,6 +63,7 @@ Total: 70 decisions, 50 named by a test, 20 explained, 0 unexplained.
 | D57 | Drive a real browser, because a real audience is not available | `examples/ixfe/live/proxy.test.ts` |
 | D61 | Reporting is a versioned event, and the entity reference is withheld | `src/core/event.test.ts` |
 | D62 | Fail-open requires a witness | `src/store/kv.test.ts` |
+| D67 | Anomaly is reported and does not decide, and the dataset says why | `examples/lab/report.test.ts` |
 
 ## Prose only, with the reason
 
@@ -88,7 +89,6 @@ covered instead when it is covered at all.
 - D64: Calibration refuses a dataset it cannot learn from. Calibration refuses a dataset it cannot learn from. A policy about what may be published, not a behaviour of the library. The refusals, the grid and the per-persona counting are all in `examples/lab/calibration.test.ts`, verified by mutation; what no test can hold is the rule that a refusal must be printed instead of a table.
 - D65: The frozen fixture is how a treatment change becomes visible. The frozen fixture is how a treatment change becomes visible. The freeze itself is a script, and its consequences are in `examples/lab/fixture.test.ts` (a fixture exists, replays to its frozen decisions, and holds no hashed identifier), verified by mutation; what no test can hold is the promise that a fixture is only regenerated on purpose.
 - D66: A persona is a population, and a repetition is a different visitor. A persona is a population, and a repetition is a different visitor. The identity rule is a function in `examples/lab/personas.ts` and its consequences are in `examples/lab/lab.test.ts` (eight repetitions claim eight stable, distinct identities; one treated repetition is a false positive for the persona), verified by mutation; what no test can hold is the judgement that eight scripted runs of one trace are enough of a population to publish a threshold against.
-- D67: Anomaly is reported and does not decide, and the dataset says why. Anomaly is reported and does not decide, and the dataset says why. A decision taken from a measurement, not a behaviour of the library. The score's role is pinned by the tests that own D18 and D37 (`src/core/anomaly.test.ts`, `src/core/assess.test.ts`), and what D67 adds is a reading of recorded traffic: `docs/DATASET.md` finding F7, reproduced by `npm run calibrate` against the frozen rows. There is no new test, because a test asserting a number from one lab run would freeze the number instead of the reasoning that put it there.
 
 ## Prose only, and not yet explained
 

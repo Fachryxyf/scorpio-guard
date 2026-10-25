@@ -3746,8 +3746,11 @@ A dataset with real traffic where some threshold on the score separates legitima
 adversarial visitors with zero false positives. That is M2.5, and it would be a new
 decision supported by its own measurement rather than a re-tuning of this one.
 
-Gates: none new, and that is deliberate. The score's role is pinned by the tests that own
-D18 and D37 in `src/core/anomaly.test.ts` and `src/core/assess.test.ts`; what this
-decision adds is a reading of the dataset, which lives in `docs/DATASET.md` finding F7 and
-is reproduced by `npm run calibrate` against the frozen rows. A test asserting a number
-from a ninety-minute lab run would freeze the number and not the reasoning.
+Gates: the score's role stays pinned by the tests that own D18 and D37 in
+`src/core/anomaly.test.ts` and `src/core/assess.test.ts`. What this decision adds is a
+reading of the dataset, which lives in `docs/DATASET.md` finding F7, is reproduced by
+`npm run calibrate` against the frozen rows, and is published by the site from
+`examples/lab/report.json` (M2.8). `examples/lab/report.test.ts` holds that published
+report to the one claim this decision rests on: no anomaly threshold on the recorded
+traffic beats the shipped policy. It does not assert the individual scores, because a test
+that pinned them would freeze a number instead of the reasoning that put it there.

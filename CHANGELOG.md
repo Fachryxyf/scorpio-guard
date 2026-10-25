@@ -62,6 +62,11 @@ Tagged in `package.json`, not yet published to npm. The registry has 0.1.0, and
   own identity and profile, so a persona defined as a short visit still contributes
   enough rows to calibrate and one treated repetition counts as a false positive for
   the whole persona (D66).
+- `npm run report:lab`: the recorded run becomes a small committed report
+  (`examples/lab/report.json`) that the site renders, so the published false-positive and
+  miss counts are generated from the recording instead of typed into a page, and
+  `examples/lab/report.test.ts` fails if the counters stop adding up or if another policy
+  cell beats the shipped one (M2.8).
 - A second recorded lab dataset and its frozen fixture: 1656 rows, 24 personas across
   three targets, eight visitors per persona, zero false positives and seven misses. The
   grid it produces has the shipped policy as its best cell, and the fixture replays all

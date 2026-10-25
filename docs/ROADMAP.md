@@ -51,7 +51,7 @@ kalibrasi diulang dan halaman jaminan diperbarui.
 | Instrumen trafik nyata: proxy, browser, report | `examples/ixfe/live/`, D56, D57 |
 | Gate manifest dan lockfile | `scripts/check-manifest.mjs`, `npm run check:manifest` |
 
-Angka yang dipakai gate: 275 test, 70 keputusan, 10 halaman, 0 dependensi runtime,
+Angka yang dipakai gate: 281 test, 70 keputusan, 10 halaman, 0 dependensi runtime,
 versi terbit 0.1.0, versi di `main` 0.2.0.
 
 Belum ada sama sekali: server protokol, hook event keputusan, publish ke registry,
@@ -236,7 +236,7 @@ yang cukup untuk memilih threshold:
 | M2.5 | Re-kalibrasi dengan campuran nyata begitu ada data produksi. Sampai itu ada, halaman jaminan menyebut batas ini secara eksplisit |
 | M2.6 | 404 yang tertaut bukan bukti (H19). Observer mencatat path yang pernah ia sajikan dari `<a href>` di HTML yang lewat, dan 404 untuk path itu tidak menambah bukti negatif |
 | M2.7 | Persona sebagai populasi (H20). `--repeat=N` menjalankan tiap persona N kali sebagai pengunjung berbeda: identitas sendiri, seed sendiri, profil Chrome sendiri, dan label tetap di level persona (D66) |
-| M2.8 | Terbitkan angka FP/FN run lab di situs, dibangkitkan dari file run dan bukan diketik, supaya halaman jaminan menyebut komposisi dan batasnya |
+| M2.8 | Terbitkan angka FP/FN run lab di situs, dibangkitkan dari file run dan bukan diketik, supaya halaman jaminan menyebut komposisi dan batasnya. Selesai: `npm run report:lab` menulis `examples/lab/report.json`, halaman results membacanya, dan `examples/lab/report.test.ts` menolak laporan yang angkanya tidak berjumlah atau yang sel kirimnya bukan yang terbaik |
 
 Status: M2.1 selesai (D63). Dua run terekam. Run pertama, dua build statis: 129
 request, 14 persona-run, 0 false positive, 6 false negative, dan keenamnya punya satu
@@ -277,8 +277,8 @@ itu false positive, dan jumlah repetisi tercatat di manifest sebagai bagian komp
 
 Exit: laporan FP/FN terbit di situs, komposisi dataset tertulis, fixture beku diputar
 di CI, dan keputusan baru tercatat di `DECISIONS.md`. Komposisi dan fixture sudah ada,
-begitu juga keputusan (D64, D66, D67). Yang belum: bagian situs yang menerbitkan angka
-run kedua, dicatat sebagai M2.8.
+begitu juga keputusan (D64, D66, D67), dan bagian situs yang menerbitkan angkanya
+(M2.8). Keempat syarat M2 terpenuhi pada run kedua.
 
 ### M3, protokol end-to-end
 

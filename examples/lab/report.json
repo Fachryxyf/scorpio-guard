@@ -1,0 +1,599 @@
+{
+ "run": "2026-10-25T00-45-46-089Z",
+ "startedAt": "2026-10-25T00:45:46.093Z",
+ "durationMinutes": 44,
+ "node": "v22.16.0",
+ "platform": "darwin-x64",
+ "chrome": "Chrome/150.0.7871.125",
+ "seed": 1,
+ "repeat": 8,
+ "requests": 1656,
+ "personas": 24,
+ "note": "Generated traffic. Ground truth is by construction. This is not a sample of any population, and no rate read off it describes real visitors.",
+ "identity": "Repetitions of a persona differ only in the identity they present, so the observer sees a new client instead of one long history. The variation is generated, and the browser mix it produces is not a sample of any real population (D66).",
+ "targets": [
+  {
+   "id": "ixfe",
+   "label": "ixfe.pro, the deployment D56 and D57 observed",
+   "origin": "http://127.0.0.1:4002",
+   "rows": 608,
+   "invariants": 13,
+   "personas": [
+    {
+     "id": "ixfe:ixfe-skimmer",
+     "label": "legitimate",
+     "what": "lands, scrolls, leaves without acting",
+     "instances": 8,
+     "failures": 0,
+     "requests": 16,
+     "decisions": {
+      "ALLOW": 16
+     }
+    },
+    {
+     "id": "ixfe:ixfe-researcher",
+     "label": "legitimate",
+     "what": "reads pricing, opens the order page, does not submit",
+     "instances": 8,
+     "failures": 0,
+     "requests": 32,
+     "decisions": {
+      "ALLOW": 32
+     }
+    },
+    {
+     "id": "ixfe:ixfe-mobile-visitor",
+     "label": "legitimate",
+     "what": "phone, fast scroll, short session",
+     "instances": 8,
+     "failures": 0,
+     "requests": 24,
+     "decisions": {
+      "ALLOW": 24
+     }
+    },
+    {
+     "id": "ixfe:ixfe-stale-bookmark",
+     "label": "legitimate",
+     "what": "joins the waiting list from a cached pre-launch page, and is refused",
+     "instances": 8,
+     "failures": 0,
+     "requests": 16,
+     "decisions": {
+      "ALLOW": 16
+     }
+    },
+    {
+     "id": "ixfe:ixfe-returning-visitor",
+     "label": "legitimate",
+     "what": "two visits separated by a real gap",
+     "instances": 8,
+     "failures": 0,
+     "requests": 24,
+     "decisions": {
+      "ALLOW": 24
+     }
+    },
+    {
+     "id": "ixfe:ixfe-uptime-monitor",
+     "label": "legitimate",
+     "what": "GET / on a fixed interval, like any uptime check",
+     "instances": 8,
+     "failures": 0,
+     "requests": 160,
+     "decisions": {
+      "ALLOW": 160
+     }
+    },
+    {
+     "id": "ixfe:ixfe-endpoint-shooter",
+     "label": "adversarial",
+     "what": "posts the waitlist endpoint directly, no page involved",
+     "instances": 8,
+     "failures": 0,
+     "requests": 96,
+     "decisions": {
+      "RESTRICT": 96
+     }
+    },
+    {
+     "id": "ixfe:ixfe-honeypot-filler",
+     "label": "adversarial",
+     "what": "fills the hidden website field with a plausible dwell",
+     "instances": 8,
+     "failures": 0,
+     "requests": 80,
+     "decisions": {
+      "OBSERVE": 16,
+      "INCREASE_FRICTION": 64
+     }
+    },
+    {
+     "id": "ixfe:ixfe-path-scanner",
+     "label": "adversarial",
+     "what": "walks scanner paths at machine pace",
+     "instances": 8,
+     "failures": 0,
+     "requests": 80,
+     "decisions": {
+      "ALLOW": 16,
+      "OBSERVE": 56,
+      "INCREASE_FRICTION": 8
+     }
+    },
+    {
+     "id": "ixfe:ixfe-silent-crawler",
+     "label": "adversarial",
+     "what": "crawls every page at a fixed interval",
+     "instances": 8,
+     "failures": 0,
+     "requests": 80,
+     "decisions": {
+      "ALLOW": 80
+     }
+    }
+   ]
+  },
+  {
+   "id": "aufsicht",
+   "label": "aufsicht.dev",
+   "origin": "http://127.0.0.1:4701",
+   "rows": 520,
+   "invariants": 0,
+   "personas": [
+    {
+     "id": "aufsicht:reader",
+     "label": "legitimate",
+     "what": "lands, reads, follows three links, leaves without converting",
+     "instances": 8,
+     "failures": 0,
+     "requests": 32,
+     "decisions": {
+      "ALLOW": 32
+     }
+    },
+    {
+     "id": "aufsicht:skimmer",
+     "label": "legitimate",
+     "what": "lands, scrolls a little, decides it is not for them",
+     "instances": 8,
+     "failures": 0,
+     "requests": 8,
+     "decisions": {
+      "ALLOW": 8
+     }
+    },
+    {
+     "id": "aufsicht:monitor",
+     "label": "legitimate",
+     "what": "uptime monitor: eight fixed-interval reads of the landing page",
+     "instances": 8,
+     "failures": 0,
+     "requests": 64,
+     "decisions": {
+      "ALLOW": 64
+     }
+    },
+    {
+     "id": "aufsicht:crawler",
+     "label": "legitimate",
+     "what": "indexer reading every link it finds, quickly, and nothing else",
+     "instances": 8,
+     "failures": 0,
+     "requests": 64,
+     "decisions": {
+      "ALLOW": 64
+     }
+    },
+    {
+     "id": "aufsicht:scanner",
+     "label": "adversarial",
+     "what": "asks for eight paths no page links to, looking for an exposed surface",
+     "instances": 8,
+     "failures": 0,
+     "requests": 64,
+     "decisions": {
+      "ALLOW": 16,
+      "OBSERVE": 48
+     }
+    },
+    {
+     "id": "aufsicht:patient",
+     "label": "adversarial",
+     "what": "probes slowly, blending with page views, staying under any velocity rule",
+     "instances": 8,
+     "failures": 0,
+     "requests": 128,
+     "decisions": {
+      "ALLOW": 64,
+      "OBSERVE": 64
+     }
+    },
+    {
+     "id": "aufsicht:hammer",
+     "label": "adversarial",
+     "what": "twenty reads of the same URL back to back, no dwell",
+     "instances": 8,
+     "failures": 0,
+     "requests": 160,
+     "decisions": {
+      "ALLOW": 160
+     }
+    }
+   ]
+  },
+  {
+   "id": "talkhere",
+   "label": "talkhere.life",
+   "origin": "http://127.0.0.1:4702",
+   "rows": 528,
+   "invariants": 0,
+   "personas": [
+    {
+     "id": "talkhere:reader",
+     "label": "legitimate",
+     "what": "lands, reads, follows three links, leaves without converting",
+     "instances": 8,
+     "failures": 0,
+     "requests": 32,
+     "decisions": {
+      "ALLOW": 32
+     }
+    },
+    {
+     "id": "talkhere:skimmer",
+     "label": "legitimate",
+     "what": "lands, scrolls a little, decides it is not for them",
+     "instances": 8,
+     "failures": 0,
+     "requests": 8,
+     "decisions": {
+      "ALLOW": 8
+     }
+    },
+    {
+     "id": "talkhere:monitor",
+     "label": "legitimate",
+     "what": "uptime monitor: eight fixed-interval reads of the landing page",
+     "instances": 8,
+     "failures": 0,
+     "requests": 64,
+     "decisions": {
+      "ALLOW": 64
+     }
+    },
+    {
+     "id": "talkhere:crawler",
+     "label": "legitimate",
+     "what": "indexer reading every link it finds, quickly, and nothing else",
+     "instances": 8,
+     "failures": 0,
+     "requests": 72,
+     "decisions": {
+      "ALLOW": 40,
+      "OBSERVE": 32
+     }
+    },
+    {
+     "id": "talkhere:scanner",
+     "label": "adversarial",
+     "what": "asks for eight paths no page links to, looking for an exposed surface",
+     "instances": 8,
+     "failures": 0,
+     "requests": 64,
+     "decisions": {
+      "ALLOW": 16,
+      "OBSERVE": 48
+     }
+    },
+    {
+     "id": "talkhere:patient",
+     "label": "adversarial",
+     "what": "probes slowly, blending with page views, staying under any velocity rule",
+     "instances": 8,
+     "failures": 0,
+     "requests": 128,
+     "decisions": {
+      "ALLOW": 64,
+      "OBSERVE": 64
+     }
+    },
+    {
+     "id": "talkhere:hammer",
+     "label": "adversarial",
+     "what": "twenty reads of the same URL back to back, no dwell",
+     "instances": 8,
+     "failures": 0,
+     "requests": 160,
+     "decisions": {
+      "ALLOW": 160
+     }
+    }
+   ]
+  }
+ ],
+ "grid": [
+  {
+   "halfLifeHours": 24,
+   "developingAt": 3,
+   "establishedAt": 7,
+   "falsePositives": 0,
+   "falseNegatives": 7,
+   "correct": 17,
+   "total": 24,
+   "shipped": true
+  },
+  {
+   "halfLifeHours": 24,
+   "developingAt": 4,
+   "establishedAt": 8,
+   "falsePositives": 0,
+   "falseNegatives": 8,
+   "correct": 16,
+   "total": 24,
+   "shipped": false
+  },
+  {
+   "halfLifeHours": 24,
+   "developingAt": 5,
+   "establishedAt": 9,
+   "falsePositives": 0,
+   "falseNegatives": 8,
+   "correct": 16,
+   "total": 24,
+   "shipped": false
+  },
+  {
+   "halfLifeHours": 72,
+   "developingAt": 3,
+   "establishedAt": 7,
+   "falsePositives": 0,
+   "falseNegatives": 7,
+   "correct": 17,
+   "total": 24,
+   "shipped": false
+  },
+  {
+   "halfLifeHours": 72,
+   "developingAt": 4,
+   "establishedAt": 8,
+   "falsePositives": 0,
+   "falseNegatives": 8,
+   "correct": 16,
+   "total": 24,
+   "shipped": false
+  },
+  {
+   "halfLifeHours": 72,
+   "developingAt": 5,
+   "establishedAt": 9,
+   "falsePositives": 0,
+   "falseNegatives": 8,
+   "correct": 16,
+   "total": 24,
+   "shipped": false
+  },
+  {
+   "halfLifeHours": 168,
+   "developingAt": 3,
+   "establishedAt": 7,
+   "falsePositives": 0,
+   "falseNegatives": 7,
+   "correct": 17,
+   "total": 24,
+   "shipped": false
+  },
+  {
+   "halfLifeHours": 168,
+   "developingAt": 4,
+   "establishedAt": 8,
+   "falsePositives": 0,
+   "falseNegatives": 8,
+   "correct": 16,
+   "total": 24,
+   "shipped": false
+  },
+  {
+   "halfLifeHours": 168,
+   "developingAt": 5,
+   "establishedAt": 9,
+   "falsePositives": 0,
+   "falseNegatives": 8,
+   "correct": 16,
+   "total": 24,
+   "shipped": false
+  }
+ ],
+ "totals": {
+  "falsePositives": 0,
+  "falseNegatives": 7,
+  "correct": 17,
+  "total": 24
+ },
+ "misses": [
+  "ixfe:ixfe-silent-crawler",
+  "aufsicht:scanner",
+  "aufsicht:patient",
+  "aufsicht:hammer",
+  "talkhere:scanner",
+  "talkhere:patient",
+  "talkhere:hammer"
+ ],
+ "wronged": [],
+ "anomaly": [
+  {
+   "threshold": 0.8,
+   "falsePositives": 6,
+   "falseNegatives": 4,
+   "correct": 14,
+   "total": 24
+  },
+  {
+   "threshold": 0.9,
+   "falsePositives": 4,
+   "falseNegatives": 5,
+   "correct": 15,
+   "total": 24
+  },
+  {
+   "threshold": 0.95,
+   "falsePositives": 1,
+   "falseNegatives": 8,
+   "correct": 15,
+   "total": 24
+  },
+  {
+   "threshold": 0.99,
+   "falsePositives": 0,
+   "falseNegatives": 10,
+   "correct": 14,
+   "total": 24
+  }
+ ],
+ "peaks": [
+  {
+   "persona": "ixfe:ixfe-endpoint-shooter",
+   "groundTruth": "adversarial",
+   "max": 0.9610873761575645,
+   "scored": 72
+  },
+  {
+   "persona": "ixfe:ixfe-uptime-monitor",
+   "groundTruth": "legitimate",
+   "max": 0.961037192046591,
+   "scored": 136
+  },
+  {
+   "persona": "ixfe:ixfe-honeypot-filler",
+   "groundTruth": "adversarial",
+   "max": 0.9594511484146113,
+   "scored": 56
+  },
+  {
+   "persona": "talkhere:scanner",
+   "groundTruth": "adversarial",
+   "max": 0.943283294617894,
+   "scored": 40
+  },
+  {
+   "persona": "talkhere:monitor",
+   "groundTruth": "legitimate",
+   "max": 0.9362113424955263,
+   "scored": 40
+  },
+  {
+   "persona": "talkhere:crawler",
+   "groundTruth": "legitimate",
+   "max": 0.9361129085967905,
+   "scored": 48
+  },
+  {
+   "persona": "talkhere:reader",
+   "groundTruth": "legitimate",
+   "max": 0.9243699989723471,
+   "scored": 8
+  },
+  {
+   "persona": "aufsicht:scanner",
+   "groundTruth": "adversarial",
+   "max": 0.9194272894642932,
+   "scored": 40
+  },
+  {
+   "persona": "talkhere:patient",
+   "groundTruth": "adversarial",
+   "max": 0.9101365730929769,
+   "scored": 104
+  },
+  {
+   "persona": "aufsicht:patient",
+   "groundTruth": "adversarial",
+   "max": 0.8600105636237956,
+   "scored": 104
+  },
+  {
+   "persona": "aufsicht:monitor",
+   "groundTruth": "legitimate",
+   "max": 0.85870483250271,
+   "scored": 40
+  },
+  {
+   "persona": "aufsicht:reader",
+   "groundTruth": "legitimate",
+   "max": 0.8179057517520183,
+   "scored": 8
+  },
+  {
+   "persona": "aufsicht:hammer",
+   "groundTruth": "adversarial",
+   "max": 0.703669937080218,
+   "scored": 136
+  },
+  {
+   "persona": "talkhere:hammer",
+   "groundTruth": "adversarial",
+   "max": 0.6884806687986149,
+   "scored": 136
+  },
+  {
+   "persona": "aufsicht:crawler",
+   "groundTruth": "legitimate",
+   "max": 0.6698516497747489,
+   "scored": 40
+  },
+  {
+   "persona": "ixfe:ixfe-silent-crawler",
+   "groundTruth": "adversarial",
+   "max": 0.39686148533861576,
+   "scored": 56
+  },
+  {
+   "persona": "ixfe:ixfe-path-scanner",
+   "groundTruth": "adversarial",
+   "max": 0.3965840252116592,
+   "scored": 56
+  },
+  {
+   "persona": "ixfe:ixfe-researcher",
+   "groundTruth": "legitimate",
+   "max": 0.020812794048319594,
+   "scored": 8
+  },
+  {
+   "persona": "ixfe:ixfe-skimmer",
+   "groundTruth": "legitimate",
+   "max": null,
+   "scored": 0
+  },
+  {
+   "persona": "ixfe:ixfe-mobile-visitor",
+   "groundTruth": "legitimate",
+   "max": null,
+   "scored": 0
+  },
+  {
+   "persona": "ixfe:ixfe-stale-bookmark",
+   "groundTruth": "legitimate",
+   "max": null,
+   "scored": 0
+  },
+  {
+   "persona": "ixfe:ixfe-returning-visitor",
+   "groundTruth": "legitimate",
+   "max": null,
+   "scored": 0
+  },
+  {
+   "persona": "aufsicht:skimmer",
+   "groundTruth": "legitimate",
+   "max": null,
+   "scored": 0
+  },
+  {
+   "persona": "talkhere:skimmer",
+   "groundTruth": "legitimate",
+   "max": null,
+   "scored": 0
+  }
+ ]
+}

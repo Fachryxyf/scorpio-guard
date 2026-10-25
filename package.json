@@ -51,6 +51,7 @@
     "observed": "node --experimental-strip-types examples/ixfe/live/report.ts",
     "lab": "node --experimental-strip-types examples/lab/run.ts",
     "calibrate": "node --experimental-strip-types scripts/calibrate.mjs",
+    "report:lab": "node --experimental-strip-types scripts/lab-report.mjs",
     "freeze:lab": "node --experimental-strip-types scripts/freeze-lab.mjs",
     "smoke": "node scripts/smoke.mjs",
     "example:integration": "node --experimental-strip-types examples/integration/server.ts --demo",

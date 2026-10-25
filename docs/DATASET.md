@@ -355,7 +355,9 @@ exits zero only when the audit passes.
 What it can do, and does, is hold behaviour still and give the constants a reading: 1656
 labelled rows from 24 personas across three targets in nine cells, with the shipped policy
 the best of the nine and zero false positives. The frozen fixtures in
-`examples/lab/fixtures/` replay these decisions on every push.
+`examples/lab/fixtures/` replay these decisions on every push, and `npm run report:lab`
+turns the run into the report the site publishes, so the numbers on the page come from the
+recording rather than from memory.
 
 ## Reproducing it
 

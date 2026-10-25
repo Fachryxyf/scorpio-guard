@@ -61,7 +61,7 @@ export function labTargets(): LabTarget[] {
   return [
     {
       id: 'ixfe',
-      label: 'ixfe.pro, the deployment D56 and D57 observed',
+      label: 'the IXFE landing service, the app D56 and D57 observed',
       origin: process.env.LAB_IXFE_ORIGIN ?? 'https://ixfe.pro',
       entry: '/',
       source: 'the live deployment, driven by the personas in examples/ixfe/live/visitors.ts',

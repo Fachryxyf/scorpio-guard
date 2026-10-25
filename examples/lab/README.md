@@ -74,6 +74,19 @@ healthy. One Chrome per persona instance, launched with its own `--user-data-dir
 killed when the instance is done, because a shared instance shares a cache and a cookie
 jar and would quietly contaminate the next persona.
 
+## From a run to the published numbers
+
+```sh
+npm run calibrate      # replay the newest run under the nine-policy grid
+npm run freeze:lab     # rewrite the committed fixture from that run
+npm run report:lab     # write examples/lab/report.json for the site
+```
+
+`calibrate` refuses a run it cannot learn from and writes nothing. `freeze:lab` writes
+the fixture the test suite replays. `report:lab` writes the small committed report the
+site renders as its lab section, so the false-positive and miss counts on the page come
+from the recording instead of from someone reading a terminal once.
+
 ## Repetitions
 
 `--repeat=N` runs every persona N times. Each repetition is a different visitor: its

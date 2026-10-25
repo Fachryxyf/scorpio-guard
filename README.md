@@ -425,7 +425,7 @@ stays reported and does not decide (D67). Both runs are frozen into
 `examples/lab/fixtures/` and replayed on every push, so a change that moves any decision
 fails CI rather than being found in production (D65).
 
-Two hundred and seventy-five tests, which double as the record of every numeric and
+Two hundred and eighty-one tests, which double as the record of every numeric and
 semantic property the design depends on. [docs/CLAIMS.md](docs/CLAIMS.md) maps each
 design decision to the test that names it, and lists the ones that are still prose
 only, generated rather than maintained by hand.
