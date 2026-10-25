@@ -85,8 +85,8 @@ ${items}
         </tbody>
       </table>
       <p class="tnote">${t(
-        'Every figure in this box is computed from the repository. Downloads is the exception: your browser reads it from the npm API, and it is the only number here that can change without a commit.',
-        'Setiap angka di kotak ini dihitung dari repositori. Unduhan adalah pengecualian: browser Anda membacanya dari API npm, dan itu satu-satunya angka di sini yang bisa berubah tanpa commit.',
+        'All figures here come from the repository, except downloads, which your browser reads from the npm API.',
+        'Semua angka di sini berasal dari repositori, kecuali unduhan, yang dibaca browser Anda dari API npm.',
       )}</p>
     </aside>
 

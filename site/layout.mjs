@@ -270,6 +270,13 @@ export const CSS = String.raw`
   .infobox tbody tr:first-child th, .infobox tbody tr:first-child td { border-top: 0; }
   .infobox th { width: 7rem; font: 400 .75rem/1.4 var(--sans); color: var(--ink-2); background: none; }
   .infobox td { font-family: var(--mono); font-size: .75rem; }
+  /* The note is a footnote to the table, not a paragraph that happened to land in the box.
+     Without its own padding it sits on the border and reads as broken markup. */
+  .infobox > .tnote {
+    margin: 0; padding: .5rem .7rem .55rem;
+    border-top: 1px solid var(--line-2);
+    font: .75rem/1.55 var(--sans); color: var(--ink-3);
+  }
 
   /* ---- definition lists ---- */
   dl { margin: 0 0 1.1rem; }

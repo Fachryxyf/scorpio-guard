@@ -194,6 +194,10 @@ Tagged in `package.json`, not yet published to npm. The registry has 0.1.0, and
 - A persona instance that fails is recorded as a failed instance instead of ending the
   persona. One hung page used to cost seven of eight reader instances, which shrank the
   sample to whichever instance happened to work (D66).
+- The footnote under the front page box had no padding of its own, so it sat on the box
+  border and read as broken markup. It is now a footnote: its own padding, a separator that
+  matches the table rows, and a smaller sans face. The sentence is shorter too, because it
+  was written for the full page width and ended up in an 18rem box.
 
 ### Removed
 
