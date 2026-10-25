@@ -4021,7 +4021,7 @@ What the shipped policy does, asserted in `src/core/root-of-trust.test.ts`:
 
 - six strong negatives reach `INCREASE_FRICTION`, and one changed key returns to `ALLOW` at
   the prior;
-- returning to `ALLOW` after those six takes 26 strong positives;
+- returning to `ALLOW` after those six takes 25 strong positives;
 - ten keys with one strong negative each never leave `OBSERVE`, and cost ten states;
 - a shared key gives a clean visitor the `INCREASE_FRICTION` earned by someone else;
 - retention is a rotation strategy: two hours past a one-hour retention reset the entity;
@@ -4041,7 +4041,7 @@ suite, not with a paragraph.
   they describe the shipped policy rather than a law about attackers.
 - **Nothing here authenticates the key or the host.** An upstream header inherits the
   strength of whatever wrote it.
-- **26 observations is one boundary, not a curve.** A different policy moves it.
+- **25 observations is one boundary, not a curve.** A different policy moves it.
 
 ### Alternatives rejected
 

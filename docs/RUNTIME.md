@@ -9,7 +9,7 @@ are different claims, and only the second one is executable here.
 
 | Target | Status | How it is checked |
 |---|---|---|
-| Node 22.6.0 (the floor in `engines`) | supported | CI job `Node 22.6.0`: full suite, build, and a smoke import of `dist/` |
+| Node 22.13.0 (the floor in `engines`) | supported | CI job `Node 22.13.0`: full suite, build, and a smoke import of `dist/` |
 | Node 22.x (current LTS line) | supported | CI job `Node 22.x` runs the same three steps |
 | Node 24.x | supported | CI job `Node 24.x` runs the same three steps |
 | Browser, through a bundler | supported by construction, not executed | `src/core/runtime-surface.test.ts` walks the import graph from `.` and `./collect` and fails on any Node-only global |
@@ -18,7 +18,9 @@ are different claims, and only the second one is executable here.
 | React Native, Electron renderer | untested | no claim |
 
 The three Node jobs are a matrix in CI, so the floor cannot drift away from the tests
-without a red build. The floor itself is `engines.node` at 22.6 or newer, the version
+without a red build. The floor is 22.13 rather than 22.6 because `./sqlite` needs
+`node:sqlite`, which stopped requiring `--experimental-sqlite` in 22.13.0; the core alone
+would run on 22.6. The floor is 22.13 or newer, the version
 where native TypeScript stripping arrived; the package does not need a build step to be
 tested on that version.
 

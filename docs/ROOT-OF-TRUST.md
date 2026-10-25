@@ -44,12 +44,12 @@ the shipped policy.
 | The client picks its key | Ten keys with one strong negative each never leave `OBSERVE`; distrust never reaches `INCREASE_FRICTION` | 10 decisions, 10 states |
 | One shared key for everyone | A legitimate visitor with a clean observation inherits `INCREASE_FRICTION` from six bad observations made by someone else | 1 key, whole population |
 | Rotation instead of atonement | Six strong negatives reach `INCREASE_FRICTION`; one changed string returns to `ALLOW` at the prior | 6 observations to build, 1 change to discard |
-| Staying and earning it back | Returning to `ALLOW` after those six negatives takes 26 strong positives | 26 observations |
+| Staying and earning it back | Returning to `ALLOW` after those six negatives takes 25 strong positives | 25 observations |
 | Waiting | With `retentionHours: 1`, two hours of silence reset the entity to `ALLOW` | retention is part of the key policy |
 | Per-request proof | A hard invariant violation is `RESTRICT` on first contact and `RESTRICT` for a fresh key | rotation cannot erase proof |
 
 The asymmetry in the third and fourth rows is the whole argument. Building distrust costs
-the defender six observations and the attacker one string. Atonement costs 26. Any design
+the defender six observations and the attacker one string. Atonement costs 25. Any design
 where the subject can change the key more cheaply than that is a design where the history
 matters only for subjects that do not try to escape it.
 

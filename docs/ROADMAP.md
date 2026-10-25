@@ -77,7 +77,7 @@ registry, review keamanan, dan pengirim protokol dari luar repo ini.
 | H11 | Root of trust di luar SG. Entity key yang mudah diganti mengalahkan seluruh pertahanan berbasis riwayat (D1.1) | 1.0 | M4.1 | panduan dan test yang membuktikan batasnya |
 | H12 | Poisoning lambat belum terselesaikan. D55 baru menutup farming massal | 1.0 | M4.2 | eksperimen biaya penyerang dibanding waktu deteksi |
 | H13 | Belum ada review keamanan terarah. Test fungsional bukan audit (T7) | 1.0 | M4.3 | laporan, temuan ditutup atau dinyatakan terbuka |
-| H14 | Browser, edge, dan runtime lain belum diuji. Node floor 22.6 belum jadi positioning (T6) | 1.0 | M5.1 | matriks runtime dan smoke per target |
+| H14 | Browser, edge, dan runtime lain belum diuji. Node floor 22.13 belum jadi positioning (T6) | 1.0 | M5.1 | matriks runtime dan smoke per target |
 | H15 | Retention dan erasure belum dibuktikan end-to-end di semua store dan di event log (D1.2, D22) | 1.0 | M5.2 (D69) | test: satu entity dilupakan, tidak ada sisa di store maupun log |
 | H16 | API belum dibekukan. Tidak ada kebijakan deprecation atau panduan migrasi | 1.0 | M5.3 | semver policy dan panduan migrasi |
 | H17 | Klaim di `DECISIONS.md` tidak punya indeks ke test yang membuktikannya | MVP | M1.8 | indeks dibangkitkan, klaim tanpa target muncul sebagai daftar |
@@ -322,7 +322,7 @@ belum lengkap, exit M4 belum lulus dan 1.0.0 tetap ditahan.
 
 | Task | Isi |
 |---|---|
-| M5.1 | Matriks runtime: Node 22.6, Node 24, browser bundler, edge. Didukung atau tidak, dengan smoke test. Sebagian: CI punya tiga job Node (22.6.0, 22.x, 24.x) yang masing-masing menjalankan suite, build, dan smoke impor `dist/`; `src/core/runtime-surface.test.ts` menelusuri graf impor dari `.` dan `./collect` dan gagal pada global Node apa pun, dibuktikan dengan mutasi; `docs/RUNTIME.md` mencatat mana yang dieksekusi dan mana yang masih hanya argumen (belum ada bundler, browser, atau edge sungguhan) |
+| M5.1 | Matriks runtime: Node 22.13, Node 24, browser bundler, edge. Didukung atau tidak, dengan smoke test. Sebagian: CI punya tiga job Node (22.13.0, 22.x, 24.x) yang masing-masing menjalankan suite, build, dan smoke impor `dist/`; `src/core/runtime-surface.test.ts` menelusuri graf impor dari `.` dan `./collect` dan gagal pada global Node apa pun, dibuktikan dengan mutasi; `docs/RUNTIME.md` mencatat mana yang dieksekusi dan mana yang masih hanya argumen (belum ada bundler, browser, atau edge sungguhan) |
 | M5.2 | Retention dan erasure end-to-end di semua store dan di event log. Selesai untuk tiga store yang dikirim (`src/core/erasure.test.ts`): yang dilupakan tidak tersisa di hitungan penyimpanan, yang kedaluwarsa terhapus bukan disembunyikan, dan event keputusan tidak membawa identitas sehingga log tidak perlu dihapus (D69) |
 | M5.3 | Semver final, panduan migrasi, kebijakan deprecation |
 | M5.4 | 1.0.0, dengan halaman jaminan di situs |

@@ -76,6 +76,6 @@
     "typescript": "5.9.3"
   },
   "engines": {
-    "node": ">=22.6"
+    "node": ">=22.13"
   }
 }

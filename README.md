@@ -121,7 +121,7 @@ Named honestly, not hidden.
 - **Symptom vocabulary**: the two-tier structure is settled (D43) and the v0.1 wire format is in [PROTOCOL.md](PROTOCOL.md), with its degradation rules tested (D53), its cases in `protocol/fixtures/v0.1/`, and a reference receiver plus a batching sender in `examples/protocol/` (D70, D71). The library itself still transmits nothing: no import opens a socket, and the sender is an example rather than a default.
 - **Signal encoding**: the transmitted representation should be decodable *only* by the server, even though the library's source is public. Edges into one-way embeddings and server-issued transformation recipes. Research direction, not a resolved design.
 - **Cold start & sybil churn**: history-based trust is gamed by attackers who simply discard identities. Now measured rather than feared: the floor is one request per identity, at which point nothing accumulates at all. Two requests per identity and the guard engages.
-- **Root of trust**: explicitly outside the library. It accepts an entity reference as a basis for measurement, never as proof of identity. [docs/ROOT-OF-TRUST.md](docs/ROOT-OF-TRUST.md) states the rule and the measured price of every way to break it (D72): one changed key discards six observations of distrust, earning the same standing back costs 26 positives, and a per-request proof is the one thing a rotated key cannot erase.
+- **Root of trust**: explicitly outside the library. It accepts an entity reference as a basis for measurement, never as proof of identity. [docs/ROOT-OF-TRUST.md](docs/ROOT-OF-TRUST.md) states the rule and the measured price of every way to break it (D72): one changed key discards six observations of distrust, earning the same standing back costs 25 positives, and a per-request proof is the one thing a rotated key cannot erase.
 - **Poisoning resistance**: gradual baseline shifts where every individual step looks legitimate. Priced, not solved: [docs/POISONING.md](docs/POISONING.md) measures what patience buys (D73). A fresh identity is treated after three strong negatives, a constant-gap script stops buying tolerance at five however much it spends, and a script that removes the pacing tell buys one extra tolerated negative per 1.71 positives.
 - **Saturation / farming**: closed in generated traffic by D55, after two failed attempts at the decision layer. A positive is priced by the shape of the gaps it arrived in, so machine-regular volume accrues almost nothing; negatives are never discounted. Every farmer tested now pays on the first abuse call, and positive-only automation tops out at `OBSERVE`. Uncalibrated: the threshold is inherited from D36.
 - **Privacy/legal basis**: behavioral history is personal data under GDPR and Indonesia's UU PDP.
@@ -178,7 +178,7 @@ npm install github:Fachryxyf/scorpio-guard   # from source, builds on install
 the only way to get durable trust state on serverless, install from source until it
 is published.
 
-Node 22.6 or newer, ESM only. Four entry points: `.` for the model, `./collect` for
+Node 22.13 or newer, ESM only. Four entry points: `.` for the model, `./collect` for
 the browser collector, `./sqlite` for the single-host durable store, `./kv` for the
 networked one (unreleased): on one version number so they cannot be installed
 mismatched.
@@ -322,7 +322,7 @@ with what changing it means, generated from source at build time (D58).
 
 ## Development
 
-Requires Node 22.6 or newer, tests run TypeScript directly, with no build step.
+Requires Node 22.13 or newer, tests run TypeScript directly, with no build step.
 
 ```
 npm install

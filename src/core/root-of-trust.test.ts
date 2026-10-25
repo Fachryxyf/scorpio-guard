@@ -51,9 +51,19 @@ test('D72: one key change discards six observations of distrust', async () => {
 });
 
 test('D72: atonement costs more than rotation', async () => {
-  const guard = createGuard();
+  // The clock is the test, not the wall clock. On a real clock the gaps depend on how
+  // fast the machine runs, which turned this measurement into 26 on one Node version and
+  // 32 on another before the matrix caught it.
+  const clock = fakeClock();
+  const guard = createGuard({ clock });
+  let seed = 7;
+  const gap = () => {
+    seed = (seed * 1103515245 + 12345) % 2147483648;
+    return 20_000 + Math.floor((seed / 2147483648) * 400_000);
+  };
 
   for (let i = 0; i < 6; i += 1) {
+    clock.advance(gap() / HOUR);
     await guard.evaluate({ entity: 'client-a', observation: distrust });
   }
 
@@ -61,11 +71,12 @@ test('D72: atonement costs more than rotation', async () => {
   let assessed = await guard.evaluate({ entity: 'client-a' });
   while (assessed.decision !== 'ALLOW' && needed < 60) {
     needed += 1;
+    clock.advance(gap() / HOUR);
     assessed = await guard.evaluate({ entity: 'client-a', observation: trust });
   }
 
-  assert.equal(needed, 26, 'measured: 26 observations of good behavior, against one changed string');
-  assert.equal(Number(assessed.trust.mean.toFixed(3)), 0.803);
+  assert.equal(needed, 25, 'measured: 25 observations of good behavior, against one changed string');
+  assert.equal(Number(assessed.trust.mean.toFixed(3)), 0.801);
 });
 
 test('D72: a shared key hands one visitor history to every visitor', async () => {

@@ -86,7 +86,7 @@ Tagged in `package.json`, not yet published to npm. The registry has 0.1.0, and
 - `docs/ROOT-OF-TRUST.md`: the rule for deriving an entity key, the measured cost of every
   way to get it wrong, and a checklist. Six tests in `src/core/root-of-trust.test.ts` hold
   the numbers: one changed key discards six observations of distrust, earning the same
-  standing back costs 26 positives, a shared key hands one visitor history to everyone, and
+  standing back costs 25 positives, a shared key hands one visitor history to everyone, and
   a per-request proof is the one thing a rotated key cannot erase (D72).
 - Runtime matrix in CI: Node 22.6.0 (the floor in `engines`), 22.x, and 24.x each run the
   suite, the build, and a smoke import of `dist/`. `src/core/runtime-surface.test.ts` walks
