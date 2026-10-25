@@ -118,11 +118,57 @@ for (const document of DOCUMENTS) {
   }
 }
 
+// The prose quotes signal and symptom ids, and a wrong one is worse than a typo:
+// an unknown signal id is ignored at runtime, so the reader copies a line that
+// measures nothing and never finds out. The README sample quoted
+// SIG_BROAD_ENUMERATION, which no catalogue defines. Every id in a tracked
+// document now has to exist in src.
+function tracked(pattern) {
+  const run = spawnSync('git', pattern ? ['ls-files', pattern] : ['ls-files'], { encoding: 'utf8' });
+  if (run.status !== 0) return [];
+  return run.stdout.split('\n').filter(Boolean);
+}
+
+// The two files that define the vocabulary, and nothing else: test fixtures
+// deliberately quote ids that do not exist (SIG_NOT_IN_THE_CATALOGUE), and
+// reading all of src let those fixtures vouch for themselves.
+const catalogues = [
+  'src/core/signals.ts',
+  'src/core/symptoms.ts',
+];
+const vocabulary = new Set();
+for (const file of catalogues) {
+  let source = null;
+  try {
+    source = readFileSync(file, 'utf8');
+  } catch {
+    problems.push(file + ' is missing, so the vocabulary check cannot run');
+    continue;
+  }
+  for (const match of source.matchAll(/\b(SIG|SYM)_[A-Z0-9_]+\b/g)) {
+    vocabulary.add(match[0]);
+  }
+}
+if (vocabulary.size === 0) {
+  problems.push('src defines no signal or symptom ids, so the vocabulary check cannot run');
+}
+const markdown = tracked().filter(function (name) {
+  return name.endsWith('.md');
+});
+for (const file of markdown) {
+  const body = readFileSync(file, 'utf8');
+  for (const match of body.matchAll(/\b(SIG|SYM)_[A-Z0-9_]+\b/g)) {
+    if (!vocabulary.has(match[0])) {
+      problems.push(file + ':' + lineOf(body, match.index) + ' quotes ' + match[0] + ', which no catalogue defines');
+    }
+  }
+}
+
 if (problems.length > 0) {
   for (const problem of problems) console.error('check-docs: ' + problem);
   process.exit(1);
 }
 
 console.log(
-  'docs ok: ' + counted.pages + ' pages, ' + counted.decisions + ' decisions, ' + counted.tests + ' tests match every claim in the README',
+  'docs ok: ' + counted.pages + ' pages, ' + counted.decisions + ' decisions, ' + counted.tests + ' tests match every claim in the README, ' + vocabulary.size + ' signal and symptom ids resolve',
 );

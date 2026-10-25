@@ -13,6 +13,8 @@
 
 **Status: 0.2.0, pre-1.0, not on npm yet.** The npm account behind the package is suspended for 72 hours as of 2026-10-25, so publishing is blocked until roughly 2026-10-28; the registry still serves 0.1.0. [docs/RELEASING.md](docs/RELEASING.md) carries the blocker and the runbook, and the versions page carries the dates. The core model is built and tested, the package installs from its tarball, and the v0.1 protocol has fixtures, a reference receiver, and a batching sender. Three things still stand between this and 1.0.0: an independent security review, a 24 hour soak, and thresholds calibrated against a real traffic mix rather than the two lab runs recorded in [docs/DATASET.md](docs/DATASET.md). The claims a gate enforces today, the risks that are priced instead, and the size of each gap are on the [guarantees page](https://scorpio-guard.fachryxyf.com/guarantees.html), with the test or decision behind every row (D75). What follows is the design, and where the code has caught up to it.
 
+**In a hurry:** [Install](#install), [Usage](#usage), [docs/TESTING.md](docs/TESTING.md). The design below is why the code looks like that.
+
 ---
 
 ## The Premise
@@ -39,6 +41,7 @@ Scorpio Guard is **not** Turnstile or reCAPTCHA. There is no round trip to a cen
 - **One-way flow**: it evaluates and advises *within* your environment.
 - **Advisory only**: it never unilaterally blocks or rejects. Every action belongs to the owner of the system it runs in.
 - **No phoning home** per request. Raw traffic and history stay local.
+- **Built toward a shared protocol**: the vocabulary for symptoms and prescriptions is public and versioned, but nothing in this package talks to a server and no import opens a socket. The design is [at the end of this page](#open-protocol-not-a-proprietary-backend).
 
 Learning happens at the *project* level (slow, human-mediated, via issues and review), not at the *instance* level (fast, automatic, per-request).
 
@@ -82,6 +85,28 @@ The core design breakthrough: these are not blended into one score.
 
 Weak signals operate *around* the hard constraints, which relieves them of carrying full-precision weight alone. That is what lets the system use statistical signals without inheriting a false-positive problem.
 
+The two accept different shapes, which is the distinction in one screen:
+
+```ts
+const hard: Invariant = {
+  id: 'checkout-without-cart',
+  class: 'IMPOSSIBLE_ACTION_PREREQUISITE',
+  strength: 'hard',
+  scope: 'checkout',
+  holds: (o) => (o as { cartWasCheckedOut?: boolean }).cartWasCheckedOut !== false,
+};
+
+await guard.evaluate({
+  entity,
+  observation: { scope: 'checkout', signals: ['SIG_UNIFORM_DELAY_SHAPE'] },
+});
+```
+
+A hard constraint is a declaration the host makes and can defend, so it needs no
+history and no threshold. A weak signal has nothing to declare: it travels as
+measurement and can only add mass. [Usage](#usage) wires the whole call, including
+what the host does with the answer.
+
 The tell in a bot's randomized delay is rarely the delay itself: it is the **shape of the randomness**. Humans do not produce uniform distributions.
 
 Both lists are closed, and closed the same way: by enumerating what the guard can
@@ -102,17 +127,6 @@ Weak signals cannot escalate on their own, and that is arithmetic rather than
 intent. Tripping every signal in the catalogue at once contributes the mass of one
 weak observation, which leaves a fresh entity below the evidence threshold where the
 trust dimension is allowed to ask for anything at all.
-
-## Open Protocol, Not a Proprietary Backend
-
-An open-core split, with one important refinement.
-
-- **Open**: the library *and* the protocol: how a symptom is formatted, how a prescription is structured, the shared vocabulary.
-- **Closed**: the *rule content* of any given server implementation. Publishing exact thresholds hands attackers a fixed target to route around.
-
-The reference server is **one implementation**, not a structural requirement. Anyone, a company, another community, even a competitor, can run their own against the same protocol. Same shape as DNS, SMTP, ActivityPub, Let's Encrypt.
-
-This removes the single point of failure, lets compliance-sensitive adopters self-host, and reframes the project as a standard rather than a lock-in. The cost: the symptom vocabulary becomes a **public spec**, versioned, conservative, extensible, and load-bearing for everyone downstream.
 
 ## Open Problems
 
@@ -271,7 +285,7 @@ import { WEAK_SIGNALS } from '@fachryxyf/scorpio-guard';
 
 await guard.evaluate({
   entity: sessionId,
-  observation: { signals: ['SIG_UNIFORM_DELAY_SHAPE', 'SIG_BROAD_ENUMERATION'] },
+  observation: { signals: ['SIG_UNIFORM_DELAY_SHAPE', 'SIG_BREADTH_OF_TARGET'] },
 });
 ```
 
@@ -585,6 +599,24 @@ populations are not drawn from these distributions, and an attacker who reads th
 can shape traffic around it, so numbers derived here are hypotheses, never
 conclusions.
 
+### What it measured, without fixing
+
+- **Uniform jitter buys an attacker nothing.** Fixed-sleep and `uniform(1.2s, 2.3s)`
+  brute forces escalate at the same step, which is the design's own claim about the
+  shape of randomness surviving its counterexample.
+- **Identity churn works against accumulation, and proof ignores it.** Against
+  accumulated evidence the floor is two requests per identity, at one, nothing ever
+  accumulates. But where a violation is *provable*, churn buys nothing at all:
+  IXFE's endpoint-shooter is caught on request one, with no history, because a missing
+  `dwell` is a proof rather than a guess.
+- **A 404 is not a memory.** IXFE already answers correctly at every one of these
+  endpoints. What it cannot do is remember: the webhook forger can guess `external_id`
+  forever and each refusal is a discarded log line. Turning refusals into accumulating
+  evidence about the caller is the argument for the library, in a place where it is
+  checkable.
+- **Ten honest days buy about eleven abuse calls** before `RESTRICT`. That head start
+  is the price of having a memory; the bound is now asserted.
+
 ### What it falsified
 
 - **The `developing` stage ceiling was one rung too high.** Two mistyped PINs, and an
@@ -608,24 +640,6 @@ conclusions.
   *lower* a decision: so the gate is unobservable for exactly the entity it targeted.
   Measured: 300 uniform positives absorb **17** strong negatives before leaving
   `ALLOW`. The claim is withdrawn and farming is an open problem again.
-
-### What it measured, without fixing
-
-- **Uniform jitter buys an attacker nothing.** Fixed-sleep and `uniform(1.2s, 2.3s)`
-  brute forces escalate at the same step, which is the design's own claim about the
-  shape of randomness surviving its counterexample.
-- **Identity churn works against accumulation, and proof ignores it.** Against
-  accumulated evidence the floor is two requests per identity, at one, nothing ever
-  accumulates. But where a violation is *provable*, churn buys nothing at all:
-  IXFE's endpoint-shooter is caught on request one, with no history, because a missing
-  `dwell` is a proof rather than a guess.
-- **A 404 is not a memory.** IXFE already answers correctly at every one of these
-  endpoints. What it cannot do is remember: the webhook forger can guess `external_id`
-  forever and each refusal is a discarded log line. Turning refusals into accumulating
-  evidence about the caller is the argument for the library, in a place where it is
-  checkable.
-- **Ten honest days buy about eleven abuse calls** before `RESTRICT`. That head start
-  is the price of having a memory; the bound is now asserted.
 
 ## Roadmap
 
@@ -664,6 +678,17 @@ What remains needs real traffic, in order:
 4. Give each collector its false-positive story from real traffic before any of them earns a production threshold.
 5. Move the wire format to its own repository and build a server that speaks it.
 6. Only then: investigate encoding schemes for symptom transmission.
+
+## Open Protocol, Not a Proprietary Backend
+
+An open-core split, with one important refinement.
+
+- **Open**: the library *and* the protocol: how a symptom is formatted, how a prescription is structured, the shared vocabulary.
+- **Closed**: the *rule content* of any given server implementation. Publishing exact thresholds hands attackers a fixed target to route around.
+
+The reference server is **one implementation**, not a structural requirement. Anyone, a company, another community, even a competitor, can run their own against the same protocol. Same shape as DNS, SMTP, ActivityPub, Let's Encrypt.
+
+This removes the single point of failure, lets compliance-sensitive adopters self-host, and reframes the project as a standard rather than a lock-in. The cost: the symptom vocabulary becomes a **public spec**, versioned, conservative, extensible, and load-bearing for everyone downstream.
 
 ## Contributing
 
