@@ -17,7 +17,7 @@ the answer given, and what that answer commits the implementation to.
   policy; the tests are what make a policy change visible.
 
 Status: every numbered question is answered, the original thirty, plus D31 to
-D67 arising from review, implementation, a live pentest, and the traffic lab. Nothing is blocked on
+D68 arising from review, implementation, a live pentest, and the traffic lab. Nothing is blocked on
 a decision. What remains is validation: the values recorded here have not met real
 traffic yet, and D47 names where they will.
 
@@ -119,6 +119,7 @@ Last updated: 2026-10-25
 - [D65: The frozen fixture is how a treatment change becomes visible](#d65-the-frozen-fixture-is-how-a-treatment-change-becomes-visible)
 - [D66: A persona is a population, and a repetition is a different visitor](#d66-a-persona-is-a-population-and-a-repetition-is-a-different-visitor)
 - [D67: Anomaly is reported and does not decide, and the dataset says why](#d67-anomaly-is-reported-and-does-not-decide-and-the-dataset-says-why)
+- [D68: A 404 behind the site's own link is not evidence](#d68-a-404-behind-the-sites-own-link-is-not-evidence)
 
 **[Open questions](#open-questions)**
 
@@ -3754,3 +3755,69 @@ reading of the dataset, which lives in `docs/DATASET.md` finding F7, is reproduc
 report to the one claim this decision rests on: no anomaly threshold on the recorded
 traffic beats the shipped policy. It does not assert the individual scores, because a test
 that pinned them would freeze a number instead of the reasoning that put it there.
+
+## D68: A 404 behind the site's own link is not evidence
+
+### The hole
+
+H19, found by the traffic lab (finding F3 in `docs/DATASET.md`). `crawler` reached
+`OBSERVE` on talkhere.life and never on aufsicht.dev, and the difference was the build:
+TalkHere ships pages that link to paths it does not contain. The observer read those 404s
+as guesses at hidden paths, which is what a 404 means from any other client. So a site
+with dead links made every honest crawler look worse, and its operator would read the
+`OBSERVE` rate as a bot problem they do not have.
+
+The evidence rule is where it bit. A page view earns nothing, except a refusal, which is
+weak negative evidence because asking for a page that does not exist is the shape of a
+scanner walking a wordlist. That reasoning is right and incomplete: it assumes the
+visitor chose the path. A crawler that follows the site's own navigation did not.
+
+### The decision
+
+The observer records the paths the site linked, as it serves the documents, and a 404 for
+one of those paths earns nothing. Every other 404 is unchanged.
+
+The asymmetry is the point, not an oversight. This removes evidence only for paths the
+site itself published, in this run, in a document this proxy passed through. A visitor
+asking for `/.env` earns exactly what it earned before.
+
+### Limits
+
+- **Run-scoped.** Restarting the proxy forgets the links it learned, and the next stale
+  crawler pays for a 404 the site published in an earlier process. The failure mode is a
+  false negative, which is the side this library always errs on.
+- **Browser-rendered navigation is invisible.** Links assembled by JavaScript after the
+  document arrives never pass through the proxy, so those paths are not learned. A site
+  whose whole navigation is client-rendered gets nothing from this decision.
+- **Root-relative links only, in practice.** A relative `href` is normalized against the
+  root, which is wrong for a site that nests pages in directories. None of the lab's
+  targets do, and a host that does would need the document's own path in the link table.
+- **It is a rule about evidence, not about serving.** The 404 is still served, still
+  recorded, and still counted in the report. The record says `linkedNotFound` when a row
+  was excused, so a reader can disagree with the excuse.
+
+### Alternatives rejected
+
+**Stop treating page-view 404s as evidence at all.** That is D57's rule with the part that
+catches wordlist scanners removed. The lab has no scanner that only walks pages, so nothing
+would fail, and the signal that exists for a reason would be gone with no test to notice.
+A rule that cannot tell a crawler from a directory guess is a defence that stopped seeing
+the only thing it can see.
+
+**Trust `robots.txt` or a sitemap.** Both are published by the same party that published
+the dead links, both go stale, and both are often absent. The navigation the site actually
+served is a stronger statement of what it offered.
+
+**Read the site's build directory at proxy start.** It would cover the restart case and it
+would make the observer depend on a filesystem it does not own. The proxy sees documents,
+not builds, and the host that runs it decides what it can see.
+
+### Gates
+
+`examples/ixfe/live/proxy.test.ts`, two tests: a 404 for a linked path carries no evidence
+and does not move trust, and a 404 for an unlinked path still does both. Verified by
+mutation in both directions: removing the rule fails the linked case, and treating every
+404 as linked fails the unlinked case and D57's own test.
+
+`docs/DATASET.md` finding F3 states what the hole cost. The run recorded there predates
+this decision, so it still carries the false negative it caused; a later run should not.

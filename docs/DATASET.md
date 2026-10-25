@@ -107,6 +107,11 @@ look worse, and a site owner would read the `OBSERVE` rate as a bot problem they
 have. It is recorded as H19 in the roadmap, with the fix sketched: the observer already
 sees the pages it serves, so a 404 for a path those pages linked earns nothing.
 
+That fix now exists (M2.6, D68): the observer records the paths a site linked as it serves
+the documents, and a 404 behind one of them earns nothing. It was written after this run
+was recorded, so this run still carries the false negative it caused; a later run should
+not.
+
 #### F4. No legitimate visitor was ever given friction
 
 The uptime monitor made eight reads at exactly 700 ms intervals and was allowed every

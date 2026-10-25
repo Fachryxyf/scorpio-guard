@@ -9,7 +9,7 @@ proving it and stronger than nothing: it means every design claim either has a p
 in the suite that would notice a change, or a written explanation of why it cannot
 have one.
 
-Total: 70 decisions, 51 named by a test, 19 explained, 0 unexplained.
+Total: 71 decisions, 52 named by a test, 19 explained, 0 unexplained.
 
 | Decision | Title | Tests |
 |---|---|---|
@@ -64,6 +64,7 @@ Total: 70 decisions, 51 named by a test, 19 explained, 0 unexplained.
 | D61 | Reporting is a versioned event, and the entity reference is withheld | `src/core/event.test.ts` |
 | D62 | Fail-open requires a witness | `src/store/kv.test.ts` |
 | D67 | Anomaly is reported and does not decide, and the dataset says why | `examples/lab/report.test.ts` |
+| D68 | A 404 behind the site's own link is not evidence | `examples/ixfe/live/proxy.test.ts` |
 
 ## Prose only, with the reason
 

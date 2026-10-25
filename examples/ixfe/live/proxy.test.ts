@@ -338,3 +338,79 @@ test('D56: a truncated final line does not lose the records before it', () => {
   assert.equal(parsed.length, 1);
   assert.equal(quantile([], 0.5), undefined);
 });
+
+/**
+ * D68: a 404 behind a link the site published is the site's dead link, not evidence.
+ *
+ * The lab found this shape before the rule existed: a legitimate indexer followed the
+ * navigation a build offered, inherited that build's dead links, and was treated for
+ * it (docs/DATASET.md finding F3). The observer now learns the links as it serves the
+ * documents, so the same 404 reads differently depending on who published the path.
+ */
+test('D68: a 404 for a path the site linked is not evidence', async () => {
+  await withProxy(
+    (path) =>
+      path === '/'
+        ? {
+          status: 200,
+          body: '<html><a href="/pricing">pricing</a><a href="about">about</a></html>',
+          contentType: 'text/html; charset=utf-8',
+        }
+        : { status: 404, body: 'Not found', contentType: 'text/plain' },
+    async (base, records) => {
+      await (await fetch(`${base}/`)).text();
+      await sleep(20);
+      for (const path of ['/pricing', '/about']) {
+        await (await fetch(`${base}${path}`)).text();
+        await sleep(20);
+      }
+      await settle(records, 3);
+      assert.equal(records.length, 3);
+
+      const missed = records.filter(function (row) {
+        return row.status === 404;
+      });
+      assert.equal(missed.length, 2, 'both links should have been followed');
+      for (const row of missed) {
+        assert.equal(
+          row.linkedNotFound,
+          true,
+          row.path + ' was linked by the site and still counted against the visitor',
+        );
+        assert.equal(
+          row.observation.evidence,
+          undefined,
+          row.path + ' carried evidence it should not: the site offered that link',
+        );
+      }
+      assert.equal(records[2]?.mean, records[0]?.mean, 'a linked 404 moved trust');
+    },
+  );
+});
+
+test('D68: a 404 for a path the site never linked is still evidence', async () => {
+  await withProxy(
+    (path) =>
+      path === '/'
+        ? {
+          status: 200,
+          body: '<html><a href="/pricing">pricing</a></html>',
+          contentType: 'text/html; charset=utf-8',
+        }
+        : { status: 404, body: 'Not found', contentType: 'text/plain' },
+    async (base, records) => {
+      await (await fetch(`${base}/`)).text();
+      await sleep(20);
+      await (await fetch(`${base}/.env`)).text();
+      await sleep(20);
+      await settle(records, 2);
+
+      const last = records.at(-1);
+      assert.ok(last !== undefined);
+      assert.equal(last.path, '/.env');
+      assert.equal(last.linkedNotFound, false, 'the site never offered this path');
+      assert.deepEqual(last.observation.evidence, { negative: 'weak' });
+      assert.ok(last.mean < 0.5, `expected trust to fall, got ${last.mean}`);
+    },
+  );
+});

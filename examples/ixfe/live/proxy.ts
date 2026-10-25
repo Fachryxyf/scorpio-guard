@@ -87,6 +87,29 @@ export const HOST_DWELL_FLOOR_MS = 1500;
 /** Bodies are read only for the declared fields, and only this far. */
 const MAX_BODY_BYTES = 64 * 1024;
 
+/** Documents are read for their links, not stored: a page bigger than this is not parsed. */
+const MAX_HTML_BYTES = 512 * 1024;
+
+/**
+ * The paths a document offers, as paths. H19.
+ *
+ * Only root-relative and relative links are kept, and the fragment and query are
+ * dropped, because the question is which paths this site told a visitor about. What
+ * the visitor does with a link is their business; what the site promised is ours.
+ */
+function linksIn(html: string): string[] {
+  const found: string[] = [];
+  const pattern = /href\s*=\s*["']([^"'#?]+)/gi;
+  for (const match of html.matchAll(pattern)) {
+    const href = match[1];
+    if (href === undefined) continue;
+    if (href.startsWith('http://') || href.startsWith('https://')) continue;
+    if (href.startsWith('mailto:')) continue;
+    found.push(href.startsWith('/') ? href : '/' + href);
+  }
+  return found;
+}
+
 export type LiveRecord = {
   readonly at: number;
   readonly entity: string;
@@ -110,6 +133,14 @@ export type LiveRecord = {
    * positive.
    */
   readonly answeredWithDocument: boolean;
+  /**
+   * A 404 for a path the site itself linked. H19.
+   *
+   * Recorded rather than inferred, because the difference between a visitor probing
+   * and a visitor following a dead link is not visible in the request alone: it is
+   * visible in what this proxy served earlier in the same run.
+   */
+  readonly linkedNotFound?: boolean;
   readonly advice: string;
   readonly hardViolated: boolean;
   readonly violations: readonly string[];
@@ -230,6 +261,7 @@ function evidenceFor(
   status: number,
   answeredWithDocument: boolean,
   isPageView: (scope: string) => boolean,
+  offered: boolean,
 ): { positive?: 'weak'; negative?: 'weak' } | undefined {
   const refused =
     status === 401 || status === 403 || status === 404 || status === 410 || status === 429;
@@ -238,7 +270,15 @@ function evidenceFor(
   // asking for a page that does not exist is not nothing: it is the shape of a
   // scanner walking a wordlist. Asymmetric on purpose. The innocent cause is a stale
   // link or an old bookmark, which is why it is weak rather than declared.
-  if (isPageView(scope)) return refused ? { negative: 'weak' } : undefined;
+  //
+  // Unless the site itself published that link. A crawler that follows the site's own
+  // navigation is doing what it was invited to do, and a 404 behind such a link is the
+  // site's dead link rather than the visitor's probing (H19). The lab found the cost:
+  // a legitimate indexer inherited every dead link in a build and was treated for it.
+  if (isPageView(scope)) {
+    if (!refused) return undefined;
+    return offered ? undefined : { negative: 'weak' };
+  }
 
   if (status >= 200 && status < 300) {
     return answeredWithDocument ? { negative: 'weak' } : { positive: 'weak' };
@@ -302,6 +342,14 @@ export function createLiveProxy(options: ProxyOptions) {
       if (out) appendFileSync(out, `${JSON.stringify(record)}\n`);
     });
 
+  /**
+   * Every path this site linked, learned as the proxy serves the documents (H19).
+   *
+   * Run-scoped on purpose: a restart forgets the links and pays for it with a few
+   * false negatives rather than with false positives on a stale crawler.
+   */
+  const linked = new Set<string>();
+
   /** Opaque and stable per client, and useless outside this deployment. */
   function entityOf(req: IncomingMessage): string {
     const ip = String(req.headers['cf-connecting-ip'] ?? req.socket.remoteAddress ?? '');
@@ -347,11 +395,13 @@ export function createLiveProxy(options: ProxyOptions) {
       signals.push('SIG_SUBHUMAN_LATENCY');
     }
 
+    const offered = linked.has(input.path);
     const evidence = evidenceFor(
       input.scope,
       input.status,
       input.contentType.includes('text/html'),
       profile.isPageView,
+      offered,
     );
     const observation: Observation = {
       scope: input.scope,
@@ -375,6 +425,7 @@ export function createLiveProxy(options: ProxyOptions) {
       scope: input.scope,
       status: input.status,
       answeredWithDocument: !isPageView && input.contentType.includes('text/html'),
+      linkedNotFound: offered && input.status === 404,
       advice: assessment.decision,
       hardViolated: assessment.hardViolated,
       violations: assessment.violations.map((violation) => violation.invariant),
@@ -399,6 +450,9 @@ export function createLiveProxy(options: ProxyOptions) {
     // Bodies are only read where an invariant declares a field in them.
     const wantsBody = scope !== undefined && forms.includes(scope);
 
+    const htmlChunks: Buffer[] = [];
+    let htmlBytes = 0;
+
     const upstream = httpRequest(
       {
         protocol: origin.protocol,
@@ -411,6 +465,16 @@ export function createLiveProxy(options: ProxyOptions) {
       (originRes) => {
         originAnswered = true;
         originContentType = String(originRes.headers['content-type'] ?? '');
+        // Collected beside the pipe rather than instead of it, so the visitor waits for
+        // nothing while the proxy reads the navigation the site is offering.
+        if (originContentType.includes('text/html')) {
+          originRes.on('data', function (chunk: Buffer) {
+            if (htmlBytes <= MAX_HTML_BYTES) {
+              htmlBytes += chunk.length;
+              htmlChunks.push(chunk);
+            }
+          });
+        }
         res.writeHead(originRes.statusCode ?? 502, originRes.headers);
         originRes.pipe(res);
       },
@@ -443,6 +507,9 @@ export function createLiveProxy(options: ProxyOptions) {
     // real visitor and a throw cannot reach one.
     res.on('finish', () => {
       if (scope === undefined || !originAnswered) return;
+      if (Math.floor(res.statusCode / 100) === 2 && htmlChunks.length !== 0) {
+        for (const link of linksIn(Buffer.concat(htmlChunks).toString('utf8'))) linked.add(link);
+      }
       let body: unknown;
       if (wantsBody && bytes <= MAX_BODY_BYTES) {
         try { body = JSON.parse(Buffer.concat(chunks).toString('utf8')); } catch { body = undefined; }

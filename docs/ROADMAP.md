@@ -51,7 +51,7 @@ kalibrasi diulang dan halaman jaminan diperbarui.
 | Instrumen trafik nyata: proxy, browser, report | `examples/ixfe/live/`, D56, D57 |
 | Gate manifest dan lockfile | `scripts/check-manifest.mjs`, `npm run check:manifest` |
 
-Angka yang dipakai gate: 281 test, 70 keputusan, 10 halaman, 0 dependensi runtime,
+Angka yang dipakai gate: 283 test, 70 keputusan, 10 halaman, 0 dependensi runtime,
 versi terbit 0.1.0, versi di `main` 0.2.0.
 
 Belum ada sama sekali: server protokol, hook event keputusan, publish ke registry,
@@ -81,7 +81,7 @@ review keamanan.
 | H16 | API belum dibekukan. Tidak ada kebijakan deprecation atau panduan migrasi | 1.0 | M5.3 | semver policy dan panduan migrasi |
 | H17 | Klaim di `DECISIONS.md` tidak punya indeks ke test yang membuktikannya | MVP | M1.8 | indeks dibangkitkan, klaim tanpa target muncul sebagai daftar |
 | H18 | Tidak ada soak atau load test untuk sweep dan store | 1.0 | M4.4 | soak 24 jam dengan batas memori dan jumlah state |
-| H19 | 404 untuk path yang ditautkan build sendiri dibaca sebagai bukti negatif, jadi crawler sah mewarisi link mati situs. Ditemukan lab (F3 di `docs/DATASET.md`) | 1.0 | M2.6 | dua 404 identik: yang tertaut tidak menaikkan stage, yang tidak tertaut menaikkannya |
+| H19 | 404 untuk path yang ditautkan build sendiri dibaca sebagai bukti negatif, jadi crawler sah mewarisi link mati situs. Ditemukan lab (F3 di `docs/DATASET.md`) | 1.0 | M2.6 (D68) | dua 404 identik: yang tertaut tidak menaikkan stage, yang tidak tertaut menaikkannya |
 | H20 | Lab menjalankan satu kunjungan per persona, jadi persona yang memang pendek (skimmer, stale bookmark) tidak pernah punya cukup baris untuk dikalibrasi, dan repetisi dengan identitas sama akan menyatu jadi satu entity. Ditemukan penolakan M2.2 | MVP | M2.7 | persona dijalankan N kali sebagai N pengunjung berbeda, komposisinya tercatat di manifest |
 
 ---
@@ -234,7 +234,7 @@ yang cukup untuk memilih threshold:
 | M2.3 | Fixture beku: rekaman sesi lab disimpan sebagai fixture yang diputar di CI, sehingga perubahan model yang mengubah treatment muncul sebagai diff, bukan ditemukan di produksi |
 | M2.4 | Keputusan D baru: classifier atau konjungsi ambang yang memutuskan (D52), plus threshold terpilih, dengan komposisi dataset ditulis di samping angkanya |
 | M2.5 | Re-kalibrasi dengan campuran nyata begitu ada data produksi. Sampai itu ada, halaman jaminan menyebut batas ini secara eksplisit |
-| M2.6 | 404 yang tertaut bukan bukti (H19). Observer mencatat path yang pernah ia sajikan dari `<a href>` di HTML yang lewat, dan 404 untuk path itu tidak menambah bukti negatif |
+| M2.6 | 404 yang tertaut bukan bukti (H19). Observer mencatat path yang pernah ia sajikan dari `<a href>` di HTML yang lewat, dan 404 untuk path itu tidak menambah bukti negatif. Selesai: `linkedNotFound` di baris record, dua test di `examples/ixfe/live/proxy.test.ts`, diverifikasi dengan mutasi dua arah |
 | M2.7 | Persona sebagai populasi (H20). `--repeat=N` menjalankan tiap persona N kali sebagai pengunjung berbeda: identitas sendiri, seed sendiri, profil Chrome sendiri, dan label tetap di level persona (D66) |
 | M2.8 | Terbitkan angka FP/FN run lab di situs, dibangkitkan dari file run dan bukan diketik, supaya halaman jaminan menyebut komposisi dan batasnya. Selesai: `npm run report:lab` menulis `examples/lab/report.json`, halaman results membacanya, dan `examples/lab/report.test.ts` menolak laporan yang angkanya tidak berjumlah atau yang sel kirimnya bukan yang terbaik |
 
