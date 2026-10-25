@@ -127,6 +127,7 @@ Last updated: 2026-10-25
 - [D72: The entity key is issued by the host, and rotation is priced in the open](#d72-the-entity-key-is-issued-by-the-host-and-rotation-is-priced-in-the-open)
 - [D73: Patience is priced, not detected](#d73-patience-is-priced-not-detected)
 - [D74: The API surface is frozen from 0.2.0, and deprecation is a type rather than a log](#d74-the-api-surface-is-frozen-from-020-and-deprecation-is-a-type-rather-than-a-log)
+- [D75: The guarantee table is the artifact, and a risk moves only with a mechanism](#d75-the-guarantee-table-is-the-artifact-and-a-risk-moves-only-with-a-mechanism)
 
 **[Open questions](#open-questions)**
 
@@ -4208,3 +4209,60 @@ frozen recommendation is a guarantee the project cannot keep.
 `npm run check:api` against `api/v0.2.json`, in CI after the build. Verified by mutation:
 adding `export const zzzProbe = 1;` to `src/index.ts` fails with `. zzzProbe: added`, and
 removing it passes.
+
+---
+
+## D75: The guarantee table is the artifact, and a risk moves only with a mechanism
+
+### The hole
+
+M5.4 asks for a page that states what is guaranteed, which sounds like a writing task and is
+not. At 0.2.0 the honest answer is short and tangled with what is not guaranteed: the review
+is unscheduled, the thresholds are uncalibrated, and the poisoning and rotation results are
+prices rather than defences. A page that lists only strengths is marketing. A page that lists
+only debts sells nothing. Neither can be checked by the person reading it.
+
+### The decision
+
+The page carries two tables. The first lists every claim that something on every push
+enforces, with the decision or the file that holds it. The second lists every risk that has
+been measured, priced, or declared, with what closing it would take.
+
+The rule: **a row moves from the second table to the first only when a mechanism enforces it
+and a gate would fail without that mechanism.** A version number does not move a row, and
+neither does a paragraph. That is what stops 1.0.0 from being a claim about effort.
+
+The page is published at 0.2.0, before the release it describes, so that the promise is
+public while changing it is still cheap. The numbers on it are read from the repository at
+build time rather than typed, and `npm run check-docs` compares the README claims against the
+same render, so a stale number fails the build instead of ageing quietly.
+
+### Limits
+
+- **A row is only as good as its gate.** If a test stops covering the claim it is cited for,
+  the table keeps saying it is held. The security review in `docs/SECURITY-REVIEW.md` is the
+  place where that is meant to be noticed.
+- **Enforced by is a statement about a gate, not about every input.** The state bound holds
+  for the in-memory store and the soak profile, not for every host configuration.
+- **The second table ages.** A risk that gains a mechanism has to move, and the movement is
+  recorded here and in the CHANGELOG, not only on the page.
+- **The page cannot promise a population.** Nothing on it says the thresholds are right for
+  someone else traffic.
+
+### Alternatives rejected
+
+**Publish the page at 1.0.0 only.** The promises would arrive with the release, when changing
+them costs a version bump and nobody has had a chance to check them. Rejected.
+
+**One merged list with severity labels.** Reads as marketing, because a reader cannot tell a
+guarantee from an accepted risk without opening the code. Rejected.
+
+**Guarantee the thresholds.** Cannot: there is no real population, which is the whole reason
+1.0.0 is still ahead.
+
+### Gates
+
+`site/pages/guarantees.mjs` renders the page from facts the build reads (`version`, the test
+count), and `npm run check-docs` compares the README claims with that render. The same six
+risks are listed in `docs/SECURITY-REVIEW.md`, so a risk recorded in one place and missing in
+the other is visible in review.

@@ -44,6 +44,16 @@ Tagged in `package.json`, not yet published to npm. The registry has 0.1.0, and
   the release runbook with its current blocker.
 - A Versions chapter on the site: the state of the package, what each bump promises, the
   deprecation path, the upgrade deltas, and the API gate.
+- A guarantees chapter on the site: the claims a gate enforces today with the test or decision
+  that holds each one, the risks that are measured or priced instead of solved with what
+  closing each would take, the two lab runs with their composition, and the three proofs
+  1.0.0 waits for. The rule that a risk moves to the guarantee table only when a mechanism
+  enforces it is D75.
+- `docs/SECURITY-REVIEW.md`: the M4.3 packet, so the review is a list of things to break
+  rather than a request. It names five surfaces, the claim and the code behind each, attacks
+  worth trying, what would falsify each claim, the out of scope list with reasons, the six
+  accepted risks, the evidence commands, and the finding format. The sign-off is empty until
+  a reviewer who is not the author fills it.
 
 - Declared invariants in seven classes, closed over the kinds of proof a host can
   actually hold rather than over attack shapes, with per-class advice (D41).

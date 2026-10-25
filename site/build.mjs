@@ -27,6 +27,7 @@ import { results } from './pages/results.mjs';
 import { protocol } from './pages/protocol.mjs';
 import { versions } from './pages/versions.mjs';
 import { usage } from './pages/usage.mjs';
+import { guarantees } from './pages/guarantees.mjs';
 import { limits } from './pages/limits.mjs';
 import { coverage } from './pages/coverage.mjs';
 import { record } from './pages/record.mjs';
@@ -139,6 +140,7 @@ const pages = {
   'protocol.html': protocol,
   'versions.html': versions,
   'usage.html': usage,
+  'guarantees.html': guarantees,
   'limits.html': limits,
   'coverage.html': coverage,
   'record.html': record,

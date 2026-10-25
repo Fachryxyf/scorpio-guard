@@ -47,12 +47,12 @@ kalibrasi diulang dan halaman jaminan diperbarui.
 | Constraint: lima kelas, invariant dideklarasikan host | `src/core/constraints.ts`, D13, D41 |
 | Store: memory, sqlite, KV HTTP, conformance kit | `src/store/`, `src/core/conformance.ts`, D8, D44, D60 |
 | Collector browser | `src/collect/` |
-| Situs 10 halaman, dibangkitkan dari repo | `site/`, `npm run site:check` |
+| Situs 12 halaman, dibangkitkan dari repo | `site/`, `npm run site:check` |
 | Instrumen trafik nyata: proxy, browser, report | `examples/ixfe/live/`, D56, D57 |
 | Protokol v0.1: fixture, receiver referensi, sender batching | `protocol/fixtures/v0.1/`, `examples/protocol/`, D70, D71 |
 | Gate manifest dan lockfile | `scripts/check-manifest.mjs`, `npm run check:manifest` |
 
-Angka yang dipakai gate: 356 test, 77 keputusan, 11 halaman, 0 dependensi runtime,
+Angka yang dipakai gate: 356 test, 78 keputusan, 12 halaman, 0 dependensi runtime,
 versi terbit 0.1.0, versi di `main` 0.2.0.
 
 Belum ada sama sekali: hook event keputusan yang dipakai host lain, publish ke
@@ -188,7 +188,7 @@ yang mengujinya. Klaim tanpa target dicetak sebagai daftar yang harus dijawab di
 Status: selesai. `docs/CLAIMS.md` dibangkitkan, `docs/CLAIMS-NOTES.md` memuat alasan
 tertulis, dan gate gagal kalau ada keputusan tanpa test dan tanpa alasan, atau kalau
 alasan masih tersisa untuk keputusan yang sudah punya test. Keadaan sekarang: 77
-keputusan, 56 dinamai test, 21 beralasan, 0 tanpa alasan.
+keputusan, 56 dinamai test, 22 beralasan, 0 tanpa alasan.
 
 ### Exit criteria MVP
 
@@ -318,6 +318,11 @@ run pendek yang tercatat, tetapi soak 24 jam yang sesungguhnya belum dijalankan.
 sama sekali: M4.3 review keamanan, yang butuh peninjau di luar penulis. Selama ketiganya
 belum lengkap, exit M4 belum lulus dan 1.0.0 tetap ditahan.
 
+Status M5: M5.1 sebagian, M5.2 dan M5.3 selesai (D69, D74), M5.4 sebagian dengan halaman
+jaminan yang sudah terbit tetapi rilis 1.0.0 yang belum. Paket review M4.3 sudah ada di
+`docs/SECURITY-REVIEW.md`, dan itu memindahkan pekerjaan yang tersisa dari penulisan ke
+satu orang di luar proyek yang mau mengerjakannya.
+
 ### M5, pembekuan dan 1.0.0
 
 | Task | Isi |
@@ -325,7 +330,7 @@ belum lengkap, exit M4 belum lulus dan 1.0.0 tetap ditahan.
 | M5.1 | Matriks runtime: Node 22.13, Node 24, browser bundler, edge. Didukung atau tidak, dengan smoke test. Sebagian: CI punya tiga job Node (22.13.0, 22.x, 24.x) yang masing-masing menjalankan suite, build, dan smoke impor `dist/`; `src/core/runtime-surface.test.ts` menelusuri graf impor dari `.` dan `./collect` dan gagal pada global Node apa pun, dibuktikan dengan mutasi; `docs/RUNTIME.md` mencatat mana yang dieksekusi dan mana yang masih hanya argumen (belum ada bundler, browser, atau edge sungguhan) |
 | M5.2 | Retention dan erasure end-to-end di semua store dan di event log. Selesai untuk tiga store yang dikirim (`src/core/erasure.test.ts`): yang dilupakan tidak tersisa di hitungan penyimpanan, yang kedaluwarsa terhapus bukan disembunyikan, dan event keputusan tidak membawa identitas sehingga log tidak perlu dihapus (D69) |
 | M5.3 | Semver final, panduan migrasi, kebijakan deprecation. Selesai: `docs/SEMVER.md` (aturan patch/minor/major, deprecation tanpa peringatan runtime, tipe sebagai bagian permukaan), `docs/MIGRATION.md` (0.1.0 ke 0.2.0 diukur terhadap tarball terbit: tujuh nama ditambahkan di akar, entri `./kv` dengan delapan nama, nol penghapusan, nol perubahan jenis, delapan perubahan saran, state tanpa langkah migrasi), `docs/RELEASING.md` (runbook dan penghambat publikasi), `npm run check:api` dengan 140 nama di `api/v0.2.json`, dan halaman Versi di situs (D74) |
-| M5.4 | 1.0.0, dengan halaman jaminan di situs |
+| M5.4 | 1.0.0, dengan halaman jaminan di situs. Sebagian: halaman jaminan sudah terbit (`guarantees.html`, D75) berisi tabel klaim yang ditegakkan gate tiap push, tabel risiko yang diukur atau diberi harga beserta biaya menutupnya, angka dua run lab dengan komposisinya, dan tiga bukti yang ditunggu 1.0.0. Yang tersisa adalah rilisnya, dan rilis itu menunggu tiga bukti yang sama |
 
 Status: M5.1 sebagian (matriks Node dan batas portabilitas sudah jadi, browser dan edge masih argumen), M5.2 dan M5.3 selesai (D69, D74). M5.4 menunggu tiga bukti 1.0.0: review keamanan independen, soak 24 jam, dan kalibrasi dari trafik nyata. Publikasi 0.2.0 juga tertahan suspend akun npm 72 jam per 2026-10-25.
 
