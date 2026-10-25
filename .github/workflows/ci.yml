@@ -59,6 +59,15 @@ jobs:
       - name: Verify an evaluation is still within the recorded budget
         run: npm run bench
 
+      # Short soaks, not the 24 hour run. They fail if state escapes its cap, if p99
+      # leaves the budget, or if retained memory keeps climbing after warmup. The long
+      # run is M4.4 and is recorded in docs/SOAK.md rather than in CI.
+      - name: Soak a fixed pool of visitors
+        run: npm run soak -- --seconds=20 --entities=200 --sweep-every=64
+
+      - name: Soak a stream of fresh references against the entity cap
+        run: npm run soak:flood -- --seconds=20 --max-entities=200 --sweep-every=64
+
   # The gate the registry readers care about: what a stranger gets, installed.
   pack-and-install:
     runs-on: ubuntu-latest

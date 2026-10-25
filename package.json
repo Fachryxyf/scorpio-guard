@@ -65,6 +65,8 @@
     "check:claims": "node scripts/claim-index.mjs --check",
     "claims": "node scripts/claim-index.mjs",
     "bench": "node --experimental-strip-types scripts/bench.mjs",
+    "soak": "node --expose-gc --experimental-strip-types scripts/soak.mjs",
+    "soak:flood": "node --expose-gc --experimental-strip-types scripts/soak.mjs --profile=flood",
     "pack:check": "node scripts/pack-check.mjs"
   },
   "devDependencies": {

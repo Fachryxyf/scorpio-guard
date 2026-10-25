@@ -88,6 +88,10 @@ Tagged in `package.json`, not yet published to npm. The registry has 0.1.0, and
   the numbers: one changed key discards six observations of distrust, earning the same
   standing back costs 26 positives, a shared key hands one visitor history to everyone, and
   a per-request proof is the one thing a rotated key cannot erase (D72).
+- `npm run soak` and `npm run soak:flood`: a fixed pool and a stream of fresh references
+  against the entity cap, with the same three checks locally and in CI (state under the cap,
+  p99 under 5 ms, retained RSS after warmup). Five short runs are recorded in `docs/SOAK.md`
+  and the 24 hour run is not one of them, so M4.4 stays open.
 - `npm run poison` and `docs/POISONING.md`: the price of a patient attacker, measured.
   A constant-gap script stops buying tolerance at five negatives no matter how many
   positives it spends; a jittered script buys one extra tolerated negative per 1.71

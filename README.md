@@ -11,7 +11,7 @@
 
 > **Trust is a spectrum, not a verdict.** Adaptive trust evaluation for web interactions, a local library, not a centralized gatekeeper.
 
-**Status: pre-alpha, implementation phase.** The core model is built and tested; nothing is calibrated against real traffic, and no server or protocol exists yet. What follows is the design, and where the code has caught up to it.
+**Status: 0.2.0, pre-1.0.** The core model is built and tested, the package installs from its tarball, and the v0.1 protocol has fixtures, a reference receiver, and a batching sender. Three things still stand between this and 1.0.0: an independent security review, a 24 hour soak, and thresholds calibrated against a real traffic mix rather than the two lab runs recorded in [docs/DATASET.md](docs/DATASET.md). What follows is the design, and where the code has caught up to it.
 
 ---
 
@@ -336,6 +336,11 @@ npm run site      # build the documentation site into site/dist (gitignored)
 npm run typecheck
 npm run build     # emits dist/
 npm run bench     # evaluation cost per store, checked against bench/budget.json
+npm run soak      # bounded state and memory under a fixed pool (docs/SOAK.md)
+npm run soak:flood  # the same checks while every request mints a fresh reference
+npm run poison    # what patience buys an attacker, priced (docs/POISONING.md)
+npm run protocol:serve  # the reference receiver for the v0.1 wire format
+npm run protocol:check  # both implementations against the fixtures, plus HTTP behaviour
 npm run pack:check            # pack, inspect, install the tarball somewhere empty
 npm run claims    # regenerate docs/CLAIMS.md from DECISIONS.md and the tests
 npm run check:manifest        # manifest and lockfile must agree

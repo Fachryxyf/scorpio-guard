@@ -308,14 +308,15 @@ memindahkan fixture ke repo terpisah.
 | M4.1 | Root of trust: panduan entity key, plus test yang membuktikan apa yang tidak dilindungi. Selesai: `docs/ROOT-OF-TRUST.md` memuat aturan, tabel biaya, dan checklist; `src/core/root-of-trust.test.ts` enam test mengukur biaya rotasi (satu perubahan kunci membatalkan enam observasi kecurigaan), biaya menebus (26 observasi positif), kunci bersama, sepuluh kunci, retensi sebagai rotasi, dan bukti per-request yang tidak bisa dirotasi (D72) |
 | M4.2 | Poisoning: eksperimen biaya penyerang dibanding waktu deteksi, lalu mitigasi yang diuji. Selesai: `npm run poison` mencetak dua belas baris dan `examples/poison/experiment.test.ts` mengunci empat di antaranya; skrip bergap konstan berhenti di lima negatif berapa pun yang dibelanjakan, skrip bergap jitter membeli satu negatif tambahan per 1,71 positif, dan mematikan diskon D55 membuat kedua pola itu identik (D73) |
 | M4.3 | Review keamanan terarah: adapter failure, poisoning, entity key, DoS, integrasi host |
-| M4.4 | Soak 24 jam: memori, GC, sweep, jumlah state |
+| M4.4 | Soak 24 jam: memori, GC, sweep, jumlah state. Sebagian: `scripts/soak.mjs` punya dua profil (pengunjung tetap dan banjir referensi), tiga cek yang sama di lokal dan CI (state di bawah cap, p99 di bawah 5 ms, RSS setelah warmup), dan lima run tercatat di `docs/SOAK.md`. Soak 24 jam yang sesungguhnya belum dijalankan, jadi M4.4 tetap terbuka |
 
 Exit: laporan review ada, dan tidak ada temuan kritis yang terbuka tanpa alasan
 tertulis.
 
-Status: M4.1 dan M4.2 selesai (D72, D73). Yang belum: M4.3 review keamanan, yang butuh
-peninjau di luar penulis, dan M4.4 soak 24 jam, yang butuh jam sungguhan. Selama keduanya
-belum ada, exit M4 belum lulus dan 1.0.0 tetap ditahan.
+Status: M4.1 dan M4.2 selesai (D72, D73). M4.4 sudah punya harness, dua profil, dan lima
+run pendek yang tercatat, tetapi soak 24 jam yang sesungguhnya belum dijalankan. Yang belum
+sama sekali: M4.3 review keamanan, yang butuh peninjau di luar penulis. Selama ketiganya
+belum lengkap, exit M4 belum lulus dan 1.0.0 tetap ditahan.
 
 ### M5, pembekuan dan 1.0.0
 
