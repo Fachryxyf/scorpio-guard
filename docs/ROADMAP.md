@@ -52,7 +52,7 @@ kalibrasi diulang dan halaman jaminan diperbarui.
 | Protokol v0.1: fixture, receiver referensi, sender batching | `protocol/fixtures/v0.1/`, `examples/protocol/`, D70, D71 |
 | Gate manifest dan lockfile | `scripts/check-manifest.mjs`, `npm run check:manifest` |
 
-Angka yang dipakai gate: 353 test, 76 keputusan, 10 halaman, 0 dependensi runtime,
+Angka yang dipakai gate: 356 test, 76 keputusan, 10 halaman, 0 dependensi runtime,
 versi terbit 0.1.0, versi di `main` 0.2.0.
 
 Belum ada sama sekali: hook event keputusan yang dipakai host lain, publish ke
@@ -322,7 +322,7 @@ belum lengkap, exit M4 belum lulus dan 1.0.0 tetap ditahan.
 
 | Task | Isi |
 |---|---|
-| M5.1 | Matriks runtime: Node 22.6, Node 24, browser bundler, edge. Didukung atau tidak, dengan smoke test |
+| M5.1 | Matriks runtime: Node 22.6, Node 24, browser bundler, edge. Didukung atau tidak, dengan smoke test. Sebagian: CI punya tiga job Node (22.6.0, 22.x, 24.x) yang masing-masing menjalankan suite, build, dan smoke impor `dist/`; `src/core/runtime-surface.test.ts` menelusuri graf impor dari `.` dan `./collect` dan gagal pada global Node apa pun, dibuktikan dengan mutasi; `docs/RUNTIME.md` mencatat mana yang dieksekusi dan mana yang masih hanya argumen (belum ada bundler, browser, atau edge sungguhan) |
 | M5.2 | Retention dan erasure end-to-end di semua store dan di event log. Selesai untuk tiga store yang dikirim (`src/core/erasure.test.ts`): yang dilupakan tidak tersisa di hitungan penyimpanan, yang kedaluwarsa terhapus bukan disembunyikan, dan event keputusan tidak membawa identitas sehingga log tidak perlu dihapus (D69) |
 | M5.3 | Semver final, panduan migrasi, kebijakan deprecation |
 | M5.4 | 1.0.0, dengan halaman jaminan di situs |

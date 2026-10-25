@@ -88,6 +88,11 @@ Tagged in `package.json`, not yet published to npm. The registry has 0.1.0, and
   the numbers: one changed key discards six observations of distrust, earning the same
   standing back costs 26 positives, a shared key hands one visitor history to everyone, and
   a per-request proof is the one thing a rotated key cannot erase (D72).
+- Runtime matrix in CI: Node 22.6.0 (the floor in `engines`), 22.x, and 24.x each run the
+  suite, the build, and a smoke import of `dist/`. `src/core/runtime-surface.test.ts` walks
+  the import graph from `.` and `./collect` and fails on any Node-only global, verified by
+  mutation, and `docs/RUNTIME.md` records which targets are executed and which are still
+  only argued.
 - `npm run soak` and `npm run soak:flood`: a fixed pool and a stream of fresh references
   against the entity cap, with the same three checks locally and in CI (state under the cap,
   p99 under 5 ms, retained RSS after warmup). Five short runs are recorded in `docs/SOAK.md`
