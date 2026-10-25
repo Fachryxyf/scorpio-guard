@@ -83,6 +83,16 @@ Tagged in `package.json`, not yet published to npm. The registry has 0.1.0, and
   minute per transport address, and a 64 KiB body limit (D71).
 - `npm run protocol:serve` starts the reference receiver. The package still transmits
   nothing on its own: no import opens a socket.
+- `docs/ROOT-OF-TRUST.md`: the rule for deriving an entity key, the measured cost of every
+  way to get it wrong, and a checklist. Six tests in `src/core/root-of-trust.test.ts` hold
+  the numbers: one changed key discards six observations of distrust, earning the same
+  standing back costs 26 positives, a shared key hands one visitor history to everyone, and
+  a per-request proof is the one thing a rotated key cannot erase (D72).
+- `npm run poison` and `docs/POISONING.md`: the price of a patient attacker, measured.
+  A constant-gap script stops buying tolerance at five negatives no matter how many
+  positives it spends; a jittered script buys one extra tolerated negative per 1.71
+  positives; turning the regular-gap discount off makes the two identical, which is how the
+  discount is shown to be the mechanism. Four rows are asserted (D73).
 
 ### Changed
 

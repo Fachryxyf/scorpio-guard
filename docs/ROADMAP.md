@@ -52,7 +52,7 @@ kalibrasi diulang dan halaman jaminan diperbarui.
 | Protokol v0.1: fixture, receiver referensi, sender batching | `protocol/fixtures/v0.1/`, `examples/protocol/`, D70, D71 |
 | Gate manifest dan lockfile | `scripts/check-manifest.mjs`, `npm run check:manifest` |
 
-Angka yang dipakai gate: 342 test, 74 keputusan, 10 halaman, 0 dependensi runtime,
+Angka yang dipakai gate: 353 test, 76 keputusan, 10 halaman, 0 dependensi runtime,
 versi terbit 0.1.0, versi di `main` 0.2.0.
 
 Belum ada sama sekali: hook event keputusan yang dipakai host lain, publish ke
@@ -187,8 +187,8 @@ yang mengujinya. Klaim tanpa target dicetak sebagai daftar yang harus dijawab di
 
 Status: selesai. `docs/CLAIMS.md` dibangkitkan, `docs/CLAIMS-NOTES.md` memuat alasan
 tertulis, dan gate gagal kalau ada keputusan tanpa test dan tanpa alasan, atau kalau
-alasan masih tersisa untuk keputusan yang sudah punya test. Keadaan sekarang: 74
-keputusan, 54 dinamai test, 20 beralasan, 0 tanpa alasan.
+alasan masih tersisa untuk keputusan yang sudah punya test. Keadaan sekarang: 76
+keputusan, 56 dinamai test, 20 beralasan, 0 tanpa alasan.
 
 ### Exit criteria MVP
 
@@ -305,13 +305,17 @@ memindahkan fixture ke repo terpisah.
 
 | Task | Isi |
 |---|---|
-| M4.1 | Root of trust: panduan entity key, plus test yang membuktikan apa yang tidak dilindungi |
-| M4.2 | Poisoning: eksperimen biaya penyerang dibanding waktu deteksi, lalu mitigasi yang diuji |
+| M4.1 | Root of trust: panduan entity key, plus test yang membuktikan apa yang tidak dilindungi. Selesai: `docs/ROOT-OF-TRUST.md` memuat aturan, tabel biaya, dan checklist; `src/core/root-of-trust.test.ts` enam test mengukur biaya rotasi (satu perubahan kunci membatalkan enam observasi kecurigaan), biaya menebus (26 observasi positif), kunci bersama, sepuluh kunci, retensi sebagai rotasi, dan bukti per-request yang tidak bisa dirotasi (D72) |
+| M4.2 | Poisoning: eksperimen biaya penyerang dibanding waktu deteksi, lalu mitigasi yang diuji. Selesai: `npm run poison` mencetak dua belas baris dan `examples/poison/experiment.test.ts` mengunci empat di antaranya; skrip bergap konstan berhenti di lima negatif berapa pun yang dibelanjakan, skrip bergap jitter membeli satu negatif tambahan per 1,71 positif, dan mematikan diskon D55 membuat kedua pola itu identik (D73) |
 | M4.3 | Review keamanan terarah: adapter failure, poisoning, entity key, DoS, integrasi host |
 | M4.4 | Soak 24 jam: memori, GC, sweep, jumlah state |
 
 Exit: laporan review ada, dan tidak ada temuan kritis yang terbuka tanpa alasan
 tertulis.
+
+Status: M4.1 dan M4.2 selesai (D72, D73). Yang belum: M4.3 review keamanan, yang butuh
+peninjau di luar penulis, dan M4.4 soak 24 jam, yang butuh jam sungguhan. Selama keduanya
+belum ada, exit M4 belum lulus dan 1.0.0 tetap ditahan.
 
 ### M5, pembekuan dan 1.0.0
 

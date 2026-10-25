@@ -9,12 +9,12 @@ proving it and stronger than nothing: it means every design claim either has a p
 in the suite that would notice a change, or a written explanation of why it cannot
 have one.
 
-Total: 74 decisions, 54 named by a test, 20 explained, 0 unexplained.
+Total: 76 decisions, 56 named by a test, 20 explained, 0 unexplained.
 
 | Decision | Title | Tests |
 |---|---|---|
-| D1 | Entity is the fundamental reference unit | `src/core/erasure.test.ts`, `src/core/store.test.ts`, +2 |
-| D1.1 | Root of trust is outside SG | `examples/healthme/replay.test.ts` |
+| D1 | Entity is the fundamental reference unit | `src/core/erasure.test.ts`, `src/core/root-of-trust.test.ts`, +3 |
+| D1.1 | Root of trust is outside SG | `src/core/root-of-trust.test.ts`, `examples/healthme/replay.test.ts` |
 | D1.2 | Data deletion is a requirement | `src/core/erasure.test.ts` |
 | D2 | One trust state per entity, not per entity-endpoint | `src/core/guard.test.ts`, `src/core/trust.test.ts` |
 | D2a | Trust is stored as a distribution, read as a number | `src/core/trust.test.ts` |
@@ -67,6 +67,8 @@ Total: 74 decisions, 54 named by a test, 20 explained, 0 unexplained.
 | D67 | Anomaly is reported and does not decide, and the dataset says why | `examples/lab/report.test.ts` |
 | D68 | A 404 behind the site's own link is not evidence | `examples/ixfe/live/proxy.test.ts` |
 | D69 | Erasure is proved by counting what is underneath | `src/core/erasure.test.ts` |
+| D72 | The entity key is issued by the host, and rotation is priced in the open | `src/core/root-of-trust.test.ts` |
+| D73 | Patience is priced, not detected | `examples/poison/experiment.test.ts` |
 
 ## Prose only, with the reason
 

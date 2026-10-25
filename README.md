@@ -118,11 +118,11 @@ This removes the single point of failure, lets compliance-sensitive adopters sel
 
 Named honestly, not hidden.
 
-- **Symptom vocabulary**: the two-tier structure is settled (D43) and the v0.1 wire format is now drafted in [PROTOCOL.md](PROTOCOL.md) with its degradation rules tested (D53). What remains is a server: nothing has been round-tripped, because nothing transmits.
+- **Symptom vocabulary**: the two-tier structure is settled (D43) and the v0.1 wire format is in [PROTOCOL.md](PROTOCOL.md), with its degradation rules tested (D53), its cases in `protocol/fixtures/v0.1/`, and a reference receiver plus a batching sender in `examples/protocol/` (D70, D71). The library itself still transmits nothing: no import opens a socket, and the sender is an example rather than a default.
 - **Signal encoding**: the transmitted representation should be decodable *only* by the server, even though the library's source is public. Edges into one-way embeddings and server-issued transformation recipes. Research direction, not a resolved design.
 - **Cold start & sybil churn**: history-based trust is gamed by attackers who simply discard identities. Now measured rather than feared: the floor is one request per identity, at which point nothing accumulates at all. Two requests per identity and the guard engages.
-- **Root of trust**: explicitly outside the library. It accepts an entity reference as a basis for measurement, never as proof of identity. If the host supplies a reference that is cheap to discard, every history-based defence goes with it: and that is the host's responsibility, not the library's.
-- **Poisoning resistance**: gradual baseline shifts where every individual step looks legitimate. Bounded, not solved: ten honest days buy roughly eleven abuse calls before `RESTRICT`.
+- **Root of trust**: explicitly outside the library. It accepts an entity reference as a basis for measurement, never as proof of identity. [docs/ROOT-OF-TRUST.md](docs/ROOT-OF-TRUST.md) states the rule and the measured price of every way to break it (D72): one changed key discards six observations of distrust, earning the same standing back costs 26 positives, and a per-request proof is the one thing a rotated key cannot erase.
+- **Poisoning resistance**: gradual baseline shifts where every individual step looks legitimate. Priced, not solved: [docs/POISONING.md](docs/POISONING.md) measures what patience buys (D73). A fresh identity is treated after three strong negatives, a constant-gap script stops buying tolerance at five however much it spends, and a script that removes the pacing tell buys one extra tolerated negative per 1.71 positives.
 - **Saturation / farming**: closed in generated traffic by D55, after two failed attempts at the decision layer. A positive is priced by the shape of the gaps it arrived in, so machine-regular volume accrues almost nothing; negatives are never discounted. Every farmer tested now pays on the first abuse call, and positive-only automation tops out at `OBSERVE`. Uncalibrated: the threshold is inherited from D36.
 - **Privacy/legal basis**: behavioral history is personal data under GDPR and Indonesia's UU PDP.
 - **Sequencing**: is a durable public protocol worth designing *before* a proof-of-concept exists?
@@ -425,7 +425,7 @@ stays reported and does not decide (D67). Both runs are frozen into
 `examples/lab/fixtures/` and replayed on every push, so a change that moves any decision
 fails CI rather than being found in production (D65).
 
-Three hundred and forty-two tests, which double as the record of every numeric and
+Three hundred and fifty-three tests, which double as the record of every numeric and
 semantic property the design depends on. [docs/CLAIMS.md](docs/CLAIMS.md) maps each
 design decision to the test that names it, and lists the ones that are still prose
 only, generated rather than maintained by hand.
