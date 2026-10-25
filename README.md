@@ -189,6 +189,11 @@ the browser collector, `./sqlite` for the single-host durable store, `./kv` for 
 networked one (unreleased): on one version number so they cannot be installed
 mismatched.
 
+A first integration is written out as a checklist in [docs/TESTING.md](docs/TESTING.md):
+the four parts an integration has, the two mistakes that make results meaningless (the
+entity key and the scope granularity), the decision journal that makes calibration
+possible later, and what to send back when the advice looks wrong.
+
 ## Usage
 
 Start observational. The guard advises; it never acts. Record what it would have
