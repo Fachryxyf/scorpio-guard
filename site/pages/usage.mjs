@@ -41,13 +41,18 @@ export function usage(data) {
       <thead><tr><th></th><th></th></tr></thead>
       <tbody>
         <tr><th>npm</th><td><code>@fachryxyf/scorpio-guard</code> &middot; 0.1.0 &middot; MIT</td></tr>
-        <tr><th>Node</th><td>&ge; 22.6 &middot; ESM &middot; ${t('zero runtime dependencies', 'tanpa dependensi runtime')}</td></tr>
+        <tr><th>Node</th><td>&ge; 22.13 &middot; ESM &middot; ${t('zero runtime dependencies', 'tanpa dependensi runtime')}</td></tr>
         <tr><th>.</th><td>${t('the model', 'modelnya')}</td></tr>
         <tr><th>./collect</th><td>${t('the browser collector', 'collector peramban')}</td></tr>
         <tr><th>./sqlite</th><td>${t('durable store over node:sqlite, one host', 'store tahan restart di atas node:sqlite, satu host')}</td></tr>
         <tr><th>./kv</th><td>${t('networked store over HTTP, for serverless, unreleased', 'store jaringan lewat HTTP, untuk serverless, belum dirilis')}</td></tr>
       </tbody>
     </table>
+
+    <p class="tnote">${t(
+      'The registry serves 0.1.0. 0.2.0 is tagged on main and not published yet, because the npm account is suspended for 72 hours as of 2026-10-25; the dates are on the <a href="versions.html">Versions page</a>.',
+      'Registry melayani 0.1.0. 0.2.0 sudah ditandai di main dan belum terbit, karena akun npm disuspend 72 jam per 2026-10-25; tanggalnya ada di <a href="versions.html">halaman Versi</a>.',
+    )}</p>
 
     ${h2(2, 'quickstart', 'Quickstart', 'Mulai cepat')}
 

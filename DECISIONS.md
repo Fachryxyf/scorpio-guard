@@ -17,7 +17,7 @@ the answer given, and what that answer commits the implementation to.
   policy; the tests are what make a policy change visible.
 
 Status: every numbered question is answered, the original thirty, plus D31 to
-D73 arising from review, implementation, a live pentest, the traffic lab, the protocol
+D74 arising from review, implementation, a live pentest, the traffic lab, the protocol
 work, and the hardening review. Nothing is blocked on a decision. What remains is
 validation: the values recorded here have not met real traffic yet, and D47 names where
 they will.
@@ -126,6 +126,7 @@ Last updated: 2026-10-25
 - [D71: The protocol transmits on a sender schedule, and the server keeps aggregates](#d71-the-protocol-transmits-on-a-sender-schedule-and-the-server-keeps-aggregates)
 - [D72: The entity key is issued by the host, and rotation is priced in the open](#d72-the-entity-key-is-issued-by-the-host-and-rotation-is-priced-in-the-open)
 - [D73: Patience is priced, not detected](#d73-patience-is-priced-not-detected)
+- [D74: The API surface is frozen from 0.2.0, and deprecation is a type rather than a log](#d74-the-api-surface-is-frozen-from-020-and-deprecation-is-a-type-rather-than-a-log)
 
 **[Open questions](#open-questions)**
 
@@ -4131,3 +4132,79 @@ including the discount-off row that fails if the default flips.
 `examples/poison/experiment.test.ts`: five tests over `examples/poison/experiment.ts`, the
 same code `npm run poison` prints. Verified by mutation: defaulting
 `discountRegularPositives` to `false` fails two of them.
+
+---
+
+## D74: The API surface is frozen from 0.2.0, and deprecation is a type rather than a log
+
+### The hole
+
+H16. The CHANGELOG carried the rule that a behaviour change is an API change, and nothing
+enforced it. A name could be removed in a patch and no gate would notice. There was no
+deprecation path, so the only way to retire a name was to delete it and let the adopter find
+out from a stack trace. And \"1.0.0 freezes the API\" described an act nobody had started, which
+is the kind of sentence that turns into a scramble in the release week.
+
+### The decision
+
+The exported surface of every entry point is recorded in `api/v0.2.json` and compared against
+the built declarations on every push. As of 0.2.0 that is 140 names: 102 in `.`, 27 in
+`./collect`, 8 in `./kv`, 3 in `./sqlite`.
+
+The bumps:
+
+- **patch**: API unchanged, advice unchanged for the same input and the same stored state;
+- **minor**: additions only, no removals and no kind changes, and the advice may change as
+  long as every change is recorded in CHANGELOG with a before and after;
+- **major**: removals, kind changes, a protocol major, a change to the decision vocabulary.
+
+Two choices are deliberate. A behaviour change stays a minor, because a library that exists
+to give advice cannot freeze the advice without freezing the product; what a minor promises
+is that the change is written where an adopter finds it. Removals are major even in 0.x,
+which is stricter than semver asks, because otherwise a 0.x user cannot upgrade without
+reading the source, and this project would rather pay for the promise than for the support.
+
+Deprecation: `@deprecated` in the JSDoc with the replacement and the version that deprecated
+it, at least one minor release of life, removal in a major, and **no runtime warnings**. A
+dependency that writes to the host standard output or error stream gets removed from
+production, so the deprecation is visible in the editor, the types, the CHANGELOG, and the
+API diff instead. Types count: removing a field from an exported type is a removal.
+
+`docs/MIGRATION.md` carries 0.1.0 to 0.2.0, measured against the published tarball rather
+than remembered: seven names added to the root entry, the `./kv` entry added with eight,
+zero removals, zero kind changes, plus the eight advice changes an adopter can feel and the
+statement that stored state needs no migration. `docs/RELEASING.md` carries the runbook and
+the current publish blocker, which is an npm account suspension, not a gate.
+
+### Limits
+
+- **Names and kinds, not members.** Narrowing a field in an exported type is visible in the
+  declaration diff and invisible to this check. That review is a person reading the diff, and
+  the snapshot is not a substitute.
+- **It says nothing about behaviour.** Behavioural compatibility is the CHANGELOG rule and the
+  migration guide; the gate cannot see a decision that changed for the same input.
+- **It reads whatever was built.** Run `npm run build` first. CI orders it correctly; locally it
+  is an instruction, and a stale `dist/` would pass falsely.
+- **The snapshot can be rewritten.** It is a file, and someone with commit access can update
+  it. That is why the rule is that the same commit moves the CHANGELOG; the gate makes the act
+  visible, not impossible.
+
+### Alternatives rejected
+
+**Allow removals in 0.x minors, as semver does.** Legal, and it makes every 0.x upgrade a
+small audit. Rejected in favour of the promise, since the gate made it cheap.
+
+**Emit runtime deprecation warnings.** The cleanest signal for the developer is also the
+rudest behaviour in someone else process. Rejected.
+
+**Hash the full structural type surface.** Would fail on refactors that do not change the
+contract and would be maintained by disabling it. Names and kinds, plus review.
+
+**Freeze the advice at 1.0.0.** Contradicts calibration: the numbers are still moving, and a
+frozen recommendation is a guarantee the project cannot keep.
+
+### Gates
+
+`npm run check:api` against `api/v0.2.json`, in CI after the build. Verified by mutation:
+adding `export const zzzProbe = 1;` to `src/index.ts` fails with `. zzzProbe: added`, and
+removing it passes.

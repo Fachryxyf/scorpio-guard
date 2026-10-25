@@ -85,6 +85,12 @@ jobs:
       - name: Verify an evaluation is still within the recorded budget
         run: npm run bench
 
+      # The API freeze, M5.3: api/v0.2.json is the contract. A new export, a removal, or a
+      # value that became a type fails here until the snapshot is rewritten on purpose in
+      # a commit that also moves the CHANGELOG.
+      - name: Verify the frozen API surface
+        run: npm run check:api
+
       # Short soaks, not the 24 hour run. They fail if state escapes its cap, if p99
       # leaves the budget, or if retained memory keeps climbing after warmup. The long
       # run is M4.4 and is recorded in docs/SOAK.md rather than in CI.

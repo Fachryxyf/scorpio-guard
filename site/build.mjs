@@ -25,6 +25,7 @@ import { model } from './pages/model.mjs';
 import { evidence } from './pages/evidence.mjs';
 import { results } from './pages/results.mjs';
 import { protocol } from './pages/protocol.mjs';
+import { versions } from './pages/versions.mjs';
 import { usage } from './pages/usage.mjs';
 import { limits } from './pages/limits.mjs';
 import { coverage } from './pages/coverage.mjs';
@@ -136,6 +137,7 @@ const pages = {
   'evidence.html': evidence,
   'results.html': results,
   'protocol.html': protocol,
+  'versions.html': versions,
   'usage.html': usage,
   'limits.html': limits,
   'coverage.html': coverage,

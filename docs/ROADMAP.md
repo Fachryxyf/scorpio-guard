@@ -52,7 +52,7 @@ kalibrasi diulang dan halaman jaminan diperbarui.
 | Protokol v0.1: fixture, receiver referensi, sender batching | `protocol/fixtures/v0.1/`, `examples/protocol/`, D70, D71 |
 | Gate manifest dan lockfile | `scripts/check-manifest.mjs`, `npm run check:manifest` |
 
-Angka yang dipakai gate: 356 test, 76 keputusan, 10 halaman, 0 dependensi runtime,
+Angka yang dipakai gate: 356 test, 77 keputusan, 11 halaman, 0 dependensi runtime,
 versi terbit 0.1.0, versi di `main` 0.2.0.
 
 Belum ada sama sekali: hook event keputusan yang dipakai host lain, publish ke
@@ -79,7 +79,7 @@ registry, review keamanan, dan pengirim protokol dari luar repo ini.
 | H13 | Belum ada review keamanan terarah. Test fungsional bukan audit (T7) | 1.0 | M4.3 | laporan, temuan ditutup atau dinyatakan terbuka |
 | H14 | Browser, edge, dan runtime lain belum diuji. Node floor 22.13 belum jadi positioning (T6) | 1.0 | M5.1 | matriks runtime dan smoke per target |
 | H15 | Retention dan erasure belum dibuktikan end-to-end di semua store dan di event log (D1.2, D22) | 1.0 | M5.2 (D69) | test: satu entity dilupakan, tidak ada sisa di store maupun log |
-| H16 | API belum dibekukan. Tidak ada kebijakan deprecation atau panduan migrasi | 1.0 | M5.3 | semver policy dan panduan migrasi |
+| H16 | API belum dibekukan. Tidak ada kebijakan deprecation atau panduan migrasi | 1.0 | M5.3 (D74) | semver policy dan panduan migrasi |
 | H17 | Klaim di `DECISIONS.md` tidak punya indeks ke test yang membuktikannya | MVP | M1.8 | indeks dibangkitkan, klaim tanpa target muncul sebagai daftar |
 | H18 | Tidak ada soak atau load test untuk sweep dan store | 1.0 | M4.4 | soak 24 jam dengan batas memori dan jumlah state |
 | H19 | 404 untuk path yang ditautkan build sendiri dibaca sebagai bukti negatif, jadi crawler sah mewarisi link mati situs. Ditemukan lab (F3 di `docs/DATASET.md`) | 1.0 | M2.6 (D68) | dua 404 identik: yang tertaut tidak menaikkan stage, yang tidak tertaut menaikkannya |
@@ -187,8 +187,8 @@ yang mengujinya. Klaim tanpa target dicetak sebagai daftar yang harus dijawab di
 
 Status: selesai. `docs/CLAIMS.md` dibangkitkan, `docs/CLAIMS-NOTES.md` memuat alasan
 tertulis, dan gate gagal kalau ada keputusan tanpa test dan tanpa alasan, atau kalau
-alasan masih tersisa untuk keputusan yang sudah punya test. Keadaan sekarang: 76
-keputusan, 56 dinamai test, 20 beralasan, 0 tanpa alasan.
+alasan masih tersisa untuk keputusan yang sudah punya test. Keadaan sekarang: 77
+keputusan, 56 dinamai test, 21 beralasan, 0 tanpa alasan.
 
 ### Exit criteria MVP
 
@@ -324,8 +324,10 @@ belum lengkap, exit M4 belum lulus dan 1.0.0 tetap ditahan.
 |---|---|
 | M5.1 | Matriks runtime: Node 22.13, Node 24, browser bundler, edge. Didukung atau tidak, dengan smoke test. Sebagian: CI punya tiga job Node (22.13.0, 22.x, 24.x) yang masing-masing menjalankan suite, build, dan smoke impor `dist/`; `src/core/runtime-surface.test.ts` menelusuri graf impor dari `.` dan `./collect` dan gagal pada global Node apa pun, dibuktikan dengan mutasi; `docs/RUNTIME.md` mencatat mana yang dieksekusi dan mana yang masih hanya argumen (belum ada bundler, browser, atau edge sungguhan) |
 | M5.2 | Retention dan erasure end-to-end di semua store dan di event log. Selesai untuk tiga store yang dikirim (`src/core/erasure.test.ts`): yang dilupakan tidak tersisa di hitungan penyimpanan, yang kedaluwarsa terhapus bukan disembunyikan, dan event keputusan tidak membawa identitas sehingga log tidak perlu dihapus (D69) |
-| M5.3 | Semver final, panduan migrasi, kebijakan deprecation |
+| M5.3 | Semver final, panduan migrasi, kebijakan deprecation. Selesai: `docs/SEMVER.md` (aturan patch/minor/major, deprecation tanpa peringatan runtime, tipe sebagai bagian permukaan), `docs/MIGRATION.md` (0.1.0 ke 0.2.0 diukur terhadap tarball terbit: tujuh nama ditambahkan di akar, entri `./kv` dengan delapan nama, nol penghapusan, nol perubahan jenis, delapan perubahan saran, state tanpa langkah migrasi), `docs/RELEASING.md` (runbook dan penghambat publikasi), `npm run check:api` dengan 140 nama di `api/v0.2.json`, dan halaman Versi di situs (D74) |
 | M5.4 | 1.0.0, dengan halaman jaminan di situs |
+
+Status: M5.1 sebagian (matriks Node dan batas portabilitas sudah jadi, browser dan edge masih argumen), M5.2 dan M5.3 selesai (D69, D74). M5.4 menunggu tiga bukti 1.0.0: review keamanan independen, soak 24 jam, dan kalibrasi dari trafik nyata. Publikasi 0.2.0 juga tertahan suspend akun npm 72 jam per 2026-10-25.
 
 Exit: 1.0.0 terbit. Situs punya halaman "apa yang dijamin" dan "apa yang tidak",
 berisi angka kalibrasi beserta komposisi dataset, bukan daftar fitur.

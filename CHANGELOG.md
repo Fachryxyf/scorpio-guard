@@ -20,11 +20,30 @@ signature moved. The rules are therefore narrower than semver's default reading:
 
 ## [0.2.0] - unreleased
 
+### Release status
+
+Tagged on `main`, not published. The npm account behind the package is suspended for 72
+hours as of 2026-10-25, which blocks publishing until roughly 2026-10-28. This is an
+account problem, not a gate: every check in the runbook is green. `docs/RELEASING.md`
+carries the runbook and this blocker, and the versions page on the site carries the dated
+note. Both are removed in the commit that publishes.
+
+
+
 Tagged in `package.json`, not yet published to npm. The registry has 0.1.0, and
 0.1.0 is not what this repository now contains. Release gates:
 `npm run check:manifest`, `npm run check:docs`, `npm run pack:check`, `npm run bench`.
 
 ### Added
+
+- The API surface is recorded and frozen in `api/v0.2.json`, 140 exported names across four
+  entry points, checked by `npm run check:api` with the TypeScript checker. Additions,
+  removals, and kind changes all fail until the snapshot is rewritten on purpose (D74).
+- `docs/SEMVER.md`, `docs/MIGRATION.md`, and `docs/RELEASING.md`: the version policy, the
+  0.1.0 to 0.2.0 guide measured against the published tarball rather than remembered, and
+  the release runbook with its current blocker.
+- A Versions chapter on the site: the state of the package, what each bump promises, the
+  deprecation path, the upgrade deltas, and the API gate.
 
 - Declared invariants in seven classes, closed over the kinds of proof a host can
   actually hold rather than over attack shapes, with per-class advice (D41).

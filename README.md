@@ -11,7 +11,7 @@
 
 > **Trust is a spectrum, not a verdict.** Adaptive trust evaluation for web interactions, a local library, not a centralized gatekeeper.
 
-**Status: 0.2.0, pre-1.0.** The core model is built and tested, the package installs from its tarball, and the v0.1 protocol has fixtures, a reference receiver, and a batching sender. Three things still stand between this and 1.0.0: an independent security review, a 24 hour soak, and thresholds calibrated against a real traffic mix rather than the two lab runs recorded in [docs/DATASET.md](docs/DATASET.md). What follows is the design, and where the code has caught up to it.
+**Status: 0.2.0, pre-1.0, not on npm yet.** The npm account behind the package is suspended for 72 hours as of 2026-10-25, so publishing is blocked until roughly 2026-10-28; the registry still serves 0.1.0. [docs/RELEASING.md](docs/RELEASING.md) carries the blocker and the runbook, and the versions page carries the dates.  The core model is built and tested, the package installs from its tarball, and the v0.1 protocol has fixtures, a reference receiver, and a batching sender. Three things still stand between this and 1.0.0: an independent security review, a 24 hour soak, and thresholds calibrated against a real traffic mix rather than the two lab runs recorded in [docs/DATASET.md](docs/DATASET.md). What follows is the design, and where the code has caught up to it.
 
 ---
 
@@ -174,9 +174,15 @@ npm install @fachryxyf/scorpio-guard@0.1.0   # recommended
 npm install github:Fachryxyf/scorpio-guard   # from source, builds on install
 ```
 
-`0.2.0` is on `main` and unreleased. It adds the networked KV store (D60), which is
-the only way to get durable trust state on serverless, install from source until it
-is published.
+`0.2.0` is tagged on `main` and blocked from publishing by the account suspension
+above, not by a gate. It adds the networked KV store (D60), the only way to get
+durable trust state on serverless, so install from source until it is published.
+
+The version policy is in [docs/SEMVER.md](docs/SEMVER.md): a patch keeps the advice, a
+minor may move it and records every move, and a removal is always a major. The upgrade
+from 0.1.0 is [docs/MIGRATION.md](docs/MIGRATION.md), measured against the published
+tarball: the API only gained names, and the advice changes are listed with what they
+replace. The surface is held by the API check against `api/v0.2.json`, decided in D74.
 
 Node 22.13 or newer, ESM only. Four entry points: `.` for the model, `./collect` for
 the browser collector, `./sqlite` for the single-host durable store, `./kv` for the
@@ -343,6 +349,8 @@ npm run protocol:serve  # the reference receiver for the v0.1 wire format
 npm run protocol:check  # both implementations against the fixtures, plus HTTP behaviour
 npm run pack:check            # pack, inspect, install the tarball somewhere empty
 npm run claims    # regenerate docs/CLAIMS.md from DECISIONS.md and the tests
+npm run api       # record or rewrite the frozen API surface (api/v0.2.json)
+npm run check:api # the built declarations must match the frozen surface
 npm run check:manifest        # manifest and lockfile must agree
 npm run check:docs            # numbers in the README must match the rendered site
 npm run check:claims          # docs/CLAIMS.md must not be stale
