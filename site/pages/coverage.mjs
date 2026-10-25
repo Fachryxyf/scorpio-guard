@@ -73,7 +73,7 @@ export function coverage(data) {
 
     <div class="scroll">
     <table>
-      <caption>${t(`All ${all.length} personas, both targets`, `Semua ${all.length} persona, dua target`)}</caption>
+      <caption>${t(`All ${all.length} personas, both targets, recorded while their sites were up`, `Semua ${all.length} persona, dua target, direkam saat situsnya masih hidup`)}</caption>
       <thead><tr><th>${t('Persona', 'Persona')}</th><th>${t('Kind', 'Jenis')}</th><th>${t('Worst advice', 'Saran terburuk')}</th><th class="num">${t('Steps', 'Langkah')}</th><th>FP?</th><th>${t('Walked?', 'Lolos?')}</th></tr></thead>
       <tbody>
 ${all.map(personaRow).join('\n')}

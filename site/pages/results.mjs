@@ -297,8 +297,8 @@ ${personaRows(replay.healthme.personas)}
 
     ${live ? `
     <p>${t(
-      `Ten clients drove a real Chrome through the observing proxy against IXFE's live origin. ${live.summary.total} requests, ${live.summary.entities} entities, ${live.summary.scored} with a measurable window. ${live.summary.hardViolations} hard violations, all from missing dwell time on direct API calls. ${live.summary.falsePositiveCandidates} false-positive candidates.`,
-      `Sepuluh klien menggerakkan Chrome sungguhan lewat proxy observasi ke origin IXFE. ${live.summary.total} request, ${live.summary.entities} entitas, ${live.summary.scored} dengan window terukur. ${live.summary.hardViolations} pelanggaran hard, semuanya dari dwell time yang hilang pada panggilan API langsung. ${live.summary.falsePositiveCandidates} kandidat false positive.`,
+      `Ten clients drove a real Chrome through the observing proxy against IXFE's live origin, while it still answered. ${live.summary.total} requests, ${live.summary.entities} entities, ${live.summary.scored} with a measurable window. ${live.summary.hardViolations} hard violations, all from missing dwell time on direct API calls. ${live.summary.falsePositiveCandidates} false-positive candidates. The origin is offline today, so this is a record and not a run anyone can repeat.`,
+      `Sepuluh klien menggerakkan Chrome sungguhan lewat proxy observasi ke origin IXFE, saat origin itu masih menjawab. ${live.summary.total} request, ${live.summary.entities} entitas, ${live.summary.scored} dengan window terukur. ${live.summary.hardViolations} pelanggaran hard, semuanya dari dwell time yang hilang pada panggilan API langsung. ${live.summary.falsePositiveCandidates} kandidat false positive. Origin-nya sekarang mati, jadi ini catatan dan bukan run yang bisa diulang.`,
     )}</p>
 
     <figure>
