@@ -13,6 +13,12 @@
  * The clock can be accelerated, so retention and sweeps happen inside a run that lasts
  * minutes. That is stated plainly in docs/SOAK.md: an accelerated run is a test of the
  * cap and the sweep, not a 24 hour memory claim.
+ *
+ * For a run that is meant to be a memory claim, pace it. `--pace-ms=500` sleeps between
+ * iterations so the wall clock is the thing being measured, and `--accel-ms` says how much
+ * simulated time each request stands for. A 24 hour run at 500ms pace and 5000ms
+ * acceleration is a day of wall clock and ten days of simulated retention, and the two
+ * numbers are reported separately because they are not the same claim.
  */
 import { createGuard, memoryStore } from '../src/index.ts';
 import { sqliteStore } from '../src/store/sqlite.ts';
@@ -34,6 +40,8 @@ const profile = flag('profile', 'steady');
 const kind = flag('store', 'memory');
 const maxEntities = Number(flag('max-entities', String(pool)));
 const sweepEvery = Number(flag('sweep-every', '512'));
+const paceMs = Number(flag('pace-ms', '0'));
+const sampleEvery = Number(flag('sample-every', '2000'));
 const asJson = process.argv.includes('--json');
 
 let simulated = 0;
@@ -94,8 +102,9 @@ while (Date.now() - started < seconds * 1000) {
 
   simulated += accelMs;
   iterations += 1;
+  if (paceMs > 0) await new Promise((resolve) => setTimeout(resolve, paceMs));
 
-  if (iterations % 2000 === 0 && memory.length < MEMORY_SAMPLES) {
+  if (iterations % sampleEvery === 0 && memory.length < MEMORY_SAMPLES) {
     // Retained memory, not garbage waiting for a lazy collection. Run with --expose-gc.
     globalThis.gc?.();
     const used = process.memoryUsage();
@@ -119,11 +128,31 @@ const last = memory[memory.length - 1] ?? first;
 const warmup = memory[Math.floor(memory.length / 10)] ?? first;
 const dbBytes = kind === 'sqlite' ? statSync(dbPath).size : 0;
 
+/**
+ * A leak is a trend, not an absolute number. The absolute check above answers whether the
+ * process is under a budget; this one answers whether it is still climbing after warmup,
+ * which a run of a few minutes cannot show and a run of a day can. Medians of the first and
+ * last third survive the sawtooth of collection without smoothing it away.
+ */
+function median(values) {
+  const sorted = [...values].sort((a, b) => a - b);
+  const middle = Math.floor(sorted.length / 2);
+  return sorted.length % 2 === 0 ? (sorted[middle - 1] + sorted[middle]) / 2 : sorted[middle];
+}
+
+const trendSamples = memory.length >= 30 ? Math.floor(memory.length / 3) : 0;
+const firstThirdMb = trendSamples === 0 ? 0 : median(memory.slice(0, trendSamples).map((sample) => sample.rssMb));
+const lastThirdMb = trendSamples === 0 ? 0 : median(memory.slice(-trendSamples).map((sample) => sample.rssMb));
+const trendLimitMb = firstThirdMb * 1.25 + 10;
+
 const report = {
   profile,
   store: kind,
   seconds,
   accelMs,
+  paceMs,
+  sampleEvery,
+  simulatedSeconds: Math.round(simulated / 1000),
   iterations,
   requestsPerSecond: Math.round(iterations / ((Date.now() - started) / 1000)),
   p50: percentile(50),
@@ -133,6 +162,9 @@ const report = {
   rssEndMb: Number(last.rssMb.toFixed(1)),
   rssWarmupMb: Number(warmup.rssMb.toFixed(1)),
   rssGrowthMb: Number((last.rssMb - warmup.rssMb).toFixed(1)),
+  rssFirstThirdMb: Number(firstThirdMb.toFixed(1)),
+  rssLastThirdMb: Number(lastThirdMb.toFixed(1)),
+  rssTrendSamples: trendSamples,
   heapStartMb: Number(first.heapMb.toFixed(1)),
   heapEndMb: Number(last.heapMb.toFixed(1)),
   heapGrowthMb: Number((last.heapMb - warmup.heapMb).toFixed(1)),
@@ -150,6 +182,13 @@ const checks = [
   { name: 'p99 under 5ms', ok: report.p99 < 5, detail: report.p99 + 'ms' },
   { name: 'rss growth after warmup under 100MB', ok: report.rssGrowthMb < 100, detail: report.rssGrowthMb + 'MB' },
 ];
+if (trendSamples !== 0) {
+  checks.push({
+    name: 'rss does not trend up across the run',
+    ok: lastThirdMb <= trendLimitMb,
+    detail: 'first third ' + firstThirdMb.toFixed(1) + 'MB, last third ' + lastThirdMb.toFixed(1) + 'MB, limit ' + trendLimitMb.toFixed(1) + 'MB',
+  });
+}
 
 if (asJson) {
   console.log(JSON.stringify({ report, checks }, null, 2));
@@ -157,10 +196,13 @@ if (asJson) {
   console.log('profile ' + profile + ' store ' + kind + ' for ' + seconds + 's');
   console.log('  iterations    ' + report.iterations + ' (' + report.requestsPerSecond + '/s)');
   console.log('  latency       p50 ' + report.p50 + 'ms, p95 ' + report.p95 + 'ms, p99 ' + report.p99 + 'ms');
+  if (paceMs > 0) console.log('  pacing        ' + paceMs + 'ms per iteration, ' + report.simulatedSeconds + 's simulated');
   console.log('  rss           ' + report.rssStartMb + 'MB start, ' + report.rssWarmupMb + 'MB warm, ' + report.rssEndMb + 'MB end');
   console.log('  state         ' + report.finalEntities + ' final, ' + report.peakEntities + ' peak, cap ' + cap);
   console.log('  heap          ' + report.heapStartMb + 'MB start, ' + report.heapEndMb + 'MB end' + (report.gcAvailable ? ' (forced gc before each sample)' : ' (run with --expose-gc for retained memory)'));
   if (kind === 'sqlite') console.log('  db            ' + (report.dbBytes / 1e6).toFixed(1) + 'MB');
+  if (trendSamples !== 0) console.log('  rss trend     ' + firstThirdMb.toFixed(1) + 'MB first third, ' + lastThirdMb.toFixed(1) + 'MB last third');
+  else console.log('  rss trend     not measured (' + memory.length + ' samples, needs 30)');
   for (const check of checks) console.log('  ' + (check.ok ? 'ok  ' : 'FAIL') + ' ' + check.name + ' (' + check.detail + ')');
 }
 

@@ -25,7 +25,15 @@ holds is to run traffic that tries to break it while watching three numbers:
 
 Flags: `--seconds`, `--entities`, `--store=memory|sqlite`, `--max-entities`, `--sweep-every`,
 `--accel-ms` (simulated milliseconds per request, so retention and sweeps fire inside a
-short run), `--json`.
+short run), `--pace-ms` (wall clock milliseconds to sleep between requests, default 0, which
+is the stress profile), `--sample-every` (iterations between retained memory samples, default
+2000), `--json`.
+
+Pacing and acceleration answer different questions and are reported separately. An unpaced
+run measures what the code costs per request; a paced run measures what a day of traffic does
+to the process. A 24 hour run at `--pace-ms=500` and `--accel-ms=5000` is one day of wall
+clock and ten days of simulated retention, and it says both numbers rather than choosing one
+to sound better.
 
 Each run exits non-zero if any check fails. The checks are the same in the local runs below
 and in CI:
@@ -35,6 +43,7 @@ and in CI:
 | State stays under the cap | `maxEntities + sweepEvery` for flood, the pool size for steady |
 | p99 | under 5 ms |
 | Retained RSS after warmup | growth under 100 MB |
+| Retained RSS trend across the run | last third median within 25 percent of the first third plus 10 MB, measured only when there are 30 samples or more |
 
 Memory is sampled with a forced collection (`--expose-gc`), so the number is the retained
 set rather than garbage waiting for a lazy sweep. Without the flag the script prints a note
@@ -78,14 +87,51 @@ a 1012 allowance is the amortised sweep overshooting by design, which is why the
   figures are a capacity claim.
 - **The clock is accelerated.** Retention expiry is real in these runs because the simulated
   clock advances per request, but idle behaviour (a process with no traffic) is untested.
+- **The p99 budget is a memory store budget.** It was set on the in memory profile, and
+  sqlite meets it only while its writes batch: 2.552 ms p99 at 2.6k evaluations per second
+  unpaced, and 5.229 ms p99 at a 10 ms pace, where every write waits for its own sync. The
+  paced number is the honest one for a quiet server, and it is above the budget. It is
+  recorded rather than smoothed, and the check is read with the store named.
 
 ## The 24 hour run
+
+The commands this document carried before 2026-10-25 were unpaced:
 
 ```
 npm run soak -- --seconds=86400 --entities=5000 --store=sqlite
 npm run soak:flood -- --seconds=86400 --max-entities=5000
 ```
 
-Both write nothing outside `var/`, and both print the same three checks. The run counts for
-M4.4 when the output is committed to this document, with the machine named and the day.
-Until then the task is open.
+They are wrong for the question, and saying why is more useful than deleting them. Unpaced,
+the sqlite profile does about 2.6k evaluations per second on this machine, which is roughly
+224 million writes across a day. That is a disk endurance test wearing a memory test label,
+and it would report the wear as a result. Pacing is not a softer version of the same run; it
+is the only version where the wall clock is the thing being measured.
+
+What is running now, started 2026-10-25T03:35:59Z on an Intel Core i5-5350U, Node 22.16.0,
+darwin x86_64:
+
+```
+node --expose-gc --experimental-strip-types scripts/soak.mjs \
+  --seconds=86400 --entities=500 --max-entities=2000 --sweep-every=512 \
+  --sample-every=2000 --pace-ms=500 --accel-ms=5000 --json
+```
+
+That is one day of wall clock, ten days of simulated retention, 172,800 evaluations, and 86
+retained memory samples. The four checks are the ones in the table above, including the trend
+check, which is the one that needs a day to mean anything.
+
+The sqlite companion is the next thing on the same machine, not a concurrent run, because two
+soak processes on one laptop measure each other:
+
+```
+node --expose-gc --experimental-strip-types scripts/soak.mjs \
+  --seconds=7200 --store=sqlite --entities=500 --max-entities=2000 --sweep-every=512 \
+  --sample-every=500 --pace-ms=200 --accel-ms=5000 --json
+```
+
+The flood profile stays a short unpaced run. Its subject is the cap under state exhaustion, not
+a day of quiet traffic, and pacing it would remove the thing it tests.
+
+Until the numbers from these runs are written here, with the machine and the day, M4.4 is
+open. A run in progress is not a result.

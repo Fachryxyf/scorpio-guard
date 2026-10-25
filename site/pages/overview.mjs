@@ -71,10 +71,11 @@ ${items}
         <tbody>
           <tr><th>${t('Kind', 'Jenis')}</th><td>${t('library', 'library')}</td></tr>
           <tr><th>npm</th><td>0.1.0</td></tr>
+          <tr><th>${t('Downloads, last month', 'Unduhan, sebulan lalu')}</th><td><span id="npm-downloads"><a href="https://www.npmjs.com/package/@fachryxyf/scorpio-guard">npm</a></span></td></tr>
           <tr><th>${t('Stage', 'Tahap')}</th><td>${t('published, uncalibrated', 'terbit, belum dikalibrasi')}</td></tr>
           <tr><th>${t('Language', 'Bahasa')}</th><td>TypeScript</td></tr>
           <tr><th>${t('Dependencies', 'Dependensi')}</th><td>0</td></tr>
-          <tr><th>${t('Runtime', 'Runtime')}</th><td>Node &ge; 22.6</td></tr>
+          <tr><th>${t('Runtime', 'Runtime')}</th><td>Node &ge; 22.13</td></tr>
           <tr><th>${t('Tests', 'Test')}</th><td>${data.testCount}</td></tr>
           <tr><th>${t('Decisions', 'Keputusan')}</th><td>${data.decisionCount}</td></tr>
           <tr><th>${t('Personas replayed', 'Persona diputar')}</th><td>${personas}</td></tr>
@@ -83,7 +84,28 @@ ${items}
           <tr><th>License</th><td>MIT</td></tr>
         </tbody>
       </table>
+      <p class="tnote">${t(
+        'Every figure in this box is computed from the repository. Downloads is the exception: your browser reads it from the npm API, and it is the only number here that can change without a commit.',
+        'Setiap angka di kotak ini dihitung dari repositori. Unduhan adalah pengecualian: browser Anda membacanya dari API npm, dan itu satu-satunya angka di sini yang bisa berubah tanpa commit.',
+      )}</p>
     </aside>
+
+    <script>
+      (function () {
+        var target = document.getElementById('npm-downloads');
+        if (!target) return;
+        fetch('https://api.npmjs.org/downloads/point/last-month/@fachryxyf/scorpio-guard')
+          .then(function (response) {
+            return response.ok ? response.json() : Promise.reject(new Error('status ' + response.status));
+          })
+          .then(function (body) {
+            target.textContent = String(body.downloads);
+          })
+          .catch(function () {
+            target.textContent = 'unavailable';
+          });
+      })();
+    </script>
 
     <p class="lead">${t(
       '<b>Scorpio Guard</b> is a trust-evaluation library that runs inside your own system. It never answers <i>human or bot</i>. It estimates, continuously, how much trust an interaction currently deserves, and it advises rather than acts, because every decision belongs to the operator of the system it runs in.',

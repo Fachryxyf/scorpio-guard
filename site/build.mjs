@@ -49,19 +49,27 @@ function researchData() {
   return JSON.parse(raw);
 }
 
-/** Test count, from the test runner rather than from memory. */
+/**
+ * Test count, from the test runner rather than from memory. One retry, because a
+ * concurrent npm process can make the first call fail for reasons that have nothing to do
+ * with the tests, and a silent null renders the page as n/a, which is a number that lies by
+ * omission. If both attempts fail the build stops rather than shipping that.
+ */
 function testCount() {
-  try {
-    const out = execFileSync(
-      'npm',
-      ['test', '--silent'],
-      { cwd: root, encoding: 'utf8', maxBuffer: 32 * 1024 * 1024, stdio: ['ignore', 'pipe', 'ignore'] },
-    );
-    const match = out.match(/^# tests (\d+)$/m);
-    return match ? Number(match[1]) : null;
-  } catch {
-    return null;
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    try {
+      const out = execFileSync(
+        'npm',
+        ['test', '--silent'],
+        { cwd: root, encoding: 'utf8', maxBuffer: 32 * 1024 * 1024, stdio: ['ignore', 'pipe', 'ignore'] },
+      );
+      const match = out.match(/^# tests (\d+)$/m);
+      if (match) return Number(match[1]);
+    } catch {
+      // fall through to the retry
+    }
   }
+  return null;
 }
 
 /** The design record, parsed for the Record chapter and the decision count. */
@@ -118,6 +126,10 @@ function labReport() {
 const research = researchData();
 const design = designRecord();
 const tests = testCount();
+if (tests === null) {
+  console.error('site build: npm test did not report a test count twice, so the pages would say n/a. Stopping.');
+  process.exit(1);
+}
 const pkg = JSON.parse(readFileSync(resolve(root, 'package.json'), 'utf8'));
 
 const data = {

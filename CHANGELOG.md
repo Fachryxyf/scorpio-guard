@@ -44,6 +44,19 @@ Tagged in `package.json`, not yet published to npm. The registry has 0.1.0, and
   the release runbook with its current blocker.
 - A Versions chapter on the site: the state of the package, what each bump promises, the
   deprecation path, the upgrade deltas, and the API gate.
+- The soak harness can be paced (`--pace-ms`) and samples at a chosen interval
+  (`--sample-every`), and it checks a fourth thing: whether retained RSS trends up between the
+  first and last third of a run. A leak is a trend; a few minutes cannot show one, so a 24 hour
+  run now measures something a stress run does not. The unpaced 24 hour commands this document
+  used to carry would have written roughly 224 million sqlite rows in a day, which is a disk
+  test with a memory test label.
+- The front page box shows the npm download count for the last month, read from the npm API by
+  the browser and labelled as the one number on the site that does not come from the
+  repository. The Node floor in the same box now says 22.13, which is what the package
+  actually declares.
+- The site build stops instead of rendering `n/a` when the test count cannot be read from the
+  runner, after one retry. A page that says `n/a` where a number belongs is a number that lies
+  by omission.
 - A guarantees chapter on the site: the claims a gate enforces today with the test or decision
   that holds each one, the risks that are measured or priced instead of solved with what
   closing each would take, the two lab runs with their composition, and the three proofs

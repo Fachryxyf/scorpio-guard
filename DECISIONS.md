@@ -4248,6 +4248,9 @@ same render, so a stale number fails the build instead of ageing quietly.
   recorded here and in the CHANGELOG, not only on the page.
 - **The page cannot promise a population.** Nothing on it says the thresholds are right for
   someone else traffic.
+- **One number on the site comes from outside the repository.** The download count in the
+  front page box is read from the npm API by the reader browser, and it is labelled as such
+  under the box. Every other figure is computed from the repository at build time.
 
 ### Alternatives rejected
 
