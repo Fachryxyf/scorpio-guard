@@ -409,8 +409,18 @@ loses when it fails, are in [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
 interactions with the gaps between them, and the replay drives one through a guard.
 Outside `src/` on purpose, since it generates *test* traffic.
 
-`examples/ixfe/`, the primary target (D47): invariants declared across all six proof
-sources, and personas read off IXFE's own defences.
+**The targets, since 2026-10-25.** `ixfe.pro` and the HealthMe app are offline: the first
+times out and the second no longer resolves, both checked from this machine on that date. The
+lab observes `aufsicht.dev` and `talkhere.life` now, both answering, declared in
+`examples/lab/targets.ts` by origin with an optional local build. Everything below that names
+IXFE or HealthMe is the record of what was measured while those sites were up, kept under the
+names it was measured under, because renaming measured rows to look current would be
+invention. What that record has and the live pair does not is a declared invariant, so a
+proven violation is not available from two static sites until a live target declares one
+again.
+
+`examples/ixfe/`, the primary target while it was online (D47): invariants declared across all
+six proof sources, and personas read off IXFE's own defences.
 
 `examples/healthme/`, the first target (D34), kept as the small-application
 regression: two scopes, one user.
@@ -518,7 +528,7 @@ scraping, and a real adversary. See D34 in the design record.
 
 ## Generated Traffic
 
-The primary target is **IXFE** (`ixfe.pro`), a competitor-intelligence platform with
+The primary target was **IXFE** (`ixfe.pro`), a competitor-intelligence platform with
 three deployables, an unauthenticated pre-launch funnel, and a credit ledger where one
 request spends real money: `marketplace_global` costs 12 credits and makes a Google
 Places call per market, billed to the operator whether or not the caller was

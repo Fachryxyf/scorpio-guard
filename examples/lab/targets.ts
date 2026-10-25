@@ -1,15 +1,21 @@
 /**
  * The targets the lab can observe, and what each one can prove. M2.1.
  *
- * Three rows, and their differences are the point:
+ * Two rows, both live sites, both owned by the maintainer: aufsicht.dev and talkhere.life.
+ * Neither declares invariants, because a marketing page cannot prove that an order was
+ * skipped or a token was replayed. Whatever the lab records there is statistical, and the
+ * dataset says so instead of borrowing the authority of a target that could prove one.
  *
- * - IXFE declares invariants, so a proven violation is available to the observer.
- * - The two static sites declare none, because a marketing page cannot prove that an
- *   order was skipped or a token was replayed. Whatever the lab records there is
- *   statistical, and the dataset says so rather than borrowing IXFE's authority.
+ * A third row was removed on 2026-10-25: ixfe.pro, the application that declared invariants
+ * and carried the strongest evidence in the dataset. The deployment stopped answering, so a
+ * row that can never run is a row that lies about what the lab observes. The recording, the
+ * frozen fixture, and the invariant declarations stay where they are, labelled as the record
+ * of a site that is offline, and D47 keeps the reasoning that chose it.
  *
- * The static builds live outside this repository, so a missing directory is reported
- * as an unavailable target instead of being silently skipped.
+ * Both live targets can also be served from a local build, which is what the two LAB_ root
+ * variables are for. A build directory that does not exist is reported as an unavailable
+ * target instead of being silently skipped, and the live origin is used when no build is
+ * given.
  */
 import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
@@ -84,29 +90,23 @@ function withRoot(root: string | undefined): { root?: string } {
 export function labTargets(): LabTarget[] {
   return [
     {
-      id: 'ixfe',
-      label: 'the IXFE landing service, the app D56 and D57 observed',
-      origin: process.env.LAB_IXFE_ORIGIN ?? 'https://ixfe.pro',
-      entry: '/',
-      source: 'the live deployment, driven by the personas in examples/ixfe/live/visitors.ts',
-      // Replaced by IXFE_PROFILE in the runner: the type would otherwise have to
-      // import the invariants here, and this file should stay a catalogue.
-      profile: staticProfile('ixfe'),
-    },
-    {
       id: 'aufsicht',
       label: 'aufsicht.dev',
+      origin: process.env.LAB_AUFSICHT_ORIGIN ?? 'https://aufsicht.dev',
       ...withRoot(localPath('aufsicht', 'LAB_AUFSICHT_ROOT')),
-      entry: '/index.html',
-      source: 'the static build in ARBITERAI/landing, served locally',
+      entry: '/',
+      source:
+        'the live deployment at aufsicht.dev, or the build in LAB_AUFSICHT_ROOT when one is set',
       profile: staticProfile('aufsicht'),
     },
     {
       id: 'talkhere',
       label: 'talkhere.life',
+      origin: process.env.LAB_TALKHERE_ORIGIN ?? 'https://talkhere.life',
       ...withRoot(localPath('talkhere', 'LAB_TALKHERE_ROOT')),
-      entry: '/index.html',
-      source: 'the static build in TalkHere/dist, served locally',
+      entry: '/',
+      source:
+        'the live deployment at talkhere.life, or the build in LAB_TALKHERE_ROOT when one is set',
       profile: staticProfile('talkhere'),
     },
   ];

@@ -9,6 +9,15 @@ evidence. Run 2 added the IXFE landing service, where a form post and a hidden f
 be priced, and ran every persona as eight different visitors so that a short visit could
 still contribute a sample (D66). Run 2 is the one calibration reads.
 
+**Since 2026-10-25 the two sites these runs observed are offline.** `ixfe.pro` times out and
+the HealthMe app no longer resolves, both checked from this machine on that date. The lab
+observes `aufsicht.dev` and `talkhere.life` now, by origin, and those two are what a new run
+would record. The rows below keep the names they were measured under, because a request
+recorded from a site that has since gone down is still a recorded request, and relabelling it
+would make this page claim a run that never happened. What the sites took with them is the
+ability to rerun them, and with IXFE the declared invariants that turned an observation into a
+proof.
+
 ## Run 1: two static builds, one visit each
 
 | field | value |

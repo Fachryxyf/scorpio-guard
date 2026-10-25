@@ -2527,6 +2527,22 @@ falsifies, it does not calibrate. IXFE has real users and real logs, and using t
 would be a different and better exercise, recorded as the next step rather than
 claimed here.
 
+### The target went offline, 2026-10-25
+
+`ixfe.pro` stopped answering: from this machine the request times out, and the HealthMe app no
+longer resolves. So the choice above is historical. The lab observes `aufsicht.dev` and
+`talkhere.life` now, both answering, and a target that cannot run is worse than a weaker one,
+because it makes the catalogue describe a site instead of observing one.
+
+Nothing in the reasoning moves. An unauthenticated surface with paid compute behind it is
+still the right target, the evidence recorded from IXFE keeps the name it was measured under,
+and the invariant declarations stay in `examples/ixfe/` where `replay.test.ts` still exercises
+them against the recording. What the live pair cannot reproduce is the row this section is
+built on: both sites are static, neither declares an invariant, so they produce statistical
+evidence and no proof. A live target with money attached and declared invariants is open work
+for 1.0, and the guarantee table says so rather than borrowing the authority of a site that is
+no longer there.
+
 ---
 
 ## D48: A stale client view is not a proof

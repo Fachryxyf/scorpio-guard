@@ -44,9 +44,13 @@ operator something. `scanner` and `patient` are wanted to fail. One asks for sur
 the other asks slowly and between real page views, because a rule that only counts
 requests per second would read the second one as a reader.
 
-The third target, `ixfe`, reuses the sessions in
-[`examples/ixfe/live/visitors.ts`](../ixfe/live/visitors.ts) so its flows are the ones
-D56 and D57 wrote, not a second implementation of them.
+A third target, `ixfe`, was removed on 2026-10-25: the deployment stopped answering, and a
+row that can never run only adds a skip line. Its sessions in
+[`examples/ixfe/live/visitors.ts`](../ixfe/live/visitors.ts), the recording, and the invariant
+declarations stay where they are, labelled as the record of a site that is offline.
+
+Both remaining targets are live origins, `https://aufsicht.dev` and `https://talkhere.life`,
+and each falls back to a local build when one is configured.
 
 ## Running it
 
@@ -60,11 +64,12 @@ npm run lab -- --strict                       # non-zero exit on any false posit
 npm run lab -- --report=<runId>               # re-read a run without a browser
 ```
 
-Chrome is expected at `/Applications/Google Chrome.app`. The two static targets are built
-elsewhere on disk and are deliberately not in this repository: set `LAB_AUFSICHT_ROOT` and
-`LAB_TALKHERE_ROOT`, or put both paths in `var/lab-paths.json` (`var/` is ignored by git),
-and set the live IXFE origin with `LAB_IXFE_ORIGIN`. A target whose build is missing is
-reported and skipped rather than silently dropped, and the message names the variable to set.
+Chrome is expected at `/Applications/Google Chrome.app`. Both targets default to the live
+origin, so a run needs nothing configured. To observe a local build instead, set
+`LAB_AUFSICHT_ROOT` and `LAB_TALKHERE_ROOT`, or put both paths in `var/lab-paths.json` (`var/`
+is ignored by git). The origins are overridable with `LAB_AUFSICHT_ORIGIN` and
+`LAB_TALKHERE_ORIGIN`. A configured build directory that is missing is reported and skipped
+rather than silently dropped, and the message names the variable to set.
 
 Ports are fixed per target for the site (`4700+n`) and the observer (`4800+n`).
 Chrome gets no port at all: it is launched with `--remote-debugging-port=0` and the
@@ -133,5 +138,6 @@ labels would stop meaning anything.
 
 Add an entry to `labTargets()` in [`targets.ts`](./targets.ts) with either a `root`
 (a directory to serve) or an `origin` (something already running), plus a profile.
-`staticProfile()` is the honest default for a site with no provable rules. A target
-that can prove something belongs in its own module, the way `ixfe` does.
+`staticProfile()` is the honest default for a site with no provable rules. A target that can
+prove something belongs in its own module, the way `ixfe` did: it declared invariants across
+all six proof sources, and both live targets declare none.

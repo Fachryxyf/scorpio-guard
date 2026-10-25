@@ -29,8 +29,7 @@ import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 
 import { connect, launch } from '../ixfe/live/cdp.ts';
-import { IXFE_PROFILE, createLiveProxy } from '../ixfe/live/proxy.ts';
-import { ADVERSARIES, LEGITIMATE } from '../ixfe/live/visitors.ts';
+import { createLiveProxy } from '../ixfe/live/proxy.ts';
 import { instanceIdentity, seeded, staticPersonas, type LabPersona } from './personas.ts';
 import { createStaticServer } from './serve.ts';
 import { labTargets, unavailableReason, type LabTarget } from './targets.ts';
@@ -110,21 +109,13 @@ function parseOptions(): RunOptions {
 }
 
 /**
- * The IXFE rows come from the sessions D56 and D57 already wrote, wrapped so the same
- * runner can label them. Each session declares the agent it presents, and a repetition
- * is handed a different one, so eight skimmers are eight visitors rather than one
- * visitor whose history never resets (D66).
+ * One persona set for both targets. The IXFE sessions that used to be wrapped here went
+ * with the target: they drive a funnel that no longer answers, and a persona that cannot
+ * run is a persona that only adds a skip line to the report.
  */
 function personasFor(target: LabTarget): LabPersona[] {
-  if (target.id !== 'ixfe') return staticPersonas();
-  return [...LEGITIMATE, ...ADVERSARIES].map((session) => ({
-    id: 'ixfe-' + session.id,
-    label: session.legitimate ? ('legitimate' as const) : ('adversarial' as const),
-    what: session.what,
-    userAgent: session.userAgent,
-    entry: (base: string) => base + '/',
-    run: ({ base, browser, userAgent }) => session.run({ target: base, browser, userAgent }),
-  }));
+  void target;
+  return staticPersonas();
 }
 
 async function chromeVersion(port: number): Promise<string | undefined> {
@@ -158,7 +149,7 @@ async function observeTarget(
   const recordsPath = join(outDir, target.id + '.jsonl');
   writeFileSync(recordsPath, '');
 
-  const profile = target.id === 'ixfe' ? IXFE_PROFILE : target.profile;
+  const profile = target.profile;
   const site = target.root === undefined ? undefined : createStaticServer(target.root);
   const origin =
     site === undefined

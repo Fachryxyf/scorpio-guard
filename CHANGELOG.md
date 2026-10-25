@@ -150,6 +150,12 @@ Tagged in `package.json`, not yet published to npm. The registry has 0.1.0, and
 
 ### Changed
 
+- The traffic lab observes `aufsicht.dev` and `talkhere.life`, both live, by origin with an
+  optional local build. The `ixfe` target row is gone: the deployment stopped answering on
+  2026-10-25, and a row that can never run only adds a skip line to a report. The recording,
+  the frozen fixture, and the invariant declarations stay where they are, labelled as the
+  record of a site that is offline, and the dataset keeps the names it was measured under
+  (D47, D56, D57 notes).
 - An epistemic stage now precedes trust and uncertainty, and `developing` permits at
   most `OBSERVE`. Before, a third observation could turn silence into friction (D40,
   D46).

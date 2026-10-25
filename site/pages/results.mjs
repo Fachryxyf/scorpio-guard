@@ -254,13 +254,13 @@ ${automation.map((row) => `        <tr><th>${row.label}</th><td class="num">${ro
     ${h2(5, 'personas', 'Persona replay', 'Replay persona')}
 
     <p>${t(
-      `${totalPersonas} personas across two targets: IXFE (unauthenticated compute behind a real funnel) and HealthMe (small app, one user). Every legitimate persona must stay at or below OBSERVE; every adversary must be advised something felt.`,
-      `${totalPersonas} persona di dua target: IXFE (komputasi tak terautentikasi di balik funnel nyata) dan HealthMe (aplikasi kecil, satu pengguna). Setiap persona sah harus tetap di OBSERVE atau lebih lunak; setiap adversary harus disarankan sesuatu yang terasa.`,
+      `${totalPersonas} personas across two targets, both recorded while their sites were online: IXFE (unauthenticated compute behind a real funnel) and HealthMe (small app, one user). Every legitimate persona must stay at or below OBSERVE; every adversary must be advised something felt. Neither site answers today; the lab live targets are aufsicht.dev and talkhere.life, and neither of those declares invariants, so neither can produce the hard proofs the IXFE rows rest on.`,
+      `${totalPersonas} persona di dua target, keduanya direkam saat situsnya masih online: IXFE (komputasi tak terautentikasi di balik funnel nyata) dan HealthMe (aplikasi kecil, satu pengguna). Setiap persona sah harus tetap di OBSERVE atau lebih lunak; setiap adversary harus disarankan sesuatu yang terasa. Kedua situs itu tidak menjawab lagi; target hidup lab adalah aufsicht.dev dan talkhere.life, dan keduanya tidak mendeklarasikan invariant, jadi keduanya tidak bisa menghasilkan bukti keras yang menopang baris IXFE.`,
     )}</p>
 
     <div class="scroll">
     <table>
-      <caption>IXFE: ${replay.ixfe.personas.length} ${t('personas', 'persona')} &middot; ${replay.ixfe.falsePositives} FP &middot; ${replay.ixfe.walkedThrough} ${t('walked through', 'lolos')}</caption>
+      <caption>IXFE, recorded while online: ${replay.ixfe.personas.length} ${t('personas', 'persona')} &middot; ${replay.ixfe.falsePositives} FP &middot; ${replay.ixfe.walkedThrough} ${t('walked through', 'lolos')}</caption>
       <thead><tr><th>${t('Persona', 'Persona')}</th><th>${t('Kind', 'Jenis')}</th><th class="num">${t('steps', 'langkah')}</th><th>${t('Worst', 'Terburuk')}</th><th class="num">@</th><th>${t('Verdict', 'Putusan')}</th></tr></thead>
       <tbody>
 ${personaRows(replay.ixfe.personas)}
@@ -270,7 +270,7 @@ ${personaRows(replay.ixfe.personas)}
 
     <div class="scroll">
     <table>
-      <caption>HealthMe: ${replay.healthme.personas.length} ${t('personas', 'persona')} &middot; ${replay.healthme.falsePositives} FP &middot; ${replay.healthme.walkedThrough} ${t('walked through', 'lolos')}</caption>
+      <caption>HealthMe, recorded while online: ${replay.healthme.personas.length} ${t('personas', 'persona')} &middot; ${replay.healthme.falsePositives} FP &middot; ${replay.healthme.walkedThrough} ${t('walked through', 'lolos')}</caption>
       <thead><tr><th>${t('Persona', 'Persona')}</th><th>${t('Kind', 'Jenis')}</th><th class="num">${t('steps', 'langkah')}</th><th>${t('Worst', 'Terburuk')}</th><th class="num">@</th><th>${t('Verdict', 'Putusan')}</th></tr></thead>
       <tbody>
 ${personaRows(replay.healthme.personas)}
