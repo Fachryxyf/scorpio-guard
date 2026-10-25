@@ -38,6 +38,7 @@
  * `examples/ixfe/live/report.ts`.
  */
 import { createServer, request as httpRequest, type IncomingMessage, type ServerResponse } from 'node:http';
+import { request as httpsRequest } from 'node:https';
 import { createHash, randomBytes } from 'node:crypto';
 import { appendFileSync, mkdirSync } from 'node:fs';
 import { dirname } from 'node:path';
@@ -453,14 +454,17 @@ export function createLiveProxy(options: ProxyOptions) {
     const htmlChunks: Buffer[] = [];
     let htmlBytes = 0;
 
-    const upstream = httpRequest(
+    // Whichever protocol the origin publishes. The live targets answer over TLS, so a
+    // proxy that only spoke plaintext could observe them in name and not in fact.
+    const upstream = (origin.protocol === 'https:' ? httpsRequest : httpRequest)(
       {
         protocol: origin.protocol,
         hostname: origin.hostname,
         port: origin.port,
         method,
         path: req.url ?? '/',
-        headers: forwardedHeaders(req),
+        headers: forwardedHeaders(req, origin),
+        servername: origin.hostname,
       },
       (originRes) => {
         originAnswered = true;
@@ -537,11 +541,17 @@ export function createLiveProxy(options: ProxyOptions) {
 }
 
 /** Keep the client's own headers, and be honest about the extra hop. */
-function forwardedHeaders(req: IncomingMessage): Record<string, string | string[]> {
+function forwardedHeaders(
+  req: IncomingMessage,
+  origin: URL,
+): Record<string, string | string[]> {
   const headers: Record<string, string | string[]> = { ...req.headers } as Record<string, string | string[]>;
   const previous = req.headers['x-forwarded-for'];
   const remote = req.socket.remoteAddress ?? '';
   headers['x-forwarded-for'] = previous ? `${previous}, ${remote}` : remote;
+  // The origin is asked for the page it publishes, not for the loopback address the
+  // visitor typed: an origin behind a CDN answers the second one with its default vhost.
+  headers['host'] = origin.host;
   return headers;
 }
 

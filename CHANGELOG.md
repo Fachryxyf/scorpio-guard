@@ -156,6 +156,11 @@ Tagged in `package.json`, not yet published to npm. The registry has 0.1.0, and
   the frozen fixture, and the invariant declarations stay where they are, labelled as the
   record of a site that is offline, and the dataset keeps the names it was measured under
   (D47, D56, D57 notes).
+- The observing proxy speaks TLS when the origin does, and asks for the origin host instead of
+  the loopback address the visitor typed. A default https target was observable in name and
+  not in fact before this, because the upstream request was plaintext only and every origin
+  behind a CDN answered the default vhost. Checked with one persona against aufsicht.dev:
+  ten requests recorded, every one ALLOW.
 - An epistemic stage now precedes trust and uncertainty, and `developing` permits at
   most `OBSERVE`. Before, a third observation could turn silence into friction (D40,
   D46).
