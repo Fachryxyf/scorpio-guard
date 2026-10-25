@@ -18,7 +18,7 @@ signature moved. The rules are therefore narrower than semver's default reading:
   `docs/ROADMAP.md` §1: a calibration dataset with published composition, the
   protocol running end to end, and a frozen API after a directed security review.
 
-## [0.2.0] - unreleased
+## [0.2.0] - 2026-10-25
 
 ### Release status
 
