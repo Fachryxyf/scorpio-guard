@@ -3,15 +3,23 @@
 ## Status as of 2026-10-25
 
 - 0.2.0 is set in `package.json` on `main` and is **not** published.
-- The npm account that owns the package is **suspended for 72 hours as of 2026-10-25**,
-  which blocks publishing until roughly 2026-10-28. This is an account problem, not a code
-  problem: every gate below is green on `main`, and CI has passed on the commit that holds
-  the version.
-- The registry is expected to keep serving 0.1.0. Check rather than assume before
-  announcing anything: `npm view @fachryxyf/scorpio-guard versions`.
-- When the suspension lifts, run the runbook below and then delete this section, together
-  with the dated status note on the site. A status paragraph that outlives its cause is the
-  same kind of slow-motion lie as a hand-copied number.
+- A publish attempt on 2026-10-25 at 12:15 UTC was refused by the registry:
+  `403 Your account has been temporarily suspended due to a recent security-sensitive
+  action`. The account record shows its last change at 2026-10-25 02:52 UTC, and npm's
+  freeze for this class of action lasts 72 hours and lifts on its own, so the expected
+  window is around 2026-10-28 02:52 UTC. The email npm sent for that action names the
+  exact moment. Read that, not the arithmetic.
+- The attempt before it returned `EOTP` instead. **A one-time password prompt is not
+  permission.** npm asks for the second factor before it checks whether the account may
+  write at all, so a publish that reaches your authenticator can still be refused
+  underneath it. Both attempts are in the account's log; neither is evidence of clearance.
+- Everything else is green on `main`: every gate in this file, and CI on the commit that
+  holds the version. The registry keeps serving 0.1.0; check before announcing anything
+  (`npm view @fachryxyf/scorpio-guard versions`).
+- When the freeze lifts, publish through the workflow below if the trusted publisher entry
+  is saved, or use the manual path. Then delete this section together with the dated status
+  notes in the README, the CHANGELOG, and the site pages. A status paragraph that outlives
+  its cause is the same kind of slow-motion lie as a hand-copied number.
 
 ## Preconditions, all automated
 
@@ -51,11 +59,15 @@ that has to explain why.
 5. `npm run pack:check`: it packs the tarball, installs it into an empty directory, imports
    it, and evaluates one request. A package that imports locally but not from a tarball is
    the failure this step exists for.
-6. `npm publish --access public` with the maintainer account. There is no token in this
-   repository and none in CI; publishing is a person with a second factor, not an
-   automation.
-7. `git tag v0.2.0` and push the commit and the tag. The tag is what ties the registry to a
-   commit, and npm records it as `gitHead` in the package metadata.
+6. Push the release commit to `main` first, then tag it. The tag is what publishes when
+   the trusted publisher entry is in place, so it has to point at a commit that is already
+   on the branch.
+7. `git tag -a v0.2.0 -m "..."` and `git push origin v0.2.0`. That runs
+   `.github/workflows/release.yml`, which refuses to publish unless the tag equals
+   `v` + the `package.json` version, then uploads with `--provenance`. The tag also ties
+   the registry to a commit, and npm records it as `gitHead`. Manual alternative, when the
+   workflow is not configured: `npm publish --access public` from the maintainer account,
+   same tarball, no attestation.
 8. Verify from the registry, not from the local build: `npm view @fachryxyf/scorpio-guard
    dist-tags`, then install into an empty directory and run `node -e` with an import and
    one evaluation.
@@ -75,9 +87,32 @@ That is the commit the tarball was built from, and that is the commit the tag go
 the current tip. The CHANGELOG says the tag was made late and why, so the gap reads as a gap
 and not as a release that always had a tag.
 
+## Publishing from CI (trusted publishing)
+
+The npm settings page for the package holds a trusted publisher entry. Once it names this
+repository and this workflow, no publish token exists anywhere: npm exchanges the
+workflow's OIDC token for a credential that lasts one job, and records a provenance
+attestation tying the tarball to the commit and the run.
+
+- Entry: owner `Fachryxyf`, repository `scorpio-guard`, workflow `release.yml`. Allowed
+  action `npm publish`, so a tag publishes directly rather than staging first.
+- The workflow triggers on `v*` tags and runs the gates before it uploads. It installs
+  `npm@latest` on the runner, prints the version, and fails rather than publish with a CLI
+  too old for OIDC.
+- Nothing is stored as a secret for this. `id-token: write` is the whole credential, and
+  the repository holds no npm token that could leak or go stale.
+
+0.1.0 and 0.2.0 were published by hand from the maintainer account, so neither carries an
+attestation, and provenance cannot be added to a version after it is published. That makes
+the first version published through this workflow the first one this project can point at
+with a registry-signed record of where it came from. That is the reason to prefer the tag
+path, rather than a taste for automation.
+
 ## What never happens
 
 - No publish from a dirty tree, and no publish with a red gate.
+- No retry loop against a refusal. A `403` after an authenticator prompt means the account
+  cannot write yet; the fix is time or npm support, not another code.
 - No unpublish of 0.1.0. A published version stays; fixes go forward.
 - No `latest` tag moved to an unreleased version. The tag points at what is installed by
   default, and the default should be something a stranger can actually get.

@@ -1,0 +1,57 @@
+name: release
+
+# Publishes a tagged version without a stored token, and with a provenance
+# attestation that ties the tarball to this commit and this run.
+#
+# The npm settings page for the package holds a trusted publisher entry naming
+# this repository and this file. npm exchanges the workflow's OIDC token for a
+# credential that lives for one job, so nothing here is a secret and nothing
+# needs rotating. D17's argument about API keys, applied to the registry.
+#
+# npm CLI 11.5.1 or newer is required for OIDC, and the image's npm is older
+# than that, so the runner installs npm itself and prints the version it got.
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: The npm that speaks OIDC
+        run: |
+          npm install -g npm@latest
+          npm --version
+
+      - name: The tag and package.json agree
+        run: |
+          expected="v$(node -p "require('./package.json').version")"
+          if [ "$GITHUB_REF_NAME" != "$expected" ]; then
+            echo "tag is $GITHUB_REF_NAME, package.json says $expected"
+            exit 1
+          fi
+
+      - run: npm ci
+      - run: npm run build
+      - run: npm test
+      - run: npm run check:api
+      - run: npm run check:manifest
+      - run: npm run pack:check
+
+      - name: Publish
+        run: npm publish --access public --provenance
