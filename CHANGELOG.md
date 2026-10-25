@@ -49,7 +49,10 @@ Tagged in `package.json`, not yet published to npm. The registry has 0.1.0, and
   first and last third of a run. A leak is a trend; a few minutes cannot show one, so a 24 hour
   run now measures something a stress run does not. The unpaced 24 hour commands this document
   used to carry would have written roughly 224 million sqlite rows in a day, which is a disk
-  test with a memory test label.
+  test with a memory test label. The run in progress (steady, started 2026-10-25 on a Core i5-5350U, followed by a
+  two hour sqlite companion) prints a progress line a minute on stderr, because a day long run
+  that writes only at the end cannot be told apart from a hung one. Its numbers are not in
+  this file yet, so M4.4 stays open.
 - The front page box shows the npm download count for the last month, read from the npm API by
   the browser and labelled as the one number on the site that does not come from the
   repository. The Node floor in the same box now says 22.13, which is what the package

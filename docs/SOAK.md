@@ -27,7 +27,8 @@ Flags: `--seconds`, `--entities`, `--store=memory|sqlite`, `--max-entities`, `--
 `--accel-ms` (simulated milliseconds per request, so retention and sweeps fire inside a
 short run), `--pace-ms` (wall clock milliseconds to sleep between requests, default 0, which
 is the stress profile), `--sample-every` (iterations between retained memory samples, default
-2000), `--json`.
+2000), `--progress-every` (iterations between one line of progress on stderr, default 0, and
+kept on stderr so that `--json` stays parseable), `--json`.
 
 Pacing and acceleration answer different questions and are reported separately. An unpaced
 run measures what the code costs per request; a paced run measures what a day of traffic does
@@ -108,18 +109,19 @@ the sqlite profile does about 2.6k evaluations per second on this machine, which
 and it would report the wear as a result. Pacing is not a softer version of the same run; it
 is the only version where the wall clock is the thing being measured.
 
-What is running now, started 2026-10-25T03:35:59Z on an Intel Core i5-5350U, Node 22.16.0,
+What is running now, started 2026-10-25T03:45:24Z on an Intel Core i5-5350U, Node 22.16.0,
 darwin x86_64:
 
 ```
 node --expose-gc --experimental-strip-types scripts/soak.mjs \
   --seconds=86400 --entities=500 --max-entities=2000 --sweep-every=512 \
-  --sample-every=2000 --pace-ms=500 --accel-ms=5000 --json
+  --sample-every=2000 --pace-ms=500 --accel-ms=5000 --progress-every=120 --json
 ```
 
-That is one day of wall clock, ten days of simulated retention, 172,800 evaluations, and 86
-retained memory samples. The four checks are the ones in the table above, including the trend
-check, which is the one that needs a day to mean anything.
+That is one day of wall clock, ten days of simulated retention, 172,800 evaluations, 86
+retained memory samples, and a progress line every minute on stderr, so that a run that hangs
+is not indistinguishable from a run that is working. The four checks are the ones in the table
+above, including the trend check, which is the one that needs a day to mean anything.
 
 The sqlite companion is the next thing on the same machine, not a concurrent run, because two
 soak processes on one laptop measure each other:
@@ -127,7 +129,7 @@ soak processes on one laptop measure each other:
 ```
 node --expose-gc --experimental-strip-types scripts/soak.mjs \
   --seconds=7200 --store=sqlite --entities=500 --max-entities=2000 --sweep-every=512 \
-  --sample-every=500 --pace-ms=200 --accel-ms=5000 --json
+  --sample-every=500 --pace-ms=200 --accel-ms=5000 --progress-every=120 --json
 ```
 
 The flood profile stays a short unpaced run. Its subject is the cap under state exhaustion, not

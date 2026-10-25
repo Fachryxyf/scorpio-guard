@@ -42,6 +42,7 @@ const maxEntities = Number(flag('max-entities', String(pool)));
 const sweepEvery = Number(flag('sweep-every', '512'));
 const paceMs = Number(flag('pace-ms', '0'));
 const sampleEvery = Number(flag('sample-every', '2000'));
+const progressEvery = Number(flag('progress-every', '0'));
 const asJson = process.argv.includes('--json');
 
 let simulated = 0;
@@ -103,6 +104,18 @@ while (Date.now() - started < seconds * 1000) {
   simulated += accelMs;
   iterations += 1;
   if (paceMs > 0) await new Promise((resolve) => setTimeout(resolve, paceMs));
+
+  if (progressEvery > 0 && iterations % progressEvery === 0) {
+    // On stderr, so that --json keeps stdout parseable. A day long run with no output is a
+    // run nobody can tell apart from a hung one.
+    const soFar = latencies.slice(0, Math.min(latencyCount, LATENCY_SAMPLES)).sort((a, b) => a - b);
+    const p99SoFar = soFar.length === 0 ? 0 : soFar[Math.min(soFar.length - 1, Math.floor(0.99 * soFar.length))];
+    console.error(
+      'progress elapsed=' + Math.round((Date.now() - started) / 1000) + 's iterations=' + iterations +
+      ' simulated=' + Math.round(simulated / 1000) + 's entities=' + store.size() +
+      ' rss=' + (process.memoryUsage().rss / 1e6).toFixed(1) + 'MB p99=' + p99SoFar.toFixed(3) + 'ms',
+    );
+  }
 
   if (iterations % sampleEvery === 0 && memory.length < MEMORY_SAMPLES) {
     // Retained memory, not garbage waiting for a lazy collection. Run with --expose-gc.
