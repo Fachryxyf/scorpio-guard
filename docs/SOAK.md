@@ -1,7 +1,7 @@
 # Soak: bounded state, bounded memory, stable cost
 
 H18 asks for a 24 hour soak with limits on memory and state count. This document is the
-harness, the thresholds, and the runs that exist so far. The 24 hour run does not exist
+harness, the thresholds, and the runs that exist so far. No 24 hour run has finished
 yet, so M4.4 stays open and 1.0.0 stays withheld (D1.1 is the root of trust, this is the
 memory side of the same discipline).
 
@@ -114,8 +114,8 @@ the sqlite profile does about 2.6k evaluations per second on this machine, which
 and it would report the wear as a result. Pacing is not a softer version of the same run; it
 is the only version where the wall clock is the thing being measured.
 
-What is running now, started 2026-10-25T03:45:24Z on an Intel Core i5-5350U, Node 22.16.0,
-darwin x86_64:
+The attempt that is running now started 2026-10-27T13:26:27Z on an Intel Core i5-5350U,
+Node 22.16.0, darwin x86_64:
 
 ```
 node --expose-gc --experimental-strip-types scripts/soak.mjs \
@@ -127,6 +127,30 @@ That is one day of wall clock, ten days of simulated retention, 172,800 evaluati
 retained memory samples, and a progress line every minute on stderr, so that a run that hangs
 is not indistinguishable from a run that is working. The four checks are the ones in the table
 above, including the trend check, which is the one that needs a day to mean anything.
+
+It runs under a supervisor that starts it under `caffeinate -i`, keeps stdout and stderr in
+separate files, and writes the exit code to a third one. That is not tidiness: the attempt
+before it ended without any of those.
+
+### The first attempt, which does not count
+
+The same command was started on 2026-10-25T03:45:24Z and stopped after 11,521 seconds,
+three hours and twelve minutes later. Its log ends on an ordinary progress line, no check
+ran, no verdict was printed, and no exit code was recorded, so it was cut off rather than
+finished. Two things are visible in what it left behind, and neither is a result:
+
+- Retained RSS fell from 92.8 MB in the first minute to a band of 44 to 49 MB and stayed
+  there for three hours, and state sat at the 500 visitor pool against a 2,000 cap. That is
+  the shape of a plateau, observed for three hours.
+- p99 climbed from 0.66 ms to 5.15 ms, past the 5 ms budget. The machine was not quiet: the
+  bench, the test suite, and a build ran on it during that window, and the last section of
+  this document already records that the bench and the soak measure each other. That number
+  describes the neighbours, not the guard.
+
+A run that ends without a verdict is evidence about the harness, not about the library, and
+counting it would repeat the mistake of reading a benchmark taken on a busy laptop. It stays
+written down here so the next attempt does not reproduce the two causes: a session that can
+end underneath the run, and a machine doing something else at the same time.
 
 The sqlite companion is the next thing on the same machine, not a concurrent run, because two
 soak processes on one laptop measure each other:
