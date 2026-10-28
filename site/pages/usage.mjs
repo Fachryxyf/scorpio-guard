@@ -68,6 +68,7 @@ npm install @fachryxyf/scorpio-guard@0.2.0   # pin what you tested</pre>
       '<code>0.2.0</code> adalah versi yang dilayani registry pada 2026-10-28. Halaman ini dibangkitkan dari repositori, jadi ia tidak bisa menjanjikan apa yang dilayani registry besok: <a href="versions.html">halaman versi</a> yang memegang catatan itu. Patok versi tepat, bukan rentang caret. Tak ada ambang di sini yang terkalibrasi terhadap populasi nyata, jadi kenaikan minor bisa menggeser saran, dan <code>^0.2.0</code> akan menariknya diam-diam.',
     )}</p>
 
+    <div class="scroll">
     <table>
       <caption>${t('What you are installing', 'Apa yang Anda pasang')}</caption>
       <thead><tr><th>${t('Item', 'Butir')}</th><th>${t('Value', 'Nilai')}</th></tr></thead>
@@ -79,6 +80,7 @@ npm install @fachryxyf/scorpio-guard@0.2.0   # pin what you tested</pre>
         <tr><th>${t('Tests', 'Test')}</th><td>${testCount}</td></tr>
       </tbody>
     </table>
+    </div>
 
     ${h2(2, 'quickstart', 'Quickstart', 'Mulai cepat')}
 
@@ -157,6 +159,7 @@ trace            [
       'Library mengembalikan satu dari lima string. Ia tidak mengirim status code, tidak membuka socket, dan tidak melempar error karena beritanya buruk: <code>evaluate</code> selesai dengan saran dan trace. Pemetaan dari tingkat ke aksi adalah kebijakan Anda. Simpan di satu tabel di satu file, supaya peninjau bisa membacanya tanpa membuka file Anda.',
     )}</p>
 
+    <div class="scroll">
     <table>
       <caption>${t('Five rungs, and what a host usually does with each', 'Lima tingkat, dan apa yang biasanya dilakukan host')}</caption>
       <thead><tr><th>${t('Advice', 'Saran')}</th><th>${t('What it claims', 'Apa yang diklaim')}</th><th>${t('A host action that fits', 'Aksi host yang cocok')}</th></tr></thead>
@@ -168,6 +171,7 @@ trace            [
         <tr><th>BLOCK</th><td>${t('The ceiling allows refusing everything for this entity.', 'Plafon mengizinkan penolakan untuk semua hal dari entitas ini.')}</td><td>${t('Refuse all actions for it and put it in front of a human.', 'Tolak semua aksinya dan bawa ke manusia.')}</td></tr>
       </tbody>
     </table>
+    </div>
 
     <p>${t(
       'The table above is prose. This is the code, and the only place the status numbers appear:',
@@ -219,6 +223,7 @@ if (advice.status !== 200) {
   holds: (data) =&gt; true,                // false means: this happened, and it cannot have
 };</pre>
 
+    <div class="scroll">
     <table>
       <caption>${t('The seven classes, and the fact that proves each', 'Tujuh kelas, dan fakta yang membuktikan masing-masing')}</caption>
       <thead><tr><th>${t('Class', 'Kelas')}</th><th>${t('Proof source', 'Sumber bukti')}</th><th>${t('What it says', 'Isinya')}</th></tr></thead>
@@ -226,6 +231,7 @@ if (advice.status !== 200) {
         ${classes.map(([name, source, meaning]) => '<tr><th>' + name + '</th><td>' + source + '</td><td>' + meaning + '</td></tr>').join('\n        ')}
       </tbody>
     </table>
+    </div>
 
     <p>${t(
       '<code>hard</code> is two claims at once: violations are deterministic, and the declaration is complete for its scope, so anything not declared legitimate inside that scope is provably wrong. <code>soft</code> claims only the first: it contributes evidence, never proof. If you cannot enumerate the allowed edges honestly, declare <code>soft</code>. A wrong <code>hard</code> is not a loose threshold, it is a false accusation with a trace attached.',
@@ -274,6 +280,7 @@ const checkoutOrder = transitionGraph({
       'Sinyal adalah pengukuran, bukan bukti. Ada sepuluh id, dikirim sebagai <code>observation.signals</code>, dan massa yang bisa mereka tambahkan dibatasi <code>weights.weak</code>, yaitu ' + parameters.signalMassCap + ' secara bawaan. Dua hal mengikuti batas itu: id yang tidak dikenal SG diabaikan bukan ditebak, dan menumpuk sinyal tidak bisa mengalahkan deklarasi yang Anda buat.',
     )}</p>
 
+    <div class="scroll">
     <table>
       <caption>${t('The catalogue, from the source that decides mass', 'Katalog, dari sumber yang menentukan massa')}</caption>
       <thead><tr><th>Id</th><th>${t('Source', 'Sumber')}</th><th>${t('Weight', 'Bobot')}</th><th>${t('Arrives from', 'Datang dari')}</th><th>${t('Innocent cause it must survive', 'Sebab polos yang harus ia lewati')}</th></tr></thead>
@@ -281,6 +288,7 @@ const checkoutOrder = transitionGraph({
         ${catalogue.map(([id, source, weight, from, cause]) => '<tr><th>' + id + '</th><td>' + source + '</td><td>' + weight + '</td><td>' + from + '</td><td>' + cause + '</td></tr>').join('\n        ')}
       </tbody>
     </table>
+    </div>
 
     <p>${t(
       'The four derived ids are computed from the retained window for the anomaly dimensions. They still only become negative mass if you pass the id: the feature space and the mass are separate on purpose (D42, D67). The other six come from <code>./collect</code> or straight from your own request handling.',
@@ -350,6 +358,7 @@ for (const signal of WEAK_SIGNALS) {
       'Ada dua tempat untuk menyetel angka, dan pembagiannya disengaja. Apa pun yang mengubah saran ada di bawah <code>policy</code>. Tombol yang membentuk apa yang diamati SG ada di level teratas <code>createGuard</code>. Tabel ini dibangkitkan dari nilai bawaan di sumber, jadi ia tidak bisa melenceng dari yang dilakukan kode.',
     )}</p>
 
+    <div class="scroll">
     <table>
       <caption>${t('Defaults, and the exact key each one lives under', 'Nilai bawaan, dan kunci persisnya')}</caption>
       <thead><tr><th>${t('Key', 'Kunci')}</th><th>${t('Default', 'Bawaan')}</th><th>${t('What it moves', 'Apa yang digeser')}</th></tr></thead>
@@ -357,6 +366,7 @@ for (const signal of WEAK_SIGNALS) {
         ${policyRows.map(([name, value, what]) => '<tr><th><code>' + name + '</code></th><td>' + value + '</td><td>' + what + '</td></tr>').join('\n        ')}
       </tbody>
     </table>
+    </div>
 
 <pre>import { createGuard } from '@fachryxyf/scorpio-guard';
 
