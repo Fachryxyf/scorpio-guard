@@ -62,10 +62,12 @@ throughput claim about any deployment.
 | steady, sqlite, 300 visitors, 20 s | 52,581 | 2.6k/s | 0.258 / 1.218 / 2.552 ms | 300 of 300 cap | +0.3 MB | 10.4 to 10.6 MB |
 | CI: steady, 200 visitors, 20 s, sweep 64 | pass | 66k/s | p99 0.028 ms | 200 of 200 cap | +0.7 MB | 10.5 to 11.0 MB |
 | CI: flood, cap 200, 20 s, sweep 64 | pass | 141k/s | p99 0.040 ms | 248 peak of 264 allowed | +0.7 MB | 10.4 to 10.7 MB |
+| steady, memory, 500 visitors, 24 h, paced 500 ms | 172,202 | 2/s | 0.069 / 0.116 / 0.198 ms | 500 of 500 cap | +2.2 MB | 10.8 to 5.7 MB |
 
 The sqlite run wrote a 0.3 MB database for 300 entities and 52,581 evaluations, and the file
 size did not grow past the entity count: writes update existing rows rather than appending a
-history.
+history. The last row is the day long run, and it has its own section below with the checks
+that decide it, because a row in a table is a number and not a verdict.
 
 What the numbers mean: state stayed under the cap in both profiles, the SQLite store stays
 inside the same p99 budget as memory at roughly 2.6k evaluations per second on this machine,
@@ -100,6 +102,10 @@ a 1012 allowance is the amortised sweep overshooting by design, which is why the
   local soak will make a local bench lie, which is worth knowing before blaming the change.
 
 ## The 24 hour run
+
+Verdict: four checks out of four passed, on the memory store, over one day of wall clock. The
+row above is the same run. What that does and does not buy is spelled out after the checks,
+because the interesting part of a soak is the part it leaves untested.
 
 The commands this document carried before 2026-10-25 were unpaced:
 
@@ -145,8 +151,9 @@ against a 2,000 cap for the whole day, so eviction over a long horizon is still 
 What this does not upgrade: one machine, one process, one sequential loop, memory store
 only, no framework event loop. The sqlite store gets two hours below, not a day. The machine
 was also not perfectly quiet, since a handful of site builds and test runs shared it during
-the day, which the first attempt is the reason this document mentions at all. At p99
-0.198 ms against a 5 ms budget, that noise did not decide any check.
+the day, and the first attempt is in this document because that kind of neighbour is what
+made it useless. At p99 0.198 ms against a 5 ms budget, the neighbours did not decide any
+check this time.
 
 ### The first attempt, which does not count
 
