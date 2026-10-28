@@ -17,6 +17,9 @@ dist/
 # never committed. `var/` is where the observer writes now; the bare filenames stay
 # listed so a run from the repository root, before that move, stays ignored too.
 var/
+
+# Raw host exports and calibration working notes. Real traffic, never committed.
+report-sg/
 live-traffic.jsonl
 sg-live.db
 sg-live.db-*
