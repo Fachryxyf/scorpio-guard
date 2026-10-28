@@ -1,6 +1,6 @@
 {
   "name": "@fachryxyf/scorpio-guard",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Adaptive trust evaluation for web interactions, as a local advisory library.",
   "license": "MIT",
   "author": "Fachryxyf",

@@ -179,14 +179,20 @@ the thesis rather than smoke-test it.
 npm install @fachryxyf/scorpio-guard
 ```
 
-The registry served `0.2.0` on 2026-10-28, published by the tag-triggered workflow with an
-attestation that `npm audit signatures` verifies in a clean install. MIT, zero runtime
-dependencies (D59). Pin the exact version rather than a caret range: no threshold in this
-library is calibrated, so a minor bump can change advisory behavior, and `^0.2.0` would
-pull that in silently.
+`0.2.1` is a documentation-only patch: no code, no exported name, and no advice for the
+same input and the same stored state changed. It exists because the README inside the
+`0.2.0` tarball still told a reader that `0.2.0` was unpublished, and that text is frozen
+at publish time. Every release since `0.2.0` is uploaded by the tag-triggered workflow
+with an attestation that `npm audit signatures` verifies in a clean install; `0.1.0` has
+none. MIT, zero runtime dependencies (D59). The date each version landed, and what the
+registry serves today, are on the [versions page](https://scorpio-guard.fachryxyf.com/versions.html).
+
+Pin the exact version rather than a caret range: no threshold in this library is
+calibrated, so a minor bump can change advisory behavior, and `^0.2.1` would pull that in
+silently.
 
 ```
-npm install @fachryxyf/scorpio-guard@0.2.0   # recommended
+npm install @fachryxyf/scorpio-guard@0.2.1   # recommended
 npm install github:Fachryxyf/scorpio-guard   # from source, builds on install
 ```
 

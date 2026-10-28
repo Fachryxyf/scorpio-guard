@@ -1,7 +1,9 @@
 import { h2, page, t } from "../layout.mjs";
 
 export function versions(data) {
-  const { version } = data;
+  // Registry facts, not tree facts: this is the newest version npm has accepted, and it is
+  // updated in the release commit that records the upload, never by a version bump alone.
+  const latest = "0.2.0";
   const sections = [
     { id: "now", en: "Where the package is", id_: "Posisi paket" },
     { id: "policy", en: "What a number promises", id_: "Apa arti nomor versi" },
@@ -25,8 +27,8 @@ export function versions(data) {
 
   const body = `
     <p class="lead">${t(
-      "Two versions are on the registry: 0.1.0 and " + version + ", the latter now the default. This page says what each number promises, what the upgrade moves, and how the freeze is enforced.",
-      "Ada dua versi di registry: 0.1.0 dan " + version + ", yang terakhir sekarang jadi bawaan. Halaman ini menjelaskan arti tiap nomor, apa yang berubah saat naik versi, dan bagaimana pembekuannya ditegakkan.",
+      "Two versions are on the registry: 0.1.0 and " + latest + ", the latter now the default. This page says what each number promises, what the upgrade moves, and how the freeze is enforced.",
+      "Ada dua versi di registry: 0.1.0 dan " + latest + ", yang terakhir sekarang jadi bawaan. Halaman ini menjelaskan arti tiap nomor, apa yang berubah saat naik versi, dan bagaimana pembekuannya ditegakkan.",
     )}</p>
 
     ${h2(1, "now", "Where the package is", "Posisi paket")}
@@ -36,7 +38,7 @@ export function versions(data) {
       <thead><tr><th>${t("Version", "Versi")}</th><th>${t("State", "Keadaan")}</th></th><tr></thead>
       <tbody>
         <tr><th>0.1.0</th><td>${t("Published on 2026-08-24 and still installable: the way back if 0.2.0 disagrees with your traffic. No attestation, because it was uploaded by hand and tagged two months later.", "Terbit 2026-08-24 dan masih bisa dipasang: jalan kembali kalau 0.2.0 tidak cocok dengan trafik Anda. Tanpa attestation, karena diunggah dengan tangan dan baru diberi tag dua bulan kemudian.")}</td></tr>
-        <tr><th>${version}</th><td>${t("Published on 2026-10-28, and what <code>npm install</code> gets today. Uploaded by <code>release.yml</code> from the tag <code>v0.2.0</code> on commit <code>0f426b1</code>, so the registry holds a provenance attestation tying the tarball to that commit.", "Terbit 2026-10-28, dan yang didapat <code>npm install</code> hari ini. Diunggah oleh <code>release.yml</code> dari tag <code>v0.2.0</code> pada commit <code>0f426b1</code>, jadi registry menyimpan attestation provenance yang mengikat tarball ke commit itu.")}</td></tr>
+        <tr><th>${latest}</th><td>${t("Published on 2026-10-28, and what <code>npm install</code> gets today. Uploaded by <code>release.yml</code> from the tag <code>v0.2.0</code> on commit <code>0f426b1</code>, so the registry holds a provenance attestation tying the tarball to that commit.", "Terbit 2026-10-28, dan yang didapat <code>npm install</code> hari ini. Diunggah oleh <code>release.yml</code> dari tag <code>v0.2.0</code> pada commit <code>0f426b1</code>, jadi registry menyimpan attestation provenance yang mengikat tarball ke commit itu.")}</td></tr>
         <tr><th>${t("Node", "Node")}</th><td>22.13 ${t("or newer. The sqlite entry needs it because it uses <code>node:sqlite</code>.", "atau lebih baru. Entri sqlite memerlukannya karena memakai <code>node:sqlite</code>.")}</td></tr>
       </tbody>
     </table>
@@ -112,8 +114,8 @@ export function versions(data) {
     file: "versions.html",
     titleEn: "Versions and support",
     titleId: "Versi dan dukungan",
-    subtitleEn: "What each number promises, what the upgrade moves, how the freeze is enforced, and what the registry recorded for " + version + ".",
-    subtitleId: "Arti tiap nomor, apa yang berubah saat naik versi, bagaimana pembekuannya ditegakkan, dan apa yang registry catat untuk " + version + ".",
+    subtitleEn: "What each number promises, what the upgrade moves, how the freeze is enforced, and what the registry recorded for " + latest + ".",
+    subtitleId: "Arti tiap nomor, apa yang berubah saat naik versi, bagaimana pembekuannya ditegakkan, dan apa yang registry catat untuk " + latest + ".",
     sections,
     body,
   });

@@ -18,6 +18,30 @@ signature moved. The rules are therefore narrower than semver's default reading:
   `docs/ROADMAP.md` §1: a calibration dataset with published composition, the
   protocol running end to end, and a frozen API after a directed security review.
 
+## [0.2.1] - 2026-10-28
+
+Documentation only. No code, no exported name, no threshold, and no advice for the same
+input and the same stored state changed; `api/v0.2.json` still matches name for name. The
+reason this is a release and not a commit: the README a stranger reads on npm is frozen
+into the tarball at publish time, and the tarball published as 0.2.0 still told that reader
+0.2.0 was unpublished and blocked.
+
+### Fixed
+
+- The README install section names the version it ships, and the usage sample defines the
+  entity key and the metrics sink it referenced without defining them.
+- The usage page on the site is an integration instead of a sketch: a self-contained
+  quickstart whose output is copied from a run against the published tarball, the
+  advice-to-action table with the code behind it, the seven constraint classes with the
+  proof source of each, the signal catalogue with the browser-to-server bridge, the exact
+  key every tunable lives under, a compact KV block instead of half the page, and four
+  complete recipes.
+- The landing page, the site footer, and the versions blurb no longer say 0.1.0 or claim
+  0.2.0 was missing from the registry.
+- `docs/MIGRATION.md` and `docs/ROADMAP.md` say 0.2.0 is published, and the release runbook
+  now lists the places that hardcode the published version, because all of them drifted in
+  the 0.2.0 release.
+
 ## [0.2.0] - 2026-10-28
 
 ### Release status
