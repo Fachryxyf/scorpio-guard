@@ -158,7 +158,7 @@ the answer, the reasoning, and what each answer commits the implementation to.
 Read it before proposing a change to the model, several obvious-looking
 alternatives were considered and rejected there for reasons worth knowing.
 
-Sixty-three entries is more than anyone reads front to back, so the site carries a
+Seventy-eight entries is more than anyone reads front to back, so the site carries a
 [decision index](https://scorpio-guard.fachryxyf.com/#decisions), every entry
 grouped by what it decides, with the file it turned into, and a
 [glossary](https://scorpio-guard.fachryxyf.com/#glossary) for the terms used in a
@@ -179,18 +179,21 @@ the thesis rather than smoke-test it.
 npm install @fachryxyf/scorpio-guard
 ```
 
-Published at `0.1.0`, MIT, zero runtime dependencies (D59). Pin the exact version
-rather than a caret range: no threshold in this library is calibrated, so a minor
-bump can change advisory behavior, and `^0.1.0` would pull that in silently.
+The registry served `0.2.0` on 2026-10-28, published by the tag-triggered workflow with an
+attestation that `npm audit signatures` verifies in a clean install. MIT, zero runtime
+dependencies (D59). Pin the exact version rather than a caret range: no threshold in this
+library is calibrated, so a minor bump can change advisory behavior, and `^0.2.0` would
+pull that in silently.
 
 ```
-npm install @fachryxyf/scorpio-guard@0.1.0   # recommended
+npm install @fachryxyf/scorpio-guard@0.2.0   # recommended
 npm install github:Fachryxyf/scorpio-guard   # from source, builds on install
 ```
 
-`0.2.0` is set in `package.json` on `main` and blocked from publishing by the account
-suspension above, not by a gate. It adds the networked KV store (D60), the only way to get
-durable trust state on serverless, so install from source until it is published.
+`0.2.0` added the networked KV store (D60), the only way to get durable trust state on
+serverless. The soak runs behind this release cover the memory and sqlite stores; the KV
+store has not run in production here, and the [limits page](https://scorpio-guard.fachryxyf.com/limits.html)
+records what that leaves unproven.
 
 The version policy is in [docs/SEMVER.md](https://github.com/Fachryxyf/scorpio-guard/blob/main/docs/SEMVER.md): a patch keeps the advice, a
 minor may move it and records every move, and a removal is always a major. The upgrade
@@ -200,8 +203,7 @@ replace. The surface is held by the API check against `api/v0.2.json`, decided i
 
 Node 22.13 or newer, ESM only. Four entry points: `.` for the model, `./collect` for
 the browser collector, `./sqlite` for the single-host durable store, `./kv` for the
-networked one (unreleased): on one version number so they cannot be installed
-mismatched.
+networked one: on one version number so they cannot be installed mismatched.
 
 A first integration is written out as a checklist in [docs/TESTING.md](https://github.com/Fachryxyf/scorpio-guard/blob/main/docs/TESTING.md):
 the four parts an integration has, the two mistakes that make results meaningless (the
@@ -232,8 +234,11 @@ const checkoutOrder = transitionGraph({
 // Once per process, not per request: the default store lives inside the guard.
 const guard = createGuard({ invariants: [checkoutOrder] });
 
+// The key is yours: any stable reference your app already has. SG never interprets it.
+const sessionId = 'session_9f2c';
+
 const result = await guard.evaluate({
-  entity: sessionId, // any stable reference; SG never interprets it
+  entity: sessionId,
   observation: { scope: 'checkout', data: { from: 'cart', to: 'payment' } },
   context: { endpoint: '/pay' },
 });
@@ -245,6 +250,13 @@ result.coldStart;  // true when no retained state existed
 result.trace;      // why, in the order that decided it
 ```
 
+The advice is a rung, not an action. `ALLOW` proceeds, `OBSERVE` records without
+user-visible cost, `INCREASE_FRICTION` adds a challenge or a delay, `RESTRICT` refuses
+this action, and `BLOCK` refuses everything for the entity. The mapping from rung to status
+code is yours; the [usage page](https://scorpio-guard.fachryxyf.com/usage.html#decisions)
+writes one out as code, and `result.trust.proposed`, `result.trust.capped` and
+`result.hardViolated` say which dimension decided it.
+
 Log `trace` from the first day. Four independent dimensions feed one outcome, so an
 unexplained decision cannot be debugged after the fact: which is why the trace is
 part of the return value rather than a debug flag.
@@ -253,6 +265,8 @@ If you already run a collector, take the same occasion as a structured event ins
 of parsing log lines (D61):
 
 ```js
+const metrics = []; // your sink: a metrics client, a table, a log
+
 const guard = createGuard({
   invariants: [checkoutOrder],
   onAssessment: (event) => metrics.push(event),

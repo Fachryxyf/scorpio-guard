@@ -13,7 +13,7 @@ dibuatkan gate-nya belum selesai, baru dikerjakan.
 
 ## 1. Dua definisi yang mengikat
 
-**MVP: 0.2.0.** Kodenya sudah ada di `main` dan belum terbit. Selesainya MVP berarti
+**MVP: 0.2.0.** Paketnya terbit di registry sejak 2026-10-28. Selesainya MVP berarti
 satu host nyata bisa memasang paket dari registry, mengirim observasi dari request
 sungguhan, menerima treatment beserta alasannya, melihat apa yang diputuskan lewat
 event terstruktur, dan tetap mendapat jawaban ketika store-nya mati. MVP tidak
@@ -53,10 +53,10 @@ kalibrasi diulang dan halaman jaminan diperbarui.
 | Gate manifest dan lockfile | `scripts/check-manifest.mjs`, `npm run check:manifest` |
 
 Angka yang dipakai gate: 356 test, 78 keputusan, 12 halaman, 0 dependensi runtime,
-versi terbit 0.1.0, versi di `main` 0.2.0.
+versi terbit 0.2.0.
 
-Belum ada sama sekali: hook event keputusan yang dipakai host lain, publish ke
-registry, review keamanan, dan pengirim protokol dari luar repo ini.
+Belum ada sama sekali: hook event keputusan yang dipakai host lain, review keamanan
+eksternal, kalibrasi pada trafik nyata, dan pengirim protokol dari luar repo ini.
 
 ---
 
@@ -69,7 +69,7 @@ registry, review keamanan, dan pengirim protokol dari luar repo ini.
 | H3 | `kvStore` default `failOpen: true`. Kegagalan transport bisa mereset trust tanpa jejak (T2) | MVP | M1.3 | test error transport: guard tetap menjawab dan event error wajib keluar |
 | H4 | Topologi deployment tidak didokumentasikan. `sqlite` mudah disalahpahami sebagai durable multi-instance (T3) | MVP | M1.4 | matriks empat topologi, tiap baris punya contoh konfigurasi |
 | H5 | Tidak ada anggaran performa dan tidak ada bench, jadi "murah" masih klaim | MVP | M1.5 | bench di CI, gagal kalau melewati budget hasil pengukuran |
-| H6 | 0.2.0 belum terbit. Tidak ada CHANGELOG, publish gate, atau aturan semver untuk perilaku advisory | MVP | M1.6 | install dari registry di CI, isi tarball diperiksa |
+| H6 | Tidak ada CHANGELOG, publish gate, atau aturan semver untuk perilaku advisory | MVP | M1.6 | install dari registry di CI, isi tarball diperiksa |
 | H7 | Drift dokumen tidak dicegah mesin. Bukti: `packageManager` kembali masuk lewat commit penyuntingan massal, dan audit sempat mengklaim field itu sudah dihapus | MVP | M1.7a, M1.7b | gate gagal kalau manifest tidak cocok dengan lockfile, atau angka dokumen tidak cocok dengan hasil render |
 | H8 | Classifier anomali tidak ikut memutuskan. Belum ada jalur memilih dari pengukuran (D52) | 1.0 | M2.4 (D67) | pengukuran F7: tidak ada threshold yang mengalahkan policy bukti (0 false positive, 7 false negative dari 24 persona) |
 | H9 | Semua threshold adalah tebakan. Dataset berlabel belum ada, dan populasi nyata tidak bisa ditunggu (T1) | 1.0 | M2.1 sampai M2.5 | confusion matrix dari dataset berlabel, komposisinya tertulis |

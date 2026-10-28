@@ -1,8 +1,8 @@
 # Migrating from 0.1.0 to 0.2.0
 
-0.1.0 is what npm serves. 0.2.0 is set in `package.json` on `main` and waits for a publish
-window; the reason is in [RELEASING.md](RELEASING.md). This document is what changes when
-0.2.0 becomes installable, measured against the published tarball rather than remembered.
+0.2.0 is what npm serves, published on 2026-10-28 with a provenance attestation; 0.1.0
+stays installable for rollback. This document is what changes when you upgrade, measured
+against the published tarballs rather than remembered.
 
 ## The API moved additively, measured
 

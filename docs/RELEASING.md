@@ -84,7 +84,12 @@ that has to explain why.
    dist-tags`, then install into an empty directory and run `node -e` with an import and
    one evaluation.
 9. Update the versions page on the site in the same commit as the release, so the site
-   never claims a version the registry does not have.
+   never claims a version the registry does not have. The same commit updates the places
+   that name the published version outright, because a page built from `main` cannot read
+   the registry: the install block in `site/pages/usage.mjs`, the npm row in the
+   `index.html` infobox, the footer line in `site/layout.mjs`, and the install block in
+   `README.md`. All of them still said 0.1.0 after 0.2.0 shipped, which is why the list is
+   written down instead of assumed.
 
 ### If a tag was missed
 
