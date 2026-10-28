@@ -11,9 +11,9 @@
 
 > **Trust is a spectrum, not a verdict.** Adaptive trust evaluation for web interactions, a local library, not a centralized gatekeeper.
 
-**Status: 0.2.0, pre-1.0, not on npm yet.** The npm account behind the package is suspended for 72 hours as of 2026-10-25, so publishing is blocked until roughly 2026-10-28; the registry still serves 0.1.0. [docs/RELEASING.md](docs/RELEASING.md) carries the blocker and the runbook, and the versions page carries the dates. The core model is built and tested, the package installs from its tarball, and the v0.1 protocol has fixtures, a reference receiver, and a batching sender. Three things still stand between this and 1.0.0: an independent security review, a 24 hour soak, and thresholds calibrated against a real traffic mix rather than the two lab runs recorded in [docs/DATASET.md](docs/DATASET.md). The claims a gate enforces today, the risks that are priced instead, and the size of each gap are on the [guarantees page](https://scorpio-guard.fachryxyf.com/guarantees.html), with the test or decision behind every row (D75). What follows is the design, and where the code has caught up to it.
+**Status: 0.2.0, pre-1.0.** Install with `npm install @fachryxyf/scorpio-guard`. Which version the registry serves today, and the date each one landed, are on the [versions page](https://scorpio-guard.fachryxyf.com/versions.html), because a README carried inside a tarball cannot keep that fact true. The npm account behind the package was suspended for 72 hours on 2026-10-25 after a security-sensitive action; [docs/RELEASING.md](https://github.com/Fachryxyf/scorpio-guard/blob/main/docs/RELEASING.md) carries the record and the runbook. The core model is built and tested, the package installs from its tarball, and the v0.1 protocol has fixtures, a reference receiver, and a batching sender. Three things still stand between this and 1.0.0: an independent security review, a 24 hour soak, and thresholds calibrated against a real traffic mix rather than the two lab runs recorded in [docs/DATASET.md](https://github.com/Fachryxyf/scorpio-guard/blob/main/docs/DATASET.md). The claims a gate enforces today, the risks that are priced instead, and the size of each gap are on the [guarantees page](https://scorpio-guard.fachryxyf.com/guarantees.html), with the test or decision behind every row (D75). What follows is the design, and where the code has caught up to it.
 
-**In a hurry:** [Install](#install), [Usage](#usage), [docs/TESTING.md](docs/TESTING.md). The design below is why the code looks like that.
+**In a hurry:** [Install](#install), [Usage](#usage), [docs/TESTING.md](https://github.com/Fachryxyf/scorpio-guard/blob/main/docs/TESTING.md). The design below is why the code looks like that.
 
 ---
 
@@ -132,18 +132,18 @@ trust dimension is allowed to ask for anything at all.
 
 Named honestly, not hidden.
 
-- **Symptom vocabulary**: the two-tier structure is settled (D43) and the v0.1 wire format is in [PROTOCOL.md](PROTOCOL.md), with its degradation rules tested (D53), its cases in `protocol/fixtures/v0.1/`, and a reference receiver plus a batching sender in `examples/protocol/` (D70, D71). The library itself still transmits nothing: no import opens a socket, and the sender is an example rather than a default.
+- **Symptom vocabulary**: the two-tier structure is settled (D43) and the v0.1 wire format is in [PROTOCOL.md](https://github.com/Fachryxyf/scorpio-guard/blob/main/PROTOCOL.md), with its degradation rules tested (D53), its cases in `protocol/fixtures/v0.1/`, and a reference receiver plus a batching sender in `examples/protocol/` (D70, D71). The library itself still transmits nothing: no import opens a socket, and the sender is an example rather than a default.
 - **Signal encoding**: the transmitted representation should be decodable *only* by the server, even though the library's source is public. Edges into one-way embeddings and server-issued transformation recipes. Research direction, not a resolved design.
 - **Cold start & sybil churn**: history-based trust is gamed by attackers who simply discard identities. Now measured rather than feared: the floor is one request per identity, at which point nothing accumulates at all. Two requests per identity and the guard engages.
-- **Root of trust**: explicitly outside the library. It accepts an entity reference as a basis for measurement, never as proof of identity. [docs/ROOT-OF-TRUST.md](docs/ROOT-OF-TRUST.md) states the rule and the measured price of every way to break it (D72): one changed key discards six observations of distrust, earning the same standing back costs 25 positives, and a per-request proof is the one thing a rotated key cannot erase.
-- **Poisoning resistance**: gradual baseline shifts where every individual step looks legitimate. Priced, not solved: [docs/POISONING.md](docs/POISONING.md) measures what patience buys (D73). A fresh identity is treated after three strong negatives, a constant-gap script stops buying tolerance at five however much it spends, and a script that removes the pacing tell buys one extra tolerated negative per 1.71 positives.
+- **Root of trust**: explicitly outside the library. It accepts an entity reference as a basis for measurement, never as proof of identity. [docs/ROOT-OF-TRUST.md](https://github.com/Fachryxyf/scorpio-guard/blob/main/docs/ROOT-OF-TRUST.md) states the rule and the measured price of every way to break it (D72): one changed key discards six observations of distrust, earning the same standing back costs 25 positives, and a per-request proof is the one thing a rotated key cannot erase.
+- **Poisoning resistance**: gradual baseline shifts where every individual step looks legitimate. Priced, not solved: [docs/POISONING.md](https://github.com/Fachryxyf/scorpio-guard/blob/main/docs/POISONING.md) measures what patience buys (D73). A fresh identity is treated after three strong negatives, a constant-gap script stops buying tolerance at five however much it spends, and a script that removes the pacing tell buys one extra tolerated negative per 1.71 positives.
 - **Saturation / farming**: closed in generated traffic by D55, after two failed attempts at the decision layer. A positive is priced by the shape of the gaps it arrived in, so machine-regular volume accrues almost nothing; negatives are never discounted. Every farmer tested now pays on the first abuse call, and positive-only automation tops out at `OBSERVE`. Uncalibrated: the threshold is inherited from D36.
 - **Privacy/legal basis**: behavioral history is personal data under GDPR and Indonesia's UU PDP.
 - **Sequencing**: is a durable public protocol worth designing *before* a proof-of-concept exists?
 
 ## Repositories
 
-Three repositories, not a monorepo, see [REPOSITORIES.md](REPOSITORIES.md) for the reasoning and the planned scope of each.
+Three repositories, not a monorepo, see [REPOSITORIES.md](https://github.com/Fachryxyf/scorpio-guard/blob/main/REPOSITORIES.md) for the reasoning and the planned scope of each.
 
 | Repository | Visibility | Contains |
 |---|---|---|
@@ -153,7 +153,7 @@ Three repositories, not a monorepo, see [REPOSITORIES.md](REPOSITORIES.md) for t
 
 ## Design Record
 
-Every design decision is recorded in [DECISIONS.md](DECISIONS.md): the question,
+Every design decision is recorded in [DECISIONS.md](https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md): the question,
 the answer, the reasoning, and what each answer commits the implementation to.
 Read it before proposing a change to the model, several obvious-looking
 alternatives were considered and rejected there for reasons worth knowing.
@@ -192,9 +192,9 @@ npm install github:Fachryxyf/scorpio-guard   # from source, builds on install
 suspension above, not by a gate. It adds the networked KV store (D60), the only way to get
 durable trust state on serverless, so install from source until it is published.
 
-The version policy is in [docs/SEMVER.md](docs/SEMVER.md): a patch keeps the advice, a
+The version policy is in [docs/SEMVER.md](https://github.com/Fachryxyf/scorpio-guard/blob/main/docs/SEMVER.md): a patch keeps the advice, a
 minor may move it and records every move, and a removal is always a major. The upgrade
-from 0.1.0 is [docs/MIGRATION.md](docs/MIGRATION.md), measured against the published
+from 0.1.0 is [docs/MIGRATION.md](https://github.com/Fachryxyf/scorpio-guard/blob/main/docs/MIGRATION.md), measured against the published
 tarball: the API only gained names, and the advice changes are listed with what they
 replace. The surface is held by the API check against `api/v0.2.json`, decided in D74.
 
@@ -203,7 +203,7 @@ the browser collector, `./sqlite` for the single-host durable store, `./kv` for 
 networked one (unreleased): on one version number so they cannot be installed
 mismatched.
 
-A first integration is written out as a checklist in [docs/TESTING.md](docs/TESTING.md):
+A first integration is written out as a checklist in [docs/TESTING.md](https://github.com/Fachryxyf/scorpio-guard/blob/main/docs/TESTING.md):
 the four parts an integration has, the two mistakes that make results meaningless (the
 entity key and the scope granularity), the decision journal that makes calibration
 possible later, and what to send back when the advice looks wrong.
@@ -422,7 +422,7 @@ outage reset an entity's statistical history to cold start. Failing open therefo
 requires an `onError` sink, in the type and at construction, because a store failing
 open in silence is indistinguishable from one that works (D62). Set `failOpen: false`
 if that trade is wrong for the deployment. All four topologies, and what each one
-loses when it fails, are in [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
+loses when it fails, are in [docs/DEPLOYMENT.md](https://github.com/Fachryxyf/scorpio-guard/blob/main/docs/DEPLOYMENT.md).
 
 `examples/harness/`: the application-independent parts: a persona is a sequence of
 interactions with the gaps between them, and the replay drives one through a guard.
@@ -453,7 +453,7 @@ Puppeteer so the zero-dependency promise holds in the examples too.
 
 A traffic lab in `examples/lab/`: real Chrome instances against shipped sites, one
 declared persona per instance, each run recorded as a labelled dataset with its seed
-and browser version. [docs/DATASET.md](docs/DATASET.md) carries both recorded runs and
+and browser version. [docs/DATASET.md](https://github.com/Fachryxyf/scorpio-guard/blob/main/docs/DATASET.md) carries both recorded runs and
 reports what they found rather than what they hoped. The first, 129 requests across two
 static builds, showed that a page view carries no evidence: zero false positives, six
 adversarial misses, all with one cause (D63). The second added the IXFE landing service,
@@ -468,7 +468,7 @@ stays reported and does not decide (D67). Both runs are frozen into
 fails CI rather than being found in production (D65).
 
 Three hundred and fifty-six tests, which double as the record of every numeric and
-semantic property the design depends on. [docs/CLAIMS.md](docs/CLAIMS.md) maps each
+semantic property the design depends on. [docs/CLAIMS.md](https://github.com/Fachryxyf/scorpio-guard/blob/main/docs/CLAIMS.md) maps each
 design decision to the test that names it, and lists the ones that are still prose
 only, generated rather than maintained by hand.
 
@@ -643,7 +643,7 @@ conclusions.
 
 ## Roadmap
 
-Stages, the list of holes, and the exit criteria for each milestone: [docs/ROADMAP.md](docs/ROADMAP.md).
+Stages, the list of holes, and the exit criteria for each milestone: [docs/ROADMAP.md](https://github.com/Fachryxyf/scorpio-guard/blob/main/docs/ROADMAP.md).
 
 Done: the core model, the pluggable store with its conformance kit and a durable
 SQLite implementation, the browser collector, two integration targets with declared
@@ -695,12 +695,12 @@ This removes the single point of failure, lets compliance-sensitive adopters sel
 The library and protocol are the community surface: hard-constraint discoveries,
 pattern reports, false-positive cases. At this stage discussion is worth more than
 code, the most valuable contribution is evidence that a number is wrong, not a
-patch that changes it. See [CONTRIBUTING.md](CONTRIBUTING.md) for what helps most
-and the house rules, and [SECURITY.md](SECURITY.md) for what the guard does and
+patch that changes it. See [CONTRIBUTING.md](https://github.com/Fachryxyf/scorpio-guard/blob/main/CONTRIBUTING.md) for what helps most
+and the house rules, and [SECURITY.md](https://github.com/Fachryxyf/scorpio-guard/blob/main/SECURITY.md) for what the guard does and
 does not claim, plus private vulnerability reporting.
 
 ## Links
 
 - Site: [scorpio-guard.fachryxyf.com](https://scorpio-guard.fachryxyf.com)
-- Audit: [docs/PROJECT_AUDIT.md](docs/PROJECT_AUDIT.md)
+- Audit: [docs/PROJECT_AUDIT.md](https://github.com/Fachryxyf/scorpio-guard/blob/main/docs/PROJECT_AUDIT.md)
 - Author: [@Fachryxyf](https://github.com/Fachryxyf)
