@@ -61,11 +61,11 @@ export function usage(data) {
     ${h2(1, 'install', 'Install', 'Pasang')}
 
     <pre>npm install @fachryxyf/scorpio-guard
-npm install @fachryxyf/scorpio-guard@0.2.0   # pin what you tested</pre>
+npm install @fachryxyf/scorpio-guard@0.2.1   # pin what you tested</pre>
 
     <p>${t(
-      '<code>0.2.0</code> is what the registry served on 2026-10-28. This page is generated from the repository, so it cannot promise what the registry serves tomorrow: the <a href="versions.html">versions page</a> holds that record. Pin the exact version, not a caret range. No threshold here is calibrated against a real population, so a minor bump may move advice, and <code>^0.2.0</code> would pull that in silently.',
-      '<code>0.2.0</code> adalah versi yang dilayani registry pada 2026-10-28. Halaman ini dibangkitkan dari repositori, jadi ia tidak bisa menjanjikan apa yang dilayani registry besok: <a href="versions.html">halaman versi</a> yang memegang catatan itu. Patok versi tepat, bukan rentang caret. Tak ada ambang di sini yang terkalibrasi terhadap populasi nyata, jadi kenaikan minor bisa menggeser saran, dan <code>^0.2.0</code> akan menariknya diam-diam.',
+      '<code>0.2.1</code> is what the registry served on 2026-10-28, a documentation-only patch over 0.2.0. This page is generated from the repository, so it cannot promise what the registry serves tomorrow: the <a href="versions.html">versions page</a> holds that record. Pin the exact version, not a caret range. No threshold here is calibrated against a real population, so a minor bump may move advice, and <code>^0.2.1</code> would pull that in silently.',
+      '<code>0.2.1</code> adalah versi yang dilayani registry pada 2026-10-28, patch khusus dokumentasi di atas 0.2.0. Halaman ini dibangkitkan dari repositori, jadi ia tidak bisa menjanjikan apa yang dilayani registry besok: <a href="versions.html">halaman versi</a> yang memegang catatan itu. Patok versi tepat, bukan rentang caret. Tak ada ambang di sini yang terkalibrasi terhadap populasi nyata, jadi kenaikan minor bisa menggeser saran, dan <code>^0.2.1</code> akan menariknya diam-diam.',
     )}</p>
 
     <div class="scroll">
@@ -134,7 +134,7 @@ console.log('stage           ', result.trust.stage, '| band', result.trust.band)
 console.log('trust.reason    ', result.trust.reason);
 console.log('trace           ', result.trace);</pre>
 
-    <p class="cap">${t('Run output, 0.2.0 from the registry, 2026-10-28', 'Keluaran run, 0.2.0 dari registry, 2026-10-28')}</p>
+    <p class="cap">${t('Run output, 0.2.0 from the registry, 2026-10-28 (0.2.1 is documentation only)', 'Keluaran run, 0.2.0 dari registry, 2026-10-28 (0.2.1 hanya dokumentasi)')}</p>
 
 <pre>decision         RESTRICT -&gt; http 403
 hardViolated     true

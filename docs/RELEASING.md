@@ -1,4 +1,4 @@
-# Releasing: the runbook, and what the 0.2.0 release cost
+# Releasing: the runbook, and what the 0.2.x releases cost
 
 ## Status as of 2026-10-28
 
@@ -7,6 +7,13 @@
   `e38c6e9f3dd131fdac0a2a95ef36cbd660c3b4ee`, 103 files, and the registry holds the
   provenance attestation at
   `https://registry.npmjs.org/-/npm/v1/attestations/@fachryxyf%2Fscorpio-guard@0.2.0`.
+- 0.2.1 is **published** too: 2026-10-28T13:26:50Z, from the tag `v0.2.1` on commit
+  `b85294a`, by the same workflow through the same trusted publisher entry. Tarball shasum
+  `361cd94a420688728ed877f58fa1f6c3d0bb347a`, 103 files, 327,467 bytes unpacked, provenance
+  attestation on the same endpoint shape as 0.2.0. It is a documentation-only patch: no
+  code, no exported name, and no advice change, which the API gate confirms name for name.
+- The registry served 0.2.1's tarball about ninety seconds after the upload, faster than
+  the four minutes 0.2.0 took, so the gap is processing load rather than package size.
 - The trusted publisher entry was created from the CLI with `npx npm@12 trust github`,
   allowed action `npm publish`. The workflow needed no secret and no one-time password;
   the only human step was approving the second factor in a browser once.
@@ -32,6 +39,11 @@ wrong the moment the next version lands, and it could not be corrected until tha
 0.2.0 moved the fact to the versions page and left the README with the install line. Its
 relative links were also rewritten to absolute repository URLs, because on npmjs.com
 `docs/TESTING.md` resolves against the package page and ends on a 404.
+
+0.2.1 exists because of that limit, not despite it. The README frozen into the 0.2.0
+tarball still told a reader 0.2.0 was unpublished, so the page contradicted the version
+number printed above it, and no commit could fix it. A documentation-only patch is cheap;
+a public page that argues with the registry is not.
 
 ## Preconditions, all automated
 

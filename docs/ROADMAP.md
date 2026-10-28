@@ -53,7 +53,7 @@ kalibrasi diulang dan halaman jaminan diperbarui.
 | Gate manifest dan lockfile | `scripts/check-manifest.mjs`, `npm run check:manifest` |
 
 Angka yang dipakai gate: 356 test, 78 keputusan, 12 halaman, 0 dependensi runtime,
-versi terbit 0.2.0.
+versi terbit 0.2.1.
 
 Belum ada sama sekali: hook event keputusan yang dipakai host lain, review keamanan
 eksternal, kalibrasi pada trafik nyata, dan pengirim protokol dari luar repo ini.

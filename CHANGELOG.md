@@ -42,6 +42,15 @@ into the tarball at publish time, and the tarball published as 0.2.0 still told 
   now lists the places that hardcode the published version, because all of them drifted in
   the 0.2.0 release.
 
+### Release status
+
+Published on 2026-10-28T13:26:50Z by `.github/workflows/release.yml`, from the tag
+`v0.2.1` on commit `b85294a`. Tarball shasum
+`361cd94a420688728ed877f58fa1f6c3d0bb347a`, 103 files, 327,467 bytes unpacked. The registry
+accepted the upload and served the tarball about ninety seconds later, which moved `latest`
+to 0.2.1; `npm audit signatures` in a clean install reports one verified registry signature
+and one verified attestation.
+
 ## [0.2.0] - 2026-10-28
 
 ### Release status

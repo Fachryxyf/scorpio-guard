@@ -1,8 +1,9 @@
 # Migrating from 0.1.0 to 0.2.0
 
-0.2.0 is what npm serves, published on 2026-10-28 with a provenance attestation; 0.1.0
-stays installable for rollback. This document is what changes when you upgrade, measured
-against the published tarballs rather than remembered.
+0.2.0 is the last version that changed behavior, published on 2026-10-28 with a provenance
+attestation; 0.2.1 is a documentation-only patch over it, and 0.1.0 stays installable for
+rollback. This document is what changes when you upgrade from 0.1.0, measured against the
+published tarballs rather than remembered.
 
 ## The API moved additively, measured
 
