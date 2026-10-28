@@ -54,7 +54,11 @@ const invariants = [
     class: 'IMPOSSIBLE_UNISSUED_REFERENCE',
     strength: 'hard',
     scope: 'soak',
-    holds: (observation) => (observation.data ?? {}).valid !== false,
+    // checkInvariants receives observation.data, not the observation. Reading
+    // `.data` off the data object made this predicate always true, so no run
+    // before 2026-10-29 ever produced a hard violation and `violations: 0`
+    // proved nothing.
+    holds: (data) => (data ?? {}).valid !== false,
   },
 ];
 

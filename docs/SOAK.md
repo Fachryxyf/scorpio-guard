@@ -63,17 +63,19 @@ throughput claim about any deployment.
 | CI: steady, 200 visitors, 20 s, sweep 64 | pass | 66k/s | p99 0.028 ms | 200 of 200 cap | +0.7 MB | 10.5 to 11.0 MB |
 | CI: flood, cap 200, 20 s, sweep 64 | pass | 141k/s | p99 0.040 ms | 248 peak of 264 allowed | +0.7 MB | 10.4 to 10.7 MB |
 | steady, memory, 500 visitors, 24 h, paced 500 ms | 172,202 | 2/s | 0.069 / 0.116 / 0.198 ms | 500 of 500 cap | +2.2 MB | 10.8 to 5.7 MB |
+| steady, sqlite, 500 visitors, 2 h, paced 200 ms | 35,446 | 5/s | 1.349 / 3.540 / 10.233 ms | 500 of 500 cap | +3.3 MB | 10.4 to 10.8 MB |
 
 The sqlite run wrote a 0.3 MB database for 300 entities and 52,581 evaluations, and the file
 size did not grow past the entity count: writes update existing rows rather than appending a
-history. The last row is the day long run, and it has its own section below with the checks
+history. The last two rows are the long runs, and each has its own section below with the checks
 that decide it, because a row in a table is a number and not a verdict.
 
-What the numbers mean: state stayed under the cap in both profiles, the SQLite store stays
-inside the same p99 budget as memory at roughly 2.6k evaluations per second on this machine,
-and memory plateaued rather than climbing once warmup passed. The flood run reaching 996 of
-a 1012 allowance is the amortised sweep overshooting by design, which is why the check uses
-`maxEntities + sweepEvery` rather than `maxEntities`.
+What the numbers mean: state stayed under the cap in both profiles, memory plateaued rather
+than climbing once warmup passed, and the SQLite store holds the memory store p99 budget only
+while it is unpaced, at roughly 2.6k evaluations per second on this machine. The two hour run
+further down is the same store at five evaluations per second, and it does not hold it. The
+flood run reaching 996 of a 1012 allowance is the amortised sweep overshooting by design,
+which is why the check uses `maxEntities + sweepEvery` rather than `maxEntities`.
 
 ## What this does not show
 
@@ -92,9 +94,10 @@ a 1012 allowance is the amortised sweep overshooting by design, which is why the
   clock advances per request, but idle behaviour (a process with no traffic) is untested.
 - **The p99 budget is a memory store budget.** It was set on the in memory profile, and
   sqlite meets it only while its writes batch: 2.552 ms p99 at 2.6k evaluations per second
-  unpaced, and 5.229 ms p99 at a 10 ms pace, where every write waits for its own sync. The
-  paced number is the honest one for a quiet server, and it is above the budget. It is
-  recorded rather than smoothed, and the check is read with the store named.
+  unpaced, 5.229 ms at a 10 ms pace, and 10.233 ms over two hours at a 200 ms pace, where every
+  write waits for its own sync. The paced numbers are the honest ones for a quiet server, and
+  they are above the budget. They are recorded rather than smoothed, and the check is read with
+  the store named.
 - **A soak and the bench measure each other.** With the 24 hour soak running on the same
   machine, `npm run bench` reported sqlite p95 2.5310 ms against a 2.4172 ms budget and
   failed. Paused for the length of the bench, the same build reported 1.3711 ms. CI runs the
@@ -202,10 +205,65 @@ Stopping a run is not the same as re-running until one is green. The first attem
 stopped for a reason written down here that has nothing to do with the verdict, and the
 third run faces the same four checks and will be reported whatever they say.
 
-Its numbers are not in this document yet. The flood profile stays a short unpaced run. Its
-subject is the cap under state exhaustion, not a day of quiet traffic, and pacing it would
-remove the thing it tests.
+Its numbers are in the next section, with the one failed check named rather than rounded.
+The flood profile stays a short unpaced run: its subject is the cap under state exhaustion,
+not a day of quiet traffic, and pacing it would remove the thing it tests.
 
-M4.4 stays open until the sqlite companion writes its own four checks: the memory verdict
-above is one store, and the check is read with the store named. A run in progress is not a
-result.
+The sqlite companion wrote its own four checks, so M4.4 has a verdict for both stores instead
+of one: memory four of four, sqlite three of four with p99 above the budget the memory store
+set. That is the pair the task asks for, and a failed check recorded is worth more than a
+budget quietly made to fit.
+
+### The two hour sqlite run
+
+Verdict: three checks of four passed. The p99 check failed at 10.233 ms against a 5 ms
+budget, and that is the one call this run was always going to make, for the reason the
+budget bullet gives above: a write that waits for its own sync is not a memory store.
+
+It ended on 2026-10-28T15:38Z after 7,199 seconds of wall clock, exit code 1, 35,446
+evaluations, 177,230 simulated seconds, five evaluations per second at a 200 ms pace, a
+565,248 byte database, and 500 entities against a 2,000 cap.
+
+| Check | Limit | This run |
+|---|---|---|
+| State stays under the cap | peak at most the pool for steady | peak 500, cap 500 |
+| p99 | under 5 ms | 10.233 ms, with p50 1.349 and p95 3.540 |
+| RSS growth after warmup | under 100 MB | 3.3 MB, 96.5 to 100.6 MB, warmup 97.3 MB |
+| RSS does not trend up | last third under first third x 1.25 + 10 MB | 97.6 to 100.4 MB, limit 132.0 MB |
+
+What it does buy: state never left the pool, the retained set grew 3.3 MB across two hours
+of paced writes, and the trend check finished 32 MB inside its limit. Post-GC heap moved from
+10.4 MB to 10.8 MB, so the 3.3 MB is the same allocator slack the day long run showed and not
+retained state. The database was 0.57 MB for 500 entities, so a write updates a row rather
+than appending a history.
+
+What it does not buy: throughput. At five evaluations per second the p99 is the cost of one
+paced write, not the cost of a busy server, and the three sqlite numbers now on record read as
+one line rather than three: 2.552 ms unpaced at 2.6k evaluations per second, 5.229 ms at a
+10 ms pace, 10.233 ms at a 200 ms pace. Each step away from a queue is a step up in p99,
+because each write pays for its own sync instead of sharing one.
+
+The number also carries a neighbour. From 14:20Z to 14:32Z the same machine read a 280 MB CSV
+and ran ten passes over 476,909 rows for the pre-calibration note in `report-sg/`; the running
+p99 rose from 13.400 ms to 14.993 ms over that window and settled at 10.233 ms when the later
+samples diluted it. Interference only raises a percentile, so the failure is not an artefact of
+it: without the neighbour the number would be lower, and how much lower is not measured here.
+
+### The defect this run found
+
+Every soak before this one printed `violations: 0`, and that zero meant nothing. The guard
+calls `checkInvariants(observation.data, scope, invariants)`, so an invariant `holds` receives
+the data object and not the observation. The harness predicate read `observation.data.valid`,
+which is undefined on the data object, which made `(undefined ?? {}).valid !== false` true for
+every request: the hard violation the generator sends every seventeenth evaluation never fired
+in any run, the day long one included.
+
+It is fixed, and the fix is measured rather than assumed: `holds: (data) => (data ??
+{}).valid !== false`, with a five second steady run counting 19,253 RESTRICT decisions in
+327,285 evaluations, which is the one in seventeen the generator asks for.
+
+What survives the correction: the memory, RSS, and state numbers above and in the day long
+section. A hard violation adds no evidence mass and no extra write, so a run that took the
+invariant path and a run that did not do the same work for the things those checks measure.
+What does not survive: reading `violations: 0` as evidence that the invariant path was
+exercised. It was not, until 2026-10-29.

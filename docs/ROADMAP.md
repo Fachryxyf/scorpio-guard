@@ -81,7 +81,7 @@ eksternal, kalibrasi pada trafik nyata, dan pengirim protokol dari luar repo ini
 | H15 | Retention dan erasure belum dibuktikan end-to-end di semua store dan di event log (D1.2, D22) | 1.0 | M5.2 (D69) | test: satu entity dilupakan, tidak ada sisa di store maupun log |
 | H16 | API belum dibekukan. Tidak ada kebijakan deprecation atau panduan migrasi | 1.0 | M5.3 (D74) | semver policy dan panduan migrasi |
 | H17 | Klaim di `DECISIONS.md` tidak punya indeks ke test yang membuktikannya | MVP | M1.8 | indeks dibangkitkan, klaim tanpa target muncul sebagai daftar |
-| H18 | Tidak ada soak atau load test untuk sweep dan store | 1.0 | M4.4 | soak 24 jam dengan batas memori dan jumlah state |
+| H18 | Tidak ada soak atau load test untuk sweep dan store | 1.0 | M4.4 | Selesai 2026-10-28: soak memori 24 jam lulus 4 dari 4 cek, pendamping sqlite 2 jam lulus 3 dari 4 dengan p99 10,233 ms di atas anggaran 5 ms yang memang anggaran store memori; keduanya tercatat di `docs/SOAK.md` |
 | H19 | 404 untuk path yang ditautkan build sendiri dibaca sebagai bukti negatif, jadi crawler sah mewarisi link mati situs. Ditemukan lab (F3 di `docs/DATASET.md`) | 1.0 | M2.6 (D68) | dua 404 identik: yang tertaut tidak menaikkan stage, yang tidak tertaut menaikkannya |
 | H20 | Lab menjalankan satu kunjungan per persona, jadi persona yang memang pendek (skimmer, stale bookmark) tidak pernah punya cukup baris untuk dikalibrasi, dan repetisi dengan identitas sama akan menyatu jadi satu entity. Ditemukan penolakan M2.2 | MVP | M2.7 | persona dijalankan N kali sebagai N pengunjung berbeda, komposisinya tercatat di manifest |
 
@@ -309,15 +309,18 @@ memindahkan fixture ke repo terpisah.
 | M4.1 | Root of trust: panduan entity key, plus test yang membuktikan apa yang tidak dilindungi. Selesai: `docs/ROOT-OF-TRUST.md` memuat aturan, tabel biaya, dan checklist; `src/core/root-of-trust.test.ts` enam test mengukur biaya rotasi (satu perubahan kunci membatalkan enam observasi kecurigaan), biaya menebus (26 observasi positif), kunci bersama, sepuluh kunci, retensi sebagai rotasi, dan bukti per-request yang tidak bisa dirotasi (D72) |
 | M4.2 | Poisoning: eksperimen biaya penyerang dibanding waktu deteksi, lalu mitigasi yang diuji. Selesai: `npm run poison` mencetak dua belas baris dan `examples/poison/experiment.test.ts` mengunci empat di antaranya; skrip bergap konstan berhenti di lima negatif berapa pun yang dibelanjakan, skrip bergap jitter membeli satu negatif tambahan per 1,71 positif, dan mematikan diskon D55 membuat kedua pola itu identik (D73) |
 | M4.3 | Review keamanan terarah: adapter failure, poisoning, entity key, DoS, integrasi host |
-| M4.4 | Soak 24 jam: memori, GC, sweep, jumlah state. Sebagian: `scripts/soak.mjs` punya dua profil (pengunjung tetap dan banjir referensi), tiga cek yang sama di lokal dan CI (state di bawah cap, p99 di bawah 5 ms, RSS setelah warmup), dan lima run tercatat di `docs/SOAK.md`. Soak 24 jam yang sesungguhnya belum dijalankan, jadi M4.4 tetap terbuka. Sejak 2026-10-25 harness bisa dipacu `--pace-ms` dan punya cek tren RSS antar sepertiga run, karena kebocoran adalah tren dan bukan angka absolut; run 24 jam di profil steady plus pendamping sqlite dua jam dimulai 2026-10-25 di Core i5-5350U, dengan baris progres tiap menit di stderr supaya run yang macet tidak tampak sama seperti run yang bekerja, dan hasilnya belum ditulis, jadi M4.4 tetap terbuka sampai angkanya masuk `docs/SOAK.md` |
+| M4.4 | Soak 24 jam: memori, GC, sweep, jumlah state. Selesai 2026-10-28. `scripts/soak.mjs` punya dua profil (pengunjung tetap dan banjir referensi) dan empat cek yang sama di lokal dan CI. Soak memori 24 jam di profil steady lulus 4 dari 4: p99 0,198 ms, RSS tumbuh 2,2 MB setelah warmup, tren 61,4 ke 65,5 MB dengan batas 86,8 MB, dan 500 entitas dari cap 2.000. Pendamping sqlite 2 jam lulus 3 dari 4: p99 10,233 ms gagal di anggaran 5 ms yang memang anggaran store memori, dan angkanya dicatat apa adanya bersama dua run sqlite pendek sebelumnya (2,552 ms unpaced, 5,229 ms di pace 10 ms). Run sqlite itu juga menemukan cacat harness: predikat invarian membaca `observation.data` padahal guard sudah mengirim objek data itu sendiri, jadi pelanggaran keras yang dikirim tiap 17 evaluasi tidak pernah menyala di run mana pun sebelumnya dan `violations: 0` tidak membuktikan apa pun; sudah diperbaiki dan diukur (19.253 RESTRICT dari 327.285 evaluasi di run 5 detik). Semua angka dan batasnya ada di `docs/SOAK.md` |
 
 Exit: laporan review ada, dan tidak ada temuan kritis yang terbuka tanpa alasan
 tertulis.
 
-Status: M4.1 dan M4.2 selesai (D72, D73). M4.4 sudah punya harness, dua profil, dan lima
-run pendek yang tercatat, tetapi soak 24 jam yang sesungguhnya belum dijalankan. Yang belum
-sama sekali: M4.3 review keamanan, yang butuh peninjau di luar penulis. Selama ketiganya
-belum lengkap, exit M4 belum lulus dan 1.0.0 tetap ditahan.
+Status: M4.1, M4.2, dan M4.4 selesai (D72, D73). M4.4 ditutup oleh soak memori 24 jam
+yang lulus empat cek pada 2026-10-28, plus pendamping sqlite dua jam yang lulus tiga dari empat:
+p99-nya 10,233 ms, di atas anggaran 5 ms yang memang ditulis sebagai anggaran store memori.
+Run sqlite itu sekaligus menemukan cacat di harness yang membuat cek pelanggaran keras tidak
+pernah menyala di run mana pun sebelumnya; cacatnya diperbaiki dan perbaikannya diukur. Yang
+belum sama sekali: M4.3 review keamanan, yang butuh peninjau di luar penulis. Selama M4.3 belum
+lengkap, exit M4 belum lulus dan 1.0.0 tetap ditahan.
 
 Status M5: M5.1 sebagian, M5.2 dan M5.3 selesai (D69, D74), M5.4 sebagian dengan halaman
 jaminan yang sudah terbit tetapi rilis 1.0.0 yang belum. Paket review M4.3 sudah ada di
