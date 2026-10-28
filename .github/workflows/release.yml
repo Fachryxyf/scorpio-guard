@@ -10,6 +10,9 @@ name: release
 #
 # npm CLI 11.5.1 or newer is required for OIDC, and the image's npm is older
 # than that, so the runner installs npm itself and prints the version it got.
+# It installs major 11 on purpose, not latest: npm 12 refuses to run on a Node
+# older than 22.22.2 and the runner's 22.x is not guaranteed to be that new,
+# so latest turns a pinned toolchain into a race the release can lose.
 
 on:
   push:
@@ -35,7 +38,7 @@ jobs:
 
       - name: The npm that speaks OIDC
         run: |
-          npm install -g npm@latest
+          npm install -g npm@11
           npm --version
 
       - name: The tag and package.json agree
