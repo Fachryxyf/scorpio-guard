@@ -62,7 +62,9 @@ const dbPath = 'var/soak/soak.db';
 let store;
 if (kind === 'sqlite') {
   mkdirSync('var/soak', { recursive: true });
-  rmSync(dbPath, { force: true });
+  // A killed run leaves the write-ahead log behind, and deleting only the database file
+  // makes the next run start from whichever of the two SQLite decides to trust.
+  for (const suffix of ['', '-wal', '-shm']) rmSync(dbPath + suffix, { force: true });
   store = sqliteStore({ path: dbPath, sweepEvery, maxEntities });
 } else {
   store = memoryStore({ sweepEvery, maxEntities });
