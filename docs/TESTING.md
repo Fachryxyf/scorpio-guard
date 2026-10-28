@@ -482,7 +482,9 @@ did, which is the shortest way to see the shape of a decision before writing one
    traffic lab, not from production (D45). Its zero false positives describe the
    composition recorded in [DATASET.md](DATASET.md), not your traffic.
 3. **No provenance on 0.1.0.** If you installed 0.1.0 from the registry, that is an
-   ordinary tarball. 0.2.0 is intended to use trusted publishing.
+   ordinary tarball. 0.2.0 was published by `release.yml` from the tag `v0.2.0` on
+   2026-10-28, so the registry holds a provenance attestation for it, and `npm audit
+   signatures` checks the signatures and the attestation for what you have installed.
 4. **One maintainer.** There are no required status checks and no second reviewer. CI is
    discipline, not a gate. Read the diff before you move a version.
 5. **The exported surface is frozen** in `api/v0.2.json`. A removal counts as a major

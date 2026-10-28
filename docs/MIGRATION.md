@@ -84,5 +84,6 @@ readable, so the rollback is a version change rather than a data operation.
 ## See also
 
 - [SEMVER.md](SEMVER.md): what each number promises, and the API gate that enforces it.
-- [RELEASING.md](RELEASING.md): why 0.2.0 is set and not published, with dates.
+- [RELEASING.md](RELEASING.md): the runbook, and the account history behind the 0.2.0
+  release.
 - CHANGELOG.md: the same changes with the release grouping.

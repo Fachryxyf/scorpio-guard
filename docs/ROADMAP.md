@@ -161,11 +161,12 @@ patch tidak boleh mengubah treatment untuk input yang sama, minor boleh dan waji
 dicatat dengan contoh sebelum dan sesudah. Bukti lulus: job CI `pack-and-install`
 hijau dan 0.2.0 terbit. README tidak lagi menyebut `unreleased`.
 
-Status: sebagian. `CHANGELOG.md` ada dengan aturan semver tertulis, `npm run
-pack:check` memeriksa isi tarball lalu memasang dan menjalankannya di direktori kosong,
-dan job CI `pack-and-install` menjalankannya. Yang belum: 0.2.0 belum terbit ke npm,
-karena publikasi butuh kredensial yang bukan milik sesi ini. Sampai itu terjadi README
-memang masih menyebut 0.2.0 belum dirilis, dan itu benar. Kriteria ini belum lulus.
+Status: lulus. `CHANGELOG.md` ada dengan aturan semver tertulis, `npm run pack:check`
+memeriksa isi tarball lalu memasang dan menjalankannya di direktori kosong, job CI
+`pack-and-install` menjalankannya, dan 0.2.0 terbit ke registry pada 2026-10-28 lewat tag
+`v0.2.0` dan workflow `release.yml`, dengan attestation provenance. README tidak lagi
+menyebut `unreleased`. Fakta registry tidak ditaruh di README, karena README di dalam
+tarball beku saat publish; fakta itu ada di halaman versions.
 
 **M1.7 Gate drift, dua bagian.**
 M1.7a, manifest: `scripts/check-manifest.mjs` memastikan `package.json` dan

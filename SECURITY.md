@@ -2,9 +2,9 @@
 
 ## Status
 
-Uncalibrated and unaudited. The registry serves 0.1.0; `main` is 0.2.0 and is not published
-while the npm account is suspended. Do not deploy it as your only defence for anything that
-matters.
+Uncalibrated and unaudited. The registry serves 0.2.0, published on 2026-10-28 with a
+provenance attestation that ties the tarball to its commit. Do not deploy it as your only
+defence for anything that matters.
 
 ## What the guard is, and is not
 

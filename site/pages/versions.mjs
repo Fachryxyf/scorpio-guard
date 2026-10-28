@@ -25,25 +25,25 @@ export function versions(data) {
 
   const body = `
     <p class="lead">${t(
-      "Two versions exist: 0.1.0, which the registry serves, and " + version + ", which is set in package.json on main and blocked from publishing. This page says what each number promises, what the upgrade moves, and how the freeze is enforced.",
-      "Ada dua versi: 0.1.0 yang dilayani registry, dan " + version + " yang sudah ditandai di main dan tertahan publikasinya. Halaman ini menjelaskan arti tiap nomor, apa yang berubah saat naik versi, dan bagaimana pembekuannya ditegakkan.",
+      "Two versions are on the registry: 0.1.0 and " + version + ", the latter now the default. This page says what each number promises, what the upgrade moves, and how the freeze is enforced.",
+      "Ada dua versi di registry: 0.1.0 dan " + version + ", yang terakhir sekarang jadi bawaan. Halaman ini menjelaskan arti tiap nomor, apa yang berubah saat naik versi, dan bagaimana pembekuannya ditegakkan.",
     )}</p>
 
     ${h2(1, "now", "Where the package is", "Posisi paket")}
 
     <table>
-      <caption>${t("As of 2026-10-25", "Per 2026-10-25")}</caption>
+      <caption>${t("As of 2026-10-28", "Per 2026-10-28")}</caption>
       <thead><tr><th>${t("Version", "Versi")}</th><th>${t("State", "Keadaan")}</th></th><tr></thead>
       <tbody>
-        <tr><th>0.1.0</th><td>${t("Published. What <code>npm install</code> gets today.", "Terbit. Yang didapat <code>npm install</code> hari ini.")}</td></tr>
-        <tr><th>${version}</th><td>${t("Tagged on main, not published. The npm account behind the package is suspended for 72 hours as of 2026-10-25, so publishing is blocked until roughly 2026-10-28. The code is not the blocker: every gate is green.", "Ditandai di main, belum terbit. Akun npm di balik paket ini disuspend 72 jam per 2026-10-25, jadi publikasi tertahan sampai sekitar 2026-10-28. Kodenya bukan penghambat: semua gate hijau.")}</td></tr>
+        <tr><th>0.1.0</th><td>${t("Published on 2026-08-24 and still installable: the way back if 0.2.0 disagrees with your traffic. No attestation, because it was uploaded by hand and tagged two months later.", "Terbit 2026-08-24 dan masih bisa dipasang: jalan kembali kalau 0.2.0 tidak cocok dengan trafik Anda. Tanpa attestation, karena diunggah dengan tangan dan baru diberi tag dua bulan kemudian.")}</td></tr>
+        <tr><th>${version}</th><td>${t("Published on 2026-10-28, and what <code>npm install</code> gets today. Uploaded by <code>release.yml</code> from the tag <code>v0.2.0</code> on commit <code>0f426b1</code>, so the registry holds a provenance attestation tying the tarball to that commit.", "Terbit 2026-10-28, dan yang didapat <code>npm install</code> hari ini. Diunggah oleh <code>release.yml</code> dari tag <code>v0.2.0</code> pada commit <code>0f426b1</code>, jadi registry menyimpan attestation provenance yang mengikat tarball ke commit itu.")}</td></tr>
         <tr><th>${t("Node", "Node")}</th><td>22.13 ${t("or newer. The sqlite entry needs it because it uses <code>node:sqlite</code>.", "atau lebih baru. Entri sqlite memerlukannya karena memakai <code>node:sqlite</code>.")}</td></tr>
       </tbody>
     </table>
 
     <p>${t(
-      "The dated note above is part of the record, not decoration. It is removed in the same commit that publishes, because a status line that outlives its cause is the same kind of slow-motion lie as a hand-copied number.",
-      "Catatan bertanggal di atas adalah bagian dari rekaman, bukan hiasan. Ia dihapus di commit yang sama dengan publikasi, karena baris status yang hidup lebih lama dari sebabnya adalah kebohongan lambat yang sama dengan angka yang disalin tangan.",
+      "The dates above are part of the record, not decoration. Publishing by hand left 0.1.0 with no attestation and no tag until two months had passed; 0.2.0 was pushed by the workflow from the tag, which is why the registry can say where that tarball came from.",
+      "Tanggal di atas adalah bagian dari rekaman, bukan hiasan. Publikasi dengan tangan meninggalkan 0.1.0 tanpa attestation dan tanpa tag sampai dua bulan berlalu; 0.2.0 didorong oleh workflow dari tag, karena itu registry bisa menyebut dari mana tarball itu berasal.",
     )}</p>
 
     ${h2(2, "policy", "What a number promises", "Apa arti nomor versi")}
@@ -112,8 +112,8 @@ export function versions(data) {
     file: "versions.html",
     titleEn: "Versions and support",
     titleId: "Versi dan dukungan",
-    subtitleEn: "What each number promises, what the upgrade moves, how the freeze is enforced, and why " + version + " is not on the registry yet.",
-    subtitleId: "Arti tiap nomor, apa yang berubah saat naik versi, bagaimana pembekuannya ditegakkan, dan kenapa " + version + " belum ada di registry.",
+    subtitleEn: "What each number promises, what the upgrade moves, how the freeze is enforced, and what the registry recorded for " + version + ".",
+    subtitleId: "Arti tiap nomor, apa yang berubah saat naik versi, bagaimana pembekuannya ditegakkan, dan apa yang registry catat untuk " + version + ".",
     sections,
     body,
   });

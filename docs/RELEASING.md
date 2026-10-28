@@ -1,25 +1,37 @@
-# Releasing: the runbook, and why 0.2.0 is waiting
+# Releasing: the runbook, and what the 0.2.0 release cost
 
-## Status as of 2026-10-25
+## Status as of 2026-10-28
 
-- 0.2.0 is set in `package.json` on `main` and is **not** published.
-- A publish attempt on 2026-10-25 at 12:15 UTC was refused by the registry:
-  `403 Your account has been temporarily suspended due to a recent security-sensitive
-  action`. The account record shows its last change at 2026-10-25 02:52 UTC, and npm's
-  freeze for this class of action lasts 72 hours and lifts on its own, so the expected
-  window is around 2026-10-28 02:52 UTC. The email npm sent for that action names the
-  exact moment. Read that, not the arithmetic.
-- The attempt before it returned `EOTP` instead. **A one-time password prompt is not
-  permission.** npm asks for the second factor before it checks whether the account may
-  write at all, so a publish that reaches your authenticator can still be refused
-  underneath it. Both attempts are in the account's log; neither is evidence of clearance.
-- Everything else is green on `main`: every gate in this file, and CI on the commit that
-  holds the version. The registry keeps serving 0.1.0; check before announcing anything
-  (`npm view @fachryxyf/scorpio-guard versions`).
-- When the freeze lifts, publish through the workflow below if the trusted publisher entry
-  is saved, or use the manual path. Then delete this section together with the dated status
-  notes in the README, the CHANGELOG, and the site pages. A status paragraph that outlives
-  its cause is the same kind of slow-motion lie as a hand-copied number.
+- 0.2.0 is **published**: 2026-10-28T05:24:29Z, from the tag `v0.2.0` on commit `0f426b1`,
+  by `.github/workflows/release.yml`. Tarball shasum
+  `e38c6e9f3dd131fdac0a2a95ef36cbd660c3b4ee`, 103 files, and the registry holds the
+  provenance attestation at
+  `https://registry.npmjs.org/-/npm/v1/attestations/@fachryxyf%2Fscorpio-guard@0.2.0`.
+- The trusted publisher entry was created from the CLI with `npx npm@12 trust github`,
+  allowed action `npm publish`. The workflow needed no secret and no one-time password;
+  the only human step was approving the second factor in a browser once.
+- Two manual attempts on 2026-10-25 had failed, first with `EOTP` and then with `403 Your
+  account has been temporarily suspended due to a recent security-sensitive action`. The
+  freeze lifted on its own, as npm said it would.
+- **A one-time password prompt is not permission.** npm asks for the second factor before
+  it checks whether the account may write at all, so a publish that reaches your
+  authenticator can still be refused underneath it.
+- The registry answered `+ @fachryxyf/scorpio-guard@0.2.0` immediately and served the
+  tarball about four minutes later, with `404` on the `.tgz` until then. Verify from the
+  registry, not from the local build, and read that gap as processing rather than failure.
+- The status notes this section used to carry in the README, the CHANGELOG, and the site
+  pages are gone in the commit that published, which is the rule this document set for
+  itself. A status paragraph that outlives its cause is the same kind of slow-motion lie
+  as a hand-copied number.
+
+### What the tarball cannot say
+
+The README inside the package is the README at the tagged commit, rendered on npmjs.com
+and frozen there. It cannot say which version the registry serves: that sentence would be
+wrong the moment the next version lands, and it could not be corrected until that release.
+0.2.0 moved the fact to the versions page and left the README with the install line. Its
+relative links were also rewritten to absolute repository URLs, because on npmjs.com
+`docs/TESTING.md` resolves against the package page and ends on a 404.
 
 ## Preconditions, all automated
 
@@ -89,24 +101,29 @@ and not as a release that always had a tag.
 
 ## Publishing from CI (trusted publishing)
 
-The npm settings page for the package holds a trusted publisher entry. Once it names this
-repository and this workflow, no publish token exists anywhere: npm exchanges the
+The package has a trusted publisher entry, written from the CLI or from the npm settings
+page. Once it names this repository and this workflow, no publish token exists anywhere: npm exchanges the
 workflow's OIDC token for a credential that lasts one job, and records a provenance
 attestation tying the tarball to the commit and the run.
 
 - Entry: owner `Fachryxyf`, repository `scorpio-guard`, workflow `release.yml`. Allowed
   action `npm publish`, so a tag publishes directly rather than staging first.
 - The workflow triggers on `v*` tags and runs the gates before it uploads. It installs
-  `npm@latest` on the runner, prints the version, and fails rather than publish with a CLI
-  too old for OIDC.
+  npm major 11 on the runner, not `npm@latest`: npm 12 refuses a Node older than 22.22.2, and
+  a release should not depend on which major was published that morning. The tag is the
+  whole trigger; nothing here reads a token.
+- Create or repair the entry from a machine where you can approve the second factor in a
+  browser: `npx npm@12 trust github @fachryxyf/scorpio-guard
+  --repo=Fachryxyf/scorpio-guard --file=release.yml --allow-publish`. It prints a URL,
+  waits for the approval, and writes nothing if the approval never comes.
+  `npx npm@12 trust list @fachryxyf/scorpio-guard` reads it back.
 - Nothing is stored as a secret for this. `id-token: write` is the whole credential, and
   the repository holds no npm token that could leak or go stale.
 
-0.1.0 and 0.2.0 were published by hand from the maintainer account, so neither carries an
-attestation, and provenance cannot be added to a version after it is published. That makes
-the first version published through this workflow the first one this project can point at
-with a registry-signed record of where it came from. That is the reason to prefer the tag
-path, rather than a taste for automation.
+0.1.0 was published by hand from the maintainer account, so it carries no attestation, and
+provenance cannot be added to a version after it is published. 0.2.0 was pushed by the tag
+and is the first version of this package with a registry-signed record of where it came
+from. Both versions stay on the registry; neither will be unpublished.
 
 ## What never happens
 

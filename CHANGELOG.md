@@ -18,21 +18,24 @@ signature moved. The rules are therefore narrower than semver's default reading:
   `docs/ROADMAP.md` §1: a calibration dataset with published composition, the
   protocol running end to end, and a frozen API after a directed security review.
 
-## [0.2.0] - unreleased
+## [0.2.0] - 2026-10-28
 
 ### Release status
 
-Tagged on `main`, not published. The npm account behind the package is suspended for 72
-hours as of 2026-10-25, which blocks publishing until roughly 2026-10-28. This is an
-account problem, not a gate: every check in the runbook is green. `docs/RELEASING.md`
-carries the runbook and this blocker, and the versions page on the site carries the dated
-note. Both are removed in the commit that publishes.
+Published on 2026-10-28T05:24:29Z by `.github/workflows/release.yml`, from the tag `v0.2.0`
+on commit `0f426b1`. The upload used a trusted publisher entry rather than a stored token,
+so the registry holds a provenance attestation tying this tarball to that commit and that
+run: the first version of this package with one. Shasum
+`e38c6e9f3dd131fdac0a2a95ef36cbd660c3b4ee`, 103 files, 326,219 bytes unpacked.
 
+Two manual attempts on 2026-10-25 had failed, first with `EOTP` and then with `403 Your
+account has been temporarily suspended due to a recent security-sensitive action`. The
+freeze lifted on its own, as npm said it would. `docs/RELEASING.md` carries the account
+history, the runbook, and what the tarball cannot say.
 
-
-Tagged in `package.json`, not yet published to npm. The registry has 0.1.0, and
-0.1.0 is not what this repository now contains. Release gates:
-`npm run check:manifest`, `npm run check:docs`, `npm run pack:check`, `npm run bench`.
+Release gates that passed on the tagged commit, in CI and locally: `npm run check:manifest`,
+`npm run check:docs`, `npm run check:api`, `npm run pack:check`, `npm run bench`, and the
+rest of the runbook in `docs/RELEASING.md`.
 
 ### Added
 

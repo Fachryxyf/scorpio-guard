@@ -40,18 +40,18 @@ export function usage(data) {
       <caption>${t('Requirements and entry points', 'Kebutuhan dan titik masuk')}</caption>
       <thead><tr><th></th><th></th></tr></thead>
       <tbody>
-        <tr><th>npm</th><td><code>@fachryxyf/scorpio-guard</code> &middot; 0.1.0 &middot; MIT</td></tr>
+        <tr><th>npm</th><td><code>@fachryxyf/scorpio-guard</code> &middot; 0.2.0 &middot; MIT</td></tr>
         <tr><th>Node</th><td>&ge; 22.13 &middot; ESM &middot; ${t('zero runtime dependencies', 'tanpa dependensi runtime')}</td></tr>
         <tr><th>.</th><td>${t('the model', 'modelnya')}</td></tr>
         <tr><th>./collect</th><td>${t('the browser collector', 'collector peramban')}</td></tr>
         <tr><th>./sqlite</th><td>${t('durable store over node:sqlite, one host', 'store tahan restart di atas node:sqlite, satu host')}</td></tr>
-        <tr><th>./kv</th><td>${t('networked store over HTTP, for serverless, unreleased', 'store jaringan lewat HTTP, untuk serverless, belum dirilis')}</td></tr>
+        <tr><th>./kv</th><td>${t('networked store over HTTP, for serverless: the interface ships, no production deployment has run on it', 'store jaringan lewat HTTP, untuk serverless: antarmukanya terbit, belum ada deployment produksi yang memakainya')}</td></tr>
       </tbody>
     </table>
 
     <p class="tnote">${t(
-      'The registry serves 0.1.0. 0.2.0 is set in package.json on main and not published yet, because the npm account is suspended for 72 hours as of 2026-10-25; the dates are on the <a href="versions.html">Versions page</a>.',
-      'Registry melayani 0.1.0. 0.2.0 sudah ditandai di main dan belum terbit, karena akun npm disuspend 72 jam per 2026-10-25; tanggalnya ada di <a href="versions.html">halaman Versi</a>.',
+      'The registry serves 0.2.0, published on 2026-10-28 with a provenance attestation. 0.1.0 is still installable if you need to go back; the dates are on the <a href="versions.html">Versions page</a>.',
+      'Registry melayani 0.2.0, terbit 2026-10-28 dengan attestation provenance. 0.1.0 masih bisa dipasang kalau Anda perlu kembali; tanggalnya ada di <a href="versions.html">halaman Versi</a>.',
     )}</p>
 
     ${h2(2, 'quickstart', 'Quickstart', 'Mulai cepat')}

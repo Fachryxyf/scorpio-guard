@@ -7,9 +7,10 @@ policy, a migration guide, and a deprecation policy; this is the first and third
 
 ## Where the project is
 
-0.2.0 is set in `package.json` on `main` and not on npm. The registry serves 0.1.0, and the
-reason 0.2.0 is not there is recorded in [RELEASING.md](RELEASING.md), not here. From 0.2.0
-onward the exported surface is written down in `api/v0.2.json` and checked on every push.
+0.2.0 has been on npm since 2026-10-28, and 0.1.0 stays installable for rollback. How it
+was published, and what the earlier account freeze did to it, is recorded in
+[RELEASING.md](RELEASING.md), not here. From 0.2.0 onward the exported surface is written
+down in `api/v0.2.json` and checked on every push.
 
 ## What each number promises
 
