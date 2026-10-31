@@ -522,7 +522,7 @@ export function createGuard(options: GuardOptions = {}) {
         hardViolated: hard.length > 0,
         coldStart,
         storeDegraded,
-        integrationWarning,
+        ...(integrationWarning ? { integrationWarning } : {}),
         context: input.context,
         trace,
       };
