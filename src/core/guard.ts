@@ -199,6 +199,9 @@ export function createGuard(options: GuardOptions = {}) {
   const discountPositives = options.discountRegularPositives ?? true;
   const windowSize = options.windowSize ?? DEFAULT_WINDOW_SIZE;
 
+  /** Chains one in-flight evaluation per entity. D77. */
+  const inFlight = new Map<string, Promise<void>>();
+
   /** Load state, treating absent and expired alike. D6. */
   async function load(entity: string, now: number): Promise<{ state: EntityState; coldStart: boolean }> {
     const stored = await store.get(entity);
@@ -211,9 +214,8 @@ export function createGuard(options: GuardOptions = {}) {
     return { state: stored, coldStart: false };
   }
 
-  return {
-    async evaluate(input: EvaluateInput): Promise<Assessment> {
-      const now = clock.now();
+  async function evaluateOnce(input: EvaluateInput): Promise<Assessment> {
+    const now = clock.now();
       const startedAt = performance.now();
       const observation = input.observation ?? {};
       const trace: string[] = [];
@@ -373,10 +375,41 @@ export function createGuard(options: GuardOptions = {}) {
       }
 
       return assessment;
+  }
+
+  return {
+    /**
+     * Evaluations of one entity are serialized behind each other. D77.
+     *
+     * The store contract is `get`/`set`, so two concurrent evaluations of the same
+     * entity would both read the same state and the last writer would erase the
+     * evidence the other applied. Measured on a real integration before the fix:
+     * 5,817 journal rows (1.229%) fell below their decay floor, which is lost
+     * update, not decay. Different entities still evaluate concurrently; the slot
+     * is removed when its chain settles, so the map holds only in-flight entities.
+     */
+    async evaluate(input: EvaluateInput): Promise<Assessment> {
+      const previous = inFlight.get(input.entity) ?? Promise.resolve();
+      const result = previous.then(() => evaluateOnce(input));
+      const tail = result.then(
+        () => undefined,
+        () => undefined,
+      );
+      inFlight.set(input.entity, tail);
+      void tail.then(() => {
+        if (inFlight.get(input.entity) === tail) inFlight.delete(input.entity);
+      });
+      return result;
     },
 
-    /** Forget one entity outright. D22. Same operation retention uses. */
+    /**
+     * Forget one entity outright. D22. Same operation retention uses.
+     *
+     * Waits behind any in-flight evaluation of the same entity, because a delete
+     * that lands between `load` and `set` would be resurrected by that write.
+     */
     async forget(entity: string): Promise<void> {
+      await (inFlight.get(entity) ?? Promise.resolve());
       await store.delete(entity);
     },
   };

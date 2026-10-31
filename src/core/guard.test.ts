@@ -8,6 +8,7 @@ import { DEFAULT_RETENTION_HOURS, DEFAULT_WEIGHTS } from './policy.ts';
 import { memoryStore } from './store.ts';
 import { WEAK_SIGNALS } from './signals.ts';
 import { transitionGraph } from './transitions.ts';
+import { evidenceMass } from './trust.ts';
 import type { Invariant } from './constraints.ts';
 
 const HOUR = 3_600_000;
@@ -589,4 +590,89 @@ test('D18: the classifier can replace the threshold conjunction for D37 concurre
   assert.equal(result.diversity, false, 'the classifier withholds concurrence');
   assert.ok(result.anomaly.score! > 0.5);
   assert.match(result.trace.join(' '), /drives concurrence/);
+});
+
+test('D77: concurrent evaluations of one entity cannot lose updates', async () => {
+  const clock = fakeClock();
+  const inner = memoryStore();
+  const written: number[] = [];
+  const store = {
+    get: (entity: string) => inner.get(entity),
+    set: async (entity: string, state: Parameters<typeof inner.set>[1]) => {
+      written.push(evidenceMass(state, clock.now(), 24));
+      await inner.set(entity, state);
+    },
+    delete: (entity: string) => inner.delete(entity),
+  };
+  const guard = createGuard({ clock, store });
+
+  const results = await Promise.all(
+    Array.from({ length: 20 }, () =>
+      guard.evaluate({ entity: 'e1', observation: { evidence: { negative: 'strong' } } }),
+    ),
+  );
+
+  // Serialized: every evaluation saw the write of the one before it.
+  for (let i = 1; i < results.length; i += 1) {
+    assert.ok(
+      results[i]!.trust.mass > results[i - 1]!.trust.mass,
+      `evaluation ${i} must build on evaluation ${i - 1}'s write, not overwrite it`,
+    );
+  }
+  // All 20 negatives landed in the final state, not just the last writer's.
+  const final = await inner.get('e1');
+  assert.ok(final);
+  assert.ok(
+    evidenceMass(final, clock.now(), 24) >= 42,
+    `expected all 20 strong negatives to accumulate, got ${evidenceMass(final, clock.now(), 24)}`,
+  );
+  assert.equal(written.length, 20);
+});
+
+test('D77: one entity\'s queue does not block another entity', async () => {
+  let release!: () => void;
+  const gate = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  const store = {
+    get: async (entity: string) => {
+      if (entity === 'held') await gate;
+      return undefined;
+    },
+    set: async () => {},
+    delete: async () => {},
+  };
+  const guard = createGuard({ clock: fakeClock(), store });
+
+  const held = guard.evaluate({ entity: 'held' });
+  const free = await guard.evaluate({ entity: 'free' });
+
+  assert.equal(free.decision, 'ALLOW', 'a stalled entity must not stall unrelated ones');
+  release();
+  await held;
+});
+
+test('D77: forget waits behind an in-flight evaluation instead of being resurrected', async () => {
+  const clock = fakeClock();
+  const inner = memoryStore();
+  let release!: () => void;
+  const gate = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  const store = {
+    get: async (entity: string) => {
+      if (entity === 'e1') await gate;
+      return inner.get(entity);
+    },
+    set: (entity: string, state: Parameters<typeof inner.set>[1]) => inner.set(entity, state),
+    delete: (entity: string) => inner.delete(entity),
+  };
+  const guard = createGuard({ clock, store });
+
+  const evaluating = guard.evaluate({ entity: 'e1', observation: { evidence: { positive: 'strong' } } });
+  const forgetting = guard.forget('e1');
+  release();
+  await Promise.all([evaluating, forgetting]);
+
+  assert.equal(inner.size(), 0, 'the evaluation\'s write must not resurrect forgotten state');
 });
