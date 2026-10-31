@@ -11,7 +11,7 @@
 
 > **Trust is a spectrum, not a verdict.** Adaptive trust evaluation for web interactions, a local library, not a centralized gatekeeper.
 
-**Status: 0.2.0, pre-1.0.** Install with `npm install @fachryxyf/scorpio-guard`. Which version the registry serves today, and the date each one landed, are on the [versions page](https://scorpio-guard.fachryxyf.com/versions.html), because a README carried inside a tarball cannot keep that fact true. The npm account behind the package was suspended for 72 hours on 2026-10-25 after a security-sensitive action; [docs/RELEASING.md](https://github.com/Fachryxyf/scorpio-guard/blob/main/docs/RELEASING.md) carries the record and the runbook. The core model is built and tested, the package installs from its tarball, and the v0.1 protocol has fixtures, a reference receiver, and a batching sender. Three things still stand between this and 1.0.0: an independent security review, a 24 hour soak, and thresholds calibrated against a real traffic mix rather than the two lab runs recorded in [docs/DATASET.md](https://github.com/Fachryxyf/scorpio-guard/blob/main/docs/DATASET.md). The claims a gate enforces today, the risks that are priced instead, and the size of each gap are on the [guarantees page](https://scorpio-guard.fachryxyf.com/guarantees.html), with the test or decision behind every row (D75). What follows is the design, and where the code has caught up to it.
+**Status: 0.3.0, pre-1.0.** Install with `npm install @fachryxyf/scorpio-guard`. Which version the registry serves today, and the date each one landed, are on the [versions page](https://scorpio-guard.fachryxyf.com/versions.html), because a README carried inside a tarball cannot keep that fact true. The npm account behind the package was suspended for 72 hours on 2026-10-25 after a security-sensitive action; [docs/RELEASING.md](https://github.com/Fachryxyf/scorpio-guard/blob/main/docs/RELEASING.md) carries the record and the runbook. The core model is built and tested, the package installs from its tarball, and the v0.1 protocol has fixtures, a reference receiver, and a batching sender. Two things still stand between this and 1.0.0: an independent security review, and thresholds that hold against a real traffic mix — the first integration's journal has now been replayed against the grid (docs/DATASET.md, host dataset) and moved no constant, but a population it is not. The 24 hour soak is done (docs/SOAK.md). What remains short of the proof is recorded in [docs/DATASET.md](https://github.com/Fachryxyf/scorpio-guard/blob/main/docs/DATASET.md). The claims a gate enforces today, the risks that are priced instead, and the size of each gap are on the [guarantees page](https://scorpio-guard.fachryxyf.com/guarantees.html), with the test or decision behind every row (D75). What follows is the design, and where the code has caught up to it.
 
 **In a hurry:** [Install](#install), [Usage](#usage), [docs/TESTING.md](https://github.com/Fachryxyf/scorpio-guard/blob/main/docs/TESTING.md). The design below is why the code looks like that.
 
@@ -179,7 +179,7 @@ the thesis rather than smoke-test it.
 npm install @fachryxyf/scorpio-guard
 ```
 
-`0.2.1` is a documentation-only patch: no code, no exported name, and no advice for the
+`0.2.1` was a documentation-only patch: no code, no exported name, and no advice for the
 same input and the same stored state changed. It exists because the README inside the
 `0.2.0` tarball still told a reader that `0.2.0` was unpublished, and that text is frozen
 at publish time. Every release since `0.2.0` is uploaded by the tag-triggered workflow
@@ -188,11 +188,11 @@ none. MIT, zero runtime dependencies (D59). The date each version landed, and wh
 registry serves today, are on the [versions page](https://scorpio-guard.fachryxyf.com/versions.html).
 
 Pin the exact version rather than a caret range: no threshold in this library is
-calibrated, so a minor bump can change advisory behavior, and `^0.2.1` would pull that in
+calibrated, so a minor bump can change advisory behavior, and `^0.3.0` would pull that in
 silently.
 
 ```
-npm install @fachryxyf/scorpio-guard@0.2.1   # recommended
+npm install @fachryxyf/scorpio-guard@0.3.0   # recommended
 npm install github:Fachryxyf/scorpio-guard   # from source, builds on install
 ```
 
@@ -487,7 +487,7 @@ stays reported and does not decide (D67). Both runs are frozen into
 `examples/lab/fixtures/` and replayed on every push, so a change that moves any decision
 fails CI rather than being found in production (D65).
 
-Three hundred and fifty-six tests, which double as the record of every numeric and
+Three hundred and seventy-eight tests, which double as the record of every numeric and
 semantic property the design depends on. [docs/CLAIMS.md](https://github.com/Fachryxyf/scorpio-guard/blob/main/docs/CLAIMS.md) maps each
 design decision to the test that names it, and lists the ones that are still prose
 only, generated rather than maintained by hand.

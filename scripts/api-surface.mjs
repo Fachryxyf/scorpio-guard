@@ -8,7 +8,7 @@
  * disagree.
  *
  *   node scripts/api-surface.mjs                  print the current surface
- *   node scripts/api-surface.mjs --check          compare against api/v0.2.json
+ *   node scripts/api-surface.mjs --check          compare against api/v0.3.json
  *   node scripts/api-surface.mjs --write          rewrite the snapshot, deliberately
  *   node scripts/api-surface.mjs --from <dir>     read a tarball layout instead of dist
  *
@@ -25,7 +25,7 @@ import ts from 'typescript';
 const here = dirname(fileURLToPath(import.meta.url));
 const root = resolve(here, '..');
 
-const SNAPSHOT = resolve(root, 'api/v0.2.json');
+const SNAPSHOT = resolve(root, 'api/v0.3.json');
 
 const fromIndex = process.argv.indexOf('--from');
 const from = fromIndex === -1 ? null : process.argv[fromIndex + 1];
@@ -106,7 +106,7 @@ if (process.argv.includes('--write')) {
     process.exit(1);
   }
   const count = ENTRIES.reduce((total, entry) => total + Object.keys(current[entry]).length, 0);
-  console.log('api ok: ' + count + ' names across ' + ENTRIES.length + ' entries match api/v0.2.json');
+  console.log('api ok: ' + count + ' names across ' + ENTRIES.length + ' entries match api/v0.3.json');
 } else {
   console.log(JSON.stringify(current, null, 2));
 }

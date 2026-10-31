@@ -4290,3 +4290,267 @@ guarantee from an accepted risk without opening the code. Rejected.
 count), and `npm run check-docs` compares the README claims with that render. The same six
 risks are listed in `docs/SECURITY-REVIEW.md`, so a risk recorded in one place and missing in
 the other is visible in review.
+
+---
+
+## D76: The store waits on a deadline, and degradation is reported
+
+### The hole
+
+Fail-open (D62) made a KV outage survivable, but only as fast as the transport admitted.
+The first real integration measured the gap: with Redis stopped, every host request hung
+about 305 seconds — the transport's own retry horizon — including requests that would have
+ended in 401 anyway. A guard that is advisory in the model but latency-bearing on the wire
+is not advisory where it matters. The documented contract, "a slow or broken collector
+cannot slow the advice", was true of the sink and false of the store.
+
+### The decision
+
+Every store operation the guard performs is bounded by `storeDeadlineMs`, defaulting to
+100 and disabled by zero. Past the deadline the evaluation answers without retained state —
+a cold start, which D40 already models as a well-defined condition — and the assessment and
+its event carry `storeDegraded: true` with a trace line saying which operation did not land.
+A lost state write is stated as lost, because advice that silently forgets evidence is the
+pre-D77 failure mode arriving through the deadline instead. `forget()` throws
+`StoreDeadlineError` rather than returning, because an erasure that quietly did nothing
+would lie about the data being gone.
+
+`ASSESSMENT_EVENT_SCHEMA` stays 1: the field is additive, and the schema bumps only when a
+field changes meaning or disappears.
+
+### Limits
+
+- **The deadline bounds the wait, not the outage.** A host whose transport retries for
+  minutes still sees `storeDegraded` on every row until the transport answers; the event is
+  the alert, not a fix.
+- **100ms is a default, not a measurement.** It is well under any interactive request
+  budget and well over any healthy store round trip, but a deployment that measures
+  something different overrides it.
+- **A set that lands after its deadline still writes.** The losing promise is not
+  cancelled; the state written is the state that was evaluated, so a late write is stale
+  for that entity's next decision only in the ordinary decay sense.
+
+### Alternatives rejected
+
+**Bound in the transport only.** `upstashTransport` already takes a timeout, but the
+contract lives at the store boundary: a host with a custom transport, or the sqlite and
+memory stores, gets no protection from a transport option. Rejected.
+
+**Circuit-break the store after N failures.** Useful, but it changes which state an entity
+sees for a cool-down window and needs a policy for shared state across instances. The
+deadline delivers the availability property without deciding that policy. Rejected for now.
+
+**Fail closed past the deadline.** Contradicts D9: the guard advises and an outage must not
+take the request path down. Rejected.
+
+### Gates
+
+`src/core/guard.test.ts`: four tests named D76 — a never-answering store is bounded and the
+evaluation still advises; a lost write is reported and is really lost; `forget` throws
+`StoreDeadlineError`; zero disables the bound. `src/core/event.test.ts` asserts the event
+carries `storeDegraded` and pins the event shape. Verified by mutation: bypassing the
+deadline in `bound()` fails the never-answering test by timeout.
+
+---
+
+## D77: Evaluations of one entity are serialized
+
+### The hole
+
+The store contract is `get`/`set`, so two concurrent evaluations of one entity both read
+the same state, and the last writer erased the evidence the other applied. The integration
+measured the damage: 5,817 journal rows (1.229%) fell below their decay-adjusted floor,
+which is lost update, not decay — evidence of failure silently vanishing from exactly the
+entities that were failing. The host fixed it with a per-entity promise queue and proved
+the fix: 20 concurrent evaluations produce one contiguous sequence and zero lost updates.
+
+### The decision
+
+The guard serializes evaluations per entity: each `evaluate()` waits behind the previous
+one for the same entity, and the slot is removed when its chain settles. Different entities
+evaluate concurrently. `forget()` waits behind an in-flight evaluation of the same entity,
+because a delete landing between `load` and `set` would be resurrected by that write.
+
+Serial callers see no difference, and no advice changes for any input that was correct
+before: what changes is that concurrent evidence can no longer vanish.
+
+### Limits
+
+- **One process.** The queue is in-memory, like D62's fail-open and the host's own fix:
+  two instances serving one entity still race. CAS or key sharding in the store remains
+  open, recorded in the integration manifest rather than claimed here.
+- **Backpressure is the host's.** A flood of concurrent requests for one entity now
+  serializes, which is correct and also means the host's own concurrency limit governs
+  queue depth.
+
+### Alternatives rejected
+
+**CAS in the store contract.** A compare-and-swap operation would fix the race for
+multi-instance too, but it changes the `StateStore` interface every store implements,
+including hosts' custom ones, and the conformance kit's eleven checks with it. The
+single-process fix delivers the measured property at no interface cost. Revisit if a
+multi-instance host appears.
+
+**Retry on lost update.** Detection needs a floor comparison per write and a retry policy
+per host. The queue makes the loss impossible rather than detected. Rejected.
+
+### Gates
+
+`src/core/guard.test.ts`: three tests named D77 — 20 concurrent evaluations of one entity
+accumulate all 20 negatives and the final state is the last writer's superset; one
+entity's queue does not stall another; `forget` behind an in-flight evaluation is not
+resurrected. Verified by mutation: removing the queue fails the accumulation test on the
+first concurrent pair.
+
+---
+
+## D78: The guard says when the integration looks broken
+
+### The hole
+
+The same integration mapped logout into `auth.refresh`, and every logout became a proven
+violation — 26 of 26 production rows, 14 of 14 staging ones, deterministic, each one
+poisoning a legitimate user's trust toward a mean of 0.02. Row by row the library was
+correct. The aggregate signal — one scope where every served row hard-violates the same
+invariant — was visible in the journal and in nothing the library produced. It was found
+by a human reading the whole journal, which is not a mechanism.
+
+### The decision
+
+The guard counts consecutive evaluations per (scope, invariant) that hard-violated the
+same invariant, process-locally. At a threshold (default 10, `integrationWarnings:
+{ minConsecutive }` to move it, `integrationWarnings: false` to turn off) the assessment
+and its event carry `integrationWarning: { kind: 'uniform-hard-violation', scope,
+invariant, count }` with a trace line. One evaluation of the scope without that invariant
+resets the count: hostile traffic mixes with refusals, other entities and other invariants;
+a mapping bug is uniform. The warning never reaches the decision.
+
+### Limits
+
+- **It is a hint about the integration, not a detector of anything hostile.** An attacker
+  who owns every request in a scope can trip it. That costs a trace line and an event
+  field; it never changes advice.
+- **Process-local counts.** Restart clears them, which is fine for a signal about
+  configuration: the misconfiguration restarts with the process too.
+- **10 is a reasoned default, not a calibrated one.** It is above what one hostile entity
+  sustains against mixed traffic and below where a silent mapping bug costs a day of rows.
+
+### Alternatives rejected
+
+**Suppress or downweight the advice of a degenerate scope.** The library would be second-guessing
+a host declaration, and a softening an attacker could induce by flooding one scope. The
+warning is surface only. Rejected.
+
+**Window-percentage detection.** The issue proposed "same invariant on ≥ X% of served rows
+in a window", which needs a clock, a window store, and a definition of served that the
+library does not have. Consecutive counting catches the documented failure and costs a Map.
+Rejected for now.
+
+### Gates
+
+`src/core/guard.test.ts`: four tests named D78 — the warning fires at the threshold with
+the advice unchanged; one clean evaluation resets it; `integrationWarnings: false` produces
+byte-identical advice; the threshold is configurable. `src/core/event.test.ts` asserts the
+event carries it. Verified by mutation: short-circuiting the tracker fails the threshold
+test.
+
+---
+
+## D79: Terminal transitions get their own fact or their own scope
+
+### The hole
+
+TESTING.md said five to eight scopes and warned against a scope per route. Nothing said
+what to do when two interactions share a scope and one always violates the other's
+invariant. The first integration put logout inside `auth.refresh`, whose rotation invariant
+must reject a 2xx that does not rotate — so every routine logout was a proven violation,
+deterministically, on both production and staging. The host asked which fix the library
+sanctions: a `sessionTerminated` fact the invariant accepts, or a ninth scope.
+
+### The decision
+
+Both, and the general rule stated: **interactions that always violate each other's
+invariants do not share a scope, or the invariant accepts a fact that distinguishes them.**
+
+- The fact form keeps logout inside `auth.refresh`: the host sends `sessionTerminated`,
+  and the rotation invariant accepts rotation or termination. The invariant's claim of
+  completeness becomes true again.
+- The scope form gives `auth.logout` its own scope, an expected ninth for a session-based
+  host, over the usual range and permanently under-sampled — acceptable there, because its
+  invariants are about what the host did, not what the traffic looks like.
+
+What is not sanctioned: leaving logout inside `auth.refresh` with the rotation invariant
+unchanged and reading the resulting hard violations as calibration data.
+
+`examples/integration/` gains the refresh invariant that accepts the terminal transition,
+with tests locking both sides: a 2xx logout with `sessionTerminated` is not a violation;
+a 2xx with neither still decides.
+
+### Limits
+
+- **The library does not enforce the rule.** A host can still mis-map; the D78 warning is
+  what says so.
+- **`sessionTerminated` is a documented convention, not a catalogue entry.** Facts belong
+  to the host (the inventory is explicit about that), so the guidance names the fact and
+  shows the invariant; the catalogue of signals and symptoms is untouched.
+
+### Alternatives rejected
+
+**Pick one officially.** The host already shipped the ninth scope and it works (56 rows,
+zero false positives); withdrawing it would churn a working integration to satisfy a
+range that was advice about diversity, not law. Rejecting the fact form would leave every
+future host with an under-sampled ninth scope as the only option. Rejected.
+
+### Gates
+
+`examples/integration/integration.test.ts`: two tests named D79 lock the advice on both
+sides of the transition. The docs change is prose and carries no gate beyond the docs
+check.
+
+---
+
+## D80: The journal hash is a kinded HMAC, documented rather than enforced
+
+### The hole
+
+The library's `hashEntity()` is `SHA-256(salt + "\u0000" + entity)`. The first integration
+journalled with `HMAC-SHA256(salt, kind + "\u0000" + value)`, truncated to 32 hex. Both
+satisfy "hash with a salt, never the raw reference", they are incompatible with each other,
+and no document said which pattern is recommended, why the kind prefix matters, or that the
+journal hash and the store key may legitimately diverge. The second integration would have
+had to rediscover the choice.
+
+### The decision
+
+`docs/ROOT-OF-TRUST.md` documents the kinded HMAC as the recommended journal pattern: the
+kind is domain separation (`user`, `session`, `cred`, `ipua` never collide across kinds),
+the 32-hex truncation keeps hash columns joinable at 128 bits, the salt is
+rotation-planned because hashes are only comparable within one salt generation, and
+journal hash and store key hash may diverge because nothing cross-compares them. The salt
+stays in configuration; an export carrying hashed entities never carries the salt beside
+it.
+
+The library does not enforce the pattern. Journaling is the host's code, and D1 keeps the
+store key raw and opaque.
+
+### Limits
+
+- **Documentation is not a gate.** Nothing fails when a host hashes differently; the cost
+  is that hashes stop comparing across integrations, which is invisible until someone
+  tries.
+- **128-bit truncation is a joinability trade.** A deployment that wants the full digest
+  should take it and keep it; changing the construction later is itself a rotation.
+
+### Alternatives rejected
+
+**Make the hash configurable in the frozen surface.** The store key needs no hash at all
+(D1), and the event identity already has its own construction. A config knob for the one
+place the host writes its own journal buys nothing the docs do not, at the price of a
+name in `api/` forever. Rejected.
+
+### Gates
+
+Prose only. The measured evidence it records — 723 entities over 578,365 production rows
+hashed this way without collision or resolution ambiguity beyond pre-auth entities whose
+sessions no longer exist — comes from the integration's reconciliation report, not from a
+test this repository can run.

@@ -29,7 +29,7 @@ export {
 } from './core/trust.ts';
 export type { EntityState } from './core/trust.ts';
 
-export { memoryStore, DEFAULT_SWEEP_EVERY } from './core/store.ts';
+export { memoryStore, DEFAULT_SWEEP_EVERY, DEFAULT_STORE_DEADLINE_MS, StoreDeadlineError } from './core/store.ts';
 export type { MemoryStore, MemoryStoreOptions, StateStore } from './core/store.ts';
 
 export { checkStoreConformance, assertConformant } from './core/conformance.ts';
@@ -83,8 +83,11 @@ export type {
   EvidenceStrength,
   Guard,
   GuardOptions,
+  IntegrationWarning,
   Observation,
 } from './core/guard.ts';
+
+export { DEFAULT_INTEGRATION_WARNING_MIN_CONSECUTIVE } from './core/policy.ts';
 
 export {
   behaviorFeatures,

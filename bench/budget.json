@@ -1,16 +1,16 @@
 {
-  "measuredAt": "2026-10-24",
+  "measuredAt": "2026-10-31",
   "iterations": 2000,
-  "note": "p95Ms is twice the p95 measured on the recording machine; the check fails at twice this value again.",
+  "note": "p95Ms is twice the p95 measured on the recording machine; the check fails at twice this value again. Re-recorded for 0.3.0 (was 2026-10-24): D76's per-evaluation deadline and D77's per-entity queue cost promises and one timer per evaluation, which lands mostly on p95 through GC (sqlite p50 0.22 -> 0.30 ms). The cost is the price of two correctness properties measured in the field; recorded in the 0.3.0 CHANGELOG entry.",
   "stores": {
     "memory": {
-      "p95Ms": 0.0414
+      "p95Ms": 0.1532
     },
     "sqlite": {
-      "p95Ms": 1.2086
+      "p95Ms": 8.354
     },
     "kv": {
-      "p95Ms": 0.0245
+      "p95Ms": 0.0984
     }
   }
 }

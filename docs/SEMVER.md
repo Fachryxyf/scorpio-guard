@@ -10,7 +10,7 @@ policy, a migration guide, and a deprecation policy; this is the first and third
 0.2.0 has been on npm since 2026-10-28, and 0.1.0 stays installable for rollback. How it
 was published, and what the earlier account freeze did to it, is recorded in
 [RELEASING.md](RELEASING.md), not here. From 0.2.0 onward the exported surface is written
-down in `api/v0.2.json` and checked on every push.
+down in `api/v0.3.json` and checked on every push.
 
 ## What each number promises
 
@@ -46,13 +46,13 @@ documents it, so the removal is always a visible act.
 ## The gate
 
 ```
-npm run api -- --write    # rewrite api/v0.2.json, deliberately
+npm run api -- --write    # rewrite api/v0.3.json, deliberately
 npm run api -- --check    # compare the built package with the snapshot
 ```
 
 `scripts/api-surface.mjs` reads the emitted declarations with the TypeScript checker and
 records every exported name per entry point, plus whether it is a type, a value, or both.
-As of 0.2.0 that is 140 names across four entries: 102 in `.`, 27 in `./collect`, 3 in
+As of 0.3.0 that is 144 names across four entries: 106 in `.`, 27 in `./collect`, 3 in
 `./sqlite`, 8 in `./kv`. Additions fail the check as well as removals, so a new export is
 never accidental, and the snapshot only moves in a commit that also moves the CHANGELOG.
 

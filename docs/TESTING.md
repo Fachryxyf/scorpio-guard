@@ -1,10 +1,10 @@
-# Testing 0.2.0
+# Testing 0.3.0
 
 A stranger should be able to install this, wire it into one application, and have
 something worth reporting back inside a working session. This page is that session,
 written for someone who has never read the rest of the repository.
 
-It covers what 0.2.0 asks you to test, the four parts of an integration, the two
+It covers what 0.3.0 asks you to test, the four parts of an integration, the two
 mistakes that make results meaningless, both reporting paths, and the limits you should
 not read past.
 
@@ -19,7 +19,7 @@ It does not read message content, does not store credentials, and never blocks o
 own. The host writes the code that acts, which is the point of it being a library
 (D9, D14).
 
-## What 0.2.0 asks you to test
+## What 0.3.0 asks you to test
 
 1. False positives on your own traffic. A legitimate client that is advised friction is
    the failure this design treats as central, more than a missed attacker.
@@ -28,14 +28,14 @@ own. The host writes the code that acts, which is the point of it being a librar
 3. That the decision journal you keep can support calibration later. Advice without an
    outcome next to it cannot be calibrated, only believed.
 
-What is not under test: automatic enforcement. Nothing in 0.2.0 acts on your behalf.
+What is not under test: automatic enforcement. Nothing in 0.3.0 acts on your behalf.
 
 ## Install
 
 Node 22.13 or newer. The `./sqlite` entry uses `node:sqlite`, which is why the floor is
 higher than the runtime the rest of the library needs.
 
-While the registry serves a version older than 0.2.0, build a tarball from `main`:
+While the registry serves a version older than 0.3.0, build a tarball from `main`:
 
 ```
 git clone https://github.com/Fachryxyf/scorpio-guard.git
@@ -45,11 +45,11 @@ npm run build
 npm pack
 ```
 
-That writes `fachryxyf-scorpio-guard-0.2.0.tgz`. Install it into the application you are
+That writes `fachryxyf-scorpio-guard-0.3.0.tgz`. Install it into the application you are
 testing:
 
 ```
-npm install /path/to/fachryxyf-scorpio-guard-0.2.0.tgz
+npm install /path/to/fachryxyf-scorpio-guard-0.3.0.tgz
 ```
 
 Then check that the entry point loads:
@@ -63,8 +63,7 @@ that is the first report you send.
 
 Pin the exact version rather than a caret range. No threshold in this library is
 calibrated against a real population yet, so a minor bump can move the advice, and a
-range would pull that in silently. The current blocker on publishing 0.2.0 and the
-commit that removes it are in [RELEASING.md](RELEASING.md).
+range would pull that in silently. The release runbook is in [RELEASING.md](RELEASING.md).
 
 ## An integration is four things
 
@@ -405,7 +404,7 @@ public. [SECURITY.md](../SECURITY.md) lists what is in scope.
 ```
 Title: [component] one line
 
-Guard version: 0.2.0, tarball from main at <commit>
+Guard version: 0.3.0, tarball from main at <commit>
 Node: v22.x   OS: <os>
 Integration: <framework>, store: <sqlite / kv / memory>, processes: <n>
 
@@ -489,10 +488,10 @@ Everything below runs from the repository and needs no code of your own:
 
 ```
 npm ci
-npm test                       # 356 tests
+npm test                       # 378 tests
 npm run example:integration    # three scenarios: login, a stolen session, over-consumption
 npm run protocol:check         # 54 interop tests for the v0.1 protocol
-npm run check:api              # the frozen surface: 140 names across four entries
+npm run check:api              # the frozen surface: 144 names across four entries
 npm run site:check             # 12 rendered pages
 ```
 
@@ -501,7 +500,7 @@ did, which is the shortest way to see the shape of a decision before writing one
 
 ## Definition of done for a session
 
-- [ ] 0.2.0 installed from a tarball, with the commit recorded.
+- [ ] 0.3.0 installed from a tarball, with the commit recorded.
 - [ ] Two scopes wired, one of them the login scope.
 - [ ] Three to five invariants, each with a written reason for `hard` or `soft`.
 - [ ] The entity key verified not to merge two different people on the same network.
@@ -524,7 +523,7 @@ did, which is the shortest way to see the shape of a decision before writing one
    signatures` checks the signatures and the attestation for what you have installed.
 4. **One maintainer.** There are no required status checks and no second reviewer. CI is
    discipline, not a gate. Read the diff before you move a version.
-5. **The exported surface is frozen** in `api/v0.2.json`. A removal counts as a major
+5. **The exported surface is frozen** in `api/v0.3.json`. A removal counts as a major
    change even below 1.0.0 (D74). If your test needs a name that is missing, that is a
    finding, not a reason to patch locally.
 6. **Vulnerabilities go to the advisory channel**, not to an issue.

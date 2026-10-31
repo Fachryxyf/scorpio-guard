@@ -303,46 +303,66 @@ export function createGuard(options: GuardOptions = {}) {
   }
 
   /**
-   * Bound one store operation by the deadline. D76.
+   * One deadline per evaluation, not one per operation. D76.
    *
-   * Resolves `{ ok: false }` when the operation did not land in time, in which
-   * case the losing promise is left to settle on its own: a `set` that lands
-   * after the deadline has already answered still writes the state it was
-   * given, which is safe, and a `get` that answers late is simply discarded.
-   * Store errors rethrow: only the wait is bounded, not the failure semantics
-   * the store itself chose (D62).
+   * `bound` resolves `{ ok: false }` for any operation still pending when the
+   * evaluation's store budget ran out, and rethrows store errors untouched —
+   * only the wait is bounded, not the failure semantics the store itself chose
+   * (D62). The timer is armed by the first store call and disposed when the
+   * evaluation finishes, so a healthy store pays one timer per evaluation
+   * rather than one per operation. A set that lands after the deadline has
+   * already answered still writes the state it was given, which is safe; a get
+   * that answers late is simply discarded.
    */
-  async function bound<T>(operation: Promise<T>): Promise<{ ok: true; value: T } | { ok: false }> {
+  /** Shared result for operations that did not land before the deadline. Immutable, so reusable. */
+  const NOT_LANDED: { ok: false } = Object.freeze({ ok: false });
+
+  function startStoreDeadline() {
     if (!(deadlineMs > 0)) {
-      return { ok: true, value: await operation };
+      return {
+        bound: async <T>(operation: Promise<T>) => ({ ok: true as const, value: await operation }),
+        dispose: () => {},
+      };
     }
     let timer: ReturnType<typeof setTimeout> | undefined;
-    const expired = new Promise<never>((_, reject) => {
-      timer = setTimeout(() => reject(new StoreDeadlineError(deadlineMs)), deadlineMs);
-    });
-    try {
-      return { ok: true, value: await Promise.race([operation, expired]) };
-    } catch (error) {
-      if (error instanceof StoreDeadlineError) return { ok: false };
-      throw error;
-    } finally {
-      clearTimeout(timer);
-    }
+    let expired: Promise<never> | undefined;
+    let fired = false;
+    return {
+      async bound<T>(operation: Promise<T>): Promise<{ ok: true; value: T } | { ok: false }> {
+        if (fired) return NOT_LANDED;
+        expired ??= new Promise<never>((_, reject) => {
+          timer = setTimeout(() => {
+            fired = true;
+            reject(new StoreDeadlineError(deadlineMs));
+          }, deadlineMs);
+        });
+        try {
+          return { ok: true, value: await Promise.race([operation, expired]) };
+        } catch (error) {
+          if (error instanceof StoreDeadlineError) return NOT_LANDED;
+          throw error;
+        }
+      },
+      dispose() {
+        clearTimeout(timer);
+      },
+    };
   }
 
   /** Load state, treating absent and expired alike. D6. */
   async function load(
     entity: string,
     now: number,
+    deadline: ReturnType<typeof startStoreDeadline>,
   ): Promise<{ state: EntityState; coldStart: boolean; degraded: boolean }> {
-    const got = await bound(store.get(entity));
+    const got = await deadline.bound(store.get(entity));
     if (!got.ok) return { state: freshState(now), coldStart: true, degraded: true };
 
     const stored = got.value;
     if (!stored) return { state: freshState(now), coldStart: true, degraded: false };
 
     if (isExpired(stored, now, policy.retentionHours)) {
-      const deleted = await bound(store.delete(entity));
+      const deleted = await deadline.bound(store.delete(entity));
       return { state: freshState(now), coldStart: true, degraded: !deleted.ok };
     }
     return { state: stored, coldStart: false, degraded: false };
@@ -353,8 +373,10 @@ export function createGuard(options: GuardOptions = {}) {
     const startedAt = performance.now();
     const observation = input.observation ?? {};
     const trace: string[] = [];
+    const deadline = startStoreDeadline();
 
-    const { state, coldStart, degraded } = await load(input.entity, now);
+    try {
+    const { state, coldStart, degraded } = await load(input.entity, now, deadline);
     let storeDegraded = degraded;
     if (coldStart) trace.push('cold start: no retained state, prior is Beta(1,1)');
     if (degraded) {
@@ -434,7 +456,7 @@ export function createGuard(options: GuardOptions = {}) {
         policy.halfLifeHours,
       );
       const updated: EntityState = { ...withEvidence, window };
-      const put = await bound(store.set(input.entity, updated));
+      const put = await deadline.bound(store.set(input.entity, updated));
       if (!put.ok) {
         storeDegraded = true;
         trace.push(
@@ -533,6 +555,9 @@ export function createGuard(options: GuardOptions = {}) {
       }
 
       return assessment;
+    } finally {
+      deadline.dispose();
+    }
   }
 
   return {
@@ -547,8 +572,8 @@ export function createGuard(options: GuardOptions = {}) {
      * is removed when its chain settles, so the map holds only in-flight entities.
      */
     async evaluate(input: EvaluateInput): Promise<Assessment> {
-      const previous = inFlight.get(input.entity) ?? Promise.resolve();
-      const result = previous.then(() => evaluateOnce(input));
+      const previous = inFlight.get(input.entity);
+      const result = previous === undefined ? evaluateOnce(input) : previous.then(() => evaluateOnce(input));
       const tail = result.then(
         () => undefined,
         () => undefined,
@@ -570,8 +595,13 @@ export function createGuard(options: GuardOptions = {}) {
      */
     async forget(entity: string): Promise<void> {
       await (inFlight.get(entity) ?? Promise.resolve());
-      const deleted = await bound(store.delete(entity));
-      if (!deleted.ok) throw new StoreDeadlineError(deadlineMs);
+      const deadline = startStoreDeadline();
+      try {
+        const deleted = await deadline.bound(store.delete(entity));
+        if (!deleted.ok) throw new StoreDeadlineError(deadlineMs);
+      } finally {
+        deadline.dispose();
+      }
     },
   };
 }

@@ -18,6 +18,75 @@ signature moved. The rules are therefore narrower than semver's default reading:
   `docs/ROADMAP.md` §1: a calibration dataset with published composition, the
   protocol running end to end, and a frozen API after a directed security review.
 
+## [0.3.0] - unreleased
+
+The first minor informed by a real integration: a CRM host ran 0.2.0 in front of
+production and staging traffic, journaled 578,365 production evaluations and 5,123
+labelled pentest evaluations, and reported five findings. Two of them were library
+defects measured in the field, two were guidance gaps, and the fifth became the first
+real-traffic calibration this project has. Every behavior change below carries the field
+evidence that motivated it; the numbers are in `docs/DATASET.md` (host dataset section)
+and the decisions are D76–D80.
+
+### Added
+
+- A store deadline. `storeDeadlineMs` (default 100, `DEFAULT_STORE_DEADLINE_MS`, zero
+  disables) bounds every store operation the guard performs. Past the deadline the
+  evaluation answers without retained state and carries `storeDegraded: true` on the
+  assessment and the event; `forget()` throws `StoreDeadlineError` instead, because an
+  erasure that silently did nothing would lie about the data being gone (D76). Before, a
+  KV outage hung every host request for as long as the transport would retry — measured at
+  about 305 seconds per request on the integration. After, the advice arrives within the
+  deadline and the outage is visible in the event stream.
+- An integration warning. When one scope's evaluations uniformly hard-violate the same
+  invariant — 26 of 26 production logouts, 14 of 14 staging ones on the integration, all
+  silently poisoning legitimate trust — the assessment and event now carry
+  `integrationWarning: { kind: 'uniform-hard-violation', scope, invariant, count }`
+  (D78). Threshold: 10 consecutive, `integrationWarnings: { minConsecutive }` to move,
+  `false` to turn off. One clean evaluation of the scope resets the count. The warning
+  never changes the advice.
+- `npm run calibrate:host`: the policy grid replayed against the first real host
+  journal, with the host's seven invariants reconstructed and validated against the
+  recorded violation sets (5,122 of 5,123 rows agree) and the evidence attribution
+  derived from recorded trust deltas. The shipped policy cell has the lowest decision
+  drift of the nine, and no cell moves the FP/FN counts — the first measured statement
+  that the constants are not where the integration's false positives live.
+- Terminal-transition guidance (D79) and the entity-hash override pattern (D80) in
+  `docs/TESTING.md` and `docs/ROOT-OF-TRUST.md`, from integration issues 01, 04 and 05.
+
+### Changed
+
+- Evaluations of one entity are serialized (D77). The store contract is `get`/`set`, so
+  two concurrent evaluations of one entity both read the same state and the last writer
+  erased the other's evidence: 5,817 journal rows (1.229%) on the integration fell below
+  their decay-adjusted floor. Before, concurrent evaluations of one entity lost updates
+  silently; after, they queue, different entities still run concurrently, and `forget`
+  waits behind an in-flight evaluation so a delete cannot be resurrected. Advice for the
+  same input and the same stored state is unchanged; what changed is that concurrent
+  evidence can no longer vanish.
+- The bench budget was re-recorded for the first time since 2026-10-24, deliberately and
+  with the reason stated: D76's per-evaluation deadline and D77's per-entity queue cost
+  one timer and roughly ten promises per evaluation, which lands on p95 through GC.
+  Measured on the recording machine, 2,000 iterations per store: sqlite p50 0.30 ms
+  (was 0.22) and p95 4.2 ms (was 1.2); memory p95 0.15 ms (was 0.04); kv p95 0.10 ms
+  (was 0.02). `bench/budget.json` carries the same note. This is the price of two
+  correctness properties measured in the field, not a regression to be chased below the
+  old budget by removing them.
+- `ASSESSMENT_EVENT_SCHEMA` stays 1. `storeDegraded` and `integrationWarning` are additive
+  fields; the schema bumps only when a field changes meaning or disappears.
+
+### Frozen surface
+
+- `api/v0.3.json`, 144 names across four entries: 106 in `.`, 27 in `./collect`, 8 in
+  `./kv`, 3 in `./sqlite`. Four names added, none removed, no kind changes:
+  `DEFAULT_INTEGRATION_WARNING_MIN_CONSECUTIVE` (value), `DEFAULT_STORE_DEADLINE_MS`
+  (value), `IntegrationWarning` (type), `StoreDeadlineError` (both).
+
+### Release status
+
+Not yet published. This heading gets its date from the release commit that tags `v0.3.0`;
+the runbook and its preconditions are in `docs/RELEASING.md`.
+
 ## [0.2.1] - 2026-10-28
 
 Documentation only. No code, no exported name, no threshold, and no advice for the same

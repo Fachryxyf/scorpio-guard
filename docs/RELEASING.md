@@ -66,7 +66,7 @@ npm run protocol:check
 npm run example:integration
 ```
 
-`check:api` is the freeze: it compares the built declarations with `api/v0.2.json` and
+`check:api` is the freeze: it compares the built declarations with `api/v0.3.json` and
 fails on any added, removed, or re-kinded name. If it fails, the release commit is the one
 that has to explain why.
 
