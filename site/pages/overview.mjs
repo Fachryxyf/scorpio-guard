@@ -277,8 +277,8 @@ ${portals}
     file: 'index.html',
     titleEn: 'Scorpio Guard',
     titleId: 'Scorpio Guard',
-    subtitleEn: 'Trust is a spectrum, not a verdict. A local, advisory trust-evaluation library, published at 0.2.1 and calibrated against nothing.',
-    subtitleId: 'Trust itu spektrum, bukan putusan. Library evaluasi trust yang lokal dan bersifat saran, terbit di 0.2.1 dan belum dikalibrasi terhadap apa pun.',
+    subtitleEn: 'Trust is a spectrum, not a verdict. A local, advisory trust-evaluation library. The first real integration\'s journal has been replayed against the policy grid; a population has not.',
+    subtitleId: 'Trust itu spektrum, bukan putusan. Library evaluasi trust yang lokal dan bersifat saran. Jurnal integrasi nyata pertama sudah direplay terhadap grid policy; populasi belum.',
     sections,
     body,
   });

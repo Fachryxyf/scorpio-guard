@@ -609,8 +609,8 @@ ${prevnext}
 <footer>
   <p>
     ${t(
-      'Scorpio Guard is published at 0.2.1 and calibrated against nothing. Every number on this site is generated from the code that produces it; none of it has met a real population.',
-      'Scorpio Guard terbit di 0.2.1 dan belum dikalibrasi terhadap apa pun. Setiap angka di situs ini dihasilkan dari kode yang memproduksinya; belum ada satu pun yang bertemu populasi nyata.',
+      'Scorpio Guard carries 0.3.0 in the repository; the registry\'s newest is on the versions page. The first real integration\'s journal has been replayed against the grid. Every number on this site is generated from the code that produces it; none of it has met a real population.',
+      'Scorpio Guard membawa 0.3.0 di repositori; versi terbaru di ada di halaman versi. Jurnal integrasi nyata pertama sudah direplay terhadap grid. Setiap angka di situs ini dihasilkan dari kode yang memproduksinya; belum ada satu pun yang bertemu populasi nyata.',
     )}
   </p>
   <p>

@@ -205,7 +205,7 @@ The version policy is in [docs/SEMVER.md](https://github.com/Fachryxyf/scorpio-g
 minor may move it and records every move, and a removal is always a major. The upgrade
 from 0.1.0 is [docs/MIGRATION.md](https://github.com/Fachryxyf/scorpio-guard/blob/main/docs/MIGRATION.md), measured against the published
 tarball: the API only gained names, and the advice changes are listed with what they
-replace. The surface is held by the API check against `api/v0.2.json`, decided in D74.
+replace. The surface is held by the API check against `api/v0.3.json`, decided in D74.
 
 Node 22.13 or newer, ESM only. Four entry points: `.` for the model, `./collect` for
 the browser collector, `./sqlite` for the single-host durable store, `./kv` for the
@@ -388,7 +388,7 @@ npm run protocol:serve  # the reference receiver for the v0.1 wire format
 npm run protocol:check  # both implementations against the fixtures, plus HTTP behaviour
 npm run pack:check            # pack, inspect, install the tarball somewhere empty
 npm run claims    # regenerate docs/CLAIMS.md from DECISIONS.md and the tests
-npm run api       # record or rewrite the frozen API surface (api/v0.2.json)
+npm run api       # record or rewrite the frozen API surface (api/v0.3.json)
 npm run check:api # the built declarations must match the frozen surface
 npm run check:manifest        # manifest and lockfile must agree
 npm run check:docs            # numbers in the README must match the rendered site

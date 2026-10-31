@@ -61,11 +61,12 @@ export function usage(data) {
     ${h2(1, 'install', 'Install', 'Pasang')}
 
     <pre>npm install @fachryxyf/scorpio-guard
-npm install @fachryxyf/scorpio-guard@0.2.1   # pin what you tested</pre>
+npm install @fachryxyf/scorpio-guard@0.2.1   # pin what you tested
+# 0.3.0 is versioned in the repository and pending its tag; this line is what the registry serves today</pre>
 
     <p>${t(
-      '<code>0.2.1</code> is what the registry served on 2026-10-28, a documentation-only patch over 0.2.0. This page is generated from the repository, so it cannot promise what the registry serves tomorrow: the <a href="versions.html">versions page</a> holds that record. Pin the exact version, not a caret range. No threshold here is calibrated against a real population, so a minor bump may move advice, and <code>^0.2.1</code> would pull that in silently.',
-      '<code>0.2.1</code> adalah versi yang dilayani registry pada 2026-10-28, patch khusus dokumentasi di atas 0.2.0. Halaman ini dibangkitkan dari repositori, jadi ia tidak bisa menjanjikan apa yang dilayani registry besok: <a href="versions.html">halaman versi</a> yang memegang catatan itu. Patok versi tepat, bukan rentang caret. Tak ada ambang di sini yang terkalibrasi terhadap populasi nyata, jadi kenaikan minor bisa menggeser saran, dan <code>^0.2.1</code> akan menariknya diam-diam.',
+      '<code>0.2.1</code> is the newest tarball the registry has accepted, a documentation-only patch over 0.2.0. <code>0.3.0</code> is versioned in the repository and pending its tag; it bounds store waits (D76), serializes per-entity evaluations (D77), and names degenerate scopes (D78). This page is generated from the repository, so it cannot promise what the registry serves tomorrow: the <a href="versions.html">versions page</a> holds that record. Pin the exact version, not a caret range. No threshold here is calibrated against a real population, so a minor bump may move advice, and a caret range would pull that in silently.',
+      '<code>0.2.1</code> adalah tarball terbaru yang diterima registry, patch khusus dokumentasi di atas 0.2.0. <code>0.3.0</code> sudah beku di repositori dan menunggu tag; ia membatasi waktu tunggu store (D76), menserialisasi evaluasi per entity (D77), dan menamai scope degenerate (D78). Halaman ini dibangkitkan dari repositori, jadi ia tidak bisa menjanjikan apa yang dilayani registry besok: <a href="versions.html">halaman versi</a> yang memegang catatan itu. Patok versi tepat, bukan rentang caret. Tak ada ambang di sini yang terkalibrasi terhadap populasi nyata, jadi kenaikan minor bisa menggeser saran, dan rentang caret akan menariknya diam-diam.',
     )}</p>
 
     <div class="scroll">
