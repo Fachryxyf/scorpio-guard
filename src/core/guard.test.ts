@@ -5,7 +5,8 @@ import type { Clock } from './clock.ts';
 import { severity, type Decision } from './decision.ts';
 import { createGuard } from './guard.ts';
 import { DEFAULT_RETENTION_HOURS, DEFAULT_WEIGHTS } from './policy.ts';
-import { memoryStore } from './store.ts';
+import { memoryStore, StoreDeadlineError } from './store.ts';
+import type { StateStore } from './store.ts';
 import { WEAK_SIGNALS } from './signals.ts';
 import { transitionGraph } from './transitions.ts';
 import { evidenceMass } from './trust.ts';
@@ -675,4 +676,71 @@ test('D77: forget waits behind an in-flight evaluation instead of being resurrec
   await Promise.all([evaluating, forgetting]);
 
   assert.equal(inner.size(), 0, 'the evaluation\'s write must not resurrect forgotten state');
+});
+
+test('D76: a store that never answers is bounded, and the evaluation still advises', { timeout: 5000 }, async () => {
+  const clock = fakeClock();
+  const store: StateStore = {
+    get: () => new Promise(() => {}),
+    set: async () => {},
+    delete: async () => {},
+  };
+  const guard = createGuard({ clock, store, storeDeadlineMs: 20 });
+
+  const result = await guard.evaluate({ entity: 'e1' });
+
+  assert.equal(result.decision, 'ALLOW', 'an advisory guard answers even when the store cannot');
+  assert.equal(result.coldStart, true, 'an unread store reads as cold start');
+  assert.equal(result.storeDegraded, true);
+  assert.match(result.trace.join(' '), /store degraded: the read did not land within 20ms/);
+});
+
+test('D76: a state write that misses the deadline is reported, and the loss is real', { timeout: 5000 }, async () => {
+  const clock = fakeClock();
+  const inner = memoryStore();
+  let writes = 0;
+  const store: StateStore = {
+    get: (entity) => inner.get(entity),
+    set: (entity, state) => {
+      writes += 1;
+      return writes === 1 ? new Promise(() => {}) : inner.set(entity, state);
+    },
+    delete: (entity) => inner.delete(entity),
+  };
+  const guard = createGuard({ clock, store, storeDeadlineMs: 20 });
+
+  const result = await guard.evaluate({ entity: 'e1', observation: { evidence: { negative: 'strong' } } });
+
+  assert.equal(result.storeDegraded, true);
+  assert.match(result.trace.join(' '), /state write did not land within 20ms/);
+
+  const next = await guard.evaluate({ entity: 'e1' });
+  assert.equal(next.coldStart, true, 'the lost write really is lost');
+  assert.equal(next.storeDegraded, false, 'a store that answers is not flagged');
+});
+
+test('D76: forget throws when the delete does not land within the deadline', { timeout: 5000 }, async () => {
+  const store: StateStore = {
+    get: async () => undefined,
+    set: async () => {},
+    delete: () => new Promise(() => {}),
+  };
+  const guard = createGuard({ clock: fakeClock(), store, storeDeadlineMs: 20 });
+
+  await assert.rejects(() => guard.forget('e1'), StoreDeadlineError);
+});
+
+test('D76: zero disables the deadline for a deliberately slow store', { timeout: 5000 }, async () => {
+  const clock = fakeClock();
+  const slow: StateStore = {
+    get: (entity) => new Promise((resolve) => setTimeout(() => resolve(undefined), 30)),
+    set: async () => {},
+    delete: async () => {},
+  };
+
+  const bounded = createGuard({ clock, store: slow, storeDeadlineMs: 20 });
+  assert.equal((await bounded.evaluate({ entity: 'e1' })).storeDegraded, true, '30ms misses a 20ms deadline');
+
+  const unbounded = createGuard({ clock, store: slow, storeDeadlineMs: 0 });
+  assert.equal((await unbounded.evaluate({ entity: 'e1' })).storeDegraded, false, 'zero disables the bound');
 });

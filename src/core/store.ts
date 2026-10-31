@@ -58,6 +58,35 @@ export type MemoryStore = StateStore & {
 export const DEFAULT_SWEEP_EVERY = 512;
 
 /**
+ * How long the guard waits on one store operation before it stops waiting. D76.
+ *
+ * Fail-open (D62) only protects the host as fast as the transport admits: a
+ * transport that retries for minutes turns a store outage into a host outage
+ * while technically still failing open. Measured on a real integration before
+ * this default existed: with the KV service stopped, every host request hung
+ * about 305 seconds, including requests that would have ended in 401 anyway.
+ * The guard is advisory, so the honest failure mode is to answer without
+ * retained state rather than to wait. Zero disables the deadline for a host
+ * whose store is deliberately slow.
+ */
+export const DEFAULT_STORE_DEADLINE_MS = 100;
+
+/**
+ * Thrown by `forget()` when the store's delete does not land within the
+ * deadline. Unlike evaluation, which can answer without state, forgetting is
+ * an explicit request whose failure the caller must hear about: a retention or
+ * erasure call that silently did nothing would lie about the data being gone.
+ */
+export class StoreDeadlineError extends Error {
+  readonly deadlineMs: number;
+  constructor(deadlineMs: number) {
+    super(`store deadline: operation did not land within ${deadlineMs}ms (D76)`);
+    this.name = 'StoreDeadlineError';
+    this.deadlineMs = deadlineMs;
+  }
+}
+
+/**
  * In-memory store. The default, and a real implementation rather than a stub.
  *
  * Process-local by construction: it resets on restart and is invisible to other

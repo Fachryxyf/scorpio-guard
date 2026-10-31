@@ -68,6 +68,12 @@ export type AssessmentEvent = {
   readonly hardViolated: boolean;
   readonly coldStart: boolean;
   /**
+   * A store operation did not land within the deadline (D76): the advice was
+   * given without retained state, or the state write was lost. Never a property
+   * of the traffic; a run of these is an outage to alert on.
+   */
+  readonly storeDegraded: boolean;
+  /**
    * The same explanation the assessment returns.
    *
    * Hosts that put scope names in `observation.scope` should keep those names free of
@@ -132,6 +138,7 @@ export async function toAssessmentEvent(
     })),
     hardViolated: assessment.hardViolated,
     coldStart: assessment.coldStart,
+    storeDegraded: assessment.storeDegraded,
     trace: assessment.trace,
   };
 

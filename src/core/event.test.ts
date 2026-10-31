@@ -67,6 +67,7 @@ test('D61: one event per evaluation, in a versioned shape', async () => {
       'hardViolated',
       'schemaVersion',
       'stage',
+      'storeDegraded',
       'trace',
       'trust',
       'uncertainty',
@@ -78,6 +79,7 @@ test('D61: one event per evaluation, in a versioned shape', async () => {
   assert.equal(event.decision, assessment.decision);
   assert.equal(event.stage, assessment.trust.stage);
   assert.equal(event.uncertainty, assessment.trust.uncertainty);
+  assert.equal(event.storeDegraded, assessment.storeDegraded);
   assert.deepEqual(event.trust, {
     mean: assessment.trust.mean,
     variance: assessment.trust.variance,

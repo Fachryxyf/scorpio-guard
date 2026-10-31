@@ -30,7 +30,12 @@ import {
 } from './event.ts';
 import { signalMass, type WeakSignal } from './signals.ts';
 import { DEFAULT_POLICY, hardViolationDecision, type Policy } from './policy.ts';
-import { memoryStore, type StateStore } from './store.ts';
+import {
+  DEFAULT_STORE_DEADLINE_MS,
+  memoryStore,
+  StoreDeadlineError,
+  type StateStore,
+} from './store.ts';
 import {
   applyEvidence,
   evidenceMass,
@@ -110,6 +115,13 @@ export type Assessment = {
   readonly hardViolated: boolean;
   /** True when state was absent or past its retention horizon. D6, D21. */
   readonly coldStart: boolean;
+  /**
+   * True when a store operation did not land within the deadline (D76): the
+   * advice was given without retained state, or the state write was lost. A
+   * run of these is an outage the host must alert on, not a property of the
+   * traffic.
+   */
+  readonly storeDegraded: boolean;
   readonly context: EvaluationContext | undefined;
   /** Why this outcome, in order of what actually decided it. D23. */
   readonly trace: readonly string[];
@@ -169,6 +181,20 @@ export type GuardOptions = {
    * breaks correlation in the log rather than in the state.
    */
   readonly identity?: AssessmentIdentity;
+
+  /**
+   * How long one store operation may hold the evaluation before the guard
+   * stops waiting. D76. Defaults to `DEFAULT_STORE_DEADLINE_MS` (100ms); zero
+   * disables the bound for a host whose store is deliberately slow.
+   *
+   * Fail-open (D62) is only as fast as the transport admits, and a transport
+   * that retries for minutes turns a store outage into a host outage. Past the
+   * deadline the evaluation answers without retained state (a cold start), the
+   * assessment and its event carry `storeDegraded: true`, and the state write,
+   * if it was the one lost, does not land. Store errors keep their existing
+   * semantics; only the wait is bounded.
+   */
+  readonly storeDeadlineMs?: number;
 };
 
 export type EvaluateInput = {
@@ -202,26 +228,68 @@ export function createGuard(options: GuardOptions = {}) {
   /** Chains one in-flight evaluation per entity. D77. */
   const inFlight = new Map<string, Promise<void>>();
 
+  const deadlineMs = options.storeDeadlineMs ?? DEFAULT_STORE_DEADLINE_MS;
+
+  /**
+   * Bound one store operation by the deadline. D76.
+   *
+   * Resolves `{ ok: false }` when the operation did not land in time, in which
+   * case the losing promise is left to settle on its own: a `set` that lands
+   * after the deadline has already answered still writes the state it was
+   * given, which is safe, and a `get` that answers late is simply discarded.
+   * Store errors rethrow: only the wait is bounded, not the failure semantics
+   * the store itself chose (D62).
+   */
+  async function bound<T>(operation: Promise<T>): Promise<{ ok: true; value: T } | { ok: false }> {
+    if (!(deadlineMs > 0)) {
+      return { ok: true, value: await operation };
+    }
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const expired = new Promise<never>((_, reject) => {
+      timer = setTimeout(() => reject(new StoreDeadlineError(deadlineMs)), deadlineMs);
+    });
+    try {
+      return { ok: true, value: await Promise.race([operation, expired]) };
+    } catch (error) {
+      if (error instanceof StoreDeadlineError) return { ok: false };
+      throw error;
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
   /** Load state, treating absent and expired alike. D6. */
-  async function load(entity: string, now: number): Promise<{ state: EntityState; coldStart: boolean }> {
-    const stored = await store.get(entity);
-    if (!stored) return { state: freshState(now), coldStart: true };
+  async function load(
+    entity: string,
+    now: number,
+  ): Promise<{ state: EntityState; coldStart: boolean; degraded: boolean }> {
+    const got = await bound(store.get(entity));
+    if (!got.ok) return { state: freshState(now), coldStart: true, degraded: true };
+
+    const stored = got.value;
+    if (!stored) return { state: freshState(now), coldStart: true, degraded: false };
 
     if (isExpired(stored, now, policy.retentionHours)) {
-      await store.delete(entity);
-      return { state: freshState(now), coldStart: true };
+      const deleted = await bound(store.delete(entity));
+      return { state: freshState(now), coldStart: true, degraded: !deleted.ok };
     }
-    return { state: stored, coldStart: false };
+    return { state: stored, coldStart: false, degraded: false };
   }
 
   async function evaluateOnce(input: EvaluateInput): Promise<Assessment> {
     const now = clock.now();
-      const startedAt = performance.now();
-      const observation = input.observation ?? {};
-      const trace: string[] = [];
+    const startedAt = performance.now();
+    const observation = input.observation ?? {};
+    const trace: string[] = [];
 
-      const { state, coldStart } = await load(input.entity, now);
-      if (coldStart) trace.push('cold start: no retained state, prior is Beta(1,1)');
+    const { state, coldStart, degraded } = await load(input.entity, now);
+    let storeDegraded = degraded;
+    if (coldStart) trace.push('cold start: no retained state, prior is Beta(1,1)');
+    if (degraded) {
+      trace.push(
+        `store degraded: the read did not land within ${deadlineMs}ms, evaluating without retained state (D76)`,
+      );
+    }
 
       // Declared invariants first: they are proof, and proof does not depend on
       // accumulated trust. D15, D16.
@@ -284,7 +352,13 @@ export function createGuard(options: GuardOptions = {}) {
         policy.halfLifeHours,
       );
       const updated: EntityState = { ...withEvidence, window };
-      await store.set(input.entity, updated);
+      const put = await bound(store.set(input.entity, updated));
+      if (!put.ok) {
+        storeDegraded = true;
+        trace.push(
+          `store degraded: the state write did not land within ${deadlineMs}ms, this update is lost (D76)`,
+        );
+      }
 
       // The anomaly dimension: features over this entity's own recent behavior.
       // Computed from the updated window so the current interaction counts. D36.
@@ -365,6 +439,7 @@ export function createGuard(options: GuardOptions = {}) {
         violations: checked.violations,
         hardViolated: hard.length > 0,
         coldStart,
+        storeDegraded,
         context: input.context,
         trace,
       };
@@ -407,10 +482,13 @@ export function createGuard(options: GuardOptions = {}) {
      *
      * Waits behind any in-flight evaluation of the same entity, because a delete
      * that lands between `load` and `set` would be resurrected by that write.
+     * Unlike evaluation, a delete that misses the deadline throws rather than
+     * silently leaving the row behind (D76).
      */
     async forget(entity: string): Promise<void> {
       await (inFlight.get(entity) ?? Promise.resolve());
-      await store.delete(entity);
+      const deleted = await bound(store.delete(entity));
+      if (!deleted.ok) throw new StoreDeadlineError(deadlineMs);
     },
   };
 }
