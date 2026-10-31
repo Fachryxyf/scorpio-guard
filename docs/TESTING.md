@@ -113,6 +113,41 @@ Two rules:
 - **Do not put identifiers in scope names.** Scope names are quoted in `trace`, and the
   trace is part of the event that leaves your process.
 
+The general rule behind the range, learned from a real integration (D79): **when two
+interactions share a scope and one would always violate the other's invariant, they do not
+share a scope** — or the invariant must accept a fact that distinguishes them. The case
+that found the rule: logout sharing `auth.refresh`. A refresh scope's invariant asserts
+that every 2xx rotates the session; a successful logout is a 2xx that must not rotate it.
+Every logout then reads as a proven violation — measured 26 of 26 production rows, each
+one poisoning a legitimate user's trust — and the library cannot tell, because row by row
+the invariant is correct.
+
+Both fixes are sanctioned, and the choice is the host's:
+
+1. **A terminal-transition fact.** Keep logout inside `auth.refresh` and send a
+   `sessionTerminated` fact; the invariant accepts it as a valid outcome for a 2xx:
+
+   ```js
+   {
+     id: 'auth-refresh-session-rotated',
+     class: 'IMPOSSIBLE_STATE_TRANSITION',
+     strength: 'hard',
+     scope: 'auth.refresh',
+     holds: (observation) =>
+       observation.sessionRotated === true || observation.sessionTerminated === true,
+   }
+   ```
+
+2. **A dedicated terminal scope.** `auth.logout` stands alone and carries no rotation
+   invariant. That is an expected ninth scope for a session-based host, over the usual
+   five to eight, and it will be under-sampled — logout traffic is a few rows a day per
+   user. Under-sampling is acceptable there because the scope needs no calibration: its
+   invariants are about what the host did, not about what the traffic looks like.
+
+What is not sanctioned: leaving logout inside `auth.refresh` with the rotation invariant
+unchanged, and treating the resulting hard violations as calibration data. That is the
+one false positive that keeps producing itself.
+
 ### 3. Invariant
 
 An invariant is a rule the host declares for a scope, checked against facts the host
@@ -289,6 +324,8 @@ advice and a broken one cannot fail the request (D61).
 | `violations[]` | `invariant`, `class`, `strength` |
 | `hardViolated` | whether a proven violation set the outcome |
 | `coldStart` | absent state, or state past retention |
+| `storeDegraded` | a store operation missed its deadline; advice given without retained state, or a write lost (D76) |
+| `integrationWarning` | present when the integration itself looks misconfigured — see "When something looks wrong" (D78) |
 | `trace` | the same explanation a person reads |
 
 The entity reference is omitted by default: an event log leaves the process and lands
@@ -496,6 +533,11 @@ did, which is the shortest way to see the shape of a decision before writing one
 
 Order of checks, cheapest first:
 
+0. Read the event itself. Since 0.3.0 the guard says two integration failures on its own:
+   `storeDegraded: true` means the store missed its deadline and the advice was given
+   without retained state (a run of those is an outage to alert on, D76), and
+   `integrationWarning` names the scope whose evaluations uniformly hard-violate one
+   invariant — that uniformity is a mapping bug, not traffic (D78).
 1. Confirm the entity is unique per person. Most reports of strange advice end here.
 2. Confirm one process holds the store, or that the store is shared.
 3. Print `assessment.trace` and read the sentence. It names the invariant or the feature

@@ -83,6 +83,44 @@ Write it into the risk register instead of leaving it implied. The honest statem
 "trust is per session, not per subject", and the useful parts that remain are the per-request
 proofs: declared invariants and transition checks need no history at all.
 
+## Hashing the key for storage and logs
+
+The library's own `hashEntity()` (used by `identity: { kind: 'hash', salt }` on events)
+is `SHA-256(salt + "\u0000" + entity)`, truncated to 128 bits. A host journaling its own
+rows is advised to override that with a **kinded HMAC**, because plain salted digests of
+different key kinds can collide into one comparable space (D80):
+
+```
+entityHash = HMAC-SHA256(salt, kind + "\u0000" + value).hex.slice(0, 32)   // kind: "user" | "session" | "cred" | ...
+```
+
+What the prefix buys: a `user:<a>` and a `cred:<a>` never produce the same hash, so a
+credential-stuffing row can never be attributed to the account it attacked by hash
+comparison alone. The 32-hex truncation keeps hash columns joinable across databases at
+128 bits of strength; a full digest is fine too, but pick one and keep it, because
+changing the hash is itself a rotation (every row hashed under the old form stops
+comparing).
+
+Three properties that hold, and one that does not:
+
+- **Journal hash and store key may legitimately diverge.** The store keys on the raw
+  entity reference (D1); the journal may hash with a different construction. Nothing
+  cross-compares them, so both stay correct.
+- **The salt is rotation-planned.** Hashes are only comparable within one salt
+  generation. Write down when the salt changes, and treat rows across the change as two
+  populations.
+- **Kinds are domain separation, not decoration.** Hash `kind` values are part of the
+  contract between your journal writer and your journal readers. Renaming a kind is the
+  same break as rotating the salt.
+- **A shared salt makes every hash reversible.** Anyone holding the salt can enumerate
+  candidate references and compare. Salt stays in configuration, and an export that
+  carries hashed entities never carries the salt beside it.
+
+Measured on a real integration: 723 distinct entities across 578,365 journal rows hashed
+this way, resolved to internal subjects without ambiguity for everything except
+pre-auth entities whose sessions no longer existed — and that limit is about the
+underlying data, not the hash.
+
 ## Gates
 
 `src/core/root-of-trust.test.ts`: six tests, one per row of the table. Verified by mutation:

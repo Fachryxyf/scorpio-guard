@@ -6,6 +6,7 @@ import assert from 'node:assert/strict';
 import type { Server } from 'node:http';
 import type { AddressInfo } from 'node:net';
 import { after, before, describe, it } from 'node:test';
+import { REFRESH_SCOPE, createIntegrationGuard, refreshDataFor } from './core.ts';
 import { createExpressApp } from './express.ts';
 import { createGuardedServer, listen } from './server.ts';
 
@@ -106,5 +107,33 @@ describe('express adapter', () => {
     });
     assert.equal((await body(response)).decision, 'RESTRICT');
     assert.equal(response.status, 403);
+  });
+});
+
+describe('terminal transitions (D79)', () => {
+  const guard = createIntegrationGuard();
+
+  it('a 2xx logout that reports sessionTerminated is not a hard violation', async () => {
+    const result = await guard.evaluate({
+      entity: 'logout-session',
+      observation: {
+        scope: REFRESH_SCOPE,
+        data: refreshDataFor({ body: { sessionRotated: false, sessionTerminated: true } }),
+      },
+    });
+    assert.equal(result.hardViolated, false);
+    assert.equal(result.decision, 'ALLOW', 'a fresh entity logging out is not a violation');
+  });
+
+  it('a 2xx on the refresh scope that neither rotates nor terminates still decides', async () => {
+    const result = await guard.evaluate({
+      entity: 'stolen-session',
+      observation: {
+        scope: REFRESH_SCOPE,
+        data: refreshDataFor({ body: { sessionRotated: false, sessionTerminated: false } }),
+      },
+    });
+    assert.equal(result.hardViolated, true);
+    assert.equal(result.decision, 'RESTRICT', 'the invariant still bites when no transition is reported');
   });
 });

@@ -13,6 +13,7 @@ import { createGuard, type Assessment, type Decision, type Invariant } from '../
 
 export const LOGIN_SCOPE = 'login';
 export const DATA_SCOPE = 'data';
+export const REFRESH_SCOPE = 'auth.refresh';
 
 export const integrationInvariants: readonly Invariant[] = [
   {
@@ -29,7 +30,29 @@ export const integrationInvariants: readonly Invariant[] = [
     scope: DATA_SCOPE,
     holds: (observation) => (observation as { afterLogin?: boolean }).afterLogin !== false,
   },
+  {
+    // D79: a 2xx on the refresh scope must rotate the session — unless the host
+    // reports the terminal transition instead. Logout shares this scope and must
+    // not read as a failed rotation, which is how every logout became a proven
+    // violation on the first real integration (26 of 26 production rows).
+    id: 'auth-refresh-session-rotated',
+    class: 'IMPOSSIBLE_STATE_TRANSITION',
+    strength: 'hard',
+    scope: REFRESH_SCOPE,
+    holds: (observation) => {
+      const facts = observation as { sessionRotated?: boolean; sessionTerminated?: boolean };
+      return facts.sessionRotated === true || facts.sessionTerminated === true;
+    },
+  },
 ];
+
+/** The facts a refresh-or-logout request carries: exactly one of the two happened. */
+export function refreshDataFor(raw: RawRequest): Record<string, unknown> {
+  return {
+    sessionRotated: raw.body?.sessionRotated === true,
+    sessionTerminated: raw.body?.sessionTerminated === true,
+  };
+}
 
 export type HostRoute = 'login' | 'data';
 
