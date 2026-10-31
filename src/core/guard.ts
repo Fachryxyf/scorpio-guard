@@ -29,7 +29,12 @@ import {
   type AssessmentIdentity,
 } from './event.ts';
 import { signalMass, type WeakSignal } from './signals.ts';
-import { DEFAULT_POLICY, hardViolationDecision, type Policy } from './policy.ts';
+import {
+  DEFAULT_INTEGRATION_WARNING_MIN_CONSECUTIVE,
+  DEFAULT_POLICY,
+  hardViolationDecision,
+  type Policy,
+} from './policy.ts';
 import {
   DEFAULT_STORE_DEADLINE_MS,
   memoryStore,
@@ -47,6 +52,21 @@ import {
 } from './trust.ts';
 
 export type EvidenceStrength = 'weak' | 'strong';
+
+/**
+ * An observation about the integration itself, raised on the assessment without
+ * ever touching the advice. D78.
+ *
+ * The one kind today: a scope whose evaluations uniformly hard-violate the same
+ * invariant. Row by row the guard is correct; the uniformity is the host's
+ * mapping to blame, and nothing else in the system says so.
+ */
+export type IntegrationWarning = {
+  readonly kind: 'uniform-hard-violation';
+  readonly scope: string;
+  readonly invariant: string;
+  readonly count: number;
+};
 
 export type Observation = {
   /**
@@ -122,6 +142,11 @@ export type Assessment = {
    * traffic.
    */
   readonly storeDegraded: boolean;
+  /**
+   * Present when the integration itself looks misconfigured. D78. Never
+   * changes the decision: the advice is the host's to weigh.
+   */
+  readonly integrationWarning?: IntegrationWarning;
   readonly context: EvaluationContext | undefined;
   /** Why this outcome, in order of what actually decided it. D23. */
   readonly trace: readonly string[];
@@ -195,6 +220,18 @@ export type GuardOptions = {
    * semantics; only the wait is bounded.
    */
   readonly storeDeadlineMs?: number;
+
+  /**
+   * Surface a warning when one scope's evaluations uniformly hard-violate the
+   * same invariant. D78. That uniformity is a host mapping bug — two
+   * interactions sharing a scope — and it silently poisons trust for every
+   * legitimate user of the scope.
+   *
+   * Defaults to `{ minConsecutive: DEFAULT_INTEGRATION_WARNING_MIN_CONSECUTIVE
+   * }`; `false` turns the warnings off. The warning rides the assessment and
+   * the event and never alters the decision.
+   */
+  readonly integrationWarnings?: false | { readonly minConsecutive?: number };
 };
 
 export type EvaluateInput = {
@@ -229,6 +266,41 @@ export function createGuard(options: GuardOptions = {}) {
   const inFlight = new Map<string, Promise<void>>();
 
   const deadlineMs = options.storeDeadlineMs ?? DEFAULT_STORE_DEADLINE_MS;
+
+  /**
+   * Consecutive evaluations per (scope, invariant) that hard-violated the same
+   * invariant. D78. Process-local on purpose: the warning describes the host's
+   * own configuration, which restarts with the process.
+   */
+  const uniformHard = new Map<string, Map<string, number>>();
+  const warningThreshold =
+    options.integrationWarnings === false
+      ? undefined
+      : (options.integrationWarnings?.minConsecutive ?? DEFAULT_INTEGRATION_WARNING_MIN_CONSECUTIVE);
+
+  /**
+   * Track the uniformity signal and return a warning when one (scope, invariant)
+   * has fired on this many consecutive evaluations of the scope. An evaluation
+   * of the scope without that invariant resets its count: hostile traffic mixes
+   * with refusals and other entities, a mapping bug does not.
+   */
+  function trackUniformHard(scope: string, hard: readonly Violation[]): IntegrationWarning | undefined {
+    const byInvariant = uniformHard.get(scope) ?? new Map<string, number>();
+    uniformHard.set(scope, byInvariant);
+    const fired = new Set(hard.map((violation) => violation.invariant));
+    for (const id of [...byInvariant.keys()]) {
+      if (!fired.has(id)) byInvariant.delete(id);
+    }
+    let warning: IntegrationWarning | undefined;
+    for (const violation of hard) {
+      const count = (byInvariant.get(violation.invariant) ?? 0) + 1;
+      byInvariant.set(violation.invariant, count);
+      if (count >= warningThreshold! && (warning === undefined || count > warning.count)) {
+        warning = { kind: 'uniform-hard-violation', scope, invariant: violation.invariant, count };
+      }
+    }
+    return warning;
+  }
 
   /**
    * Bound one store operation by the deadline. D76.
@@ -304,6 +376,16 @@ export function createGuard(options: GuardOptions = {}) {
 
       const hard = hardViolations(checked.violations);
       const soft = softViolations(checked.violations);
+
+      // The uniformity signal runs before anything else consumes the violations,
+      // and feeds the report only: it never reaches the decision. D78.
+      const integrationWarning =
+        scope && warningThreshold !== undefined ? trackUniformHard(scope, hard) : undefined;
+      if (integrationWarning) {
+        trace.push(
+          `integration warning: ${integrationWarning.count} consecutive evaluations of scope "${integrationWarning.scope}" hard-violated "${integrationWarning.invariant}" — that uniformity is a mapping bug, not traffic (D78)`,
+        );
+      }
 
       // Evidence: what the host attributed, plus mass owed by soft violations. D38.
       const positive = observation.evidence?.positive
@@ -440,6 +522,7 @@ export function createGuard(options: GuardOptions = {}) {
         hardViolated: hard.length > 0,
         coldStart,
         storeDegraded,
+        integrationWarning,
         context: input.context,
         trace,
       };

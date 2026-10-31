@@ -193,3 +193,29 @@ test('D61: a broken sink cannot fail an evaluation', async () => {
   assert.equal(first.decision, 'ALLOW');
   assert.equal(second.decision, 'ALLOW');
 });
+
+test('D78: the event carries an integration warning when a scope degenerates', async () => {
+  const sink = collect();
+  const invariant = {
+    id: 'lookup.token-was-issued',
+    class: 'IMPOSSIBLE_UNISSUED_REFERENCE' as const,
+    strength: 'hard' as const,
+    scope: 'lookup',
+    holds: (observation: unknown) =>
+      (observation as { token?: string }).token === 'issued-a',
+  };
+  const guard = createGuard({ onAssessment: sink.onAssessment, invariants: [invariant] });
+
+  for (let i = 0; i < 10; i += 1) {
+    await guard.evaluate({ entity: `e${i}`, observation: { scope: 'lookup', data: { token: 'forged' } } });
+  }
+  let event: AssessmentEvent | undefined;
+  for (let i = 0; i < 10; i += 1) {
+    event = await sink.next();
+  }
+
+  assert.equal(event?.integrationWarning?.kind, 'uniform-hard-violation');
+  assert.equal(event?.integrationWarning?.scope, 'lookup');
+  assert.equal(event?.integrationWarning?.invariant, 'lookup.token-was-issued');
+  assert.equal(event?.integrationWarning?.count, 10);
+});

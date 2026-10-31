@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 
 import type { Clock } from './clock.ts';
 import { severity, type Decision } from './decision.ts';
-import { createGuard } from './guard.ts';
+import { createGuard, type Assessment } from './guard.ts';
 import { DEFAULT_RETENTION_HOURS, DEFAULT_WEIGHTS } from './policy.ts';
 import { memoryStore, StoreDeadlineError } from './store.ts';
 import type { StateStore } from './store.ts';
@@ -743,4 +743,63 @@ test('D76: zero disables the deadline for a deliberately slow store', { timeout:
 
   const unbounded = createGuard({ clock, store: slow, storeDeadlineMs: 0 });
   assert.equal((await unbounded.evaluate({ entity: 'e1' })).storeDegraded, false, 'zero disables the bound');
+});
+
+test('D78: a scope whose evaluations uniformly hard-violate raises an integration warning', async () => {
+  const clock = fakeClock();
+  const guard = createGuard({ clock, invariants: [unissued] });
+
+  let warned: Assessment['integrationWarning'];
+  for (let i = 0; i < 10; i += 1) {
+    const result = await guard.evaluate({
+      entity: `e${i}`,
+      observation: { scope: 'lookup', data: { token: 'never-issued' } },
+    });
+    warned = result.integrationWarning;
+    assert.equal(result.decision, 'RESTRICT', 'the warning must not change the advice');
+  }
+
+  assert.equal(warned?.kind, 'uniform-hard-violation');
+  assert.equal(warned?.scope, 'lookup');
+  assert.equal(warned?.invariant, 'lookup.token-was-issued');
+  assert.equal(warned?.count, 10);
+});
+
+test('D78: one evaluation without the violation resets the count', async () => {
+  const clock = fakeClock();
+  const guard = createGuard({ clock, invariants: [unissued], integrationWarnings: { minConsecutive: 3 } });
+
+  for (let i = 0; i < 2; i += 1) {
+    await guard.evaluate({ entity: 'e1', observation: { scope: 'lookup', data: { token: 'never-issued' } } });
+  }
+  await guard.evaluate({ entity: 'e2', observation: { scope: 'lookup', data: { token: 'issued-a' } } });
+  await guard.evaluate({ entity: 'e1', observation: { scope: 'lookup', data: { token: 'never-issued' } } });
+
+  const result = await guard.evaluate({ entity: 'e1', observation: { scope: 'lookup', data: { token: 'never-issued' } } });
+  assert.equal(result.integrationWarning, undefined, '2 + reset + 2 never reaches 3 consecutive');
+});
+
+test('D78: the warning never changes the advice, and can be turned off', async () => {
+  const clock = fakeClock();
+  const violation = { scope: 'lookup', data: { token: 'never-issued' } };
+  const withWarnings = createGuard({ clock, invariants: [unissued] });
+  const without = createGuard({ clock, invariants: [unissued], integrationWarnings: false });
+
+  for (let i = 0; i < 12; i += 1) {
+    const a = await withWarnings.evaluate({ entity: `e${i}`, observation: violation });
+    const b = await without.evaluate({ entity: `e${i}`, observation: violation });
+    assert.equal(a.decision, b.decision, 'the warning rides the assessment, not the decision');
+    assert.equal(b.integrationWarning, undefined, 'integrationWarnings: false silences it');
+  }
+});
+
+test('D78: the threshold is configurable', async () => {
+  const clock = fakeClock();
+  const guard = createGuard({ clock, invariants: [unissued], integrationWarnings: { minConsecutive: 2 } });
+
+  await guard.evaluate({ entity: 'e1', observation: { scope: 'lookup', data: { token: 'never-issued' } } });
+  const result = await guard.evaluate({ entity: 'e2', observation: { scope: 'lookup', data: { token: 'never-issued' } } });
+
+  assert.equal(result.integrationWarning?.count, 2);
+  assert.match(result.trace.join(' '), /integration warning: 2 consecutive/);
 });
