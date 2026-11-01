@@ -533,9 +533,14 @@ default: it is a distance-to-reference model rather than a trained one, because 
 labelled traffic exists to train against (D34), and training on generated personas
 would report the author's assumptions back as findings.
 
-More importantly: nothing has met real production traffic. Every threshold in the
-model is a reasoned guess. The HealthMe harness replays its real flow, which is
-enough to catch a contradiction but not enough to calibrate a threshold.
+More importantly: the thresholds have met exactly one real deployment. The first
+host integration ran 0.2.0 for 92 hours of production traffic and its labelled
+staging journal has been replayed against the policy grid (`docs/DATASET.md`, host
+section): the shipped constants held, and the integration's false positives traced
+to host-side attribution, not to the model. That is one deployment, not a
+population — every threshold remains a reasoned guess that one dataset failed to
+falsify. The HealthMe harness replays its real flow, which is enough to catch a
+contradiction but not enough to calibrate a threshold.
 
 ## What the First Integration Shows
 
