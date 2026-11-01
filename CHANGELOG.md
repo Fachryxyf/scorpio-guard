@@ -35,12 +35,12 @@ and the decisions are D76–D80.
   evaluation answers without retained state and carries `storeDegraded: true` on the
   assessment and the event; `forget()` throws `StoreDeadlineError` instead, because an
   erasure that silently did nothing would lie about the data being gone (D76). Before, a
-  KV outage hung every host request for as long as the transport would retry — measured at
+  KV outage hung every host request for as long as the transport would retry, measured at
   about 305 seconds per request on the integration. After, the advice arrives within the
   deadline and the outage is visible in the event stream.
 - An integration warning. When one scope's evaluations uniformly hard-violate the same
-  invariant — 26 of 26 production logouts, 14 of 14 staging ones on the integration, all
-  silently poisoning legitimate trust — the assessment and event now carry
+  invariant, 26 of 26 production logouts and 14 of 14 staging ones on the integration,
+  all silently poisoning legitimate trust, the assessment and event now carry
   `integrationWarning: { kind: 'uniform-hard-violation', scope, invariant, count }`
   (D78). Threshold: 10 consecutive, `integrationWarnings: { minConsecutive }` to move,
   `false` to turn off. One clean evaluation of the scope resets the count. The warning
@@ -49,7 +49,7 @@ and the decisions are D76–D80.
   journal, with the host's seven invariants reconstructed and validated against the
   recorded violation sets (5,122 of 5,123 rows agree) and the evidence attribution
   derived from recorded trust deltas. The shipped policy cell has the lowest decision
-  drift of the nine, and no cell moves the FP/FN counts — the first measured statement
+  drift of the nine, and no cell moves the FP/FN counts. The first measured statement
   that the constants are not where the integration's false positives live.
 - Terminal-transition guidance (D79) and the entity-hash override pattern (D80) in
   `docs/TESTING.md` and `docs/ROOT-OF-TRUST.md`, from integration issues 01, 04 and 05.

@@ -1,10 +1,10 @@
-# The integration targets — the 0.2.x record
+# The integration targets: the 0.2.x record
 
 This folder keeps the record of the targets the project measured while its first
 integration targets were alive, exactly as the README told it at the time. IXFE
 (`ixfe.pro`) and HealthMe are both offline (checked 2026-10-25: the first times out,
 the second no longer resolves), so every claim below is about what was measured while
-they were up, kept under the names it was measured under — renaming measured rows to
+they were up, kept under the names it was measured under. Renaming measured rows to
 look current would be invention. The lab now observes `aufsicht.dev` and
 `talkhere.life`, declared in `examples/lab/targets.ts`.
 

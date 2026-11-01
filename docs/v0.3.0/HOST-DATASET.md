@@ -1,8 +1,8 @@
-# Host dataset — the first real integration's journal
+# Host dataset: the first real integration's journal
 
 This is the calibration half of the 0.3.0 record: the first deployment of the
-library outside the lab, replayed against the policy grid. The narrative half — the
-92-hour production record, the pentest, and the four defects — is
+library outside the lab, replayed against the policy grid. The narrative half (the
+92-hour production record, the pentest, and the four defects) is
 [INTEGRATION.md](INTEGRATION.md); the lab dataset it should be read beside lives in
 [docs/DATASET.md](../DATASET.md). The two-era split follows the version folders, so
 the lab runs recorded for 0.2.x stay there and what the first real integration
@@ -10,8 +10,8 @@ measured lives here.
 
 ## The host dataset: the first integration's journal (2026-10-31)
 
-The library's first deployment outside the lab — a CRM host running 0.2.0
-vendored — kept a decision journal, and its pentest produced a staging export of
+The library's first deployment outside the lab, a CRM host running 0.2.0
+vendored, kept a decision journal, and its pentest produced a staging export of
 5,123 evaluations with known ground truth: the testers' own accounts running
 their legitimate flows, documented adversarial attempts, and everything the
 pentest did to the system in between. The export lives with the partner
@@ -41,13 +41,13 @@ fire on it. Two recorded-data defects surfaced on the way, both worth knowing:
 
 **The shipped cell is the best of the nine.** The same grid as the lab runs
 (half-life 24/72/168h × developing 3/4/5) puts the shipped policy (24h, 3, 7) at
-the lowest decision drift: 103 rows, against 128–232 for every other cell. The
+the lowest decision drift: 103 rows, against 128-232 for every other cell. The
 false-positive and false-negative counts do not move across cells. That is the
 result D64 could not produce from lab traffic: on real integration data, no
 constant in the grid is the problem.
 
 **The false positives are real, and they are not thresholds.** On rows where a
-pentest test account made a clean request — 2xx, no violation — the recorded
+pentest test account made a clean request (2xx, no violation), the recorded
 journal shows 772 of 1,239 advised treatment, and the replay puts it at 799.
 Seven of the eleven resolved entities are affected. The cause is visible in the
 journal and it is the integration, not the model: the host attributed weak

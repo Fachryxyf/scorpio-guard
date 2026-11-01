@@ -16,4 +16,4 @@
 |---|---|
 | `v0.1.0/` | The first registry release's record: published by hand, no attestation, rollback target. |
 | `v0.2.0/` | The MVP-era records: the product audit (2026-10-18), the 0.1.0 → 0.2.0 migration guide, and the integration targets that era measured (IXFE, HealthMe, the lab). |
-| `v0.3.0/` | The current version's additions: the first real integration's record (`INTEGRATION.md` — 92 hours of production traffic and the pentest), its calibration replay (`HOST-DATASET.md`), and the 0.2.1 → 0.3.0 migration guide. |
+| `v0.3.0/` | The current version's additions: the first real integration's record (`INTEGRATION.md`: 92 hours of production traffic and the pentest), its calibration replay (`HOST-DATASET.md`), and the 0.2.1 → 0.3.0 migration guide. |

@@ -118,7 +118,7 @@ Three properties that hold, and one that does not:
 
 Measured on a real integration: 723 distinct entities across 578,365 journal rows hashed
 this way, resolved to internal subjects without ambiguity for everything except
-pre-auth entities whose sessions no longer existed — and that limit is about the
+pre-auth entities whose sessions no longer existed, and that limit is about the
 underlying data, not the hash.
 
 ## Gates

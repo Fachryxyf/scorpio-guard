@@ -79,7 +79,7 @@ and not the provable one.
 Since 0.3.0 the wait is bounded too (D76): the evaluation's store operations share a
 deadline, `storeDeadlineMs`, defaulting to 100 ms. Measured on the first real
 integration before it existed, a stopped KV hung every host request for about 305
-seconds — the transport's own retry horizon — while technically still failing open.
+seconds, the transport's own retry horizon, while technically still failing open.
 Past the deadline the evaluation answers without retained state, and the assessment
 and event carry `storeDegraded: true`; a run of those is an outage to alert on, not
 traffic. `forget()` throws `StoreDeadlineError` instead, because an erasure that

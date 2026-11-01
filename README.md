@@ -11,7 +11,9 @@
 
 > **Trust is a spectrum, not a verdict.** Adaptive trust evaluation for web interactions, a local library, not a centralized gatekeeper.
 
-**Status: 0.3.0, pre-1.0.** Install with `npm install @fachryxyf/scorpio-guard`. Which version the registry serves today, and the date each one landed, are on the [versions page](https://scorpio-guard.fachryxyf.com/versions.html), because a README carried inside a tarball cannot keep that fact true. The npm account behind the package was suspended for 72 hours on 2026-10-25 after a security-sensitive action; [docs/RELEASING.md](https://github.com/Fachryxyf/scorpio-guard/blob/main/docs/RELEASING.md) carries the record and the runbook. The core model is built and tested, the package installs from its tarball, and the v0.1 protocol has fixtures, a reference receiver, and a batching sender. Two things still stand between this and 1.0.0: an independent security review, and thresholds that hold against a real traffic mix — the first integration's journal has now been replayed against the grid (docs/v0.3.0/HOST-DATASET.md) and moved no constant, but a population it is not. The 24 hour soak is done (docs/SOAK.md). What remains short of the proof is recorded in [docs/DATASET.md](https://github.com/Fachryxyf/scorpio-guard/blob/main/docs/DATASET.md). The claims a gate enforces today, the risks that are priced instead, and the size of each gap are on the [guarantees page](https://scorpio-guard.fachryxyf.com/guarantees.html), with the test or decision behind every row (D75). What follows is the design, and where the code has caught up to it.
+**Status: 0.3.0, pre-1.0.** Install with `npm install @fachryxyf/scorpio-guard`. The core model, three stores, and the v0.1 wire format are built and tested. The [versions page](https://scorpio-guard.fachryxyf.com/versions.html) records what the registry serves today, because a README carried inside a tarball cannot keep that fact true.
+
+Two proofs stand between this and 1.0.0: an independent security review, and thresholds calibrated against a real population. The 24 hour soak, once the third proof, is done ([docs/SOAK.md](https://github.com/Fachryxyf/scorpio-guard/blob/main/docs/SOAK.md)). The first real-traffic reading is in, and the grid held every shipped constant ([docs/v0.3.0/HOST-DATASET.md](https://github.com/Fachryxyf/scorpio-guard/blob/main/docs/v0.3.0/HOST-DATASET.md)); one host is not a population, so the calibration proof is still open. What each proof requires, and what the gates enforce today, is on the [guarantees page](https://scorpio-guard.fachryxyf.com/guarantees.html), with the test or decision behind every row (D75). What follows is the design, and where the code has caught up to it.
 
 **In a hurry:** [Install](#install), [Usage](#usage), [docs/TESTING.md](https://github.com/Fachryxyf/scorpio-guard/blob/main/docs/TESTING.md). The design below is why the code looks like that.
 
@@ -356,7 +358,7 @@ and the dimension it feeds never recovers on its own.
 The wait itself is bounded since 0.3.0: the evaluation's store operations share a
 deadline, `storeDeadlineMs` (default 100 ms, D76), measured in the field at about
 305 seconds of hang per request before it existed. Past the deadline the evaluation
-answers without retained state and carries `storeDegraded: true` — alert on a run
+answers without retained state and carries `storeDegraded: true`. Alert on a run
 of those, because they are an outage, not traffic.
 
 Deleting an entity's history is one call, and it is the same code path retention
@@ -462,12 +464,12 @@ one declared persona per instance, and `cdp.ts` is a ~180-line DevTools Protocol
 over Node's `WebSocket` global, written instead of installing Puppeteer so the
 zero-dependency promise holds in the examples too.
 
-**Integration evidence, in the order it was gathered.** Two lab runs — 129 and 1,656
-labelled requests, zero false positives, frozen into fixtures that replay on every push
-(D63-D67) — are the falsification instrument, recorded in
+**Integration evidence, in the order it was gathered.** Two lab runs, 129 and 1,656
+labelled requests with zero false positives, are the falsification instrument. Their
+fixtures replay on every push (D63-D67), recorded in
 [docs/DATASET.md](https://github.com/Fachryxyf/scorpio-guard/blob/main/docs/DATASET.md).
-The first real deployment — a CRM host running 0.2.0 through 92 hours of production
-traffic and a fifteen-phase pentest on staging — journaled 578,365 evaluations of real
+The first real deployment, a CRM host running 0.2.0 through 92 hours of production
+traffic and a fifteen-phase staging pentest, journaled 578,365 evaluations of real
 usage (98.40% ALLOW, every hard violation explained) and 5,123 labelled pentest
 evaluations with known ground truth. The record caught four integration defects and
 two library-level ones, all verified fixed; the replay against the policy grid in 0.3.0
@@ -516,10 +518,10 @@ would report the author's assumptions back as findings.
 
 More importantly: the thresholds have met exactly one real deployment. The first
 host integration ran 0.2.0 for 92 hours of production traffic and its labelled
-staging journal has been replayed against the policy grid (`docs/DATASET.md`, host
-section): the shipped constants held, and the integration's false positives traced
+staging journal has been replayed against the policy grid
+(`docs/v0.3.0/HOST-DATASET.md`): the shipped constants held, and the integration's false positives traced
 to host-side attribution, not to the model. That is one deployment, not a
-population — every threshold remains a reasoned guess that one dataset failed to
+population. Every threshold remains a reasoned guess that one dataset failed to
 falsify. The HealthMe harness (`examples/healthme/`) replays its real flow, which is
 enough to catch a contradiction but not enough to calibrate a threshold.
 
@@ -530,19 +532,19 @@ what that traffic measured without fixing, and what it falsified are archived in
 [docs/v0.2.0/TARGETS.md](https://github.com/Fachryxyf/scorpio-guard/blob/main/docs/v0.2.0/TARGETS.md).
 Two claims from that era are asserted as tests and still hold: no legitimate persona is
 advised anything a user would feel, and no adversary walks through untouched. Its
-falsifications — the `developing` ceiling, scope entropy, an unprovable `hard`
-declaration, the saturation gate — are recorded in the decisions of that version and
+falsifications (the `developing` ceiling, scope entropy, an unprovable `hard`
+declaration, the saturation gate) are recorded in the decisions of that version and
 corrected the model in place.
 
 The live evidence is the lab and the first real deployment, both linked from
 [What exists](#what-exists) above. The deployment record is not a summary: it is 92
-hours of production journal — every request evaluated, every decision kept — plus a
+hours of production journal, every request evaluated and every decision kept, plus a
 pentest whose adversarial traffic was written down before it was sent, so the
 5,123-row export carries ground truth. What it found: the library's row-by-row
 behaviour survived contact with real traffic; the failures were in the integration
 around it (a 404 priced as probing, logout mapped into refresh, concurrent writes
 losing evidence, a journal that could not audit itself, a fail-open that arrived
-five minutes late) — and each one is now either fixed in the library or named in the
+five minutes late). Each one is now either fixed in the library or named in the
 guidance. What the lab cannot do is stated in
 [docs/DATASET.md](https://github.com/Fachryxyf/scorpio-guard/blob/main/docs/DATASET.md)
 and what one deployment cannot do in

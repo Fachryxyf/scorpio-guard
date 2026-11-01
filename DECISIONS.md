@@ -4299,7 +4299,7 @@ the other is visible in review.
 
 Fail-open (D62) made a KV outage survivable, but only as fast as the transport admitted.
 The first real integration measured the gap: with Redis stopped, every host request hung
-about 305 seconds — the transport's own retry horizon — including requests that would have
+about 305 seconds, the transport's own retry horizon, including requests that would have
 ended in 401 anyway. A guard that is advisory in the model but latency-bearing on the wire
 is not advisory where it matters. The documented contract, "a slow or broken collector
 cannot slow the advice", was true of the sink and false of the store.
@@ -4307,8 +4307,8 @@ cannot slow the advice", was true of the sink and false of the store.
 ### The decision
 
 Every store operation the guard performs is bounded by `storeDeadlineMs`, defaulting to
-100 and disabled by zero. Past the deadline the evaluation answers without retained state —
-a cold start, which D40 already models as a well-defined condition — and the assessment and
+100 and disabled by zero. Past the deadline the evaluation answers without retained state
+(a cold start, which D40 already models as a well-defined condition), and the assessment and
 its event carry `storeDegraded: true` with a trace line saying which operation did not land.
 A lost state write is stated as lost, because advice that silently forgets evidence is the
 pre-D77 failure mode arriving through the deadline instead. `forget()` throws
@@ -4345,7 +4345,7 @@ take the request path down. Rejected.
 
 ### Gates
 
-`src/core/guard.test.ts`: four tests named D76 — a never-answering store is bounded and the
+`src/core/guard.test.ts`: four tests named D76: a never-answering store is bounded and the
 evaluation still advises; a lost write is reported and is really lost; `forget` throws
 `StoreDeadlineError`; zero disables the bound. `src/core/event.test.ts` asserts the event
 carries `storeDegraded` and pins the event shape. Verified by mutation: bypassing the
@@ -4360,7 +4360,7 @@ deadline in `bound()` fails the never-answering test by timeout.
 The store contract is `get`/`set`, so two concurrent evaluations of one entity both read
 the same state, and the last writer erased the evidence the other applied. The integration
 measured the damage: 5,817 journal rows (1.229%) fell below their decay-adjusted floor,
-which is lost update, not decay — evidence of failure silently vanishing from exactly the
+which is lost update, not decay: evidence of failure silently vanishing from exactly the
 entities that were failing. The host fixed it with a per-entity promise queue and proved
 the fix: 20 concurrent evaluations produce one contiguous sequence and zero lost updates.
 
@@ -4396,7 +4396,7 @@ per host. The queue makes the loss impossible rather than detected. Rejected.
 
 ### Gates
 
-`src/core/guard.test.ts`: three tests named D77 — 20 concurrent evaluations of one entity
+`src/core/guard.test.ts`: three tests named D77: 20 concurrent evaluations of one entity
 accumulate all 20 negatives and the final state is the last writer's superset; one
 entity's queue does not stall another; `forget` behind an in-flight evaluation is not
 resurrected. Verified by mutation: removing the queue fails the accumulation test on the
@@ -4409,10 +4409,10 @@ first concurrent pair.
 ### The hole
 
 The same integration mapped logout into `auth.refresh`, and every logout became a proven
-violation — 26 of 26 production rows, 14 of 14 staging ones, deterministic, each one
+violation: 26 of 26 production rows, 14 of 14 staging ones, deterministic, each one
 poisoning a legitimate user's trust toward a mean of 0.02. Row by row the library was
-correct. The aggregate signal — one scope where every served row hard-violates the same
-invariant — was visible in the journal and in nothing the library produced. It was found
+correct. The aggregate signal, one scope where every served row hard-violates the same
+invariant, was visible in the journal and in nothing the library produced. It was found
 by a human reading the whole journal, which is not a mechanism.
 
 ### The decision
@@ -4448,7 +4448,7 @@ Rejected for now.
 
 ### Gates
 
-`src/core/guard.test.ts`: four tests named D78 — the warning fires at the threshold with
+`src/core/guard.test.ts`: four tests named D78: the warning fires at the threshold with
 the advice unchanged; one clean evaluation resets it; `integrationWarnings: false` produces
 byte-identical advice; the threshold is configurable. `src/core/event.test.ts` asserts the
 event carries it. Verified by mutation: short-circuiting the tracker fails the threshold
@@ -4463,7 +4463,7 @@ test.
 TESTING.md said five to eight scopes and warned against a scope per route. Nothing said
 what to do when two interactions share a scope and one always violates the other's
 invariant. The first integration put logout inside `auth.refresh`, whose rotation invariant
-must reject a 2xx that does not rotate — so every routine logout was a proven violation,
+must reject a 2xx that does not rotate, so every routine logout was a proven violation,
 deterministically, on both production and staging. The host asked which fix the library
 sanctions: a `sessionTerminated` fact the invariant accepts, or a ninth scope.
 
@@ -4476,7 +4476,7 @@ invariants do not share a scope, or the invariant accepts a fact that distinguis
   and the rotation invariant accepts rotation or termination. The invariant's claim of
   completeness becomes true again.
 - The scope form gives `auth.logout` its own scope, an expected ninth for a session-based
-  host, over the usual range and permanently under-sampled — acceptable there, because its
+  host, over the usual range and permanently under-sampled. Acceptable there, because its
   invariants are about what the host did, not what the traffic looks like.
 
 What is not sanctioned: leaving logout inside `auth.refresh` with the rotation invariant
@@ -4550,7 +4550,7 @@ name in `api/` forever. Rejected.
 
 ### Gates
 
-Prose only. The measured evidence it records — 723 entities over 578,365 production rows
+Prose only. The measured evidence it records, 723 entities over 578,365 production rows
 hashed this way without collision or resolution ambiguity beyond pre-auth entities whose
-sessions no longer exist — comes from the integration's reconciliation report, not from a
+sessions no longer exist, comes from the integration's reconciliation report, not from a
 test this repository can run.

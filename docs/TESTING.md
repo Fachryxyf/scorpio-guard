@@ -114,11 +114,12 @@ Two rules:
 
 The general rule behind the range, learned from a real integration (D79): **when two
 interactions share a scope and one would always violate the other's invariant, they do not
-share a scope** — or the invariant must accept a fact that distinguishes them. The case
+share a scope**, or the invariant must accept a fact that distinguishes them. The case
 that found the rule: logout sharing `auth.refresh`. A refresh scope's invariant asserts
 that every 2xx rotates the session; a successful logout is a 2xx that must not rotate it.
-Every logout then reads as a proven violation — measured 26 of 26 production rows, each
-one poisoning a legitimate user's trust — and the library cannot tell, because row by row
+Every logout then reads as a proven violation. Measured on a real integration: 26 of 26
+production rows, each one poisoning a legitimate user's trust. The library cannot tell,
+because row by row
 the invariant is correct.
 
 Both fixes are sanctioned, and the choice is the host's:
@@ -139,7 +140,7 @@ Both fixes are sanctioned, and the choice is the host's:
 
 2. **A dedicated terminal scope.** `auth.logout` stands alone and carries no rotation
    invariant. That is an expected ninth scope for a session-based host, over the usual
-   five to eight, and it will be under-sampled — logout traffic is a few rows a day per
+   five to eight, and it will be under-sampled. Logout traffic is a few rows a day per
    user. Under-sampling is acceptable there because the scope needs no calibration: its
    invariants are about what the host did, not about what the traffic looks like.
 
@@ -288,7 +289,7 @@ back cold.
 
 Since 0.3.0 the store wait is bounded: `storeDeadlineMs` (default 100 ms, D76) covers
 every store operation one evaluation performs. Past it the evaluation answers without
-retained state and the event carries `storeDegraded: true` — count those in your
+retained state and the event carries `storeDegraded: true`. Count those in your
 journal, because a run of them is an outage, and the whole point of the field is that
 you see it. Two evaluations of one entity can no longer lose each other's evidence
 either (D77): they queue per entity, in this process.
@@ -331,7 +332,7 @@ advice and a broken one cannot fail the request (D61).
 | `hardViolated` | whether a proven violation set the outcome |
 | `coldStart` | absent state, or state past retention |
 | `storeDegraded` | a store operation missed its deadline; advice given without retained state, or a write lost (D76) |
-| `integrationWarning` | present when the integration itself looks misconfigured — see "When something looks wrong" (D78) |
+| `integrationWarning` | present when the integration itself looks misconfigured. See "When something looks wrong" (D78) |
 | `trace` | the same explanation a person reads |
 
 The entity reference is omitted by default: an event log leaves the process and lands
@@ -543,7 +544,7 @@ Order of checks, cheapest first:
    `storeDegraded: true` means the store missed its deadline and the advice was given
    without retained state (a run of those is an outage to alert on, D76), and
    `integrationWarning` names the scope whose evaluations uniformly hard-violate one
-   invariant — that uniformity is a mapping bug, not traffic (D78).
+   invariant. That uniformity is a mapping bug, not traffic (D78).
 1. Confirm the entity is unique per person. Most reports of strange advice end here.
 2. Confirm one process holds the store, or that the store is shared.
 3. Print `assessment.trace` and read the sentence. It names the invariant or the feature
