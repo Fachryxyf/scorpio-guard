@@ -466,11 +466,15 @@ zero-dependency promise holds in the examples too.
 labelled requests, zero false positives, frozen into fixtures that replay on every push
 (D63-D67) — are the falsification instrument, recorded in
 [docs/DATASET.md](https://github.com/Fachryxyf/scorpio-guard/blob/main/docs/DATASET.md).
-The first real deployment — a CRM host running 0.2.0 for 92 hours of production traffic —
-produced 578,365 journaled evaluations and a 5,123-row labelled staging export, replayed
-against the policy grid in 0.3.0: the shipped constants held, and the findings became
-D76-D80
-([docs/v0.3.0/HOST-DATASET.md](https://github.com/Fachryxyf/scorpio-guard/blob/main/docs/v0.3.0/HOST-DATASET.md)).
+The first real deployment — a CRM host running 0.2.0 through 92 hours of production
+traffic and a fifteen-phase pentest on staging — journaled 578,365 evaluations of real
+usage (98.40% ALLOW, every hard violation explained) and 5,123 labelled pentest
+evaluations with known ground truth. The record caught four integration defects and
+two library-level ones, all verified fixed; the replay against the policy grid in 0.3.0
+held the shipped constants. The full record:
+[docs/v0.3.0/INTEGRATION.md](https://github.com/Fachryxyf/scorpio-guard/blob/main/docs/v0.3.0/INTEGRATION.md),
+its calibration:
+[docs/v0.3.0/HOST-DATASET.md](https://github.com/Fachryxyf/scorpio-guard/blob/main/docs/v0.3.0/HOST-DATASET.md).
 The earlier targets of that era, IXFE and HealthMe, are offline; their record lives in
 [docs/v0.2.0/TARGETS.md](https://github.com/Fachryxyf/scorpio-guard/blob/main/docs/v0.2.0/TARGETS.md),
 kept under the names it was measured under.
@@ -531,7 +535,15 @@ declaration, the saturation gate — are recorded in the decisions of that versi
 corrected the model in place.
 
 The live evidence is the lab and the first real deployment, both linked from
-[What exists](#what-exists) above. What the lab cannot do is stated in
+[What exists](#what-exists) above. The deployment record is not a summary: it is 92
+hours of production journal — every request evaluated, every decision kept — plus a
+pentest whose adversarial traffic was written down before it was sent, so the
+5,123-row export carries ground truth. What it found: the library's row-by-row
+behaviour survived contact with real traffic; the failures were in the integration
+around it (a 404 priced as probing, logout mapped into refresh, concurrent writes
+losing evidence, a journal that could not audit itself, a fail-open that arrived
+five minutes late) — and each one is now either fixed in the library or named in the
+guidance. What the lab cannot do is stated in
 [docs/DATASET.md](https://github.com/Fachryxyf/scorpio-guard/blob/main/docs/DATASET.md)
 and what one deployment cannot do in
 [docs/v0.3.0/HOST-DATASET.md](https://github.com/Fachryxyf/scorpio-guard/blob/main/docs/v0.3.0/HOST-DATASET.md):

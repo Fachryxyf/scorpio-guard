@@ -1,8 +1,10 @@
 # Host dataset — the first real integration's journal
 
-This is the 0.3.0 record: the first deployment of the library outside the lab,
-replayed against the policy grid. The lab dataset it should be read beside lives in
-[docs/DATASET.md](../DATASET.md); the two-era split follows the version folders, so
+This is the calibration half of the 0.3.0 record: the first deployment of the
+library outside the lab, replayed against the policy grid. The narrative half — the
+92-hour production record, the pentest, and the four defects — is
+[INTEGRATION.md](INTEGRATION.md); the lab dataset it should be read beside lives in
+[docs/DATASET.md](../DATASET.md). The two-era split follows the version folders, so
 the lab runs recorded for 0.2.x stay there and what the first real integration
 measured lives here.
 
