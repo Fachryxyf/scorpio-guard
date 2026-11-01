@@ -52,8 +52,9 @@ kalibrasi diulang dan halaman jaminan diperbarui.
 | Protokol v0.1: fixture, receiver referensi, sender batching | `protocol/fixtures/v0.1/`, `examples/protocol/`, D70, D71 |
 | Gate manifest dan lockfile | `scripts/check-manifest.mjs`, `npm run check:manifest` |
 
-Angka yang dipakai gate: 356 test, 78 keputusan, 12 halaman, 0 dependensi runtime,
-versi terbit 0.2.1.
+Angka yang dipakai gate: 378 test, 83 keputusan, 12 halaman, 0 dependensi runtime,
+144 nama beku di `api/v0.3.json`. Registry terakhir melayani 0.2.1; 0.3.0 (D76-D80,
+umpan balik integrasi nyata pertama) sudah beku di repo dan menunggu tag.
 
 Belum ada sama sekali: hook event keputusan yang dipakai host lain, review keamanan
 eksternal, kalibrasi pada trafik nyata, dan pengirim protokol dari luar repo ini.

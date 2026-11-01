@@ -126,6 +126,34 @@ rather than trusting `get`. Import `./collect` into a server bundle.
 **What falsifies it.** One identifier in the default event, one residue after `forget`, or one
 write to a host stream.
 
+## Three surfaces 0.3.0 added
+
+These shipped after the packet was first written; they get the same treatment as the five
+above, and a reviewer should treat the packet as carrying eight surfaces.
+
+1. **The store deadline (`storeDeadlineMs`, D76).** Claim: an evaluation's store wait is
+   bounded, and degradation is reported rather than silent. Code: `bound`/`startStoreDeadline`
+   in `src/core/guard.ts`, `StoreDeadlineError` in `src/core/store.ts`. Attacks worth trying:
+   a store that answers at deadline-minus-epsilon on every call (the slowest possible healthy
+   store — does the deadline race behave, or leak timers?); a `set` that lands after the
+   deadline answered (is the late write the state that was evaluated, or a newer one?);
+   `forget` throwing while the delete actually lands later (does the host double-forget?).
+   Falsifies: the "a hung store cannot hang the host" guarantee row.
+2. **The per-entity queue (D77).** Claim: concurrent evaluations of one entity serialize,
+   and different entities never wait on each other. Code: `inFlight` in `src/core/guard.ts`.
+   Attacks worth trying: one entity flooded with concurrent requests (queue depth is the
+   host's concurrency limit — is memory bounded by in-flight promises, and does a rejected
+   evaluation poison the chain for the next waiter?); an evaluation that throws inside
+   `evaluateOnce` (does the next caller still run?); interaction with the deadline (a
+   queued evaluation's deadline starts when it runs, not when it was called — is that the
+   contract the docs state?). Falsifies: the D77 accumulation test's claim to cover all
+   interleavings.
+3. **The integration warning (D78).** Claim: it never changes the advice, and its state is
+   bounded. Code: `trackUniformHard` in `src/core/guard.ts`. Attacks worth trying: a scope
+   flooded with one hostile invariant (the warning fires — is it pure surface, event and
+   trace only?); the counter map's growth (bounded by declared scope × invariant pairs —
+   confirm nothing keys it by entity, which would be an unbounded map under rotation).
+
 ## Out of scope, with the reason
 
 - **npm supply chain and the registry account.** Outside the code. The account suspension is

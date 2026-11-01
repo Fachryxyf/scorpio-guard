@@ -286,6 +286,8 @@ event.trust;         // mean, variance, mass, band, proposed, ceiling, capped
 event.violations;    // which invariant, which class, which strength
 event.durationMs;    // measured, not inferred from the clock
 event.entity;        // absent unless `identity` asks: a hash, never the reference
+event.storeDegraded; // true when a store operation missed its deadline (D76)
+event.integrationWarning; // present when the integration itself looks misconfigured (D78)
 ```
 
 The reference is withheld by default, because an event log leaves your process with
@@ -351,6 +353,12 @@ is not free to do silently, though: `kvStore` refuses to be constructed without
 store that has been failing quietly for a month looks exactly like one that works,
 and the dimension it feeds never recovers on its own.
 
+The wait itself is bounded since 0.3.0: the evaluation's store operations share a
+deadline, `storeDeadlineMs` (default 100 ms, D76), measured in the field at about
+305 seconds of hang per request before it existed. Past the deadline the evaluation
+answers without retained state and carries `storeDegraded: true` — alert on a run
+of those, because they are an outage, not traffic.
+
 Deleting an entity's history is one call, and it is the same code path retention
 uses with the horizon forced to zero:
 
@@ -358,7 +366,8 @@ uses with the horizon forced to zero:
 await guard.forget(entity);
 ```
 
-Every tunable number lives in `src/core/policy.ts` and is overridable per guard:
+Every tunable number lives in `src/core/policy.ts` (the store's own deadline default
+lives beside the store, in `src/core/store.ts`) and is overridable per guard:
 half-life, retention, evidence weights, the epistemic stage thresholds, what a
 proven violation advises, the diversity thresholds. All of them are reasoned
 guesses set leniently, so being wrong withholds escalation rather than
@@ -383,6 +392,8 @@ npm run build     # emits dist/
 npm run bench     # evaluation cost per store, checked against bench/budget.json
 npm run soak      # bounded state and memory under a fixed pool (docs/SOAK.md)
 npm run soak:flood  # the same checks while every request mints a fresh reference
+npm run calibrate # the policy grid over the recorded lab runs (docs/DATASET.md)
+npm run calibrate:host  # the same grid over the first real integration's journal (partner data)
 npm run poison    # what patience buys an attacker, priced (docs/POISONING.md)
 npm run protocol:serve  # the reference receiver for the v0.1 wire format
 npm run protocol:check  # both implementations against the fixtures, plus HTTP behaviour

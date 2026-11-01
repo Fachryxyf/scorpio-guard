@@ -17,10 +17,13 @@ export function guarantees(data) {
     ["Erasure is counted, not assumed", "D69", "src/core/erasure.test.ts, over three stores"],
     ["State is bounded: a cap, a retention horizon, a sweep", t("The cap evicts the stalest first, and retention deletes rather than hides.", "Cap mengusir yang paling lama dulu, dan retensi menghapus bukan menyembunyikan."), "src/core/store.test.ts, npm run soak"],
     ["A failing store is loud or refused", "D62", t("Fail-open is refused without an onError sink, at construction.", "Fail-open ditolak tanpa sink onError, saat konstruksi.")],
+    ["A hung store cannot hang the host", "D76", t("One deadline per evaluation (default 100 ms); past it the advice is given without retained state and storeDegraded rides the event.", "Satu deadline per evaluasi (bawaan 100 ms); lewat itu saran diberikan tanpa state tertahan dan storeDegraded ikut di event."), "src/core/guard.test.ts, src/core/event.test.ts"],
+    ["Concurrent evaluations of one entity cannot lose evidence", "D77", t("They queue per entity; the recorded failure was 5,817 rows below their decay floor on the first real integration.", "Mereka mengantre per entity; kegagalan terekamnya 5.817 baris di bawah lantai decay pada integrasi nyata pertama."), "src/core/guard.test.ts"],
+    ["A degenerate scope names itself", "D78", t("Uniform hard violations on one scope raise an integrationWarning that never changes the advice.", "Hard violation seragam pada satu scope memunculkan integrationWarning yang tak pernah mengubah saran."), "src/core/guard.test.ts, src/core/event.test.ts"],
     ["A forbidden field is a rejection, nested and case-insensitive", "D70", "npm run protocol:check"],
     ["Binary limits on the wire", "D71", t("64 KiB body, 60 requests per minute per address, hourly aggregates.", "Body 64 KiB, 60 permintaan per menit per alamat, agregat per jam.")],
     ["The anomaly score is reported and never decides", "D67", "src/core/anomaly.test.ts"],
-    ["The API surface cannot move by accident", "D74", "npm run check:api, api/v0.2.json"],
+    ["The API surface cannot move by accident", "D74", "npm run check:api, api/v0.3.json"],
     ["The same input and the same state give the same advice", t("No randomness in the core, and the clock is injected.", "Tanpa keacakan di core, dan clock-nya disuntikkan."), "src/core/clock.ts, src/core/trust.test.ts"],
   ];
 

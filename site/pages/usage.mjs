@@ -436,8 +436,8 @@ const store = kvStore({
 });</pre>
 
     <p>${t(
-      'Be careful with this one. The soak runs cover the memory and sqlite stores; no deployment of this project has run <code>./kv</code> in production yet, and the <a href="limits.html">limits page</a> records what that means. If you have a disk, use the disk.',
-      'Hati-hati dengan yang ini. Run soak mencakup store memori dan sqlite; belum ada deployment proyek ini yang menjalankan <code>./kv</code> di produksi, dan <a href="limits.html">halaman batas</a> mencatat artinya. Kalau Anda punya disk, pakai disk.',
+      'Be careful with this one. The soak runs cover the memory and sqlite stores; no deployment of this project has run <code>./kv</code> in production yet, and the <a href="limits.html">limits page</a> records what that means. If you have a disk, use the disk. One guard since 0.3.0: store waits are bounded by <code>storeDeadlineMs</code> (default 100 ms, D76), so an unreachable KV costs you the deadline, not the transport\'s retry horizon - and the event says <code>storeDegraded: true</code> while it lasts.',
+      'Hati-hati dengan yang ini. Run soak mencakup store memori dan sqlite; belum ada deployment proyek ini yang menjalankan <code>./kv</code> di produksi, dan <a href="limits.html">halaman batas</a> mencatat artinya. Kalau Anda punya disk, pakai disk. Satu jaga sejak 0.3.0: waktu tunggu store dibatasi <code>storeDeadlineMs</code> (bawaan 100 ms, D76), jadi KV yang tidak reachable hanya menghabiskan deadline, bukan horizon retry transport - dan event menyebut <code>storeDegraded: true</code> selama itu berlangsung.',
     )}</p>
 
     ${h2(8, 'recipes', 'Recipes', 'Resep')}

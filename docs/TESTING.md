@@ -286,6 +286,13 @@ false negatives at the same time, and neither will reproduce on one process. Ret
 state expires after seven days by default, so an entity that goes quiet for a week comes
 back cold.
 
+Since 0.3.0 the store wait is bounded: `storeDeadlineMs` (default 100 ms, D76) covers
+every store operation one evaluation performs. Past it the evaluation answers without
+retained state and the event carries `storeDegraded: true` — count those in your
+journal, because a run of them is an outage, and the whole point of the field is that
+you see it. Two evaluations of one entity can no longer lose each other's evidence
+either (D77): they queue per entity, in this process.
+
 ## What leaves your process, and what never does
 
 | sent to the guard | never sent |
