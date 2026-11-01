@@ -91,8 +91,8 @@ export function versions(data) {
     </table>
 
     <p>${t(
-      "There is no state migration step. <code>EntityState</code> has the same fields in both versions and the SQLite table is the same three columns, so a database written by 0.1.0 is readable by 0.2.0. What differs after the upgrade is the advice computed from that state.<br><br>The full list, including the erasure, anomaly, and observer changes, is in <code>docs/MIGRATION.md</code> in the repository, with the commands that reproduce the surface diff.",
-      "Tidak ada langkah migrasi state. <code>EntityState</code> punya field yang sama di kedua versi dan tabel SQLite-nya sama-sama tiga kolom, jadi database yang ditulis 0.1.0 bisa dibaca 0.2.0. Yang berbeda setelah naik versi adalah saran yang dihitung dari state itu.<br><br>Daftar lengkapnya, termasuk perubahan erasure, anomali, dan observer, ada di <code>docs/MIGRATION.md</code> di repositori, beserta perintah untuk mereproduksi selisih permukaannya.",
+      "There is no state migration step. <code>EntityState</code> has the same fields in both versions and the SQLite table is the same three columns, so a database written by 0.1.0 is readable by 0.2.0. What differs after the upgrade is the advice computed from that state.<br><br>The full list, including the erasure, anomaly, and observer changes, is in <code>docs/v0.2.0/MIGRATION.md</code> in the repository, with the commands that reproduce the surface diff.",
+      "Tidak ada langkah migrasi state. <code>EntityState</code> punya field yang sama di kedua versi dan tabel SQLite-nya sama-sama tiga kolom, jadi database yang ditulis 0.1.0 bisa dibaca 0.2.0. Yang berbeda setelah naik versi adalah saran yang dihitung dari state itu.<br><br>Daftar lengkapnya, termasuk perubahan erasure, anomali, dan observer, ada di <code>docs/v0.2.0/MIGRATION.md</code> di repositori, beserta perintah untuk mereproduksi selisih permukaannya.",
     )}</p>
 
     ${h2(5, "freeze", "The API gate", "Gerbang API")}

@@ -158,6 +158,6 @@ from. Both versions stay on the registry; neither will be unpublished.
 
 - Check the site build against the registry version (`npm run site:check` after updating the
   versions page).
-- If the release moved advice, the versions page and `MIGRATION.md` get the row in the same
+- If the release moved advice, the versions page and the migration guide under `docs/vX.Y.Z/` get the row in the same
   commit. An advisory change that is real but undocumented is the failure mode this whole
   document is written against.

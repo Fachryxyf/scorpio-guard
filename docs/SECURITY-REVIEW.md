@@ -179,7 +179,7 @@ finding against the acceptance, not against the code.
 | Key rotation cannot be detected by the library | D72 | A per-request proof the host issues, which the host must want |
 | Poisoning is priced, not prevented | D73 | A separate mechanism, and the price table says what it would buy |
 | The first-seen-rate diagnostic is not implemented | D72 | A new signal with its own calibration, which does not exist yet |
-| Thresholds come from lab traffic with a published composition, not a real population | `docs/DATASET.md` | Real mixed traffic, which the project does not have |
+| Thresholds come from lab traffic with a published composition, not a real population | `docs/DATASET.md`, `docs/v0.3.0/HOST-DATASET.md` | Real mixed traffic, which the project does not have |
 | The protocol endpoint is unauthenticated | D17 | A key, a rotation policy, and an argument about where the key lives |
 | The framework integration is one example, not a supported set of adapters | M1.1 | A support matrix and the tests behind it |
 
