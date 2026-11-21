@@ -22,7 +22,7 @@ work, and the hardening review. Nothing is blocked on a decision. What remains i
 validation: the values recorded here have not met real traffic yet, and D47 names where
 they will.
 
-Last updated: 2026-10-25
+Last updated: 2026-11-22
 
 ---
 
@@ -45,6 +45,7 @@ Last updated: 2026-10-25
 **Part III: Decision layer**
 
 - [D5: Decision is a function of trust and uncertainty](#d5-decision-is-a-function-of-trust-and-uncertainty)
+- [D33: `CHALLENGE` and `deceive` are aliases, not rungs](#d33-challenge-and-deceive-are-aliases-not-rungs) (decided inside D5)
 - [D37: Saturation guard belongs in the decision layer, not the trust model](#d37-saturation-guard-belongs-in-the-decision-layer-not-the-trust-model)
 - [D40: An epistemic stage precedes trust and uncertainty](#d40-an-epistemic-stage-precedes-trust-and-uncertainty)
 - [D46: Two thresholds the traffic falsified](#d46-two-thresholds-the-traffic-falsified)
@@ -96,12 +97,13 @@ Last updated: 2026-10-25
 - [D26: Node floor: `>=22.13`](#d26-node-floor-2213)
 - [D27: CI now: typecheck and test](#d27-ci-now-typecheck-and-test)
 - [D28: Site stays where it is](#d28-site-stays-where-it-is)
+- [D28.1: The site indexes the record; it does not restate it](#d281-the-site-indexes-the-record-it-does-not-restate-it)
 - [D29: No empty repositories](#d29-no-empty-repositories)
 - [D34: PoC target: HealthMe, with its limits stated](#d34-poc-target-healthme-with-its-limits-stated)
+- [D30: PoC must run against a real application flow](#d30-poc-must-run-against-a-real-application-flow)
 - [D45: Generate the traffic; do not wait for it](#d45-generate-the-traffic-do-not-wait-for-it)
 - [D47: Primary target: IXFE, because it has something to steal](#d47-primary-target-ixfe-because-it-has-something-to-steal)
 - [D48: A stale client view is not a proof](#d48-a-stale-client-view-is-not-a-proof)
-- [D30: PoC must run against a real application flow](#d30-poc-must-run-against-a-real-application-flow)
 - [D50: Farming is answered on mass, through velocity](#d50-farming-is-answered-on-mass-through-velocity)
 - [D51: Signal collectors exist for all seven uncovered catalogue entries](#d51-signal-collectors-exist-for-all-seven-uncovered-catalogue-entries)
 - [D52: The anomaly classifier is a distance-to-reference model, not a trained one](#d52-the-anomaly-classifier-is-a-distance-to-reference-model-not-a-trained-one)
@@ -708,7 +710,7 @@ So `deny` is only ever reachable with real accumulated negative mass, and the
 construction, which matches the stated priority that false positives are the
 central constraint. Recorded so it is not later mistaken for a bug.
 
-### Vocabulary: `CHALLENGE` and `deceive` are not new rungs
+### D33: `CHALLENGE` and `deceive` are aliases, not rungs
 
 **Decided (D33).** The bands name `CHALLENGE` and `deceive`, which are absent from
 the five-rung spectrum in `src/decision.ts`. They are aliases, not additional

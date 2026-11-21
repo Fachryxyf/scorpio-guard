@@ -6,11 +6,11 @@ evidence that a number is wrong, not a patch that changes it.
 
 ## Read this first
 
-[DECISIONS.md](DECISIONS.md) records every design decision: the question, the
-answer, the reasoning, and what the answer commits the implementation to. Several
-obvious-looking alternatives were considered and rejected there. A proposal that
-reopens a recorded decision is welcome; one that reopens it without knowing it was
-decided will be closed with a pointer to the entry.
+Read [DECISIONS.md](DECISIONS.md) before proposing a change to the model. Every design
+decision is recorded there with its reasoning and what it commits the implementation to,
+and several obvious-looking alternatives were considered and rejected there for reasons
+worth knowing. A proposal that reopens a recorded decision is welcome; one that reopens
+it without knowing it was decided will be closed with a pointer to the entry.
 
 ## What is most useful
 
@@ -53,29 +53,31 @@ npm run build
 npm run smoke     # verifies the built package, not the source
 ```
 
+The full command list, gates included, is in the README's Development section.
+
 House rules, in order of how likely they are to get a change sent back:
 
-1. **A behavioral change needs a test that names the decision it depends on.**
+1. A behavioral change needs a test that names the decision it depends on.
    The tests double as the record of every numeric and semantic property in the
    design. `D5: evidence mass is n = alpha + beta` is a test name, not a comment.
-2. **`src/core/` imports nothing platform-specific.** No DOM types, no `node:`
+2. `src/core/` imports nothing platform-specific. No DOM types, no `node:`
    modules. That rule is what keeps one model usable on both sides of the wire.
    Browser code lives in `src/collect/`, platform-backed stores in `src/store/`.
-3. **Numbers live in `src/core/policy.ts`.** A threshold inline in a function is
+3. Numbers live in `src/core/policy.ts`. A threshold inline in a function is
    a threshold nobody can find or override.
-4. **Time comes from the injected `Clock`.** Never `Date.now()` in the core.
-5. **A deliberate simplification is marked `ponytail:`**, naming its ceiling and
+4. Time comes from the injected `Clock`. Never `Date.now()` in the core.
+5. A deliberate simplification is marked `ponytail:`, naming its ceiling and
    the upgrade path. An unmarked shortcut reads as an oversight: and a marked one
    is a debt, so removing it counts as a contribution.
-6. **`hard` needs an enumeration, not an error code.** Declaring `hard` asserts the
+6. `hard` needs an enumeration, not an error code. Declaring `hard` asserts the
    legitimate set is complete for that scope. That the server already refuses the
    request is not evidence of completeness, see D48, where "paid work requires
    enough credits" turned out to be `soft` because the client's view of its balance
    is stale by construction.
-7. **No threshold goes in `signals.ts`.** The catalogue names what is measured,
+7. No threshold goes in `signals.ts`. The catalogue names what is measured,
    never when it fires: the library is public, so a published number is a target to
    route around. Thresholds live in policy an adopter overrides.
-8. **The guard advises. It never enforces.** Any API that acts on its own belongs
+8. The guard advises. It never enforces. Any API that acts on its own belongs
    in the host application, not here.
 
 ## How a change lands
@@ -83,18 +85,18 @@ House rules, in order of how likely they are to get a change sent back:
 One public branch, `main`, one maintainer. That is the whole of the governance, and it is
 written down so nobody has to guess what the silence after a pull request means.
 
-- **Only the maintainer has write access.** For anyone else a pull request is the only way
+- Only the maintainer has write access. For anyone else a pull request is the only way
   in. There is no second reviewer to assign, and pretending otherwise would be a review
   process with one participant wearing two hats.
-- **`main` cannot be force pushed or deleted.** A repository ruleset blocks both, so a
+- `main` cannot be force pushed or deleted. A repository ruleset blocks both, so a
   published commit stays reachable. A wrong change is corrected forward, never rewritten out
   of the history.
-- **CI has to be green before a merge.** That rule is discipline, not a required status
+- CI has to be green before a merge. That rule is discipline, not a required status
   check: the maintainer reads the run and does not merge a red one. A pull request that
   fails the gates is not merged on the argument that the failure looks unrelated.
-- **Contributions ship under the same licence.** MIT in, MIT out, no CLA and no copyright
+- Contributions ship under the same licence. MIT in, MIT out, no CLA and no copyright
   assignment. Opening a pull request is agreeing to that.
-- **A patch does not overrule a decision.** A change that reopens a recorded decision
+- A patch does not overrule a decision. A change that reopens a recorded decision
   changes that entry in the same pull request, with the reason. Otherwise the decision wins,
   and the answer names which entry.
 

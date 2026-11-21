@@ -65,7 +65,7 @@ const guard = createGuard({
 The store speaks HTTP through `fetch`, so it works from a function that may be frozen
 between requests, and there is still nothing to install (D60).
 
-**The alert is part of the configuration, not an optional extra.** The store fails
+The alert is part of the configuration, not an optional extra. The store fails
 open, which means an unreachable KV reads as a cold start for every entity and the
 guard answers `ALLOW` on trust alone. That is the intended behaviour for an advisory
 library (D9), and it is indistinguishable from a healthy deployment unless the `onError`
@@ -95,12 +95,12 @@ rather than offered as a design.
 
 ## What no topology fixes
 
-**The entity key is the root of trust, and it is yours.** An attacker who can present
+The entity key is the root of trust, and it is yours. An attacker who can present
 a fresh entity reference per request gets a fresh `unknown` state per request, and no
 store choice changes that (D1.1). This is the largest open problem in the design, and
 it is a property of the host's authentication, not of the state layer.
 
-**Retention is data deletion.** Behavioural history is personal data: `guard.forget()`
+Retention is data deletion. Behavioural history is personal data: `guard.forget()`
 deletes one entity, and the retention horizon deletes the rest on the read path (D6,
 D12, D22). A backup of a store is a backup of that data.
 

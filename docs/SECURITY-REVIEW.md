@@ -128,16 +128,15 @@ write to a host stream.
 
 ## Out of scope, with the reason
 
-- **npm supply chain and the registry account.** Outside the code. The account suspension is
+- npm supply chain and the registry account. Outside the code. The account suspension is
   recorded in `docs/RELEASING.md` and is not a security finding.
-- **TLS and transport authentication.** The local core is unauthenticated by decision (D17).
+- TLS and transport authentication. The local core is unauthenticated by decision (D17).
   The receiver in `examples/protocol/` is a reference, not a public endpoint, and reviewing it
   as one would produce findings about a deployment that does not exist.
-- **Host operating system, container, and database security.**
-
-- **Browser fingerprinting performed by the host.** The collector reports what the page
+- Host operating system, container, and database security.
+- Browser fingerprinting performed by the host. The collector reports what the page
   reports; a host that fingerprints harder is a host decision.
-- **A malicious maintainer.** No amount of structure survives that, and pretending otherwise
+- A malicious maintainer. No amount of structure survives that, and pretending otherwise
   would be a claim the project cannot hold.
 
 ## Known open risks, accepted and not findings

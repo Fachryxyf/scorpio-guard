@@ -32,20 +32,23 @@ Layout, per D7 in the design record, one package, several entry points, with
 ```
 src/core/       the model: trust, decay, decision, constraints, signals, storage contract
 src/collect/    browser-side observation, exported as ./collect
-src/store/      platform-backed stores, exported as ./sqlite
+src/store/      platform-backed stores, exported as ./sqlite and ./kv
 examples/harness/  application-independent persona traffic and replay
-examples/ixfe/     primary target: invariants across all six proof sources
+examples/ixfe/     primary target while online (D47): invariants across all six proof sources
 examples/healthme/ small-application regression: two scopes, one user
+examples/lab/      real-browser traffic lab against live origins; both runs recorded in docs/DATASET.md
 ```
 
-Not built yet: an anomaly classifier over the feature space, the prescription
-client, and collectors for seven of the ten catalogued weak signals. There is no
-`src/server/`: the core is framework-agnostic and needs no host-specific layer
-until an adapter is written.
+Not built yet: the prescription client, and a server to receive symptom reports.
+The anomaly classifier over the feature space exists (`src/core/anomaly.ts`, D52)
+and reports on every assessment without deciding, and every catalogued weak signal
+has a collector (D51). There is no `src/server/`: the core is framework-agnostic
+and needs no host-specific layer until an adapter is written.
 
-`src/store/` is the one deliberate exception to "no platform APIs", and it is why
-platform code lives in its own directory rather than in `src/core/`: a durable store
-needs a filesystem, and the model still has to run in a browser.
+`src/store/` is the one deliberate exception to the no-platform-APIs rule, and it
+is why platform code lives in its own directory rather than in `src/core/`: a
+durable store needs a filesystem or a network transport, and the model still has
+to run in a browser.
 
 `examples/` stays outside the published package entirely. It generates *test* traffic,
 and shipping a traffic generator in an adopter's bundle would blur the line the design
@@ -71,7 +74,9 @@ Scope:
   that D43 makes strict negotiation optional rather than necessary: an unrecognised
   detail already degrades to its category, so a v2 library and a v1 server remain
   mutually intelligible without one.
-- A conformance checklist for anyone implementing a compatible server.
+- A conformance checklist for anyone implementing a compatible server. One
+  already exists as section 8 of [PROTOCOL.md](PROTOCOL.md) in this repository,
+  with its fixtures in `protocol/fixtures/v0.1/`; it moves with the extraction.
 
 Explicitly out of scope: any actual rule, threshold, or heuristic. The protocol
 says how to ask, never what the answer should be.

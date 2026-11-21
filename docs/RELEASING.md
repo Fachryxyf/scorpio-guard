@@ -1,37 +1,10 @@
-# Releasing: the runbook, and what the 0.2.x releases cost
+# Releasing
 
-## Status as of 2026-10-28
+What each release shipped is recorded in the CHANGELOG's `### Release status` entries:
+the date, the tag and commit, the shasum, and the attestation. This document is the
+runbook and the reasoning that does not belong in a release note.
 
-- 0.2.0 is **published**: 2026-10-28T05:24:29Z, from the tag `v0.2.0` on commit `0f426b1`,
-  by `.github/workflows/release.yml`. Tarball shasum
-  `e38c6e9f3dd131fdac0a2a95ef36cbd660c3b4ee`, 103 files, and the registry holds the
-  provenance attestation at
-  `https://registry.npmjs.org/-/npm/v1/attestations/@fachryxyf%2Fscorpio-guard@0.2.0`.
-- 0.2.1 is **published** too: 2026-10-28T13:26:50Z, from the tag `v0.2.1` on commit
-  `b85294a`, by the same workflow through the same trusted publisher entry. Tarball shasum
-  `361cd94a420688728ed877f58fa1f6c3d0bb347a`, 103 files, 327,467 bytes unpacked, provenance
-  attestation on the same endpoint shape as 0.2.0. It is a documentation-only patch: no
-  code, no exported name, and no advice change, which the API gate confirms name for name.
-- The registry served 0.2.1's tarball about ninety seconds after the upload, faster than
-  the four minutes 0.2.0 took, so the gap is processing load rather than package size.
-- The trusted publisher entry was created from the CLI with `npx npm@12 trust github`,
-  allowed action `npm publish`. The workflow needed no secret and no one-time password;
-  the only human step was approving the second factor in a browser once.
-- Two manual attempts on 2026-10-25 had failed, first with `EOTP` and then with `403 Your
-  account has been temporarily suspended due to a recent security-sensitive action`. The
-  freeze lifted on its own, as npm said it would.
-- **A one-time password prompt is not permission.** npm asks for the second factor before
-  it checks whether the account may write at all, so a publish that reaches your
-  authenticator can still be refused underneath it.
-- The registry answered `+ @fachryxyf/scorpio-guard@0.2.0` immediately and served the
-  tarball about four minutes later, with `404` on the `.tgz` until then. Verify from the
-  registry, not from the local build, and read that gap as processing rather than failure.
-- The status notes this section used to carry in the README, the CHANGELOG, and the site
-  pages are gone in the commit that published, which is the rule this document set for
-  itself. A status paragraph that outlives its cause is the same kind of slow-motion lie
-  as a hand-copied number.
-
-### What the tarball cannot say
+## What the tarball cannot say
 
 The README inside the package is the README at the tagged commit, rendered on npmjs.com
 and frozen there. It cannot say which version the registry serves: that sentence would be
@@ -94,7 +67,9 @@ that has to explain why.
    same tarball, no attestation.
 8. Verify from the registry, not from the local build: `npm view @fachryxyf/scorpio-guard
    dist-tags`, then install into an empty directory and run `node -e` with an import and
-   one evaluation.
+   one evaluation. The registry answers the publish immediately and serves the tarball
+   minutes later, with `404` on the `.tgz` until then; both 0.2.x releases saw that gap,
+   so read it as processing rather than failure.
 9. Update the versions page on the site in the same commit as the release, so the site
    never claims a version the registry does not have. The same commit updates the places
    that name the published version outright, because a page built from `main` cannot read
@@ -146,7 +121,10 @@ from. Both versions stay on the registry; neither will be unpublished.
 
 - No publish from a dirty tree, and no publish with a red gate.
 - No retry loop against a refusal. A `403` after an authenticator prompt means the account
-  cannot write yet; the fix is time or npm support, not another code.
+  cannot write yet; the fix is time or npm support, not another code. A one-time password
+  prompt is not permission, either: npm asks for the second factor before it checks whether
+  the account may write at all, so a publish that reaches your authenticator can still be
+  refused underneath it.
 - No unpublish of 0.1.0. A published version stays; fixes go forward.
 - No `latest` tag moved to an unreleased version. The tag points at what is installed by
   default, and the default should be something a stranger can actually get.

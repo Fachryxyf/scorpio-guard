@@ -214,7 +214,7 @@ ran eight times.
 | patient | 128 | ALLOW x64, OBSERVE x64 | none |
 | hammer | 160 | ALLOW x160 | none |
 
-The table is the recording. The calibration replay of the same rows reproduces every one
+The table is the recording: the calibration replay of the same rows reproduces every one
 of these counts, which is what the frozen fixture checks on each push.
 
 ### What run 2 found
@@ -258,7 +258,7 @@ measurable instead of philosophical. The maximum score per persona:
 | `aufsicht:hammer` | adversarial | 0.7037 | 136 of 160 |
 | `ixfe:path-scanner` | adversarial | 0.3966 | 56 of 80 |
 
-An hypothesis that the score could drive a decision would have to pick a threshold. At
+A hypothesis that the score could drive a decision would have to pick a threshold. At
 each one, counting the personas it gets wrong:
 
 | threshold | false positives | misses | correct |
@@ -272,7 +272,7 @@ each one, counting the personas it gets wrong:
 The reason is visible in the first table. A monitor on a fixed cadence is as unlike the
 reference profile as an attacker posting a form, and an attacker crowding one URL with
 160 requests is familiar, because that is what a tight client shape looks like. The score
-answers "how unusual is this client's shape", and the label is about intent. D67 records
+measures how unusual a client's shape is, and the label is about intent. D67 records
 the consequence: the anomaly stays reported and does not decide, and M2.4 is closed with a
 measurement rather than an argument.
 
@@ -335,16 +335,16 @@ every persona above the eight that makes its label mean something. The smallest 
 
 What the grid says:
 
-- **The shipped cell is the best cell, not a survivor.** Seventeen of twenty-four
+- The shipped cell is the best cell, not a survivor. Seventeen of twenty-four
   personas labelled correctly, zero false positives, seven misses. Moving
   `developingAt` to 4 or 5 loses one more catch, and at 5 the honeypot filler is allowed
   eight times before it is noticed.
-- **The half-life axis did not move a single row.** This run spans minutes, so nothing
+- The half-life axis did not move a single row. This run spans minutes, so nothing
   decays inside it and the three columns are identical. That is printed rather than
   hidden: the plateau is a fact about the dataset, not about the constant.
-- **Zero false positives is the constraint that held**, with eight instances of every
+- Zero false positives is the constraint that held, with eight instances of every
   legitimate persona in the run, including a monitor making 160 reads and two crawlers.
-- **The seven misses are structural.** `ixfe-silent-crawler` and the static `scanner`,
+- The seven misses are structural. `ixfe-silent-crawler` and the static `scanner`,
   `patient` and `hammer` never earned evidence. No cell in this grid catches them,
   because a threshold cannot make silence decisive (F1, F5).
 
@@ -353,17 +353,17 @@ exits zero only when the audit passes.
 
 ## What this dataset cannot do
 
-- **It is not a population.** The personas were written here, and D66 repeats each of them
+- It is not a population. The personas were written here, and D66 repeats each of them
   eight times with independent timing. That is eight samples of one script, not eight
   kinds of visitor, so the spread inside a cell understates the spread between real
   visitors. D45 applies to every rate on this page.
-- **It says nothing about decay.** The run spans minutes; the half-life never bites.
+- It says nothing about decay. The run spans minutes; the half-life never bites.
   Thresholds from this dataset are calibrated on a clock that barely moves.
-- **The misses are not threshold placements.** Moving a constant cannot make behaviour
+- The misses are not threshold placements. Moving a constant cannot make behaviour
   decisive; that is the decision D67 records, and it was refused on this data.
-- **The IXFE rows came from a local landing service**, not from `ixfe.pro`. The invariants
+- The IXFE rows came from a local landing service, not from `ixfe.pro`. The invariants
   and the endpoints are the shipped ones, the deployment is not.
-- **The static targets declare nothing**, so no row from them can prove a violation. Their
+- The static targets declare nothing, so no row from them can prove a violation. Their
   rows can only ever be statistical, and they are labelled as such.
 
 What it can do, and does, is hold behaviour still and give the constants a reading: 1656

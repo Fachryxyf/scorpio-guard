@@ -1,12 +1,13 @@
-# Testing 0.2.0
+# Testing an integration
 
 A stranger should be able to install this, wire it into one application, and have
 something worth reporting back inside a working session. This page is that session,
 written for someone who has never read the rest of the repository.
 
-It covers what 0.2.0 asks you to test, the four parts of an integration, the two
+It covers what this release asks you to test, the four parts of an integration, the two
 mistakes that make results meaningless, both reporting paths, and the limits you should
-not read past.
+not read past. It is written against `0.2.1`; the same page tested `0.2.0`, whose advice
+is identical because `0.2.1` changes no behavior.
 
 ## What the library does
 
@@ -19,7 +20,7 @@ It does not read message content, does not store credentials, and never blocks o
 own. The host writes the code that acts, which is the point of it being a library
 (D9, D14).
 
-## What 0.2.0 asks you to test
+## What this release asks you to test
 
 1. False positives on your own traffic. A legitimate client that is advised friction is
    the failure this design treats as central, more than a missed attacker.
@@ -28,14 +29,20 @@ own. The host writes the code that acts, which is the point of it being a librar
 3. That the decision journal you keep can support calibration later. Advice without an
    outcome next to it cannot be calibrated, only believed.
 
-What is not under test: automatic enforcement. Nothing in 0.2.0 acts on your behalf.
+What is not under test: automatic enforcement. Nothing in this package acts on your behalf.
 
 ## Install
 
 Node 22.13 or newer. The `./sqlite` entry uses `node:sqlite`, which is why the floor is
 higher than the runtime the rest of the library needs.
 
-While the registry serves a version older than 0.2.0, build a tarball from `main`:
+Install the released version:
+
+```
+npm install @fachryxyf/scorpio-guard@0.2.1
+```
+
+To test `main` rather than the release, build a tarball from source:
 
 ```
 git clone https://github.com/Fachryxyf/scorpio-guard.git
@@ -45,11 +52,12 @@ npm run build
 npm pack
 ```
 
-That writes `fachryxyf-scorpio-guard-0.2.0.tgz`. Install it into the application you are
+That writes `fachryxyf-scorpio-guard-<version>.tgz`, named after the version in
+`package.json`. Install it into the application you are
 testing:
 
 ```
-npm install /path/to/fachryxyf-scorpio-guard-0.2.0.tgz
+npm install /path/to/fachryxyf-scorpio-guard-<version>.tgz
 ```
 
 Then check that the entry point loads:
@@ -63,8 +71,8 @@ that is the first report you send.
 
 Pin the exact version rather than a caret range. No threshold in this library is
 calibrated against a real population yet, so a minor bump can move the advice, and a
-range would pull that in silently. The current blocker on publishing 0.2.0 and the
-commit that removes it are in [RELEASING.md](RELEASING.md).
+range would pull that in silently. How a release ships, and the record of the npm
+account suspension, are in [RELEASING.md](RELEASING.md).
 
 ## An integration is four things
 
@@ -85,11 +93,11 @@ quietly.
 
 Two traps:
 
-- **One office, one address.** A team behind one NAT gateway presents one address and
+- One office, one address. A team behind one NAT gateway presents one address and
   often one user agent string. Keyed on address plus user agent, eighty people collapse
   into one entity and their histories mix. For authenticated requests, key on the
   session or the user.
-- **Rotating identities defeat the wrong key.** Keyed on the address, an attacker who
+- Rotating identities defeat the wrong key. Keyed on the address, an attacker who
   rotates addresses resets its own history on every attempt. Key the brute-force scope
   on the credential instead, so the history follows the thing being attacked.
 
@@ -107,10 +115,10 @@ auth.login  auth.refresh  chat.read  chat.send  admin.action  outbound.send
 
 Two rules:
 
-- **Do not use one scope per route.** The diversity feature reads the spread of scopes
+- Do not use one scope per route. The diversity feature reads the spread of scopes
   (D36, D46), and a scope per route makes diversity impossible to reach, which removes
   evidence from every decision.
-- **Do not put identifiers in scope names.** Scope names are quoted in `trace`, and the
+- Do not put identifiers in scope names. Scope names are quoted in `trace`, and the
   trace is part of the event that leaves your process.
 
 ### 3. Invariant
@@ -210,9 +218,9 @@ async function decide(entity, scope, facts, signals) {
 
 Two properties worth keeping in your own version:
 
-- **The call is wrapped.** Without that wrapper a store outage becomes an outage of your
+- The call is wrapped. Without that wrapper a store outage becomes an outage of your
   login, which is a worse outcome than the abuse you were pricing.
-- **One evaluation point per scope.** An invariant that reads the handler result has to
+- One evaluation point per scope. An invariant that reads the handler result has to
   be evaluated after the handler, and its advice then applies to the next request. Mixing
   the two orders scrambles the trust accumulation and makes two sessions incomparable.
   Write down which order you chose.
@@ -243,8 +251,8 @@ computes for you through the `./collect` entry: `measureLatency`, `trackBreadth`
 | more than one process or host | `kvStore({ transport })` with your own transport |
 | unit tests | `memoryStore()`, the default |
 
-`KvTransport` is three methods: `get(key)`, `set(key, value, ttlSeconds)`, `del(key)`.
-A Redis implementation is short.
+`KvTransport` is three methods, `get(key)`, `set(key, value, ttlSeconds)`, and
+`del(key)`, and a Redis implementation of it is short.
 
 Running several processes with a local sqlite file each splits the per-entity window.
 The result looks like a library bug and is not one: you will see false positives and
@@ -368,7 +376,7 @@ public. [SECURITY.md](../SECURITY.md) lists what is in scope.
 ```
 Title: [component] one line
 
-Guard version: 0.2.0, tarball from main at <commit>
+Guard version: <version>, tarball from main at <commit>
 Node: v22.x   OS: <os>
 Integration: <framework>, store: <sqlite / kv / memory>, processes: <n>
 
@@ -443,8 +451,9 @@ number matches.
 | an uptime monitor every 60 seconds, all day | `ALLOW`, and if it escalates that is a false positive to report |
 | a restart, with sqlite or kv | state survives; with `memoryStore` the entity returns cold. Neither is an error |
 
-Two hundred observations per scope is the minimum for a session to say anything. Below
-that, everything is still cold start.
+Treat two hundred observations per scope as the working minimum for a session to say
+anything; below that, everything is still cold start. That floor is a working
+assumption carried out of the lab sessions, not a calibrated threshold.
 
 ## Testing without an application
 
@@ -464,7 +473,7 @@ did, which is the shortest way to see the shape of a decision before writing one
 
 ## Definition of done for a session
 
-- [ ] 0.2.0 installed from a tarball, with the commit recorded.
+- [ ] The tested version installed, with the commit recorded.
 - [ ] Two scopes wired, one of them the login scope.
 - [ ] Three to five invariants, each with a written reason for `hard` or `soft`.
 - [ ] The entity key verified not to merge two different people on the same network.
@@ -476,21 +485,21 @@ did, which is the shortest way to see the shape of a decision before writing one
 
 ## Limits you should not read past
 
-1. **Advisory only.** There is no enforcement in this package. Blocking is your code, and
+1. Advisory only. There is no enforcement in this package. Blocking is your code, and
    your responsibility.
-2. **No calibration against a real population.** The published dataset comes from a
+2. No calibration against a real population. The published dataset comes from a
    traffic lab, not from production (D45). Its zero false positives describe the
    composition recorded in [DATASET.md](DATASET.md), not your traffic.
-3. **No provenance on 0.1.0.** If you installed 0.1.0 from the registry, that is an
+3. No provenance on 0.1.0. If you installed 0.1.0 from the registry, that is an
    ordinary tarball. 0.2.0 was published by `release.yml` from the tag `v0.2.0` on
    2026-10-28, so the registry holds a provenance attestation for it, and `npm audit
    signatures` checks the signatures and the attestation for what you have installed.
-4. **One maintainer.** There are no required status checks and no second reviewer. CI is
+4. One maintainer. There are no required status checks and no second reviewer. CI is
    discipline, not a gate. Read the diff before you move a version.
-5. **The exported surface is frozen** in `api/v0.2.json`. A removal counts as a major
+5. The exported surface is frozen in `api/v0.2.json`. A removal counts as a major
    change even below 1.0.0 (D74). If your test needs a name that is missing, that is a
    finding, not a reason to patch locally.
-6. **Vulnerabilities go to the advisory channel**, not to an issue.
+6. Vulnerabilities go to the advisory channel, not to an issue.
 
 ## When something looks wrong
 

@@ -1,6 +1,8 @@
 # Scorpio Guard Protocol - v0.1 (draft)
 
-Wire format for the symptom/prescription exchange.
+Wire format for the symptom/prescription exchange. The key words MUST, MUST NOT,
+REQUIRED, SHOULD, and MAY in this document are to be interpreted as described in
+[RFC 2119](https://www.rfc-editor.org/rfc/rfc2119).
 
 **The library still transmits nothing on its own.** D17 removed the API key and D20
 made a serverless guard fully functional, so there is no default destination and no

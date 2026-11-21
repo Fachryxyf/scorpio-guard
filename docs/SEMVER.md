@@ -7,8 +7,8 @@ policy, a migration guide, and a deprecation policy; this is the first and third
 
 ## Where the project is
 
-0.2.0 has been on npm since 2026-10-28, and 0.1.0 stays installable for rollback. How it
-was published, and what the earlier account freeze did to it, is recorded in
+0.2.1 is the latest on npm, published 2026-10-28, and 0.1.0 stays installable for rollback.
+How it was published, and what the earlier account freeze did to it, is recorded in
 [RELEASING.md](RELEASING.md), not here. From 0.2.0 onward the exported surface is written
 down in `api/v0.2.json` and checked on every push.
 
@@ -22,11 +22,11 @@ down in `api/v0.2.json` and checked on every push.
 
 Two consequences are deliberate.
 
-**A behaviour change is an API change, but not a major one.** This library exists to give
+A behaviour change is an API change, but not a major one. This library exists to give
 advice, so freezing the advice would freeze the product. What a minor promises is that the
 change is written down where an adopter can find it, with the old behaviour beside the new.
 
-**Removals are major even in 0.x.** Semver would let 0.x break anything. This project does
+Removals are major even in 0.x. Semver would let 0.x break anything. This project does
 not, because the alternative is that a 0.x user cannot upgrade without reading the source.
 The gate below refuses a removal until the snapshot is rewritten in the same commit that
 documents it, so the removal is always a visible act.
@@ -36,11 +36,11 @@ documents it, so the removal is always a visible act.
 - A name is deprecated in its JSDoc with `@deprecated`, the replacement, and the version
   that deprecated it. Types carry the same note.
 - A deprecated name survives at least one minor release. Removal happens in a major.
-- **No runtime warnings.** The library never writes to the host standard output or error
+- No runtime warnings. The library never writes to the host standard output or error
   stream, because a dependency that logs into someone else process is a dependency that
   gets removed. The deprecation is visible in the editor, the types, the CHANGELOG entry,
   and the API diff.
-- **Types are part of the surface.** Removing a field from an exported type is a removal
+- Types are part of the surface. Removing a field from an exported type is a removal
   and needs a major, whether or not the runtime still ignores that field.
 
 ## The gate
@@ -72,7 +72,7 @@ the project believes.
 
 Nothing in this document waits for 1.0.0. The freeze is already in force, which is the
 point: 1.0.0 is the release that can be trusted because the rule was already being followed,
-not the release where the rule starts. What 1.0.0 adds is the three proofs in
-[docs/ROADMAP.md](ROADMAP.md) section 1, and the promise that the protocol major and the
+not the release where the rule starts. What 1.0.0 adds is the proofs
+[docs/ROADMAP.md](ROADMAP.md) section 1 lists, and the promise that the protocol major and the
 decision vocabulary (`ALLOW`, `OBSERVE`, `INCREASE_FRICTION`, `RESTRICT`, `BLOCK`) will not
 move without a major release.

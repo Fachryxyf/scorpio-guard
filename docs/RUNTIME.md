@@ -1,8 +1,8 @@
 # Runtime support: what is promised, what is tested, and what is only argued
 
-H14 asks for a runtime matrix with a smoke test per target. This document says which
+H14 requires a runtime matrix with a smoke test per target. This document says which
 targets the package supports, how each one is checked, and which boxes are still empty.
-The distinction matters because \"works in the browser\" and \"imports nothing from Node\"
+The distinction matters because "works in the browser" and "imports nothing from Node"
 are different claims, and only the second one is executable here.
 
 ## The matrix
@@ -28,15 +28,15 @@ tested on that version.
 
 Three tests in `src/core/runtime-surface.test.ts`:
 
-1. **The root entry point reaches nothing Node-only.** Starting at `src/index.ts`, every
+1. The root entry point reaches nothing Node-only. Starting at `src/index.ts`, every
    relative import is followed, and each file is scanned for node: specifiers, `require()`,
    `process.`, `Buffer`, `setImmediate`, and `__dirname`.
-2. **The browser collector entry point reaches nothing Node-only.** The same walk from
+2. The browser collector entry point reaches nothing Node-only. The same walk from
    `src/collect/index.ts`.
-3. **The Node-only entry point is a separate graph.** `src/store/sqlite.ts` is asserted to
+3. The Node-only entry point is a separate graph. `src/store/sqlite.ts` is asserted to
    import `node:sqlite`, to be unreachable from `.`, and to be the reason the split exists.
 
-Verified by mutation: adding `import { hostname } from \"node:os\"` to `src/core/clock.ts`
+Verified by mutation: adding `import { hostname } from "node:os"` to `src/core/clock.ts`
 fails test 1 with `core/clock.ts: node: import`, and removing it passes. The third test is
 what stops the boundary from being vacuous, since a walk that finds nothing proves nothing.
 
@@ -54,17 +54,17 @@ serves the request, and the package does not pick a framework for it.
 
 ## What is still not shown
 
-- **No bundle is built in CI.** The property that a bundler needs holds (standard ECMAScript
+- No bundle is built in CI. The property that a bundler needs holds (standard ECMAScript
   and no Node globals), but no bundler configuration is tested, and there is no claim about
   bundle size or tree shaking.
-- **No real browser executes the library.** The collector is exercised in the lab runs
+- No real browser executes the library. The collector is exercised in the lab runs
   through a real Chrome, which is a different path: that is the observer, not `./collect`
   inside a page.
-- **No edge deployment exists.** No workerd, no Vercel, no Cloudflare run. The argument is
+- No edge deployment exists. No workerd, no Vercel, no Cloudflare run. The argument is
   the import graph, and H14 stays open until a deployment consumes the package.
-- **No Deno or Bun run.** Both could probably import `dist/`, and until someone does it, it
+- No Deno or Bun run. Both could probably import `dist/`, and until someone does it, it
   is not a support claim.
-- **The Node matrix covers one operating system.** All three jobs are ubuntu-latest; the
+- The Node matrix covers one operating system. All three jobs are ubuntu-latest; the
   soak numbers in [SOAK.md](SOAK.md) came from macOS.
 
 ## Reproducing

@@ -18,6 +18,11 @@ signature moved. The rules are therefore narrower than semver's default reading:
   `docs/ROADMAP.md` §1: a calibration dataset with published composition, the
   protocol running end to end, and a frozen API after a directed security review.
 
+## [Unreleased]
+
+Nothing yet. Changes land here while they are being made and move into the dated
+heading at release time.
+
 ## [0.2.1] - 2026-10-28
 
 Documentation only. No code, no exported name, no threshold, and no advice for the same
@@ -106,7 +111,6 @@ rest of the runbook in `docs/RELEASING.md`.
   worth trying, what would falsify each claim, the out of scope list with reasons, the six
   accepted risks, the evidence commands, and the finding format. The sign-off is empty until
   a reviewer who is not the author fills it.
-
 - Declared invariants in seven classes, closed over the kinds of proof a host can
   actually hold rather than over attack shapes, with per-class advice (D41).
   `hard` and `soft` are separate claims: `hard` asserts the enumeration is complete
@@ -280,3 +284,7 @@ invention.
 The heading said 2026-08-15 until 2026-10-25. The registry is the record for this: 0.1.0
 was published on 2026-08-24 from commit `c488012`. That commit is tagged `v0.1.0` now,
 retroactively, because no tag was made when the package was released.
+
+[Unreleased]: https://github.com/Fachryxyf/scorpio-guard/compare/v0.2.1...HEAD
+[0.2.1]: https://github.com/Fachryxyf/scorpio-guard/compare/v0.2.0...v0.2.1
+[0.2.0]: https://github.com/Fachryxyf/scorpio-guard/compare/v0.1.0...v0.2.0

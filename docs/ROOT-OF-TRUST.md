@@ -20,13 +20,13 @@ library. It is a hole in the protection the host believes it bought.
 
 A key has to satisfy three properties, and the host has to be able to state them:
 
-1. **Issued, not observed.** The value comes from something the host created: an account
+1. Issued, not observed. The value comes from something the host created: an account
    id, a session id minted at login, a signed cookie the host set. It does not come from
    the request.
-2. **Stable for as long as the history is meant to matter.** History follows the key. If
+2. Stable for as long as the history is meant to matter. History follows the key. If
    the key changes every request, there is no history; if it changes every session, the
    history is one session long.
-3. **Revocable, at a cost the host chooses.** A subject can discard the key (logout,
+3. Revocable, at a cost the host chooses. A subject can discard the key (logout,
    cleared cookie, deleted account). That cost is the real strength of every history-based
    defence, and it is a product decision rather than a library setting.
 
@@ -55,15 +55,15 @@ matters only for subjects that do not try to escape it.
 
 ## What is not protected
 
-- **Rotation is invisible.** The library cannot distinguish a hundred new visitors from one
+- Rotation is invisible. The library cannot distinguish a hundred new visitors from one
   attacker with a hundred keys. D1.1 records a first-seen-rate diagnostic as a possibility;
   it is not implemented, and if it lands it will not be a claim that the rate means abuse.
-- **A key derived from a client-controlled value is a capability.** If the value is a
+- A key derived from a client-controlled value is a capability. If the value is a
   cookie the client can rewrite, then the client owns the history. Treat that value the way
   a password reset is treated: a step that costs something.
-- **The library does not authenticate the key.** A host that trusts an upstream header
+- The library does not authenticate the key. A host that trusts an upstream header
   inherits the weakness of whatever wrote that header.
-- **No history, no history-based advice.** With a key that changes per request, the guard
+- No history, no history-based advice. With a key that changes per request, the guard
   still checks declared invariants and transitions per request. Everything else degrades to
   a cold start, which is `ALLOW` with a trace that says so.
 

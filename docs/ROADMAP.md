@@ -188,7 +188,7 @@ yang mengujinya. Klaim tanpa target dicetak sebagai daftar yang harus dijawab di
 
 Status: selesai. `docs/CLAIMS.md` dibangkitkan, `docs/CLAIMS-NOTES.md` memuat alasan
 tertulis, dan gate gagal kalau ada keputusan tanpa test dan tanpa alasan, atau kalau
-alasan masih tersisa untuk keputusan yang sudah punya test. Keadaan sekarang: 77
+alasan masih tersisa untuk keputusan yang sudah punya test. Keadaan sekarang: 78
 keputusan, 56 dinamai test, 22 beralasan, 0 tanpa alasan.
 
 ### Exit criteria MVP
@@ -209,9 +209,9 @@ Semua harus benar, dan semuanya bisa diperiksa:
 Di luar MVP, disengaja: kalibrasi, server protokol, review keamanan eksternal,
 browser dan edge, dashboard, encoding symptom.
 
-Status per 2026-10-24: kriteria 1, 3, 4, 5, dan 6 lulus. Kriteria 2 belum, dan
-satu-satunya yang menahannya adalah publikasi ke npm. Empat dari lima hal yang bisa
-dikerjakan tanpa kredensial sudah dikerjakan dan punya gate sendiri.
+Status per 2026-10-28: seluruh kriteria lulus. Kriteria 2 tertutup oleh publikasi
+0.2.0 ke npm lewat tag `v0.2.0` pada 2026-10-28, dengan attestation provenance dan
+`pack-and-install` hijau di CI.
 
 ---
 
@@ -240,42 +240,29 @@ yang cukup untuk memilih threshold:
 | M2.7 | Persona sebagai populasi (H20). `--repeat=N` menjalankan tiap persona N kali sebagai pengunjung berbeda: identitas sendiri, seed sendiri, profil Chrome sendiri, dan label tetap di level persona (D66) |
 | M2.8 | Terbitkan angka FP/FN run lab di situs, dibangkitkan dari file run dan bukan diketik, supaya halaman jaminan menyebut komposisi dan batasnya. Selesai: `npm run report:lab` menulis `examples/lab/report.json`, halaman results membacanya, dan `examples/lab/report.test.ts` menolak laporan yang angkanya tidak berjumlah atau yang sel kirimnya bukan yang terbaik |
 
-Status: M2.1 selesai (D63). Dua run terekam. Run pertama, dua build statis: 129
-request, 14 persona-run, 0 false positive, 6 false negative, dan keenamnya punya satu
-sebab yang sama: page view tidak membawa bukti, jadi mass tetap 2.00, stage tetap
-`unknown`, dan plafonnya `ALLOW` (F1). Run kedua menambahkan IXFE, tempat form dan
-hidden field bisa dinilai: 1656 request, 24 persona, tiga target, 0 false positive,
-7 false negative (F5). Komposisi dan temuannya di `docs/DATASET.md`.
+Status: M2.1 selesai (D63). Dua run terekam: 129 request pada dua build statis
+(0 false positive, 6 false negative, semuanya satu sebab, F1), dan 1656 request pada
+tiga target (0 false positive, 7 false negative). Komposisi dan temuannya di
+`docs/DATASET.md`.
 
-Status: M2.2 selesai sebagai hasil, bukan hanya sebagai alat (D64). `npm run calibrate`
-lulus audit pada run kedua dan mencetak sembilan sel: half-life 24, 72, 168 jam kali
-developingAt 3, 4, 5. Sel yang dikirim (24 jam, 3, 7) adalah yang terbaik dari sembilan,
-0 false positive dan 7 false negative, 17 dari 24 persona. Menaikkan developingAt ke 4
-atau 5 kehilangan satu tangkapan lagi. Sumbu half-life tidak menggeser satu baris pun,
-karena run hanya berlangsung beberapa menit dan tidak ada yang meluruh di dalamnya; itu
-dicetak apa adanya, bukan disembunyikan. Gate: `examples/lab/calibration.test.ts`,
-diverifikasi dengan tiga mutasi.
+Status: M2.2 selesai sebagai hasil, bukan hanya sebagai alat (D64). Sembilan sel
+kalibrasi pada run kedua; sel yang dikirim adalah yang terbaik dari sembilan
+(17/24 persona, 0 false positive, 7 false negative), dan sumbu half-life tidak
+menggeser satu baris pun karena run hanya berlangsung beberapa menit. Gate:
+`examples/lab/calibration.test.ts`.
 
-Status: M2.3 selesai. `scripts/freeze-lab.mjs` menyimpan satu run ke
-`examples/lab/fixtures/`, hanya dengan field yang dibutuhkan replay: waktu relatif, id
-entity pendek yang stabil, persona, label, profile yang mendeklarasikan invariant, dan
-observation yang dievaluasi, plus keputusan model untuk tiap baris.
-`examples/lab/fixture.test.ts` memutar ulang kedua fixture pada setiap push, jadi
-perubahan model yang menggeser treatment gagal di CI dan harus diterima dengan sengaja
-lewat `npm run freeze:lab`. Run kedua menghasilkan nol drift di 24 persona setelah
-profile ikut di baris (F8). Batasnya di D65: ini gate perilaku, bukan gate parameter.
+Status: M2.3 selesai. Kedua fixture beku diputar ulang pada setiap push dan
+menghasilkan nol drift setelah profile ikut di baris (F8); perubahan model yang
+menggeser treatment gagal di CI dan harus diterima lewat `npm run freeze:lab`.
+Batasnya di D65: gate perilaku, bukan gate parameter.
 
-Status: M2.4 selesai sebagai penolakan terukur (D67). Anomali tetap dilaporkan dan tidak
-memutuskan. Pada run kedua tidak ada threshold yang mengalahkan policy bukti: 0.80
-memberi 6 false positive, 0.95 memberi 8 false negative, 0.99 tidak menandai apa pun,
-sementara policy bukti 0 false positive dan 7 false negative. Sebabnya terlihat di
-peringkat skor: monitor sah dengan irama tetap mencapai 0.9610, sebanding dengan
-penembak endpoint, sementara hammer yang mengirim 160 request ke satu URL hanya 0.7037.
+Status: M2.4 selesai sebagai penolakan terukur (D67). Pada run kedua tidak ada
+threshold anomali yang mengalahkan policy bukti, jadi anomali tetap dilaporkan dan
+tidak memutuskan. Peringkat skornya ada di `docs/DATASET.md` (F7).
 
-Status: M2.7 selesai (D66, H20). `--repeat=8` menjalankan tiap persona sebagai delapan
-pengunjung berbeda: identitas sendiri, seed sendiri, profil Chrome sendiri. Baris tetap
-dikelompokkan per persona, satu repetisi yang kena treatment sudah cukup membuat persona
-itu false positive, dan jumlah repetisi tercatat di manifest sebagai bagian komposisi.
+Status: M2.7 selesai (D66, H20). `--repeat=8` menjalankan tiap persona sebagai
+delapan pengunjung berbeda, dan jumlah repetisi tercatat di manifest sebagai
+bagian komposisi.
 
 Exit: laporan FP/FN terbit di situs, komposisi dataset tertulis, fixture beku diputar
 di CI, dan keputusan baru tercatat di `DECISIONS.md`. Komposisi dan fixture sudah ada,
@@ -294,49 +281,38 @@ begitu juga keputusan (D64, D66, D67), dan bagian situs yang menerbitkan angkany
 Exit: dua implementasi berbeda lulus fixture yang sama, dan envelope yang dimanipulasi
 ditolak oleh test, bukan oleh klaim.
 
-Status: selesai. Encoder dan decoder di `src/core/protocol.ts` dan receiver referensi di
-`examples/protocol/validate.ts` lulus 22 fixture yang sama, dan
+Status: selesai. 22 fixture lulus di kedua implementasi, dan
 `examples/protocol/interop.test.ts` menutup jalur HTTP: 54 test, 44 di antaranya
-pemutaran fixture. Dua mutasi membuktikan test itu bisa gagal: menghapus pemindaian field
-terlarang dari library menggagalkan enam test, mengubah major yang didukung di receiver
-menggagalkan sembilan belas. Yang belum ada: pengirim dari luar repo ini, dan keputusan
-memindahkan fixture ke repo terpisah.
+pemutaran fixture. Dua mutasi membuktikan test itu bisa gagal. Yang belum ada:
+pengirim dari luar repo ini, dan keputusan memindahkan fixture ke repo terpisah.
 
 ### M4, pengerasan
 
 | Task | Isi |
 |---|---|
-| M4.1 | Root of trust: panduan entity key, plus test yang membuktikan apa yang tidak dilindungi. Selesai: `docs/ROOT-OF-TRUST.md` memuat aturan, tabel biaya, dan checklist; `src/core/root-of-trust.test.ts` enam test mengukur biaya rotasi (satu perubahan kunci membatalkan enam observasi kecurigaan), biaya menebus (26 observasi positif), kunci bersama, sepuluh kunci, retensi sebagai rotasi, dan bukti per-request yang tidak bisa dirotasi (D72) |
+| M4.1 | Root of trust: panduan entity key, plus test yang membuktikan apa yang tidak dilindungi. Selesai: `docs/ROOT-OF-TRUST.md` memuat aturan, tabel biaya, dan checklist; `src/core/root-of-trust.test.ts` enam test mengunci angkanya, di antaranya satu perubahan kunci membatalkan enam observasi kecurigaan dan menebusnya butuh 25 observasi positif (D72) |
 | M4.2 | Poisoning: eksperimen biaya penyerang dibanding waktu deteksi, lalu mitigasi yang diuji. Selesai: `npm run poison` mencetak dua belas baris dan `examples/poison/experiment.test.ts` mengunci empat di antaranya; skrip bergap konstan berhenti di lima negatif berapa pun yang dibelanjakan, skrip bergap jitter membeli satu negatif tambahan per 1,71 positif, dan mematikan diskon D55 membuat kedua pola itu identik (D73) |
 | M4.3 | Review keamanan terarah: adapter failure, poisoning, entity key, DoS, integrasi host |
-| M4.4 | Soak 24 jam: memori, GC, sweep, jumlah state. Selesai 2026-10-28. `scripts/soak.mjs` punya dua profil (pengunjung tetap dan banjir referensi) dan empat cek yang sama di lokal dan CI. Soak memori 24 jam di profil steady lulus 4 dari 4: p99 0,198 ms, RSS tumbuh 2,2 MB setelah warmup, tren 61,4 ke 65,5 MB dengan batas 86,8 MB, dan 500 entitas dari cap 2.000. Pendamping sqlite 2 jam lulus 3 dari 4: p99 10,233 ms gagal di anggaran 5 ms yang memang anggaran store memori, dan angkanya dicatat apa adanya bersama dua run sqlite pendek sebelumnya (2,552 ms unpaced, 5,229 ms di pace 10 ms). Run sqlite itu juga menemukan cacat harness: predikat invarian membaca `observation.data` padahal guard sudah mengirim objek data itu sendiri, jadi pelanggaran keras yang dikirim tiap 17 evaluasi tidak pernah menyala di run mana pun sebelumnya dan `violations: 0` tidak membuktikan apa pun; sudah diperbaiki dan diukur (19.253 RESTRICT dari 327.285 evaluasi di run 5 detik). Semua angka dan batasnya ada di `docs/SOAK.md` |
+| M4.4 | Soak 24 jam: memori, GC, sweep, jumlah state. Selesai 2026-10-28: soak memori 24 jam lulus 4 dari 4 cek, pendamping sqlite 2 jam lulus 3 dari 4 (p99-nya di atas anggaran 5 ms yang memang anggaran store memori, dicatat apa adanya), dan run sqlite itu menemukan cacat harness predikat invarian yang sudah diperbaiki dan diukur. Semua angka, batas, dan postmortem dua percobaan awal ada di `docs/SOAK.md` |
 
 Exit: laporan review ada, dan tidak ada temuan kritis yang terbuka tanpa alasan
 tertulis.
 
-Status: M4.1, M4.2, dan M4.4 selesai (D72, D73). M4.4 ditutup oleh soak memori 24 jam
-yang lulus empat cek pada 2026-10-28, plus pendamping sqlite dua jam yang lulus tiga dari empat:
-p99-nya 10,233 ms, di atas anggaran 5 ms yang memang ditulis sebagai anggaran store memori.
-Run sqlite itu sekaligus menemukan cacat di harness yang membuat cek pelanggaran keras tidak
-pernah menyala di run mana pun sebelumnya; cacatnya diperbaiki dan perbaikannya diukur. Yang
-belum sama sekali: M4.3 review keamanan, yang butuh peninjau di luar penulis. Selama M4.3 belum
-lengkap, exit M4 belum lulus dan 1.0.0 tetap ditahan.
-
-Status M5: M5.1 sebagian, M5.2 dan M5.3 selesai (D69, D74), M5.4 sebagian dengan halaman
-jaminan yang sudah terbit tetapi rilis 1.0.0 yang belum. Paket review M4.3 sudah ada di
-`docs/SECURITY-REVIEW.md`, dan itu memindahkan pekerjaan yang tersisa dari penulisan ke
-satu orang di luar proyek yang mau mengerjakannya.
+Status: M4.1, M4.2, dan M4.4 selesai (D72, D73); M4.4 ditutup oleh soak memori 24 jam
+pada 2026-10-28, angka dan batasnya di `docs/SOAK.md`. Yang belum sama sekali: M4.3
+review keamanan, yang butuh peninjau di luar penulis. Selama M4.3 belum lengkap, exit
+M4 belum lulus dan 1.0.0 tetap ditahan.
 
 ### M5, pembekuan dan 1.0.0
 
 | Task | Isi |
 |---|---|
-| M5.1 | Matriks runtime: Node 22.13, Node 24, browser bundler, edge. Didukung atau tidak, dengan smoke test. Sebagian: CI punya tiga job Node (22.13.0, 22.x, 24.x) yang masing-masing menjalankan suite, build, dan smoke impor `dist/`; `src/core/runtime-surface.test.ts` menelusuri graf impor dari `.` dan `./collect` dan gagal pada global Node apa pun, dibuktikan dengan mutasi; `docs/RUNTIME.md` mencatat mana yang dieksekusi dan mana yang masih hanya argumen (belum ada bundler, browser, atau edge sungguhan) |
-| M5.2 | Retention dan erasure end-to-end di semua store dan di event log. Selesai untuk tiga store yang dikirim (`src/core/erasure.test.ts`): yang dilupakan tidak tersisa di hitungan penyimpanan, yang kedaluwarsa terhapus bukan disembunyikan, dan event keputusan tidak membawa identitas sehingga log tidak perlu dihapus (D69) |
-| M5.3 | Semver final, panduan migrasi, kebijakan deprecation. Selesai: `docs/SEMVER.md` (aturan patch/minor/major, deprecation tanpa peringatan runtime, tipe sebagai bagian permukaan), `docs/MIGRATION.md` (0.1.0 ke 0.2.0 diukur terhadap tarball terbit: tujuh nama ditambahkan di akar, entri `./kv` dengan delapan nama, nol penghapusan, nol perubahan jenis, delapan perubahan saran, state tanpa langkah migrasi), `docs/RELEASING.md` (runbook dan penghambat publikasi), `npm run check:api` dengan 140 nama di `api/v0.2.json`, dan halaman Versi di situs (D74) |
-| M5.4 | 1.0.0, dengan halaman jaminan di situs. Sebagian: halaman jaminan sudah terbit (`guarantees.html`, D75) berisi tabel klaim yang ditegakkan gate tiap push, tabel risiko yang diukur atau diberi harga beserta biaya menutupnya, angka dua run lab dengan komposisinya, dan tiga bukti yang ditunggu 1.0.0. Yang tersisa adalah rilisnya, dan rilis itu menunggu tiga bukti yang sama |
+| M5.1 | Matriks runtime: Node 22.13, Node 24, browser bundler, edge. Didukung atau tidak, dengan smoke test. Sebagian: tiga job Node di CI (22.13.0, 22.x, 24.x) masing-masing menjalankan suite, build, dan smoke impor `dist/`, dan graf impor diperiksa `src/core/runtime-surface.test.ts` dibuktikan dengan mutasi. Mana yang dieksekusi dan mana yang masih hanya argumen dicatat di `docs/RUNTIME.md` (bundler, browser, dan edge belum dieksekusi) |
+| M5.2 | Retention dan erasure end-to-end di semua store dan di event log. Selesai untuk tiga store yang dikirim (`src/core/erasure.test.ts`, D69): yang dilupakan tidak tersisa di hitungan penyimpanan, yang kedaluwarsa terhapus bukan disembunyikan, dan event keputusan tidak membawa identitas |
+| M5.3 | Semver final, panduan migrasi, kebijakan deprecation. Selesai: `docs/SEMVER.md`, `docs/MIGRATION.md`, `docs/RELEASING.md`, `npm run check:api` dengan 140 nama di `api/v0.2.json`, dan halaman Versi di situs (D74) |
+| M5.4 | 1.0.0, dengan halaman jaminan di situs. Sebagian: halaman jaminan sudah terbit (`guarantees.html`, D75). Rilisnya menunggu bukti 1.0.0 yang tersisa (status di bawah) |
 
-Status: M5.1 sebagian (matriks Node dan batas portabilitas sudah jadi, browser dan edge masih argumen), M5.2 dan M5.3 selesai (D69, D74). M5.4 menunggu dua bukti 1.0.0 yang tersisa: review keamanan independen dan kalibrasi dari trafik nyata. Bukti ketiga, soak 24 jam, selesai 2026-10-28 dan tercatat di `docs/SOAK.md`. Suspend akun npm 72 jam per 2026-10-25 sudah lewat, dan 0.2.1 sudah terbit.
+Status: M5.1 sebagian (matriks Node dan batas portabilitas sudah jadi, browser dan edge masih argumen), M5.2 dan M5.3 selesai (D69, D74), M5.4 sebagian dengan halaman jaminan terbit. M5.4 menunggu dua bukti 1.0.0 yang tersisa: review keamanan independen dan kalibrasi dari trafik nyata; bukti ketiga, soak 24 jam, selesai 2026-10-28 dan tercatat di `docs/SOAK.md`. Paket review M4.3 sudah ada di `docs/SECURITY-REVIEW.md`, dan itu memindahkan pekerjaan yang tersisa ke satu orang di luar proyek yang mau mengerjakannya.
 
 Exit: 1.0.0 terbit. Situs punya halaman "apa yang dijamin" dan "apa yang tidak",
 berisi angka kalibrasi beserta komposisi dataset, bukan daftar fitur.

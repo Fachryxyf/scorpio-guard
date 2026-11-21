@@ -1,9 +1,10 @@
 # Soak: bounded state, bounded memory, stable cost
 
 H18 asks for a 24 hour soak with limits on memory and state count. This document is the
-harness, the thresholds, and the runs that exist so far. No 24 hour run has finished
-yet, so M4.4 stays open and 1.0.0 stays withheld (D1.1 is the root of trust, this is the
-memory side of the same discipline).
+harness, the thresholds, and the runs recorded so far. The 24 hour memory run finished on
+2026-10-28 with four checks of four passed, and its two hour sqlite companion passed three
+of four; both verdicts are below, and M4.4 is closed (D1.1 is the root of trust, this is
+the memory side of the same discipline).
 
 ## What is being proved
 
@@ -79,26 +80,26 @@ which is why the check uses `maxEntities + sweepEvery` rather than `maxEntities`
 
 ## What this does not show
 
-- **The short runs above are not the 24 hour run.** Thirty seconds with an accelerated clock
+- The short runs above are not the 24 hour run. Thirty seconds with an accelerated clock
   exercises the sweep and the cap, but it cannot show a slow leak that needs hours, a
   fragmentation pattern, or a GC cycle that only appears at a different heap size. The day
   long run is recorded below, on its own, with the day it ran.
-- **It does not cover real concurrency.** Each run is one process, one guard, one store, and
+- It does not cover real concurrency. Each run is one process, one guard, one store, and
   a sequential loop. Worker threads, several processes over one SQLite file, and an adapter
   under a framework event loop are not measured here.
-- **It does not cover the network.** No HTTP, no protocol receiver, no adapter. Cost per
+- It does not cover the network. No HTTP, no protocol receiver, no adapter. Cost per
   evaluation is not cost per request.
-- **It is one machine.** RAM, CPU, and Node version move every number, and none of these
+- It is one machine. RAM, CPU, and Node version move every number, and none of these
   figures are a capacity claim.
-- **The clock is accelerated.** Retention expiry is real in these runs because the simulated
+- The clock is accelerated. Retention expiry is real in these runs because the simulated
   clock advances per request, but idle behaviour (a process with no traffic) is untested.
-- **The p99 budget is a memory store budget.** It was set on the in memory profile, and
+- The p99 budget is a memory store budget. It was set on the in memory profile, and
   sqlite meets it only while its writes batch: 2.552 ms p99 at 2.6k evaluations per second
   unpaced, 5.229 ms at a 10 ms pace, and 10.233 ms over two hours at a 200 ms pace, where every
   write waits for its own sync. The paced numbers are the honest ones for a quiet server, and
   they are above the budget. They are recorded rather than smoothed, and the check is read with
   the store named.
-- **A soak and the bench measure each other.** With the 24 hour soak running on the same
+- A soak and the bench measure each other. With the 24 hour soak running on the same
   machine, `npm run bench` reported sqlite p95 2.5310 ms against a 2.4172 ms budget and
   failed. Paused for the length of the bench, the same build reported 1.3711 ms. CI runs the
   bench before the soak, in that order, so the gate is not measuring a neighbour there; a
@@ -266,4 +267,4 @@ What survives the correction: the memory, RSS, and state numbers above and in th
 section. A hard violation adds no evidence mass and no extra write, so a run that took the
 invariant path and a run that did not do the same work for the things those checks measure.
 What does not survive: reading `violations: 0` as evidence that the invariant path was
-exercised. It was not, until 2026-10-29.
+exercised, which no recorded run did until the measured fix on 2026-10-29.
