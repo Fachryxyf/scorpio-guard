@@ -2,8 +2,8 @@
 
 ## Status
 
-Uncalibrated and unaudited. The registry serves 0.2.1, published on 2026-10-28 with a
-provenance attestation that ties the tarball to its commit. Do not deploy it as your only
+Uncalibrated and unaudited. The registry serves 0.3.0, published with a provenance
+attestation that ties the tarball to its commit. Do not deploy it as your only
 defence for anything that matters.
 
 ## What the guard is, and is not

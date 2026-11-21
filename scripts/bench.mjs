@@ -132,5 +132,14 @@ try {
     process.exit(1);
   }
 } finally {
-  rmSync(directory, { recursive: true, force: true });
+  // Windows keeps the sqlite file open until the process exits, so the recursive
+  // remove can fail with EPERM even though every measurement has been printed.
+  // The verdicts above are the output; a left-over temp directory is not a
+  // benchmark failure, so the cleanup failure is reported and otherwise ignored.
+  try {
+    rmSync(directory, { recursive: true, force: true });
+  } catch (error) {
+    if (error.code !== 'EPERM' && error.code !== 'EBUSY') throw error;
+    console.error('bench: could not remove the temp directory ' + directory + ' (' + error.code + '); it can be deleted by hand');
+  }
 }

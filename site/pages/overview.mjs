@@ -70,7 +70,7 @@ ${items}
       <table>
         <tbody>
           <tr><th>${t('Kind', 'Jenis')}</th><td>${t('library', 'library')}</td></tr>
-          <tr><th>npm</th><td><a href="versions.html">0.2.1</a></td></tr>
+          <tr><th>npm</th><td><a href="versions.html">${data.version}</a></td></tr>
           <tr><th>${t('Downloads, last month', 'Unduhan, sebulan lalu')}</th><td><span id="npm-downloads"><a href="https://www.npmjs.com/package/@fachryxyf/scorpio-guard">npm</a></span></td></tr>
           <tr><th>${t('Stage', 'Tahap')}</th><td>${t('published, uncalibrated', 'terbit, belum dikalibrasi')}</td></tr>
           <tr><th>${t('Language', 'Bahasa')}</th><td>TypeScript</td></tr>
@@ -277,8 +277,8 @@ ${portals}
     file: 'index.html',
     titleEn: 'Scorpio Guard',
     titleId: 'Scorpio Guard',
-    subtitleEn: 'Trust is a spectrum, not a verdict. A local, advisory trust-evaluation library, published at 0.2.1 and calibrated against nothing.',
-    subtitleId: 'Trust itu spektrum, bukan putusan. Library evaluasi trust yang lokal dan bersifat saran, terbit di 0.2.1 dan belum dikalibrasi terhadap apa pun.',
+    subtitleEn: 'Trust is a spectrum, not a verdict. A local, advisory trust-evaluation library. The thresholds are not yet calibrated against a real population; the registry record is on the versions page.',
+    subtitleId: 'Trust itu spektrum, bukan putusan. Library evaluasi trust yang lokal dan bersifat saran. Ambang-ambangnya belum dikalibrasi terhadap populasi nyata; catatan registry ada di halaman versi.',
     sections,
     body,
   });

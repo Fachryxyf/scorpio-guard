@@ -31,7 +31,11 @@ function testFiles(directory) {
     const path = join(entry.parentPath ?? entry.path ?? directory, entry.name);
     if (path.endsWith('.test.ts')) found.push(path);
   }
-  return found.sort();
+  // The index is committed, so the paths it writes cannot depend on the OS that
+  // generated it: readdirSync joins with the platform separator, which is a
+  // backslash on Windows, and a regenerated index would then always read stale.
+  // Forward slashes are what the repository records.
+  return found.sort().map((path) => path.replaceAll('\\', '/'));
 }
 
 function decisions() {
@@ -109,7 +113,9 @@ const lines = [
   '',
   ...(explainedOnly.length === 0
     ? ['None.']
-    : explainedOnly.map((row) => '- ' + row.id + ': ' + row.title + '. ' + row.note)),
+    // Each note in CLAIMS-NOTES.md already opens with the decision title, so
+    // prepending row.title here printed every title twice.
+    : explainedOnly.map((row) => '- ' + row.id + ': ' + row.note)),
   '',
   '## Prose only, and not yet explained',
   '',

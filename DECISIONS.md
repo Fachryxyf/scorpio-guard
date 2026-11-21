@@ -17,10 +17,10 @@ the answer given, and what that answer commits the implementation to.
   policy; the tests are what make a policy change visible.
 
 Status: every numbered question is answered, the original thirty, plus D31 to
-D74 arising from review, implementation, a live pentest, the traffic lab, the protocol
-work, and the hardening review. Nothing is blocked on a decision. What remains is
-validation: the values recorded here have not met real traffic yet, and D47 names where
-they will.
+D76 arising from review, implementation, a live pentest, the traffic lab, the protocol
+work, the hardening review, and the release record. Nothing is blocked on a decision.
+What remains is validation: the values recorded here have not met real traffic yet, and
+D47 names where they will.
 
 Last updated: 2026-11-22
 
@@ -130,6 +130,7 @@ Last updated: 2026-11-22
 - [D73: Patience is priced, not detected](#d73-patience-is-priced-not-detected)
 - [D74: The API surface is frozen from 0.2.0, and deprecation is a type rather than a log](#d74-the-api-surface-is-frozen-from-020-and-deprecation-is-a-type-rather-than-a-log)
 - [D75: The guarantee table is the artifact, and a risk moves only with a mechanism](#d75-the-guarantee-table-is-the-artifact-and-a-risk-moves-only-with-a-mechanism)
+- [D76: The 0.3.x line is the finalization line, and a page states a registry version only on the versions page](#d76-the-03x-line-is-the-finalization-line-and-a-page-states-a-registry-version-only-on-the-versions-page)
 
 **[Open questions](#open-questions)**
 
@@ -4292,3 +4293,52 @@ guarantee from an accepted risk without opening the code. Rejected.
 count), and `npm run check-docs` compares the README claims with that render. The same six
 risks are listed in `docs/SECURITY-REVIEW.md`, so a risk recorded in one place and missing in
 the other is visible in review.
+
+## D76: The 0.3.x line is the finalization line, and a page states a registry version only on the versions page
+
+**Decided.** 0.3.0 ships no code change: the exported surface still matches
+`api/v0.2.json` name for name, and no advice moves, because the shipped calibration cell
+is re-confirmed against the frozen lab fixtures on every push. The release carries the
+record instead: the repository documentation restructured around `ARCHITECTURE.md`, the
+landing page made drift-proof, and the decision-file index completed. What a 0.3.x patch
+may carry: documentation and site corrections, tooling fixes, and a calibration row
+recorded with a before and after in the CHANGELOG. What it may not carry: an API change,
+which needs the deliberate snapshot rewrite D74 describes, and a threshold move without a
+recorded calibration row behind it.
+
+### Why the version facts split
+
+The site carried hand-typed version strings in five places, and every release drifted one
+of them: after 0.2.0 shipped, the infobox, the footer, and the install blocks still said
+0.1.0. The rule now: the versions page is the one place that states which version the
+registry serves, updated in the commit that records the upload; everything else renders
+the version from the tree or states no version at all. The infobox npm row renders the
+build's `package.json` version, the landing subtitle and the footer name no version, and
+the "calibrated against nothing" phrasing is gone because it was wrong: the lab
+calibrations exist, and what is missing is a real population, which is what the words now
+say.
+
+### What this commits the code to
+
+- `site/pages/overview.mjs` renders the build's version in the infobox instead of a typed
+  string; the landing subtitle and the site footer carry no version number.
+- The versions page rows read as historical records, with no "what npm install gets
+  today" phrasing to age.
+- `scripts/bench.mjs`, `scripts/pack-check.mjs`, and the site build spawn npm through a
+  shell on Windows, so the gates run on the machine the maintainer develops on, not only
+  on CI.
+- `docs/RELEASING.md` step 9 lists only the typed version places that remain: the install
+  block in README.md, the install block in `site/pages/usage.mjs`, and the versions
+  page's `latest` const.
+
+### Alternatives rejected
+
+**Render the registry's latest version from the npm API at build time.** The build must
+not depend on the wall clock or the network (D58), and a site that says whatever the
+registry said at build time cannot tell drift from a registry outage. Rejected.
+
+**Bump the typed strings in the release commit itself.** That makes the tree claim a
+registry fact before the registry has it, which is the same lie in the other direction.
+The typed places are updated in the commit that records the upload. Rejected for the
+site pages; README is the exception, because the README inside a tarball is frozen at
+publish time and must be correct for the version it ships with.

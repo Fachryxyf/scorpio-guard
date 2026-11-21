@@ -30,7 +30,10 @@ function run(command, args, options = {}) {
 }
 
 try {
-  const packed = JSON.parse(run('npm', ['pack', '--json', '--pack-destination', workdir]));
+  // npm is npm.cmd on Windows, which spawnSync refuses to run without a shell.
+  // Linux, where CI runs, is unaffected by the flag; the node probe below keeps
+  // spawning without one, because its path contains spaces.
+  const packed = JSON.parse(run('npm', ['pack', '--json', '--pack-destination', workdir], { shell: process.platform === 'win32' }));
   const info = packed[0];
   const files = info.files.map((file) => file.path);
 
@@ -69,7 +72,7 @@ try {
     JSON.stringify({ name: 'scorpio-guard-install-check', private: true, type: 'module' }, null, 2),
   );
 
-  run('npm', ['install', '--no-audit', '--no-fund', tarball], { cwd: app });
+  run('npm', ['install', '--no-audit', '--no-fund', tarball], { cwd: app, shell: process.platform === 'win32' });
 
   writeFileSync(
     join(app, 'probe.mjs'),

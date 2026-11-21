@@ -18,10 +18,85 @@ signature moved. The rules are therefore narrower than semver's default reading:
   `docs/ROADMAP.md` §1: a calibration dataset with published composition, the
   protocol running end to end, and a frozen API after a directed security review.
 
-## [Unreleased]
+## [0.3.0] - 2026-11-22
 
-Nothing yet. Changes land here while they are being made and move into the dated
-heading at release time.
+The finalization release: no code, no exported name, and no advice for the same input and
+the same stored state changed. The API gate still matches `api/v0.2.json` name for name,
+the shipped calibration cell is re-confirmed against the frozen lab fixtures on every
+push, and a fresh benchmark run sits inside every budget. What changed is the record and
+the site that publishes it (D76).
+
+### Added
+
+- `ARCHITECTURE.md` at the repository root: the design essay, the two signal kinds, and
+  the recorded integrations moved out of the README, which is now the front door: status,
+  install, usage, and a documentation map that links every document, including the three
+  no other page linked (`docs/RUNTIME.md`, `docs/SECURITY-REVIEW.md`,
+  `docs/CLAIMS-NOTES.md`).
+- D76: the 0.3.x line is the finalization line. It records what a 0.3.x patch may carry,
+  and the rule that a page states a registry version only on the versions page while the
+  rest of the site renders the tree version or states none.
+- `site/decision-files.json` now maps every decision to the files it turned into: D2a and
+  D61 to D75 had no entry, so the record page showed them with a blank mapping.
+
+### Changed
+
+- The landing page: the footer and the landing subtitle no longer type a version or claim
+  "calibrated against nothing", which was wrong twice over, since the lab calibrations
+  exist and the missing thing is a real population; the infobox npm row renders the tree
+  version instead of a typed one; the versions page rows read as historical records
+  without "what npm install gets today" phrasing.
+- README restructured around install, usage, and the documentation map, with the design
+  essay in `ARCHITECTURE.md`; the mechanical bold lead-ins are removed across the corpus
+  and the headings use sentence case.
+- `docs/PROJECT_AUDIT.md` moved to `docs/archive/PROJECT-AUDIT.md`: a dated audit of the
+  0.2.0 era, kept as a record rather than presented as current.
+- `docs/RELEASING.md` lost its "Status as of" narrative; the release facts live in these
+  entries and the runbook keeps the operational lessons.
+- ROADMAP milestone cells carry their verdict in one or two lines with a pointer to the
+  document that holds the numbers.
+
+### Fixed
+
+- README named the 24 hour soak as a proof still missing; it finished on 2026-10-28, and
+  the guarantees framing now matches the roadmap.
+- REPOSITORIES.md claimed the anomaly classifier and the signal collectors were not
+  built; both have existed since 0.2.0 (D51, D52), and the `./kv` entry point was missing
+  from the layout.
+- ROADMAP recorded the atonement cost as 26 observations; the test asserts 25. The claim
+  index paragraph read 77 decisions; there are 78 at the time of that paragraph, 79 now.
+  The MVP exit criteria still said publication was pending.
+- SECURITY.md and SEMVER.md named 0.2.0 as what the registry serves; 0.2.1 has been the
+  default since 2026-10-28.
+- TESTING.md walked a stranger through building a tarball because "the registry serves a
+  version older than 0.2.0"; it installs the release and builds from source only to test
+  main, and the two-hundred-observation floor is labelled a working assumption rather
+  than a calibrated threshold.
+- `scripts/bench.mjs`, `scripts/pack-check.mjs`, and the site build spawned npm in a way
+  Windows refuses, since npm is `npm.cmd` there, so three gates could not run on the
+  machine the maintainer develops on. Bench cleanup also leaked its temp directory on
+  Windows. All fixed behind a platform check that CI's Linux never takes.
+- PROTOCOL.md used MUST and MAY without declaring them; the RFC 2119 declaration is there
+  now.
+
+### Calibration and benchmark records
+
+- The shipped calibration cell (half-life 24 h, developing 3, established 7) is confirmed
+  by the frozen fixtures on every push: `examples/lab/fixture.test.ts` replays 1,785
+  frozen rows to the same decisions, and `examples/lab/report.test.ts` asserts the
+  shipped cell is still the best of the nine. A full re-calibration needs a new lab run
+  with Chrome (`npm run lab`, then `npm run calibrate`); none was recorded for this
+  release, which is why no advice moved.
+- Benchmark on the development machine (Windows 10, Node 24.21.0), 2,000 iterations per
+  store, p95 against the doubled budget: memory p95 0.0286 ms (budget 0.0828), sqlite p95
+  0.7987 ms (budget 2.4172), kv p95 0.0441 ms (budget 0.0490). All inside, recorded as
+  measured rather than smoothed.
+
+### Release status
+
+To be appended at publish: the tag `v0.3.0`, the commit, the timestamp, the tarball
+shasum, and the attestation. The versions page's `latest` const and the usage page
+install pin are updated in the commit that records the upload, per D76.
 
 ## [0.2.1] - 2026-10-28
 
@@ -285,6 +360,7 @@ The heading said 2026-08-15 until 2026-10-25. The registry is the record for thi
 was published on 2026-08-24 from commit `c488012`. That commit is tagged `v0.1.0` now,
 retroactively, because no tag was made when the package was released.
 
-[Unreleased]: https://github.com/Fachryxyf/scorpio-guard/compare/v0.2.1...HEAD
+[Unreleased]: https://github.com/Fachryxyf/scorpio-guard/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/Fachryxyf/scorpio-guard/compare/v0.2.1...v0.3.0
 [0.2.1]: https://github.com/Fachryxyf/scorpio-guard/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/Fachryxyf/scorpio-guard/compare/v0.1.0...v0.2.0

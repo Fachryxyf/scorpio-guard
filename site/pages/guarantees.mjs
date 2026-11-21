@@ -85,8 +85,8 @@ export function guarantees(data) {
     ${h2(4, "exit", "What 1.0.0 adds", "Apa yang ditambah 1.0.0")}
 
     <p>${t(
-      "1.0.0 is not a date. It is three proofs, listed in the roadmap: a calibration dataset with its composition published, the protocol running end to end with a reference receiver and interop fixtures, and a frozen API after a directed security review. Two of the three are already in place or in part: the protocol runs end to end and is checked on every push, and the freeze is enforced by the API gate. The calibration dataset and the review by someone other than the author are the ones still missing.",
-      "1.0.0 bukan tanggal. Ia tiga bukti, tercantum di roadmap: dataset kalibrasi dengan komposisi yang diterbitkan, protokol yang berjalan end to end dengan reference receiver dan fixture interop, dan API yang dibekukan setelah review keamanan terarah. Dua dari tiga sudah ada atau sebagian: protokol berjalan end to end dan diperiksa tiap push, dan pembekuannya ditegakkan gerbang API. Yang masih kurang adalah dataset kalibrasi dan review oleh orang selain penulisnya.",
+      "1.0.0 is not a date. It is three proofs, listed in the roadmap: a calibration dataset with its composition published, the protocol running end to end with a reference receiver and interop fixtures, and a frozen API after a directed security review. Two of the three are already in place or in part: the protocol runs end to end and is checked on every push, and the freeze is enforced by the API gate. Real-traffic calibration and the review by someone other than the author are the ones still missing.",
+      "1.0.0 bukan tanggal. Ia tiga bukti, tercantum di roadmap: dataset kalibrasi dengan komposisi yang diterbitkan, protokol yang berjalan end to end dengan reference receiver dan fixture interop, dan API yang dibekukan setelah review keamanan terarah. Dua dari tiga sudah ada atau sebagian: protokol berjalan end to end dan diperiksa tiap push, dan pembekuannya ditegakkan gerbang API. Yang masih kurang adalah kalibrasi dari trafik nyata dan review oleh orang selain penulisnya.",
     )}</p>
 
     <p>${t(

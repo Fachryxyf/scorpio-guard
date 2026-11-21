@@ -70,13 +70,15 @@ that has to explain why.
    one evaluation. The registry answers the publish immediately and serves the tarball
    minutes later, with `404` on the `.tgz` until then; both 0.2.x releases saw that gap,
    so read it as processing rather than failure.
-9. Update the versions page on the site in the same commit as the release, so the site
-   never claims a version the registry does not have. The same commit updates the places
-   that name the published version outright, because a page built from `main` cannot read
-   the registry: the install block in `site/pages/usage.mjs`, the npm row in the
-   `index.html` infobox, the footer line in `site/layout.mjs`, and the install block in
-   `README.md`. All of them still said 0.1.0 after 0.2.0 shipped, which is why the list is
-   written down instead of assumed.
+9. Update the places that name the published version, and know which commit owns each
+   one. The README install block is a release-commit fact: the tarball freezes it at
+   publish, so it must already say the version it ships with (D76). The registry-side
+   facts, the versions page's `latest` const and the install pin in
+   `site/pages/usage.mjs`, are updated in the commit that records the upload, because a
+   page built from `main` cannot read the registry and must not claim a version it does
+   not have. The npm row in the `index.html` infobox renders the tree version, and the
+   footer names no version at all, so neither can drift again. All of them still said
+   0.1.0 after 0.2.0 shipped, which is why the list is written down instead of assumed.
 
 ### If a tag was missed
 

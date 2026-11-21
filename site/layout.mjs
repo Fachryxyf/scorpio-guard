@@ -418,7 +418,7 @@ export const CHAPTERS = [
     blurbId: 'Apa yang boleh lewat kabel, apa yang secara struktural tak bisa, dan kenapa belum ada yang dikirim.' },
   { file: 'versions.html', segment: 'reference', en: 'Versions', id: 'Versi',
     titleEn: 'Versions and support', titleId: 'Versi dan dukungan',
-    blurbEn: 'What a version number promises, what the upgrade moves, how the freeze is enforced, and which versions the registry serves today.',
+    blurbEn: 'What a version number promises, what the upgrade moves, how the freeze is enforced, and which versions the registry serves.',
     blurbId: 'Arti nomor versi, apa yang berubah saat naik versi, bagaimana pembekuannya ditegakkan, dan versi mana yang dilayani registry hari ini.' },
   { file: 'record.html', segment: 'reference', en: 'Record', id: 'Rekaman',
     titleEn: 'Design record and glossary', titleId: 'Rekaman desain dan glosarium',
@@ -609,8 +609,8 @@ ${prevnext}
 <footer>
   <p>
     ${t(
-      'Scorpio Guard is published at 0.2.1 and calibrated against nothing. Every number on this site is generated from the code that produces it; none of it has met a real population.',
-      'Scorpio Guard terbit di 0.2.1 dan belum dikalibrasi terhadap apa pun. Setiap angka di situs ini dihasilkan dari kode yang memproduksinya; belum ada satu pun yang bertemu populasi nyata.',
+      'Scorpio Guard is an advisory trust library; the registry record is on the versions page. Every number on this site is generated from the code that produces it; none of it has been calibrated against a real population.',
+      'Scorpio Guard adalah library trust yang bersifat saran; catatan registry ada di halaman versi. Setiap angka di situs ini dihasilkan dari kode yang memproduksinya; belum ada satu pun yang dikalibrasi terhadap populasi nyata.',
     )}
   </p>
   <p>

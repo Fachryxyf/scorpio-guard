@@ -61,9 +61,19 @@ function testCount() {
       const out = execFileSync(
         'npm',
         ['test', '--silent'],
-        { cwd: root, encoding: 'utf8', maxBuffer: 32 * 1024 * 1024, stdio: ['ignore', 'pipe', 'ignore'] },
+        {
+          cwd: root,
+          encoding: 'utf8',
+          maxBuffer: 32 * 1024 * 1024,
+          stdio: ['ignore', 'pipe', 'ignore'],
+          // npm is npm.cmd on Windows, which spawnSync refuses to run without a
+          // shell. Linux, where CI runs, is unaffected by the flag.
+          shell: process.platform === 'win32',
+        },
       );
-      const match = out.match(/^# tests (\d+)$/m);
+      // Node 22 prints the test summary in TAP, node 23 and up print it in the
+      // spec reporter's format. Either line is the runner reporting its count.
+      const match = out.match(/^# tests (\d+)$/m) || out.match(/^ℹ tests (\d+)$/m);
       if (match) return Number(match[1]);
     } catch {
       // fall through to the retry

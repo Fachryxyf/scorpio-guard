@@ -6,8 +6,8 @@ written for someone who has never read the rest of the repository.
 
 It covers what this release asks you to test, the four parts of an integration, the two
 mistakes that make results meaningless, both reporting paths, and the limits you should
-not read past. It is written against `0.2.1`; the same page tested `0.2.0`, whose advice
-is identical because `0.2.1` changes no behavior.
+not read past. It is written against `0.3.0`; the same page tested `0.2.0` and `0.2.1`,
+whose advice is identical because neither changes behavior.
 
 ## What the library does
 
@@ -39,7 +39,7 @@ higher than the runtime the rest of the library needs.
 Install the released version:
 
 ```
-npm install @fachryxyf/scorpio-guard@0.2.1
+npm install @fachryxyf/scorpio-guard@0.3.0
 ```
 
 To test `main` rather than the release, build a tarball from source:

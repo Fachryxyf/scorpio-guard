@@ -5,6 +5,11 @@ attestation; 0.2.1 is a documentation-only patch over it, and 0.1.0 stays instal
 rollback. This document is what changes when you upgrade from 0.1.0, measured against the
 published tarballs rather than remembered.
 
+Upgrading from 0.2.x to 0.3.0 needs no section of its own: no exported name, kind, or
+advice changed (D76), so the surface diff against 0.2.0 is empty and the state a 0.2.x
+build wrote is read as-is. The same measurement commands below work unchanged against a
+0.3.0 tarball.
+
 ## The API moved additively, measured
 
 ```

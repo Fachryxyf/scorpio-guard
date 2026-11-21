@@ -76,7 +76,7 @@ npm install @fachryxyf/scorpio-guard@0.2.1   # pin what you tested</pre>
         <tr><th>Node</th><td>22.13 ${t('or newer, ESM only', 'atau lebih baru, hanya ESM')}</td></tr>
         <tr><th>${t('Runtime dependencies', 'Dependensi runtime')}</th><td>0 (D59)</td></tr>
         <tr><th>${t('Entry points', 'Titik masuk')}</th><td><code>.</code> ${t('the model', 'model')}, <code>./collect</code> ${t('browser collectors', 'collector browser')}, <code>./sqlite</code> ${t('durable store', 'store tahan restart')}, <code>./kv</code> ${t('networked store', 'store lewat jaringan')}</td></tr>
-        <tr><th>${t('Provenance', 'Provenance')}</th><td>${t('0.2.0 carries a publish attestation and SLSA provenance, which <code>npm audit signatures</code> verifies in a clean install. 0.1.0 has neither and cannot gain it.', '0.2.0 membawa attestation publish dan provenance SLSA, yang diverifikasi <code>npm audit signatures</code> di instalasi bersih. 0.1.0 tidak punya keduanya dan tak bisa mendapatkannya.')}</td></tr>
+        <tr><th>${t('Provenance', 'Provenance')}</th><td>${t('0.2.0 and 0.2.1 carry a publish attestation and SLSA provenance, which <code>npm audit signatures</code> verifies in a clean install. 0.1.0 has neither and cannot gain it.', '0.2.0 dan 0.2.1 membawa attestation publish dan provenance SLSA, yang diverifikasi <code>npm audit signatures</code> di instalasi bersih. 0.1.0 tidak punya keduanya dan tak bisa mendapatkannya.')}</td></tr>
         <tr><th>${t('Tests', 'Test')}</th><td>${testCount}</td></tr>
       </tbody>
     </table>

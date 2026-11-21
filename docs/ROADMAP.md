@@ -52,8 +52,8 @@ kalibrasi diulang dan halaman jaminan diperbarui.
 | Protokol v0.1: fixture, receiver referensi, sender batching | `protocol/fixtures/v0.1/`, `examples/protocol/`, D70, D71 |
 | Gate manifest dan lockfile | `scripts/check-manifest.mjs`, `npm run check:manifest` |
 
-Angka yang dipakai gate: 356 test, 78 keputusan, 12 halaman, 0 dependensi runtime,
-versi terbit 0.2.1.
+Angka yang dipakai gate: 356 test, 79 keputusan, 12 halaman, 0 dependensi runtime,
+versi terbit 0.3.0.
 
 Belum ada sama sekali: hook event keputusan yang dipakai host lain, review keamanan
 eksternal, kalibrasi pada trafik nyata, dan pengirim protokol dari luar repo ini.
@@ -312,7 +312,7 @@ M4 belum lulus dan 1.0.0 tetap ditahan.
 | M5.3 | Semver final, panduan migrasi, kebijakan deprecation. Selesai: `docs/SEMVER.md`, `docs/MIGRATION.md`, `docs/RELEASING.md`, `npm run check:api` dengan 140 nama di `api/v0.2.json`, dan halaman Versi di situs (D74) |
 | M5.4 | 1.0.0, dengan halaman jaminan di situs. Sebagian: halaman jaminan sudah terbit (`guarantees.html`, D75). Rilisnya menunggu bukti 1.0.0 yang tersisa (status di bawah) |
 
-Status: M5.1 sebagian (matriks Node dan batas portabilitas sudah jadi, browser dan edge masih argumen), M5.2 dan M5.3 selesai (D69, D74), M5.4 sebagian dengan halaman jaminan terbit. M5.4 menunggu dua bukti 1.0.0 yang tersisa: review keamanan independen dan kalibrasi dari trafik nyata; bukti ketiga, soak 24 jam, selesai 2026-10-28 dan tercatat di `docs/SOAK.md`. Paket review M4.3 sudah ada di `docs/SECURITY-REVIEW.md`, dan itu memindahkan pekerjaan yang tersisa ke satu orang di luar proyek yang mau mengerjakannya.
+Status: M5.1 sebagian (matriks Node dan batas portabilitas sudah jadi, browser dan edge masih argumen), M5.2 dan M5.3 selesai (D69, D74), M5.4 sebagian dengan halaman jaminan terbit. M5.4 menunggu dua bukti 1.0.0 yang tersisa: review keamanan independen dan kalibrasi dari trafik nyata; bukti ketiga, soak 24 jam, selesai 2026-10-28 dan tercatat di `docs/SOAK.md`. Garis 0.3.x memfinalisasi catatan dan landing page tanpa mengubah API atau advice (D76). Paket review M4.3 sudah ada di `docs/SECURITY-REVIEW.md`, dan itu memindahkan pekerjaan yang tersisa ke satu orang di luar proyek yang mau mengerjakannya.
 
 Exit: 1.0.0 terbit. Situs punya halaman "apa yang dijamin" dan "apa yang tidak",
 berisi angka kalibrasi beserta komposisi dataset, bukan daftar fitur.
