@@ -255,8 +255,8 @@ ${items}
     ${h2(6, 'read', 'How to read this site', 'Cara membaca situs ini')}
 
     <p>${t(
-      'Seven chapters in four segments. <b>Start</b> is this page and how to install; <b>Theory</b> is the argument and the arithmetic; <b>Findings</b> is what was measured and what those measurements do not cover; <b>Reference</b> is what you look up rather than read.',
-      'Tujuh bab dalam empat segmen. <b>Mulai</b> adalah halaman ini dan cara memasang; <b>Teori</b> adalah argumen dan aritmetikanya; <b>Temuan</b> adalah apa yang diukur dan apa yang tidak dicakup pengukuran itu; <b>Rujukan</b> adalah yang kamu cari, bukan yang kamu baca.',
+      (CHAPTERS.length - 1) + ' chapters in four segments. <b>Start</b> is this page and how to install; <b>Theory</b> is the argument and the arithmetic; <b>Findings</b> is what was measured and what those measurements do not cover; <b>Reference</b> is what you look up rather than read.',
+      (CHAPTERS.length - 1) + ' bab dalam empat segmen. <b>Mulai</b> adalah halaman ini dan cara memasang; <b>Teori</b> adalah argumen dan aritmetikanya; <b>Temuan</b> adalah apa yang diukur dan apa yang tidak dicakup pengukuran itu; <b>Rujukan</b> adalah yang kamu cari, bukan yang kamu baca.',
     )}</p>
 
     <div class="portals">
