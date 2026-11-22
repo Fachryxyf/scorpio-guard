@@ -83,6 +83,20 @@ export type UncertaintyLevel = (typeof DEFAULT_UNCERTAINTY_BANDS)[number]['level
 export const DEFAULT_HARD_VIOLATION_DECISION = 'RESTRICT';
 
 /**
+ * Consecutive evaluations of one scope hard-violating the same invariant before
+ * the guard says so as an integration warning. D78.
+ *
+ * A host mapping two interactions into one scope produces a deterministic
+ * pattern no traffic produces: every served row of that scope carries the same
+ * hard violation. Measured on a real integration: 26 of 26 production logouts
+ * and 14 of 14 staging ones, all `auth-refresh-session-rotated`, silently
+ * poisoning every legitimate user's trust to a mean of about 0.02. Ten is
+ * above anything one hostile entity can sustain against mixed traffic, and
+ * below where a silent mapping bug costs a day of journalled rows.
+ */
+export const DEFAULT_INTEGRATION_WARNING_MIN_CONSECUTIVE = 10;
+
+/**
  * Advice for proven violations: one decision for all classes, or per class. D41.
  *
  * The per-class form is partial, classes left out fall back to

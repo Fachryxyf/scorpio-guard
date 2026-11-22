@@ -1,13 +1,12 @@
-# Testing an integration
+# Testing 0.3.0
 
 A stranger should be able to install this, wire it into one application, and have
 something worth reporting back inside a working session. This page is that session,
 written for someone who has never read the rest of the repository.
 
-It covers what this release asks you to test, the four parts of an integration, the two
+It covers what 0.3.0 asks you to test, the four parts of an integration, the two
 mistakes that make results meaningless, both reporting paths, and the limits you should
-not read past. It is written against `0.3.0`; the same page tested `0.2.0` and `0.2.1`,
-whose advice is identical because neither changes behavior.
+not read past.
 
 ## What the library does
 
@@ -20,7 +19,7 @@ It does not read message content, does not store credentials, and never blocks o
 own. The host writes the code that acts, which is the point of it being a library
 (D9, D14).
 
-## What this release asks you to test
+## What 0.3.0 asks you to test
 
 1. False positives on your own traffic. A legitimate client that is advised friction is
    the failure this design treats as central, more than a missed attacker.
@@ -29,18 +28,12 @@ own. The host writes the code that acts, which is the point of it being a librar
 3. That the decision journal you keep can support calibration later. Advice without an
    outcome next to it cannot be calibrated, only believed.
 
-What is not under test: automatic enforcement. Nothing in this package acts on your behalf.
+What is not under test: automatic enforcement. Nothing in 0.3.0 acts on your behalf.
 
 ## Install
 
 Node 22.13 or newer. The `./sqlite` entry uses `node:sqlite`, which is why the floor is
 higher than the runtime the rest of the library needs.
-
-Install the released version:
-
-```
-npm install @fachryxyf/scorpio-guard@0.3.0
-```
 
 To test `main` rather than the release, build a tarball from source:
 
@@ -52,12 +45,11 @@ npm run build
 npm pack
 ```
 
-That writes `fachryxyf-scorpio-guard-<version>.tgz`, named after the version in
-`package.json`. Install it into the application you are
+That writes `fachryxyf-scorpio-guard-0.3.0.tgz`. Install it into the application you are
 testing:
 
 ```
-npm install /path/to/fachryxyf-scorpio-guard-<version>.tgz
+npm install /path/to/fachryxyf-scorpio-guard-0.3.0.tgz
 ```
 
 Then check that the entry point loads:
@@ -71,8 +63,7 @@ that is the first report you send.
 
 Pin the exact version rather than a caret range. No threshold in this library is
 calibrated against a real population yet, so a minor bump can move the advice, and a
-range would pull that in silently. How a release ships, and the record of the npm
-account suspension, are in [RELEASING.md](RELEASING.md).
+range would pull that in silently. The release runbook is in [RELEASING.md](RELEASING.md).
 
 ## An integration is four things
 
@@ -93,11 +84,11 @@ quietly.
 
 Two traps:
 
-- One office, one address. A team behind one NAT gateway presents one address and
+- **One office, one address.** A team behind one NAT gateway presents one address and
   often one user agent string. Keyed on address plus user agent, eighty people collapse
   into one entity and their histories mix. For authenticated requests, key on the
   session or the user.
-- Rotating identities defeat the wrong key. Keyed on the address, an attacker who
+- **Rotating identities defeat the wrong key.** Keyed on the address, an attacker who
   rotates addresses resets its own history on every attempt. Key the brute-force scope
   on the credential instead, so the history follows the thing being attacked.
 
@@ -115,11 +106,47 @@ auth.login  auth.refresh  chat.read  chat.send  admin.action  outbound.send
 
 Two rules:
 
-- Do not use one scope per route. The diversity feature reads the spread of scopes
+- **Do not use one scope per route.** The diversity feature reads the spread of scopes
   (D36, D46), and a scope per route makes diversity impossible to reach, which removes
   evidence from every decision.
-- Do not put identifiers in scope names. Scope names are quoted in `trace`, and the
+- **Do not put identifiers in scope names.** Scope names are quoted in `trace`, and the
   trace is part of the event that leaves your process.
+
+The general rule behind the range, learned from a real integration (D79): **when two
+interactions share a scope and one would always violate the other's invariant, they do not
+share a scope**, or the invariant must accept a fact that distinguishes them. The case
+that found the rule: logout sharing `auth.refresh`. A refresh scope's invariant asserts
+that every 2xx rotates the session; a successful logout is a 2xx that must not rotate it.
+Every logout then reads as a proven violation. Measured on a real integration: 26 of 26
+production rows, each one poisoning a legitimate user's trust. The library cannot tell,
+because row by row
+the invariant is correct.
+
+Both fixes are sanctioned, and the choice is the host's:
+
+1. **A terminal-transition fact.** Keep logout inside `auth.refresh` and send a
+   `sessionTerminated` fact; the invariant accepts it as a valid outcome for a 2xx:
+
+   ```js
+   {
+     id: 'auth-refresh-session-rotated',
+     class: 'IMPOSSIBLE_STATE_TRANSITION',
+     strength: 'hard',
+     scope: 'auth.refresh',
+     holds: (observation) =>
+       observation.sessionRotated === true || observation.sessionTerminated === true,
+   }
+   ```
+
+2. **A dedicated terminal scope.** `auth.logout` stands alone and carries no rotation
+   invariant. That is an expected ninth scope for a session-based host, over the usual
+   five to eight, and it will be under-sampled. Logout traffic is a few rows a day per
+   user. Under-sampling is acceptable there because the scope needs no calibration: its
+   invariants are about what the host did, not about what the traffic looks like.
+
+What is not sanctioned: leaving logout inside `auth.refresh` with the rotation invariant
+unchanged, and treating the resulting hard violations as calibration data. That is the
+one false positive that keeps producing itself.
 
 ### 3. Invariant
 
@@ -218,9 +245,9 @@ async function decide(entity, scope, facts, signals) {
 
 Two properties worth keeping in your own version:
 
-- The call is wrapped. Without that wrapper a store outage becomes an outage of your
+- **The call is wrapped.** Without that wrapper a store outage becomes an outage of your
   login, which is a worse outcome than the abuse you were pricing.
-- One evaluation point per scope. An invariant that reads the handler result has to
+- **One evaluation point per scope.** An invariant that reads the handler result has to
   be evaluated after the handler, and its advice then applies to the next request. Mixing
   the two orders scrambles the trust accumulation and makes two sessions incomparable.
   Write down which order you chose.
@@ -251,14 +278,21 @@ computes for you through the `./collect` entry: `measureLatency`, `trackBreadth`
 | more than one process or host | `kvStore({ transport })` with your own transport |
 | unit tests | `memoryStore()`, the default |
 
-`KvTransport` is three methods, `get(key)`, `set(key, value, ttlSeconds)`, and
-`del(key)`, and a Redis implementation of it is short.
+`KvTransport` is three methods: `get(key)`, `set(key, value, ttlSeconds)`, `del(key)`.
+A Redis implementation is short.
 
 Running several processes with a local sqlite file each splits the per-entity window.
 The result looks like a library bug and is not one: you will see false positives and
 false negatives at the same time, and neither will reproduce on one process. Retained
 state expires after seven days by default, so an entity that goes quiet for a week comes
 back cold.
+
+Since 0.3.0 the store wait is bounded: `storeDeadlineMs` (default 100 ms, D76) covers
+every store operation one evaluation performs. Past it the evaluation answers without
+retained state and the event carries `storeDegraded: true`. Count those in your
+journal, because a run of them is an outage, and the whole point of the field is that
+you see it. Two evaluations of one entity can no longer lose each other's evidence
+either (D77): they queue per entity, in this process.
 
 ## What leaves your process, and what never does
 
@@ -297,6 +331,8 @@ advice and a broken one cannot fail the request (D61).
 | `violations[]` | `invariant`, `class`, `strength` |
 | `hardViolated` | whether a proven violation set the outcome |
 | `coldStart` | absent state, or state past retention |
+| `storeDegraded` | a store operation missed its deadline; advice given without retained state, or a write lost (D76) |
+| `integrationWarning` | present when the integration itself looks misconfigured. See "When something looks wrong" (D78) |
 | `trace` | the same explanation a person reads |
 
 The entity reference is omitted by default: an event log leaves the process and lands
@@ -376,7 +412,7 @@ public. [SECURITY.md](../SECURITY.md) lists what is in scope.
 ```
 Title: [component] one line
 
-Guard version: <version>, tarball from main at <commit>
+Guard version: 0.3.0, tarball from main at <commit>
 Node: v22.x   OS: <os>
 Integration: <framework>, store: <sqlite / kv / memory>, processes: <n>
 
@@ -451,9 +487,8 @@ number matches.
 | an uptime monitor every 60 seconds, all day | `ALLOW`, and if it escalates that is a false positive to report |
 | a restart, with sqlite or kv | state survives; with `memoryStore` the entity returns cold. Neither is an error |
 
-Treat two hundred observations per scope as the working minimum for a session to say
-anything; below that, everything is still cold start. That floor is a working
-assumption carried out of the lab sessions, not a calibrated threshold.
+Two hundred observations per scope is the minimum for a session to say anything. Below
+that, everything is still cold start.
 
 ## Testing without an application
 
@@ -461,10 +496,10 @@ Everything below runs from the repository and needs no code of your own:
 
 ```
 npm ci
-npm test                       # 356 tests
+npm test                       # 378 tests
 npm run example:integration    # three scenarios: login, a stolen session, over-consumption
 npm run protocol:check         # 54 interop tests for the v0.1 protocol
-npm run check:api              # the frozen surface: 140 names across four entries
+npm run check:api              # the frozen surface: 144 names across four entries
 npm run site:check             # 12 rendered pages
 ```
 
@@ -473,7 +508,7 @@ did, which is the shortest way to see the shape of a decision before writing one
 
 ## Definition of done for a session
 
-- [ ] The tested version installed, with the commit recorded.
+- [ ] 0.3.0 installed from a tarball, with the commit recorded.
 - [ ] Two scopes wired, one of them the login scope.
 - [ ] Three to five invariants, each with a written reason for `hard` or `soft`.
 - [ ] The entity key verified not to merge two different people on the same network.
@@ -485,26 +520,31 @@ did, which is the shortest way to see the shape of a decision before writing one
 
 ## Limits you should not read past
 
-1. Advisory only. There is no enforcement in this package. Blocking is your code, and
+1. **Advisory only.** There is no enforcement in this package. Blocking is your code, and
    your responsibility.
-2. No calibration against a real population. The published dataset comes from a
+2. **No calibration against a real population.** The published dataset comes from a
    traffic lab, not from production (D45). Its zero false positives describe the
    composition recorded in [DATASET.md](DATASET.md), not your traffic.
-3. No provenance on 0.1.0. If you installed 0.1.0 from the registry, that is an
+3. **No provenance on 0.1.0.** If you installed 0.1.0 from the registry, that is an
    ordinary tarball. 0.2.0 was published by `release.yml` from the tag `v0.2.0` on
    2026-10-28, so the registry holds a provenance attestation for it, and `npm audit
    signatures` checks the signatures and the attestation for what you have installed.
-4. One maintainer. There are no required status checks and no second reviewer. CI is
+4. **One maintainer.** There are no required status checks and no second reviewer. CI is
    discipline, not a gate. Read the diff before you move a version.
-5. The exported surface is frozen in `api/v0.2.json`. A removal counts as a major
+5. **The exported surface is frozen** in `api/v0.3.json`. A removal counts as a major
    change even below 1.0.0 (D74). If your test needs a name that is missing, that is a
    finding, not a reason to patch locally.
-6. Vulnerabilities go to the advisory channel, not to an issue.
+6. **Vulnerabilities go to the advisory channel**, not to an issue.
 
 ## When something looks wrong
 
 Order of checks, cheapest first:
 
+0. Read the event itself. Since 0.3.0 the guard says two integration failures on its own:
+   `storeDegraded: true` means the store missed its deadline and the advice was given
+   without retained state (a run of those is an outage to alert on, D76), and
+   `integrationWarning` names the scope whose evaluations uniformly hard-violate one
+   invariant. That uniformity is a mapping bug, not traffic (D78).
 1. Confirm the entity is unique per person. Most reports of strange advice end here.
 2. Confirm one process holds the store, or that the store is shared.
 3. Print `assessment.trace` and read the sentence. It names the invariant or the feature

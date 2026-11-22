@@ -39,7 +39,7 @@ npm run protocol:check
 npm run example:integration
 ```
 
-`check:api` is the freeze: it compares the built declarations with `api/v0.2.json` and
+`check:api` is the freeze: it compares the built declarations with `api/v0.3.json` and
 fails on any added, removed, or re-kinded name. If it fails, the release commit is the one
 that has to explain why.
 
@@ -72,7 +72,7 @@ that has to explain why.
    so read it as processing rather than failure.
 9. Update the places that name the published version, and know which commit owns each
    one. The README install block is a release-commit fact: the tarball freezes it at
-   publish, so it must already say the version it ships with (D76). The registry-side
+   publish, so it must already say the version it ships with (D81). The registry-side
    facts, the versions page's `latest` const and the install pin in
    `site/pages/usage.mjs`, are updated in the commit that records the upload, because a
    page built from `main` cannot read the registry and must not claim a version it does
@@ -138,6 +138,6 @@ from. Both versions stay on the registry; neither will be unpublished.
 
 - Check the site build against the registry version (`npm run site:check` after updating the
   versions page).
-- If the release moved advice, the versions page and `MIGRATION.md` get the row in the same
+- If the release moved advice, the versions page and the migration guide under `docs/vX.Y.Z/` get the row in the same
   commit. An advisory change that is real but undocumented is the failure mode this whole
   document is written against.

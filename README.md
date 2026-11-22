@@ -11,7 +11,9 @@
 
 > Trust is a spectrum, not a verdict. Adaptive trust evaluation for web interactions, a local library, not a centralized gatekeeper.
 
-**Status: 0.3.0, pre-1.0.** Install with `npm install @fachryxyf/scorpio-guard`. Which version the registry serves today, and the date each one landed, are on the [versions page](https://scorpio-guard.fachryxyf.com/versions.html), because a README carried inside a tarball cannot keep that fact true. npm suspended the account behind the package for 72 hours on 2026-10-25 after a security-sensitive action; [docs/RELEASING.md](https://github.com/Fachryxyf/scorpio-guard/blob/main/docs/RELEASING.md) carries the record and the runbook. The core model is built and tested, the package installs from its tarball, and the v0.1 protocol has fixtures, a reference receiver, and a batching sender. Two things still stand between this and 1.0.0: an independent security review, and thresholds calibrated against a real traffic mix rather than the two lab runs recorded in [docs/DATASET.md](https://github.com/Fachryxyf/scorpio-guard/blob/main/docs/DATASET.md). The 24 hour soak that was the third proof finished on 2026-10-28 and is recorded in [docs/SOAK.md](https://github.com/Fachryxyf/scorpio-guard/blob/main/docs/SOAK.md). The claims a gate enforces today, the risks that are priced instead, and the size of each gap are on the [guarantees page](https://scorpio-guard.fachryxyf.com/guarantees.html), with the test or decision behind every row (D75).
+**Status: 0.3.0, pre-1.0.** Install with `npm install @fachryxyf/scorpio-guard`. The core model, three stores, and the v0.1 wire format are built and tested. The [versions page](https://scorpio-guard.fachryxyf.com/versions.html) records what the registry serves today, because a README carried inside a tarball cannot keep that fact true. npm suspended the account behind the package for 72 hours on 2026-10-25 after a security-sensitive action; [docs/RELEASING.md](https://github.com/Fachryxyf/scorpio-guard/blob/main/docs/RELEASING.md) carries the record and the runbook.
+
+Two proofs stand between this and 1.0.0: an independent security review, and thresholds calibrated against a real population. The 24 hour soak, once the third proof, is done ([docs/SOAK.md](https://github.com/Fachryxyf/scorpio-guard/blob/main/docs/SOAK.md)). The first real-traffic reading is in, and the grid held every shipped constant ([docs/v0.3.0/HOST-DATASET.md](https://github.com/Fachryxyf/scorpio-guard/blob/main/docs/v0.3.0/HOST-DATASET.md)); one host is not a population, so the calibration proof is still open. What each proof requires, and what the gates enforce today, is on the [guarantees page](https://scorpio-guard.fachryxyf.com/guarantees.html), with the test or decision behind every row (D75).
 
 **In a hurry:** [Install](#install), [Usage](#usage), [docs/TESTING.md](https://github.com/Fachryxyf/scorpio-guard/blob/main/docs/TESTING.md). The design and its boundaries are in [ARCHITECTURE.md](https://github.com/Fachryxyf/scorpio-guard/blob/main/ARCHITECTURE.md).
 
@@ -21,14 +23,15 @@
 npm install @fachryxyf/scorpio-guard
 ```
 
-`0.3.0` is the finalization release: no code, no exported name, and no advice for the
-same input and the same stored state changed (D76). It exists because the README inside
-the `0.2.0` tarball still told a reader that `0.2.0` was unpublished, and that text is
-frozen at publish time; the record and the landing page had drifted from what shipped,
-and `0.3.0` closes that gap. Every release since `0.2.0` is uploaded by the tag-triggered
-workflow with an attestation that `npm audit signatures` verifies in a clean install;
-`0.1.0` has none. MIT, zero runtime dependencies (D59). The date each version landed, and
-what the registry serves today, are on the [versions page](https://scorpio-guard.fachryxyf.com/versions.html).
+`0.3.0` is the release the first real integration shaped: a store deadline, per-entity
+serialization, and an integration warning (D76-D78), with the surface frozen at
+`api/v0.3.json`. It exists because the README inside the `0.2.0` tarball still told a
+reader that `0.2.0` was unpublished, and that text is frozen at publish time; the record
+and the landing page had drifted from what shipped, and `0.3.0` closes that gap too.
+Every release since `0.2.0` is uploaded by the tag-triggered workflow with an attestation
+that `npm audit signatures` verifies in a clean install; `0.1.0` has none. MIT, zero
+runtime dependencies (D59). The date each version landed, and what the registry serves
+today, are on the [versions page](https://scorpio-guard.fachryxyf.com/versions.html).
 
 Pin the exact version rather than a caret range: no threshold in this library is
 calibrated, so a minor bump can change advisory behavior, and `^0.3.0` would pull that in
@@ -330,7 +333,7 @@ stays reported and does not decide (D67). Both runs are frozen into
 `examples/lab/fixtures/` and replayed on every push, so a change that moves any decision
 fails CI rather than being found in production (D65).
 
-Three hundred and fifty-six tests, which double as the record of every numeric and
+Three hundred and seventy-eight tests, which double as the record of every numeric and
 semantic property the design depends on. [docs/CLAIMS.md](https://github.com/Fachryxyf/scorpio-guard/blob/main/docs/CLAIMS.md) maps each
 design decision to the test that names it, and lists the ones that are still prose
 only, generated rather than maintained by hand.
@@ -365,31 +368,42 @@ default: it is a distance-to-reference model rather than a trained one, because 
 labelled traffic exists to train against (D34), and training on generated personas
 would report the author's assumptions back as findings.
 
-More importantly: nothing has met real production traffic. Every threshold in the
-model is a reasoned guess. The HealthMe harness replays its real flow, which is
+More importantly: the thresholds have met exactly one real deployment. The first
+host integration ran 0.2.0 for 92 hours of production traffic and its labelled
+staging journal has been replayed against the policy grid
+(`docs/v0.3.0/HOST-DATASET.md`): the shipped constants held, and the integration's false positives traced
+to host-side attribution, not to the model. That is one deployment, not a
+population. Every threshold remains a reasoned guess that one dataset failed to
+falsify. The HealthMe harness (`examples/healthme/`) replays its real flow, which is
 enough to catch a contradiction but not enough to calibrate a threshold.
 
-## Evidence so far
+## The integration record, and what it cannot claim
 
-The full record of both integrations and the falsifications they produced is in
-[ARCHITECTURE.md](https://github.com/Fachryxyf/scorpio-guard/blob/main/ARCHITECTURE.md). In brief: HealthMe's replayed flow disagrees with its
-own defences exactly twice, once in the guard's favor (a forged API call the origin
-check passes) and once in the user's (a three-strike lockout where no evidence
-exists to act on). Generated IXFE persona traffic leaves every legitimate persona at
-`OBSERVE` or below and restricts every adversary, and it corrected the model four
-times along the way (D45-D49): a stage ceiling one rung too high, entropy normalized
-against the wrong base, a `hard` declaration that was not provable, and a saturation
-guard that could not observe the entity it targeted. Two lab runs against static
-sites add the calibration grid and the finding that a page view carries no evidence
-(D63, D66), recorded in [docs/DATASET.md](https://github.com/Fachryxyf/scorpio-guard/blob/main/docs/DATASET.md).
+The first two integration targets, IXFE and HealthMe, are offline. What they showed,
+what that traffic measured without fixing, and what it falsified are archived in
+[docs/v0.2.0/TARGETS.md](https://github.com/Fachryxyf/scorpio-guard/blob/main/docs/v0.2.0/TARGETS.md),
+and the design story behind them is in
+[ARCHITECTURE.md](https://github.com/Fachryxyf/scorpio-guard/blob/main/ARCHITECTURE.md).
+Two claims from that era are asserted as tests and still hold: no legitimate persona is
+advised anything a user would feel, and no adversary walks through untouched. Its
+falsifications (the `developing` ceiling, scope entropy, an unprovable `hard`
+declaration, the saturation gate) are recorded in the decisions of that version and
+corrected the model in place.
 
-| Scenario | HealthMe does | The guard advises |
-|---|---|---|
-| Normal daily unlock, one week | allows | `ALLOW` / `OBSERVE`, never friction |
-| Three mistyped PINs | 5-minute lockout | `OBSERVE`, stage `developing` |
-| `POST /api/chat` with no unlock in session | **allows** | `RESTRICT`, provable violation |
-| Session restore from `sessionStorage` | allows | `ALLOW`, not mistaken for replay |
-| 20 scripted attempts | rejects, counter resets on cold start | `INCREASE_FRICTION`, stage `established` |
+The live evidence is the lab and the first real deployment. The deployment record is not
+a summary: it is 92 hours of production journal, every request evaluated and every
+decision kept, plus a pentest whose adversarial traffic was written down before it was
+sent, so the 5,123-row export carries ground truth. What it found: the library's
+row-by-row behaviour survived contact with real traffic; the failures were in the
+integration around it (a 404 priced as probing, logout mapped into refresh, concurrent
+writes losing evidence, a journal that could not audit itself, a fail-open that arrived
+five minutes late). Each one is now either fixed in the library or named in the guidance.
+What the lab cannot do is stated in
+[docs/DATASET.md](https://github.com/Fachryxyf/scorpio-guard/blob/main/docs/DATASET.md)
+and what one deployment cannot do in
+[docs/v0.3.0/HOST-DATASET.md](https://github.com/Fachryxyf/scorpio-guard/blob/main/docs/v0.3.0/HOST-DATASET.md):
+neither is a population, so every threshold remains a reasoned guess that two datasets
+have failed to falsify.
 
 ## Open problems
 
@@ -409,7 +423,7 @@ the answer, the reasoning, and what each answer commits the implementation to.
 Read it before proposing a change to the model, several obvious-looking
 alternatives were considered and rejected there for reasons worth knowing.
 
-Seventy-nine entries is more than anyone reads front to back, so the site carries a
+Eighty-four entries is more than anyone reads front to back, so the site carries a
 [decision index](https://scorpio-guard.fachryxyf.com/#decisions), every entry
 grouped by what it decides, with the file it turned into, and a
 [glossary](https://scorpio-guard.fachryxyf.com/#glossary) for the terms used in a
@@ -425,19 +439,23 @@ advisory.
 | [DECISIONS.md](https://github.com/Fachryxyf/scorpio-guard/blob/main/DECISIONS.md) | The design record: every decision, its reasoning, and what it commits the code to. Appended to, never renumbered. |
 | [docs/TESTING.md](https://github.com/Fachryxyf/scorpio-guard/blob/main/docs/TESTING.md) | How to integrate, test, and report a false positive. |
 | [docs/ROADMAP.md](https://github.com/Fachryxyf/scorpio-guard/blob/main/docs/ROADMAP.md) | The hole list, the milestones, and the exit criteria for 1.0.0. |
-| [docs/DATASET.md](https://github.com/Fachryxyf/scorpio-guard/blob/main/docs/DATASET.md) | The two recorded lab runs and what they found. |
+| [docs/DATASET.md](https://github.com/Fachryxyf/scorpio-guard/blob/main/docs/DATASET.md) | The two recorded lab runs, the host dataset section, and what they found. |
 | [docs/SOAK.md](https://github.com/Fachryxyf/scorpio-guard/blob/main/docs/SOAK.md) | The soak harness, its limits, and the recorded runs including the 24 hour run. |
 | [docs/POISONING.md](https://github.com/Fachryxyf/scorpio-guard/blob/main/docs/POISONING.md) | What sustained poisoning costs an attacker, priced by measurement (D73). |
 | [docs/ROOT-OF-TRUST.md](https://github.com/Fachryxyf/scorpio-guard/blob/main/docs/ROOT-OF-TRUST.md) | The entity-key rule and the measured price of every way to break it (D72). |
 | [docs/DEPLOYMENT.md](https://github.com/Fachryxyf/scorpio-guard/blob/main/docs/DEPLOYMENT.md) | Four store topologies and what each one loses when it fails. |
 | [docs/RUNTIME.md](https://github.com/Fachryxyf/scorpio-guard/blob/main/docs/RUNTIME.md) | Where the library is promised, tested, and only argued to run. |
 | [docs/SEMVER.md](https://github.com/Fachryxyf/scorpio-guard/blob/main/docs/SEMVER.md) | What a version number promises here, and how deprecation works. |
-| [docs/MIGRATION.md](https://github.com/Fachryxyf/scorpio-guard/blob/main/docs/MIGRATION.md) | Upgrading from 0.1.0, and what 0.3.0 changes (nothing). |
+| [docs/MIGRATION.md](https://github.com/Fachryxyf/scorpio-guard/blob/main/docs/MIGRATION.md) | One migration guide per version; the current one is `docs/v0.3.0/MIGRATION.md`. |
+| [docs/v0.3.0/INTEGRATION.md](https://github.com/Fachryxyf/scorpio-guard/blob/main/docs/v0.3.0/INTEGRATION.md) | The first real host integration, told in full. |
+| [docs/v0.3.0/HOST-DATASET.md](https://github.com/Fachryxyf/scorpio-guard/blob/main/docs/v0.3.0/HOST-DATASET.md) | The host journal dataset: 92 hours of production traffic and the labelled pentest export. |
+| [docs/v0.2.0/TARGETS.md](https://github.com/Fachryxyf/scorpio-guard/blob/main/docs/v0.2.0/TARGETS.md) | The recorded IXFE and HealthMe targets, archived with their version. |
 | [docs/RELEASING.md](https://github.com/Fachryxyf/scorpio-guard/blob/main/docs/RELEASING.md) | How a release ships, and the record of the npm account suspension. |
 | [docs/SECURITY-REVIEW.md](https://github.com/Fachryxyf/scorpio-guard/blob/main/docs/SECURITY-REVIEW.md) | The packet for the independent security review, which is still open. |
 | [docs/CLAIMS.md](https://github.com/Fachryxyf/scorpio-guard/blob/main/docs/CLAIMS.md) | Generated map of which decision is named by which test. |
 | [docs/CLAIMS-NOTES.md](https://github.com/Fachryxyf/scorpio-guard/blob/main/docs/CLAIMS-NOTES.md) | Written reasons for the decisions no test can name. |
-| [docs/archive/PROJECT-AUDIT.md](https://github.com/Fachryxyf/scorpio-guard/blob/main/docs/archive/PROJECT-AUDIT.md) | The October 2026 product audit, kept as a dated record. |
+| [docs/README.md](https://github.com/Fachryxyf/scorpio-guard/blob/main/docs/README.md) | The folder rule: what lives at the root of docs/ and what lives in a version folder. |
+| [docs/v0.2.0/PROJECT_AUDIT.md](https://github.com/Fachryxyf/scorpio-guard/blob/main/docs/v0.2.0/PROJECT_AUDIT.md) | The October 2026 product audit, frozen with its version folder. |
 | [REPOSITORIES.md](https://github.com/Fachryxyf/scorpio-guard/blob/main/REPOSITORIES.md) | The three-repository split, the reasoning, and the planned scope of each. |
 
 ## Repositories
@@ -449,16 +467,22 @@ spec in `scorpio-guard-protocol`, and the Rust reference server, private, in
 
 ## Roadmap
 
-The hole list, the milestones with their exit criteria, and the current status of
-each are in [docs/ROADMAP.md](https://github.com/Fachryxyf/scorpio-guard/blob/main/docs/ROADMAP.md). Closed so far: the core model, the stores with
-their conformance kit, the browser collector, the constraint taxonomy closed over
-proof sources (D41), the weak-signal catalogue (D42), the two-tier symptom
-vocabulary (D43), generated persona traffic that corrected the model four times
-(D45-D49), farming answered on mass (D55), the anomaly classifier (D52), the
-wire format (D53), the observing proxy and its real-browser driver (D56, D57), and
-the 24 hour soak (H18). What remains needs real traffic: a real population,
-calibration of the intake discount and the anomaly reference, false-positive
-stories per collector, and only then the encoding work (D50-D57).
+Stages, the list of holes, and the exit criteria for each milestone: [docs/ROADMAP.md](https://github.com/Fachryxyf/scorpio-guard/blob/main/docs/ROADMAP.md).
+
+Done: the core model, three stores behind one conformance kit, the browser collector,
+the enumeration tasks closed over proof sources (D41-D43), generated persona traffic
+that corrected the model four times (D45-D49), the lab with frozen fixtures replayed in
+CI (D63-D67), the v0.1 wire format running end to end (D70, D71), the 0.2.0 release
+gates (D74, D75), and 0.3.0's field-driven changes (D76-D80).
+
+What remains needs real traffic, in order:
+
+1. A real population. Not visits; those can be produced, but their *distribution*: how many real clients look like each persona. This is the honest residue of D45 and the one thing generated traffic can never supply.
+2. Calibrate the intake discount. `maxInterArrivalCv = 0.25` is inherited from D36, and it decides how much trust a legitimate machine client is denied.
+3. Calibrate the anomaly reference profile, and decide from measurement whether the classifier or the threshold conjunction should drive the D37 concurrence.
+4. Give each collector its false-positive story from real traffic before any of them earns a production threshold.
+5. Move the wire format to its own repository and build a server that speaks it.
+6. Only then: investigate encoding schemes for symptom transmission.
 
 ## Contributing
 
@@ -471,5 +495,5 @@ does not claim, plus private vulnerability reporting.
 ## Links
 
 - Site: [scorpio-guard.fachryxyf.com](https://scorpio-guard.fachryxyf.com)
-- Audit record: [docs/archive/PROJECT-AUDIT.md](https://github.com/Fachryxyf/scorpio-guard/blob/main/docs/archive/PROJECT-AUDIT.md)
+- Audit record: [docs/v0.2.0/PROJECT_AUDIT.md](https://github.com/Fachryxyf/scorpio-guard/blob/main/docs/v0.2.0/PROJECT_AUDIT.md)
 - Author: [@Fachryxyf](https://github.com/Fachryxyf)

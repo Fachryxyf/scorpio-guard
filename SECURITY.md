@@ -2,9 +2,12 @@
 
 ## Status
 
-Uncalibrated and unaudited. The registry serves 0.3.0, published with a provenance
-attestation that ties the tarball to its commit. Do not deploy it as your only
-defence for anything that matters.
+Uncalibrated against a population, and unaudited. The registry's newest tarball is 0.2.1
+(published 2026-10-28 with a provenance attestation tying it to its commit); 0.3.0, which
+carries the first real integration's fixes (D76-D80), is versioned in this repository and
+waiting on its tag. The first real integration's journal has been replayed against the
+policy grid (`docs/v0.3.0/HOST-DATASET.md`) and moved no constant; that is one host, not
+a population. Do not deploy this library as your only defence for anything that matters.
 
 ## What the guard is, and is not
 
@@ -13,24 +16,24 @@ reasoning behind it; every action belongs to the host application. So the most
 important thing to understand about its security posture is what it does not
 claim:
 
-- It does not establish identity. It accepts an entity reference as a basis
+- **It does not establish identity.** It accepts an entity reference as a basis
   for measurement, never as proof. If the host supplies a reference that is cheap
   to discard, every history-based defence goes with it. That is the host's
   responsibility.
-- It does not resist a determined adversary yet. Sybil churn, discarding
+- **It does not resist a determined adversary yet.** Sybil churn, discarding
   identities rather than building trust, is an open problem, recorded as such.
-- It has no network surface. No API key, no phoning home, no runtime request
+- **It has no network surface.** No API key, no phoning home, no runtime request
   forwarding. There is nothing to intercept because nothing is sent.
-- Thresholds are public. The library and its policy defaults are open by
+- **Thresholds are public.** The library and its policy defaults are open by
   design. They are set leniently, so knowing them tells an attacker how to avoid
   escalation, not how to trigger a false positive against someone else. The weak
   signal *catalogue* is deliberately threshold-free for the same reason: it names
   what is measured, never when it fires.
-- Weak signals cannot escalate on their own. Every catalogued signal an
-  interaction trips contributes at most the mass of one weak observation, which
-  leaves a fresh entity below the evidence threshold where trust may ask for
-  anything; [ARCHITECTURE.md](ARCHITECTURE.md) carries that arithmetic in full.
-  Anything that escalates on measurement alone is a bug, not a policy choice.
+- **Weak signals cannot escalate on their own.** Every catalogued signal an
+  interaction trips contributes at most the mass of one weak observation in total,
+  which leaves a fresh entity below the evidence threshold where trust may ask for
+  anything. Anything that escalates on measurement alone is a bug, not a policy
+  choice.
 
 ## Handling personal data
 
@@ -73,12 +76,12 @@ estimate rather than a service level.
 
 ### Known, and recorded rather than fixed
 
-- Saturation / farming. Uniform high-volume interaction converges on a large
+- **Saturation / farming.** Uniform high-volume interaction converges on a large
   positive evidence mass that resists negative evidence: 300 uniform positives absorb
   seventeen strong negatives before the advice changes. The decision-layer gate that
   was recorded as the mitigation cannot reach it, and that claim is withdrawn, see
   D49. Reports demonstrating this are welcome but will be closed as duplicates of D49.
-- Identity churn. At one request per identity reference, nothing accumulates and
+- **Identity churn.** At one request per identity reference, nothing accumulates and
   no history-based defence can engage. That is the root-of-trust problem, and the
   reference is the host's to make expensive.
 

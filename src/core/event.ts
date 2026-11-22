@@ -22,7 +22,7 @@
  */
 import type { ConstraintClass, Strength } from './constraints.ts';
 import type { Decision } from './decision.ts';
-import type { Assessment } from './guard.ts';
+import type { Assessment, IntegrationWarning } from './guard.ts';
 import type { EpistemicStage, TrustBand, UncertaintyLevel } from './policy.ts';
 
 /** Bumped only when a field changes meaning or disappears. D61. */
@@ -67,6 +67,14 @@ export type AssessmentEvent = {
   readonly violations: readonly AssessmentEventViolation[];
   readonly hardViolated: boolean;
   readonly coldStart: boolean;
+  /**
+   * A store operation did not land within the deadline (D76): the advice was
+   * given without retained state, or the state write was lost. Never a property
+   * of the traffic; a run of these is an outage to alert on.
+   */
+  readonly storeDegraded: boolean;
+  /** Present when the integration itself looks misconfigured. D78. */
+  readonly integrationWarning?: IntegrationWarning;
   /**
    * The same explanation the assessment returns.
    *
@@ -132,6 +140,10 @@ export async function toAssessmentEvent(
     })),
     hardViolated: assessment.hardViolated,
     coldStart: assessment.coldStart,
+    storeDegraded: assessment.storeDegraded,
+    ...(assessment.integrationWarning
+      ? { integrationWarning: assessment.integrationWarning }
+      : {}),
     trace: assessment.trace,
   };
 

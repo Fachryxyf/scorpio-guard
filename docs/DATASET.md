@@ -390,3 +390,12 @@ the run is still calibrated, it just carries the F5 misses without the evidence 
 acting adversaries are caught. A repeated run is not expected to be identical request for
 request, because Chrome's own scheduling is not seeded; the seed controls the personas'
 pauses, which is the part that was ours to control.
+
+## The host dataset has its own page
+
+The first real integration's journal, 5,123 labelled evaluations replayed against
+the grid in 0.3.0, is recorded in
+[docs/v0.3.0/HOST-DATASET.md](v0.3.0/HOST-DATASET.md), beside the rest of that
+version's documentation. Its headline: the shipped policy cell is the best of the
+nine, no constant moved, and the false positives trace to host-side attribution
+rather than to the model.

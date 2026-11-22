@@ -75,7 +75,12 @@
   "D71": "examples/protocol/, PROTOCOL.md",
   "D72": "docs/ROOT-OF-TRUST.md, root-of-trust.test.ts",
   "D73": "examples/poison/experiment.ts, examples/poison/experiment.test.ts, docs/POISONING.md",
-  "D74": "api/v0.2.json, scripts/api-surface.mjs, docs/SEMVER.md",
+  "D74": "api/v0.3.json, scripts/api-surface.mjs, docs/SEMVER.md",
   "D75": "site/pages/guarantees.mjs, docs/SECURITY-REVIEW.md",
-  "D76": "CHANGELOG.md, site/pages/overview.mjs"
+  "D76": "src/core/guard.ts, src/core/store.ts, src/core/policy.ts",
+  "D77": "src/core/guard.ts, src/core/store.ts",
+  "D78": "src/core/event.ts, src/core/guard.ts",
+  "D79": "docs/TESTING.md, docs/ROOT-OF-TRUST.md",
+  "D80": "docs/ROOT-OF-TRUST.md",
+  "D81": "CHANGELOG.md, site/pages/overview.mjs"
 }

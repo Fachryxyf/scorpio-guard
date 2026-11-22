@@ -29,8 +29,18 @@ import {
   type AssessmentIdentity,
 } from './event.ts';
 import { signalMass, type WeakSignal } from './signals.ts';
-import { DEFAULT_POLICY, hardViolationDecision, type Policy } from './policy.ts';
-import { memoryStore, type StateStore } from './store.ts';
+import {
+  DEFAULT_INTEGRATION_WARNING_MIN_CONSECUTIVE,
+  DEFAULT_POLICY,
+  hardViolationDecision,
+  type Policy,
+} from './policy.ts';
+import {
+  DEFAULT_STORE_DEADLINE_MS,
+  memoryStore,
+  StoreDeadlineError,
+  type StateStore,
+} from './store.ts';
 import {
   applyEvidence,
   evidenceMass,
@@ -42,6 +52,21 @@ import {
 } from './trust.ts';
 
 export type EvidenceStrength = 'weak' | 'strong';
+
+/**
+ * An observation about the integration itself, raised on the assessment without
+ * ever touching the advice. D78.
+ *
+ * The one kind today: a scope whose evaluations uniformly hard-violate the same
+ * invariant. Row by row the guard is correct; the uniformity is the host's
+ * mapping to blame, and nothing else in the system says so.
+ */
+export type IntegrationWarning = {
+  readonly kind: 'uniform-hard-violation';
+  readonly scope: string;
+  readonly invariant: string;
+  readonly count: number;
+};
 
 export type Observation = {
   /**
@@ -110,6 +135,18 @@ export type Assessment = {
   readonly hardViolated: boolean;
   /** True when state was absent or past its retention horizon. D6, D21. */
   readonly coldStart: boolean;
+  /**
+   * True when a store operation did not land within the deadline (D76): the
+   * advice was given without retained state, or the state write was lost. A
+   * run of these is an outage the host must alert on, not a property of the
+   * traffic.
+   */
+  readonly storeDegraded: boolean;
+  /**
+   * Present when the integration itself looks misconfigured. D78. Never
+   * changes the decision: the advice is the host's to weigh.
+   */
+  readonly integrationWarning?: IntegrationWarning;
   readonly context: EvaluationContext | undefined;
   /** Why this outcome, in order of what actually decided it. D23. */
   readonly trace: readonly string[];
@@ -169,6 +206,32 @@ export type GuardOptions = {
    * breaks correlation in the log rather than in the state.
    */
   readonly identity?: AssessmentIdentity;
+
+  /**
+   * How long one store operation may hold the evaluation before the guard
+   * stops waiting. D76. Defaults to `DEFAULT_STORE_DEADLINE_MS` (100ms); zero
+   * disables the bound for a host whose store is deliberately slow.
+   *
+   * Fail-open (D62) is only as fast as the transport admits, and a transport
+   * that retries for minutes turns a store outage into a host outage. Past the
+   * deadline the evaluation answers without retained state (a cold start), the
+   * assessment and its event carry `storeDegraded: true`, and the state write,
+   * if it was the one lost, does not land. Store errors keep their existing
+   * semantics; only the wait is bounded.
+   */
+  readonly storeDeadlineMs?: number;
+
+  /**
+   * Surface a warning when one scope's evaluations uniformly hard-violate the
+   * same invariant. D78. That uniformity is a host mapping bug — two
+   * interactions sharing a scope — and it silently poisons trust for every
+   * legitimate user of the scope.
+   *
+   * Defaults to `{ minConsecutive: DEFAULT_INTEGRATION_WARNING_MIN_CONSECUTIVE
+   * }`; `false` turns the warnings off. The warning rides the assessment and
+   * the event and never alters the decision.
+   */
+  readonly integrationWarnings?: false | { readonly minConsecutive?: number };
 };
 
 export type EvaluateInput = {
@@ -199,27 +262,128 @@ export function createGuard(options: GuardOptions = {}) {
   const discountPositives = options.discountRegularPositives ?? true;
   const windowSize = options.windowSize ?? DEFAULT_WINDOW_SIZE;
 
-  /** Load state, treating absent and expired alike. D6. */
-  async function load(entity: string, now: number): Promise<{ state: EntityState; coldStart: boolean }> {
-    const stored = await store.get(entity);
-    if (!stored) return { state: freshState(now), coldStart: true };
+  /** Chains one in-flight evaluation per entity. D77. */
+  const inFlight = new Map<string, Promise<void>>();
 
-    if (isExpired(stored, now, policy.retentionHours)) {
-      await store.delete(entity);
-      return { state: freshState(now), coldStart: true };
+  const deadlineMs = options.storeDeadlineMs ?? DEFAULT_STORE_DEADLINE_MS;
+
+  /**
+   * Consecutive evaluations per (scope, invariant) that hard-violated the same
+   * invariant. D78. Process-local on purpose: the warning describes the host's
+   * own configuration, which restarts with the process.
+   */
+  const uniformHard = new Map<string, Map<string, number>>();
+  const warningThreshold =
+    options.integrationWarnings === false
+      ? undefined
+      : (options.integrationWarnings?.minConsecutive ?? DEFAULT_INTEGRATION_WARNING_MIN_CONSECUTIVE);
+
+  /**
+   * Track the uniformity signal and return a warning when one (scope, invariant)
+   * has fired on this many consecutive evaluations of the scope. An evaluation
+   * of the scope without that invariant resets its count: hostile traffic mixes
+   * with refusals and other entities, a mapping bug does not.
+   */
+  function trackUniformHard(scope: string, hard: readonly Violation[]): IntegrationWarning | undefined {
+    const byInvariant = uniformHard.get(scope) ?? new Map<string, number>();
+    uniformHard.set(scope, byInvariant);
+    const fired = new Set(hard.map((violation) => violation.invariant));
+    for (const id of [...byInvariant.keys()]) {
+      if (!fired.has(id)) byInvariant.delete(id);
     }
-    return { state: stored, coldStart: false };
+    let warning: IntegrationWarning | undefined;
+    for (const violation of hard) {
+      const count = (byInvariant.get(violation.invariant) ?? 0) + 1;
+      byInvariant.set(violation.invariant, count);
+      if (count >= warningThreshold! && (warning === undefined || count > warning.count)) {
+        warning = { kind: 'uniform-hard-violation', scope, invariant: violation.invariant, count };
+      }
+    }
+    return warning;
   }
 
-  return {
-    async evaluate(input: EvaluateInput): Promise<Assessment> {
-      const now = clock.now();
-      const startedAt = performance.now();
-      const observation = input.observation ?? {};
-      const trace: string[] = [];
+  /**
+   * One deadline per evaluation, not one per operation. D76.
+   *
+   * `bound` resolves `{ ok: false }` for any operation still pending when the
+   * evaluation's store budget ran out, and rethrows store errors untouched —
+   * only the wait is bounded, not the failure semantics the store itself chose
+   * (D62). The timer is armed by the first store call and disposed when the
+   * evaluation finishes, so a healthy store pays one timer per evaluation
+   * rather than one per operation. A set that lands after the deadline has
+   * already answered still writes the state it was given, which is safe; a get
+   * that answers late is simply discarded.
+   */
+  /** Shared result for operations that did not land before the deadline. Immutable, so reusable. */
+  const NOT_LANDED: { ok: false } = Object.freeze({ ok: false });
 
-      const { state, coldStart } = await load(input.entity, now);
-      if (coldStart) trace.push('cold start: no retained state, prior is Beta(1,1)');
+  function startStoreDeadline() {
+    if (!(deadlineMs > 0)) {
+      return {
+        bound: async <T>(operation: Promise<T>) => ({ ok: true as const, value: await operation }),
+        dispose: () => {},
+      };
+    }
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    let expired: Promise<never> | undefined;
+    let fired = false;
+    return {
+      async bound<T>(operation: Promise<T>): Promise<{ ok: true; value: T } | { ok: false }> {
+        if (fired) return NOT_LANDED;
+        expired ??= new Promise<never>((_, reject) => {
+          timer = setTimeout(() => {
+            fired = true;
+            reject(new StoreDeadlineError(deadlineMs));
+          }, deadlineMs);
+        });
+        try {
+          return { ok: true, value: await Promise.race([operation, expired]) };
+        } catch (error) {
+          if (error instanceof StoreDeadlineError) return NOT_LANDED;
+          throw error;
+        }
+      },
+      dispose() {
+        clearTimeout(timer);
+      },
+    };
+  }
+
+  /** Load state, treating absent and expired alike. D6. */
+  async function load(
+    entity: string,
+    now: number,
+    deadline: ReturnType<typeof startStoreDeadline>,
+  ): Promise<{ state: EntityState; coldStart: boolean; degraded: boolean }> {
+    const got = await deadline.bound(store.get(entity));
+    if (!got.ok) return { state: freshState(now), coldStart: true, degraded: true };
+
+    const stored = got.value;
+    if (!stored) return { state: freshState(now), coldStart: true, degraded: false };
+
+    if (isExpired(stored, now, policy.retentionHours)) {
+      const deleted = await deadline.bound(store.delete(entity));
+      return { state: freshState(now), coldStart: true, degraded: !deleted.ok };
+    }
+    return { state: stored, coldStart: false, degraded: false };
+  }
+
+  async function evaluateOnce(input: EvaluateInput): Promise<Assessment> {
+    const now = clock.now();
+    const startedAt = performance.now();
+    const observation = input.observation ?? {};
+    const trace: string[] = [];
+    const deadline = startStoreDeadline();
+
+    try {
+    const { state, coldStart, degraded } = await load(input.entity, now, deadline);
+    let storeDegraded = degraded;
+    if (coldStart) trace.push('cold start: no retained state, prior is Beta(1,1)');
+    if (degraded) {
+      trace.push(
+        `store degraded: the read did not land within ${deadlineMs}ms, evaluating without retained state (D76)`,
+      );
+    }
 
       // Declared invariants first: they are proof, and proof does not depend on
       // accumulated trust. D15, D16.
@@ -234,6 +398,16 @@ export function createGuard(options: GuardOptions = {}) {
 
       const hard = hardViolations(checked.violations);
       const soft = softViolations(checked.violations);
+
+      // The uniformity signal runs before anything else consumes the violations,
+      // and feeds the report only: it never reaches the decision. D78.
+      const integrationWarning =
+        scope && warningThreshold !== undefined ? trackUniformHard(scope, hard) : undefined;
+      if (integrationWarning) {
+        trace.push(
+          `integration warning: ${integrationWarning.count} consecutive evaluations of scope "${integrationWarning.scope}" hard-violated "${integrationWarning.invariant}" — that uniformity is a mapping bug, not traffic (D78)`,
+        );
+      }
 
       // Evidence: what the host attributed, plus mass owed by soft violations. D38.
       const positive = observation.evidence?.positive
@@ -282,7 +456,13 @@ export function createGuard(options: GuardOptions = {}) {
         policy.halfLifeHours,
       );
       const updated: EntityState = { ...withEvidence, window };
-      await store.set(input.entity, updated);
+      const put = await deadline.bound(store.set(input.entity, updated));
+      if (!put.ok) {
+        storeDegraded = true;
+        trace.push(
+          `store degraded: the state write did not land within ${deadlineMs}ms, this update is lost (D76)`,
+        );
+      }
 
       // The anomaly dimension: features over this entity's own recent behavior.
       // Computed from the updated window so the current interaction counts. D36.
@@ -363,6 +543,8 @@ export function createGuard(options: GuardOptions = {}) {
         violations: checked.violations,
         hardViolated: hard.length > 0,
         coldStart,
+        storeDegraded,
+        ...(integrationWarning ? { integrationWarning } : {}),
         context: input.context,
         trace,
       };
@@ -373,11 +555,53 @@ export function createGuard(options: GuardOptions = {}) {
       }
 
       return assessment;
+    } finally {
+      deadline.dispose();
+    }
+  }
+
+  return {
+    /**
+     * Evaluations of one entity are serialized behind each other. D77.
+     *
+     * The store contract is `get`/`set`, so two concurrent evaluations of the same
+     * entity would both read the same state and the last writer would erase the
+     * evidence the other applied. Measured on a real integration before the fix:
+     * 5,817 journal rows (1.229%) fell below their decay floor, which is lost
+     * update, not decay. Different entities still evaluate concurrently; the slot
+     * is removed when its chain settles, so the map holds only in-flight entities.
+     */
+    async evaluate(input: EvaluateInput): Promise<Assessment> {
+      const previous = inFlight.get(input.entity);
+      const result = previous === undefined ? evaluateOnce(input) : previous.then(() => evaluateOnce(input));
+      const tail = result.then(
+        () => undefined,
+        () => undefined,
+      );
+      inFlight.set(input.entity, tail);
+      void tail.then(() => {
+        if (inFlight.get(input.entity) === tail) inFlight.delete(input.entity);
+      });
+      return result;
     },
 
-    /** Forget one entity outright. D22. Same operation retention uses. */
+    /**
+     * Forget one entity outright. D22. Same operation retention uses.
+     *
+     * Waits behind any in-flight evaluation of the same entity, because a delete
+     * that lands between `load` and `set` would be resurrected by that write.
+     * Unlike evaluation, a delete that misses the deadline throws rather than
+     * silently leaving the row behind (D76).
+     */
     async forget(entity: string): Promise<void> {
-      await store.delete(entity);
+      await (inFlight.get(entity) ?? Promise.resolve());
+      const deadline = startStoreDeadline();
+      try {
+        const deleted = await deadline.bound(store.delete(entity));
+        if (!deleted.ok) throw new StoreDeadlineError(deadlineMs);
+      } finally {
+        deadline.dispose();
+      }
     },
   };
 }

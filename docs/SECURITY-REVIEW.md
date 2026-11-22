@@ -126,6 +126,34 @@ rather than trusting `get`. Import `./collect` into a server bundle.
 **What falsifies it.** One identifier in the default event, one residue after `forget`, or one
 write to a host stream.
 
+## Three surfaces 0.3.0 added
+
+These shipped after the packet was first written; they get the same treatment as the five
+above, and a reviewer should treat the packet as carrying eight surfaces.
+
+1. **The store deadline (`storeDeadlineMs`, D76).** Claim: an evaluation's store wait is
+   bounded, and degradation is reported rather than silent. Code: `bound`/`startStoreDeadline`
+   in `src/core/guard.ts`, `StoreDeadlineError` in `src/core/store.ts`. Attacks worth trying:
+   a store that answers at deadline-minus-epsilon on every call (the slowest possible healthy
+   store: does the deadline race behave, or leak timers?); a `set` that lands after the
+   deadline answered (is the late write the state that was evaluated, or a newer one?);
+   `forget` throwing while the delete actually lands later (does the host double-forget?).
+   Falsifies: the "a hung store cannot hang the host" guarantee row.
+2. **The per-entity queue (D77).** Claim: concurrent evaluations of one entity serialize,
+   and different entities never wait on each other. Code: `inFlight` in `src/core/guard.ts`.
+   Attacks worth trying: one entity flooded with concurrent requests (queue depth is the
+   host's concurrency limit. Is memory bounded by in-flight promises, and does a rejected
+   evaluation poison the chain for the next waiter?); an evaluation that throws inside
+   `evaluateOnce` (does the next caller still run?); interaction with the deadline (a
+   queued evaluation's deadline starts when it runs, not when it was called. Is that the
+   contract the docs state?). Falsifies: the D77 accumulation test's claim to cover all
+   interleavings.
+3. **The integration warning (D78).** Claim: it never changes the advice, and its state is
+   bounded. Code: `trackUniformHard` in `src/core/guard.ts`. Attacks worth trying: a scope
+   flooded with one hostile invariant (the warning fires. Is it pure surface, event and
+   trace only?); the counter map's growth (bounded by declared scope × invariant pairs,
+   confirm nothing keys it by entity, which would be an unbounded map under rotation).
+
 ## Out of scope, with the reason
 
 - npm supply chain and the registry account. Outside the code. The account suspension is
@@ -150,7 +178,7 @@ finding against the acceptance, not against the code.
 | Key rotation cannot be detected by the library | D72 | A per-request proof the host issues, which the host must want |
 | Poisoning is priced, not prevented | D73 | A separate mechanism, and the price table says what it would buy |
 | The first-seen-rate diagnostic is not implemented | D72 | A new signal with its own calibration, which does not exist yet |
-| Thresholds come from lab traffic with a published composition, not a real population | `docs/DATASET.md` | Real mixed traffic, which the project does not have |
+| Thresholds come from lab traffic with a published composition, not a real population | `docs/DATASET.md`, `docs/v0.3.0/HOST-DATASET.md` | Real mixed traffic, which the project does not have |
 | The protocol endpoint is unauthenticated | D17 | A key, a rotation policy, and an argument about where the key lives |
 | The framework integration is one example, not a supported set of adapters | M1.1 | A support matrix and the tests behind it |
 

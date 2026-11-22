@@ -61,11 +61,12 @@ export function usage(data) {
     ${h2(1, 'install', 'Install', 'Pasang')}
 
     <pre>npm install @fachryxyf/scorpio-guard
-npm install @fachryxyf/scorpio-guard@0.2.1   # pin what you tested</pre>
+npm install @fachryxyf/scorpio-guard@0.2.1   # pin what you tested
+# 0.3.0 is versioned in the repository and pending its tag; this line is what the registry serves today</pre>
 
     <p>${t(
-      '<code>0.2.1</code> is what the registry served on 2026-10-28, a documentation-only patch over 0.2.0. This page is generated from the repository, so it cannot promise what the registry serves tomorrow: the <a href="versions.html">versions page</a> holds that record. Pin the exact version, not a caret range. No threshold here is calibrated against a real population, so a minor bump may move advice, and <code>^0.2.1</code> would pull that in silently.',
-      '<code>0.2.1</code> adalah versi yang dilayani registry pada 2026-10-28, patch khusus dokumentasi di atas 0.2.0. Halaman ini dibangkitkan dari repositori, jadi ia tidak bisa menjanjikan apa yang dilayani registry besok: <a href="versions.html">halaman versi</a> yang memegang catatan itu. Patok versi tepat, bukan rentang caret. Tak ada ambang di sini yang terkalibrasi terhadap populasi nyata, jadi kenaikan minor bisa menggeser saran, dan <code>^0.2.1</code> akan menariknya diam-diam.',
+      '<code>0.2.1</code> is the newest tarball the registry has accepted, a documentation-only patch over 0.2.0. <code>0.3.0</code> is versioned in the repository and pending its tag; it bounds store waits (D76), serializes per-entity evaluations (D77), and names degenerate scopes (D78). This page is generated from the repository, so it cannot promise what the registry serves tomorrow: the <a href="versions.html">versions page</a> holds that record. Pin the exact version, not a caret range. No threshold here is calibrated against a real population, so a minor bump may move advice, and a caret range would pull that in silently.',
+      '<code>0.2.1</code> adalah tarball terbaru yang diterima registry, patch khusus dokumentasi di atas 0.2.0. <code>0.3.0</code> sudah beku di repositori dan menunggu tag; ia membatasi waktu tunggu store (D76), menserialisasi evaluasi per entity (D77), dan menamai scope degenerate (D78). Halaman ini dibangkitkan dari repositori, jadi ia tidak bisa menjanjikan apa yang dilayani registry besok: <a href="versions.html">halaman versi</a> yang memegang catatan itu. Patok versi tepat, bukan rentang caret. Tak ada ambang di sini yang terkalibrasi terhadap populasi nyata, jadi kenaikan minor bisa menggeser saran, dan rentang caret akan menariknya diam-diam.',
     )}</p>
 
     <div class="scroll">
@@ -435,8 +436,8 @@ const store = kvStore({
 });</pre>
 
     <p>${t(
-      'Be careful with this one. The soak runs cover the memory and sqlite stores; no deployment of this project has run <code>./kv</code> in production yet, and the <a href="limits.html">limits page</a> records what that means. If you have a disk, use the disk.',
-      'Hati-hati dengan yang ini. Run soak mencakup store memori dan sqlite; belum ada deployment proyek ini yang menjalankan <code>./kv</code> di produksi, dan <a href="limits.html">halaman batas</a> mencatat artinya. Kalau Anda punya disk, pakai disk.',
+      'Be careful with this one. The soak runs cover the memory and sqlite stores; no deployment of this project has run <code>./kv</code> in production yet, and the <a href="limits.html">limits page</a> records what that means. If you have a disk, use the disk. One guard since 0.3.0: store waits are bounded by <code>storeDeadlineMs</code> (default 100 ms, D76), so an unreachable KV costs you the deadline, not the transport\'s retry horizon - and the event says <code>storeDegraded: true</code> while it lasts.',
+      'Hati-hati dengan yang ini. Run soak mencakup store memori dan sqlite; belum ada deployment proyek ini yang menjalankan <code>./kv</code> di produksi, dan <a href="limits.html">halaman batas</a> mencatat artinya. Kalau Anda punya disk, pakai disk. Satu jaga sejak 0.3.0: waktu tunggu store dibatasi <code>storeDeadlineMs</code> (bawaan 100 ms, D76), jadi KV yang tidak reachable hanya menghabiskan deadline, bukan horizon retry transport - dan event menyebut <code>storeDegraded: true</code> selama itu berlangsung.',
     )}</p>
 
     ${h2(8, 'recipes', 'Recipes', 'Resep')}

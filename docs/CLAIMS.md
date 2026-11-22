@@ -9,7 +9,7 @@ proving it and stronger than nothing: it means every design claim either has a p
 in the suite that would notice a change, or a written explanation of why it cannot
 have one.
 
-Total: 79 decisions, 56 named by a test, 23 explained, 0 unexplained.
+Total: 84 decisions, 60 named by a test, 24 explained, 0 unexplained.
 
 | Decision | Title | Tests |
 |---|---|---|
@@ -69,6 +69,10 @@ Total: 79 decisions, 56 named by a test, 23 explained, 0 unexplained.
 | D69 | Erasure is proved by counting what is underneath | `src/core/erasure.test.ts` |
 | D72 | The entity key is issued by the host, and rotation is priced in the open | `src/core/root-of-trust.test.ts` |
 | D73 | Patience is priced, not detected | `examples/poison/experiment.test.ts` |
+| D76 | The store waits on a deadline, and degradation is reported | `src/core/guard.test.ts` |
+| D77 | Evaluations of one entity are serialized | `src/core/guard.test.ts` |
+| D78 | The guard says when the integration looks broken | `src/core/event.test.ts`, `src/core/guard.test.ts` |
+| D79 | Terminal transitions get their own fact or their own scope | `examples/integration/integration.test.ts`, `examples/lab/host-calibration.test.ts` |
 
 ## Prose only, with the reason
 
@@ -95,9 +99,10 @@ covered instead when it is covered at all.
 - D66: A persona is a population, and a repetition is a different visitor. The identity rule is a function in `examples/lab/personas.ts` and its consequences are in `examples/lab/lab.test.ts` (eight repetitions claim eight stable, distinct identities; one treated repetition is a false positive for the persona), verified by mutation; what no test can hold is the judgement that eight scripted runs of one trace are enough of a population to publish a threshold against.
 - D70: An identity field is a rejection, not an ignore. The rule is a walk of the raw body, written twice on purpose (`forbiddenFieldIn` in `src/core/protocol.ts` and in `examples/protocol/validate.ts`), and its consequences are in `examples/protocol/interop.test.ts` (every section 1 name rejected by both implementations, the scan running before the major check, the same answer from both) and in `protocol/fixtures/v0.1/reject-forbidden-*.json`. Verified by mutation: removing the scan from the library fails six tests. No test names this decision, the fixtures name the protocol section instead.
 - D71: The protocol transmits on a sender schedule, and the server keeps aggregates. Covered by `examples/protocol/interop.test.ts`: the cadence fires without a caller, a replayed body is counted once, the third request over the limit gets 429, aggregates and the address table are empty after the window, and an oversize body gets 413 before parsing. No test names this decision. What no test can hold is the choice of one hour for retention, which is a number nobody measured.
-- D74: The API surface is frozen from 0.2.0, and deprecation is a type rather than a log. Gate: `npm run check:api`, which reads the built declarations with the TypeScript checker and compares them with `api/v0.2.json`, in CI after the build. Verified by mutation: adding `export const zzzProbe = 1;` to `src/index.ts` fails with `. zzzProbe: added`. No test names the decision, because the check reads `dist/` and the suite runs before the build. What no gate can hold is the rule that the snapshot moves only in a commit that also moves the CHANGELOG, which is the sentence D74 is for.
+- D74: The API surface is frozen from 0.2.0, and deprecation is a type rather than a log. Gate: `npm run check:api`, which reads the built declarations with the TypeScript checker and compares them with the current snapshot, `api/v0.3.json` as of 0.3.0, in CI after the build. Verified by mutation: adding `export const zzzProbe = 1;` to `src/index.ts` fails with `. zzzProbe: added`. No test names the decision, because the check reads `dist/` and the suite runs before the build. What no gate can hold is the rule that the snapshot moves only in a commit that also moves the CHANGELOG, which is the sentence D74 is for.
 - D75: The guarantee table is the artifact, and a risk moves only with a mechanism. Gate: site/pages/guarantees.mjs renders the page from facts the build reads (the version and the test count), and npm run check-docs compares the README claims against that render. The rule itself is editorial and no test names it: a row moves from the risk table to the guarantee table only when a gate would fail without the mechanism, and that is checked by a person reading each row beside the test it cites. What automation holds is that the page cannot claim a number the repository does not have.
-- D76: The 0.3.x line is the finalization line, and a page states a registry version only on the versions page. A release-line policy is not a behaviour of the library, and its enforcement is procedural. The gates that hold its consequences already exist: npm run pack:check asserts the tarball version, the versions page's latest const is updated in the commit that records the upload, and npm run check:docs keeps the README's counts and install line true against the rendered site. What no test can hold is the rule about which commit updates which string, which is the sentence D76 is for.
+- D80: The journal hash is a kinded HMAC, documented rather than enforced. Prose only, and deliberately: journaling is the host's code and D1 keeps the store key raw, so there is no library behavior to test. The evidence the entry records (723 entities over 578,365 production rows hashed this way without collision) comes from the partner's reconciliation report, which this repository cannot run. The gate that covers the adjacent behavior is `docs/ROOT-OF-TRUST.md`'s own test file for the entity-key rules, and the docs check (`npm run check:docs`) holds the documents to the numbers the repository actually has.
+- D81: A page states a registry version only on the versions page, and the 0.3.x patch line is the finalization line. A release-line policy is not a behaviour of the library, and its enforcement is procedural. The gates that hold its consequences already exist: npm run pack:check asserts the tarball version, the versions page's latest const is updated in the commit that records the upload, and npm run check:docs keeps the README's counts and install line true against the rendered site. What no test can hold is the rule about which commit updates which string, which is the sentence D81 is for.
 
 ## Prose only, and not yet explained
 

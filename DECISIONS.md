@@ -17,10 +17,12 @@ the answer given, and what that answer commits the implementation to.
   policy; the tests are what make a policy change visible.
 
 Status: every numbered question is answered, the original thirty, plus D31 to
-D76 arising from review, implementation, a live pentest, the traffic lab, the protocol
-work, the hardening review, and the release record. Nothing is blocked on a decision.
-What remains is validation: the values recorded here have not met real traffic yet, and
-D47 names where they will.
+D81 arising from review, implementation, a live pentest, the traffic lab, the protocol
+work, the hardening review, the first real host integration, and the release record.
+Nothing is blocked on a decision. The first host integration has met real traffic
+(578,365 production evaluations, D76-D80), and the shipped cell survived the journal
+replay with the lowest decision drift of the nine; what remains is a measured population
+distribution, which is the one thing a journal cannot supply (D45).
 
 Last updated: 2026-11-22
 
@@ -45,7 +47,6 @@ Last updated: 2026-11-22
 **Part III: Decision layer**
 
 - [D5: Decision is a function of trust and uncertainty](#d5-decision-is-a-function-of-trust-and-uncertainty)
-- [D33: `CHALLENGE` and `deceive` are aliases, not rungs](#d33-challenge-and-deceive-are-aliases-not-rungs) (decided inside D5)
 - [D37: Saturation guard belongs in the decision layer, not the trust model](#d37-saturation-guard-belongs-in-the-decision-layer-not-the-trust-model)
 - [D40: An epistemic stage precedes trust and uncertainty](#d40-an-epistemic-stage-precedes-trust-and-uncertainty)
 - [D46: Two thresholds the traffic falsified](#d46-two-thresholds-the-traffic-falsified)
@@ -97,13 +98,12 @@ Last updated: 2026-11-22
 - [D26: Node floor: `>=22.13`](#d26-node-floor-2213)
 - [D27: CI now: typecheck and test](#d27-ci-now-typecheck-and-test)
 - [D28: Site stays where it is](#d28-site-stays-where-it-is)
-- [D28.1: The site indexes the record; it does not restate it](#d281-the-site-indexes-the-record-it-does-not-restate-it)
 - [D29: No empty repositories](#d29-no-empty-repositories)
 - [D34: PoC target: HealthMe, with its limits stated](#d34-poc-target-healthme-with-its-limits-stated)
-- [D30: PoC must run against a real application flow](#d30-poc-must-run-against-a-real-application-flow)
 - [D45: Generate the traffic; do not wait for it](#d45-generate-the-traffic-do-not-wait-for-it)
 - [D47: Primary target: IXFE, because it has something to steal](#d47-primary-target-ixfe-because-it-has-something-to-steal)
 - [D48: A stale client view is not a proof](#d48-a-stale-client-view-is-not-a-proof)
+- [D30: PoC must run against a real application flow](#d30-poc-must-run-against-a-real-application-flow)
 - [D50: Farming is answered on mass, through velocity](#d50-farming-is-answered-on-mass-through-velocity)
 - [D51: Signal collectors exist for all seven uncovered catalogue entries](#d51-signal-collectors-exist-for-all-seven-uncovered-catalogue-entries)
 - [D52: The anomaly classifier is a distance-to-reference model, not a trained one](#d52-the-anomaly-classifier-is-a-distance-to-reference-model-not-a-trained-one)
@@ -130,7 +130,12 @@ Last updated: 2026-11-22
 - [D73: Patience is priced, not detected](#d73-patience-is-priced-not-detected)
 - [D74: The API surface is frozen from 0.2.0, and deprecation is a type rather than a log](#d74-the-api-surface-is-frozen-from-020-and-deprecation-is-a-type-rather-than-a-log)
 - [D75: The guarantee table is the artifact, and a risk moves only with a mechanism](#d75-the-guarantee-table-is-the-artifact-and-a-risk-moves-only-with-a-mechanism)
-- [D76: The 0.3.x line is the finalization line, and a page states a registry version only on the versions page](#d76-the-03x-line-is-the-finalization-line-and-a-page-states-a-registry-version-only-on-the-versions-page)
+- [D76: The store waits on a deadline, and degradation is reported](#d76-the-store-waits-on-a-deadline-and-degradation-is-reported)
+- [D77: Evaluations of one entity are serialized](#d77-evaluations-of-one-entity-are-serialized)
+- [D78: The guard says when the integration looks broken](#d78-the-guard-says-when-the-integration-looks-broken)
+- [D79: Terminal transitions get their own fact or their own scope](#d79-terminal-transitions-get-their-own-fact-or-their-own-scope)
+- [D80: The journal hash is a kinded HMAC, documented rather than enforced](#d80-the-journal-hash-is-a-kinded-hmac-documented-rather-than-enforced)
+- [D81: A page states a registry version only on the versions page, and the 0.3.x patch line is the finalization line](#d81-a-page-states-a-registry-version-only-on-the-versions-page-and-the-03x-patch-line-is-the-finalization-line)
 
 **[Open questions](#open-questions)**
 
@@ -711,7 +716,7 @@ So `deny` is only ever reachable with real accumulated negative mass, and the
 construction, which matches the stated priority that false positives are the
 central constraint. Recorded so it is not later mistaken for a bug.
 
-### D33: `CHALLENGE` and `deceive` are aliases, not rungs
+### Vocabulary: `CHALLENGE` and `deceive` are not new rungs
 
 **Decided (D33).** The bands name `CHALLENGE` and `deceive`, which are absent from
 the five-rung spectrum in `src/decision.ts`. They are aliases, not additional
@@ -4294,17 +4299,278 @@ count), and `npm run check-docs` compares the README claims with that render. Th
 risks are listed in `docs/SECURITY-REVIEW.md`, so a risk recorded in one place and missing in
 the other is visible in review.
 
-## D76: The 0.3.x line is the finalization line, and a page states a registry version only on the versions page
+---
 
-**Decided.** 0.3.0 ships no code change: the exported surface still matches
-`api/v0.2.json` name for name, and no advice moves, because the shipped calibration cell
-is re-confirmed against the frozen lab fixtures on every push. The release carries the
-record instead: the repository documentation restructured around `ARCHITECTURE.md`, the
-landing page made drift-proof, and the decision-file index completed. What a 0.3.x patch
-may carry: documentation and site corrections, tooling fixes, and a calibration row
-recorded with a before and after in the CHANGELOG. What it may not carry: an API change,
-which needs the deliberate snapshot rewrite D74 describes, and a threshold move without a
-recorded calibration row behind it.
+## D76: The store waits on a deadline, and degradation is reported
+
+### The hole
+
+Fail-open (D62) made a KV outage survivable, but only as fast as the transport admitted.
+The first real integration measured the gap: with Redis stopped, every host request hung
+about 305 seconds, the transport's own retry horizon, including requests that would have
+ended in 401 anyway. A guard that is advisory in the model but latency-bearing on the wire
+is not advisory where it matters. The documented contract, "a slow or broken collector
+cannot slow the advice", was true of the sink and false of the store.
+
+### The decision
+
+Every store operation the guard performs is bounded by `storeDeadlineMs`, defaulting to
+100 and disabled by zero. Past the deadline the evaluation answers without retained state
+(a cold start, which D40 already models as a well-defined condition), and the assessment and
+its event carry `storeDegraded: true` with a trace line saying which operation did not land.
+A lost state write is stated as lost, because advice that silently forgets evidence is the
+pre-D77 failure mode arriving through the deadline instead. `forget()` throws
+`StoreDeadlineError` rather than returning, because an erasure that quietly did nothing
+would lie about the data being gone.
+
+`ASSESSMENT_EVENT_SCHEMA` stays 1: the field is additive, and the schema bumps only when a
+field changes meaning or disappears.
+
+### Limits
+
+- **The deadline bounds the wait, not the outage.** A host whose transport retries for
+  minutes still sees `storeDegraded` on every row until the transport answers; the event is
+  the alert, not a fix.
+- **100ms is a default, not a measurement.** It is well under any interactive request
+  budget and well over any healthy store round trip, but a deployment that measures
+  something different overrides it.
+- **A set that lands after its deadline still writes.** The losing promise is not
+  cancelled; the state written is the state that was evaluated, so a late write is stale
+  for that entity's next decision only in the ordinary decay sense.
+
+### Alternatives rejected
+
+**Bound in the transport only.** `upstashTransport` already takes a timeout, but the
+contract lives at the store boundary: a host with a custom transport, or the sqlite and
+memory stores, gets no protection from a transport option. Rejected.
+
+**Circuit-break the store after N failures.** Useful, but it changes which state an entity
+sees for a cool-down window and needs a policy for shared state across instances. The
+deadline delivers the availability property without deciding that policy. Rejected for now.
+
+**Fail closed past the deadline.** Contradicts D9: the guard advises and an outage must not
+take the request path down. Rejected.
+
+### Gates
+
+`src/core/guard.test.ts`: four tests named D76: a never-answering store is bounded and the
+evaluation still advises; a lost write is reported and is really lost; `forget` throws
+`StoreDeadlineError`; zero disables the bound. `src/core/event.test.ts` asserts the event
+carries `storeDegraded` and pins the event shape. Verified by mutation: bypassing the
+deadline in `bound()` fails the never-answering test by timeout.
+
+---
+
+## D77: Evaluations of one entity are serialized
+
+### The hole
+
+The store contract is `get`/`set`, so two concurrent evaluations of one entity both read
+the same state, and the last writer erased the evidence the other applied. The integration
+measured the damage: 5,817 journal rows (1.229%) fell below their decay-adjusted floor,
+which is lost update, not decay: evidence of failure silently vanishing from exactly the
+entities that were failing. The host fixed it with a per-entity promise queue and proved
+the fix: 20 concurrent evaluations produce one contiguous sequence and zero lost updates.
+
+### The decision
+
+The guard serializes evaluations per entity: each `evaluate()` waits behind the previous
+one for the same entity, and the slot is removed when its chain settles. Different entities
+evaluate concurrently. `forget()` waits behind an in-flight evaluation of the same entity,
+because a delete landing between `load` and `set` would be resurrected by that write.
+
+Serial callers see no difference, and no advice changes for any input that was correct
+before: what changes is that concurrent evidence can no longer vanish.
+
+### Limits
+
+- **One process.** The queue is in-memory, like D62's fail-open and the host's own fix:
+  two instances serving one entity still race. CAS or key sharding in the store remains
+  open, recorded in the integration manifest rather than claimed here.
+- **Backpressure is the host's.** A flood of concurrent requests for one entity now
+  serializes, which is correct and also means the host's own concurrency limit governs
+  queue depth.
+
+### Alternatives rejected
+
+**CAS in the store contract.** A compare-and-swap operation would fix the race for
+multi-instance too, but it changes the `StateStore` interface every store implements,
+including hosts' custom ones, and the conformance kit's eleven checks with it. The
+single-process fix delivers the measured property at no interface cost. Revisit if a
+multi-instance host appears.
+
+**Retry on lost update.** Detection needs a floor comparison per write and a retry policy
+per host. The queue makes the loss impossible rather than detected. Rejected.
+
+### Gates
+
+`src/core/guard.test.ts`: three tests named D77: 20 concurrent evaluations of one entity
+accumulate all 20 negatives and the final state is the last writer's superset; one
+entity's queue does not stall another; `forget` behind an in-flight evaluation is not
+resurrected. Verified by mutation: removing the queue fails the accumulation test on the
+first concurrent pair.
+
+---
+
+## D78: The guard says when the integration looks broken
+
+### The hole
+
+The same integration mapped logout into `auth.refresh`, and every logout became a proven
+violation: 26 of 26 production rows, 14 of 14 staging ones, deterministic, each one
+poisoning a legitimate user's trust toward a mean of 0.02. Row by row the library was
+correct. The aggregate signal, one scope where every served row hard-violates the same
+invariant, was visible in the journal and in nothing the library produced. It was found
+by a human reading the whole journal, which is not a mechanism.
+
+### The decision
+
+The guard counts consecutive evaluations per (scope, invariant) that hard-violated the
+same invariant, process-locally. At a threshold (default 10, `integrationWarnings:
+{ minConsecutive }` to move it, `integrationWarnings: false` to turn off) the assessment
+and its event carry `integrationWarning: { kind: 'uniform-hard-violation', scope,
+invariant, count }` with a trace line. One evaluation of the scope without that invariant
+resets the count: hostile traffic mixes with refusals, other entities and other invariants;
+a mapping bug is uniform. The warning never reaches the decision.
+
+### Limits
+
+- **It is a hint about the integration, not a detector of anything hostile.** An attacker
+  who owns every request in a scope can trip it. That costs a trace line and an event
+  field; it never changes advice.
+- **Process-local counts.** Restart clears them, which is fine for a signal about
+  configuration: the misconfiguration restarts with the process too.
+- **10 is a reasoned default, not a calibrated one.** It is above what one hostile entity
+  sustains against mixed traffic and below where a silent mapping bug costs a day of rows.
+
+### Alternatives rejected
+
+**Suppress or downweight the advice of a degenerate scope.** The library would be second-guessing
+a host declaration, and a softening an attacker could induce by flooding one scope. The
+warning is surface only. Rejected.
+
+**Window-percentage detection.** The issue proposed "same invariant on ≥ X% of served rows
+in a window", which needs a clock, a window store, and a definition of served that the
+library does not have. Consecutive counting catches the documented failure and costs a Map.
+Rejected for now.
+
+### Gates
+
+`src/core/guard.test.ts`: four tests named D78: the warning fires at the threshold with
+the advice unchanged; one clean evaluation resets it; `integrationWarnings: false` produces
+byte-identical advice; the threshold is configurable. `src/core/event.test.ts` asserts the
+event carries it. Verified by mutation: short-circuiting the tracker fails the threshold
+test.
+
+---
+
+## D79: Terminal transitions get their own fact or their own scope
+
+### The hole
+
+TESTING.md said five to eight scopes and warned against a scope per route. Nothing said
+what to do when two interactions share a scope and one always violates the other's
+invariant. The first integration put logout inside `auth.refresh`, whose rotation invariant
+must reject a 2xx that does not rotate, so every routine logout was a proven violation,
+deterministically, on both production and staging. The host asked which fix the library
+sanctions: a `sessionTerminated` fact the invariant accepts, or a ninth scope.
+
+### The decision
+
+Both, and the general rule stated: **interactions that always violate each other's
+invariants do not share a scope, or the invariant accepts a fact that distinguishes them.**
+
+- The fact form keeps logout inside `auth.refresh`: the host sends `sessionTerminated`,
+  and the rotation invariant accepts rotation or termination. The invariant's claim of
+  completeness becomes true again.
+- The scope form gives `auth.logout` its own scope, an expected ninth for a session-based
+  host, over the usual range and permanently under-sampled. Acceptable there, because its
+  invariants are about what the host did, not what the traffic looks like.
+
+What is not sanctioned: leaving logout inside `auth.refresh` with the rotation invariant
+unchanged and reading the resulting hard violations as calibration data.
+
+`examples/integration/` gains the refresh invariant that accepts the terminal transition,
+with tests locking both sides: a 2xx logout with `sessionTerminated` is not a violation;
+a 2xx with neither still decides.
+
+### Limits
+
+- **The library does not enforce the rule.** A host can still mis-map; the D78 warning is
+  what says so.
+- **`sessionTerminated` is a documented convention, not a catalogue entry.** Facts belong
+  to the host (the inventory is explicit about that), so the guidance names the fact and
+  shows the invariant; the catalogue of signals and symptoms is untouched.
+
+### Alternatives rejected
+
+**Pick one officially.** The host already shipped the ninth scope and it works (56 rows,
+zero false positives); withdrawing it would churn a working integration to satisfy a
+range that was advice about diversity, not law. Rejecting the fact form would leave every
+future host with an under-sampled ninth scope as the only option. Rejected.
+
+### Gates
+
+`examples/integration/integration.test.ts`: two tests named D79 lock the advice on both
+sides of the transition. The docs change is prose and carries no gate beyond the docs
+check.
+
+---
+
+## D80: The journal hash is a kinded HMAC, documented rather than enforced
+
+### The hole
+
+The library's `hashEntity()` is `SHA-256(salt + "\u0000" + entity)`. The first integration
+journalled with `HMAC-SHA256(salt, kind + "\u0000" + value)`, truncated to 32 hex. Both
+satisfy "hash with a salt, never the raw reference", they are incompatible with each other,
+and no document said which pattern is recommended, why the kind prefix matters, or that the
+journal hash and the store key may legitimately diverge. The second integration would have
+had to rediscover the choice.
+
+### The decision
+
+`docs/ROOT-OF-TRUST.md` documents the kinded HMAC as the recommended journal pattern: the
+kind is domain separation (`user`, `session`, `cred`, `ipua` never collide across kinds),
+the 32-hex truncation keeps hash columns joinable at 128 bits, the salt is
+rotation-planned because hashes are only comparable within one salt generation, and
+journal hash and store key hash may diverge because nothing cross-compares them. The salt
+stays in configuration; an export carrying hashed entities never carries the salt beside
+it.
+
+The library does not enforce the pattern. Journaling is the host's code, and D1 keeps the
+store key raw and opaque.
+
+### Limits
+
+- **Documentation is not a gate.** Nothing fails when a host hashes differently; the cost
+  is that hashes stop comparing across integrations, which is invisible until someone
+  tries.
+- **128-bit truncation is a joinability trade.** A deployment that wants the full digest
+  should take it and keep it; changing the construction later is itself a rotation.
+
+### Alternatives rejected
+
+**Make the hash configurable in the frozen surface.** The store key needs no hash at all
+(D1), and the event identity already has its own construction. A config knob for the one
+place the host writes its own journal buys nothing the docs do not, at the price of a
+name in `api/` forever. Rejected.
+
+### Gates
+
+Prose only. The measured evidence it records, 723 entities over 578,365 production rows
+hashed this way without collision or resolution ambiguity beyond pre-auth entities whose
+sessions no longer exist, comes from the integration's reconciliation report, not from a
+test this repository can run.
+
+---
+
+## D81: A page states a registry version only on the versions page, and the 0.3.x patch line is the finalization line
+
+**Decided.** The 0.3.x line's patches carry documentation and site corrections, tooling
+fixes, and a calibration row recorded with a before and after in the CHANGELOG. They do
+not carry an API change, which needs the deliberate snapshot rewrite D74 describes, or a
+threshold move without a recorded calibration row behind it.
 
 ### Why the version facts split
 
@@ -4315,8 +4581,8 @@ registry serves, updated in the commit that records the upload; everything else 
 the version from the tree or states no version at all. The infobox npm row renders the
 build's `package.json` version, the landing subtitle and the footer name no version, and
 the "calibrated against nothing" phrasing is gone because it was wrong: the lab
-calibrations exist, and what is missing is a real population, which is what the words now
-say.
+calibrations exist, the host integration's journal replay exists, and what is missing is
+a measured population distribution, which is what the words now say.
 
 ### What this commits the code to
 
@@ -4325,8 +4591,9 @@ say.
 - The versions page rows read as historical records, with no "what npm install gets
   today" phrasing to age.
 - `scripts/bench.mjs`, `scripts/pack-check.mjs`, and the site build spawn npm through a
-  shell on Windows, so the gates run on the machine the maintainer develops on, not only
-  on CI.
+  shell on Windows, and the site build reads both the TAP and the spec test-summary
+  format, so the gates run on the machine the maintainer develops on and on every Node
+  the CI matrix carries.
 - `docs/RELEASING.md` step 9 lists only the typed version places that remain: the install
   block in README.md, the install block in `site/pages/usage.mjs`, and the versions
   page's `latest` const.

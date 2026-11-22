@@ -17,10 +17,13 @@ export function guarantees(data) {
     ["Erasure is counted, not assumed", "D69", "src/core/erasure.test.ts, over three stores"],
     ["State is bounded: a cap, a retention horizon, a sweep", t("The cap evicts the stalest first, and retention deletes rather than hides.", "Cap mengusir yang paling lama dulu, dan retensi menghapus bukan menyembunyikan."), "src/core/store.test.ts, npm run soak"],
     ["A failing store is loud or refused", "D62", t("Fail-open is refused without an onError sink, at construction.", "Fail-open ditolak tanpa sink onError, saat konstruksi.")],
+    ["A hung store cannot hang the host", "D76", t("One deadline per evaluation (default 100 ms); past it the advice is given without retained state and storeDegraded rides the event.", "Satu deadline per evaluasi (bawaan 100 ms); lewat itu saran diberikan tanpa state tertahan dan storeDegraded ikut di event."), "src/core/guard.test.ts, src/core/event.test.ts"],
+    ["Concurrent evaluations of one entity cannot lose evidence", "D77", t("They queue per entity; the recorded failure was 5,817 rows below their decay floor on the first real integration.", "Mereka mengantre per entity; kegagalan terekamnya 5.817 baris di bawah lantai decay pada integrasi nyata pertama."), "src/core/guard.test.ts"],
+    ["A degenerate scope names itself", "D78", t("Uniform hard violations on one scope raise an integrationWarning that never changes the advice.", "Hard violation seragam pada satu scope memunculkan integrationWarning yang tak pernah mengubah saran."), "src/core/guard.test.ts, src/core/event.test.ts"],
     ["A forbidden field is a rejection, nested and case-insensitive", "D70", "npm run protocol:check"],
     ["Binary limits on the wire", "D71", t("64 KiB body, 60 requests per minute per address, hourly aggregates.", "Body 64 KiB, 60 permintaan per menit per alamat, agregat per jam.")],
     ["The anomaly score is reported and never decides", "D67", "src/core/anomaly.test.ts"],
-    ["The API surface cannot move by accident", "D74", "npm run check:api, api/v0.2.json"],
+    ["The API surface cannot move by accident", "D74", "npm run check:api, api/v0.3.json"],
     ["The same input and the same state give the same advice", t("No randomness in the core, and the clock is injected.", "Tanpa keacakan di core, dan clock-nya disuntikkan."), "src/core/clock.ts, src/core/trust.test.ts"],
   ];
 
@@ -85,8 +88,8 @@ export function guarantees(data) {
     ${h2(4, "exit", "What 1.0.0 adds", "Apa yang ditambah 1.0.0")}
 
     <p>${t(
-      "1.0.0 is not a date. It is three proofs, listed in the roadmap: a calibration dataset with its composition published, the protocol running end to end with a reference receiver and interop fixtures, and a frozen API after a directed security review. Two of the three are already in place or in part: the protocol runs end to end and is checked on every push, and the freeze is enforced by the API gate. Real-traffic calibration and the review by someone other than the author are the ones still missing.",
-      "1.0.0 bukan tanggal. Ia tiga bukti, tercantum di roadmap: dataset kalibrasi dengan komposisi yang diterbitkan, protokol yang berjalan end to end dengan reference receiver dan fixture interop, dan API yang dibekukan setelah review keamanan terarah. Dua dari tiga sudah ada atau sebagian: protokol berjalan end to end dan diperiksa tiap push, dan pembekuannya ditegakkan gerbang API. Yang masih kurang adalah kalibrasi dari trafik nyata dan review oleh orang selain penulisnya.",
+      "1.0.0 is not a date. It is three proofs, listed in the roadmap: a calibration dataset with its composition published, the protocol running end to end with a reference receiver and interop fixtures, and a frozen API after a directed security review. The protocol proof is in place and checked on every push, the freeze is enforced by the API gate, and 0.3.0 adds the first replay of a real integration's journal against the policy grid - one host, constants unmoved, recorded in docs/v0.3.0/HOST-DATASET.md. Still missing: a population dataset that can be published, and the review by someone other than the author.",
+      "1.0.0 bukan tanggal. Ia tiga bukti, tercantum di roadmap: dataset kalibrasi dengan komposisi yang diterbitkan, protokol yang berjalan end to end dengan reference receiver dan fixture interop, dan API yang dibekukan setelah review keamanan terarah. Bukti protokol sudah ada dan diperiksa tiap push, pembekuan ditegakkan gerbang API, dan 0.3.0 menambah replay pertama jurnal integrasi nyata terhadap grid policy - satu host, konstanta tak bergeser, tercatat di docs/v0.3.0/HOST-DATASET.md. Yang masih kurang: dataset populasi yang bisa diterbitkan, dan review oleh orang selain penulisnya.",
     )}</p>
 
     <p>${t(
@@ -95,8 +98,8 @@ export function guarantees(data) {
     )}</p>
 
     <p>${t(
-      "This page is written at 0.2.0 on purpose. A promise published before the release is one that someone else can check while it is still cheap to change, which is the only moment a promise is worth anything.",
-      "Halaman ini ditulis di 0.2.0 dengan sengaja. Janji yang terbit sebelum rilis adalah janji yang bisa diperiksa orang lain saat masih murah untuk diubah, dan itulah satu satunya saat sebuah janji bernilai.",
+      "This page is written ahead of the release it describes, on purpose. A promise published before the release is one that someone else can check while it is still cheap to change, which is the only moment a promise is worth anything.",
+      "Halaman ini ditulis sebelum rilis yang ia jelaskan, dengan sengaja. Janji yang terbit sebelum rilis adalah janji yang bisa diperiksa orang lain saat masih murah untuk diubah, dan itulah satu satunya saat sebuah janji bernilai.",
     )}</p>
 
     <p class="seealso"><b>${t("See also", "Lihat juga")}</b>

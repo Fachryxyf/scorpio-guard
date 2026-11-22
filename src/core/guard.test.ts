@@ -3,11 +3,13 @@ import assert from 'node:assert/strict';
 
 import type { Clock } from './clock.ts';
 import { severity, type Decision } from './decision.ts';
-import { createGuard } from './guard.ts';
+import { createGuard, type Assessment } from './guard.ts';
 import { DEFAULT_RETENTION_HOURS, DEFAULT_WEIGHTS } from './policy.ts';
-import { memoryStore } from './store.ts';
+import { memoryStore, StoreDeadlineError } from './store.ts';
+import type { StateStore } from './store.ts';
 import { WEAK_SIGNALS } from './signals.ts';
 import { transitionGraph } from './transitions.ts';
+import { evidenceMass } from './trust.ts';
 import type { Invariant } from './constraints.ts';
 
 const HOUR = 3_600_000;
@@ -589,4 +591,215 @@ test('D18: the classifier can replace the threshold conjunction for D37 concurre
   assert.equal(result.diversity, false, 'the classifier withholds concurrence');
   assert.ok(result.anomaly.score! > 0.5);
   assert.match(result.trace.join(' '), /drives concurrence/);
+});
+
+test('D77: concurrent evaluations of one entity cannot lose updates', async () => {
+  const clock = fakeClock();
+  const inner = memoryStore();
+  const written: number[] = [];
+  const store = {
+    get: (entity: string) => inner.get(entity),
+    set: async (entity: string, state: Parameters<typeof inner.set>[1]) => {
+      written.push(evidenceMass(state, clock.now(), 24));
+      await inner.set(entity, state);
+    },
+    delete: (entity: string) => inner.delete(entity),
+  };
+  const guard = createGuard({ clock, store });
+
+  const results = await Promise.all(
+    Array.from({ length: 20 }, () =>
+      guard.evaluate({ entity: 'e1', observation: { evidence: { negative: 'strong' } } }),
+    ),
+  );
+
+  // Serialized: every evaluation saw the write of the one before it.
+  for (let i = 1; i < results.length; i += 1) {
+    assert.ok(
+      results[i]!.trust.mass > results[i - 1]!.trust.mass,
+      `evaluation ${i} must build on evaluation ${i - 1}'s write, not overwrite it`,
+    );
+  }
+  // All 20 negatives landed in the final state, not just the last writer's.
+  const final = await inner.get('e1');
+  assert.ok(final);
+  assert.ok(
+    evidenceMass(final, clock.now(), 24) >= 42,
+    `expected all 20 strong negatives to accumulate, got ${evidenceMass(final, clock.now(), 24)}`,
+  );
+  assert.equal(written.length, 20);
+});
+
+test('D77: one entity\'s queue does not block another entity', async () => {
+  let release!: () => void;
+  const gate = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  const store = {
+    get: async (entity: string) => {
+      if (entity === 'held') await gate;
+      return undefined;
+    },
+    set: async () => {},
+    delete: async () => {},
+  };
+  const guard = createGuard({ clock: fakeClock(), store });
+
+  const held = guard.evaluate({ entity: 'held' });
+  const free = await guard.evaluate({ entity: 'free' });
+
+  assert.equal(free.decision, 'ALLOW', 'a stalled entity must not stall unrelated ones');
+  release();
+  await held;
+});
+
+test('D77: forget waits behind an in-flight evaluation instead of being resurrected', async () => {
+  const clock = fakeClock();
+  const inner = memoryStore();
+  let release!: () => void;
+  const gate = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  const store = {
+    get: async (entity: string) => {
+      if (entity === 'e1') await gate;
+      return inner.get(entity);
+    },
+    set: (entity: string, state: Parameters<typeof inner.set>[1]) => inner.set(entity, state),
+    delete: (entity: string) => inner.delete(entity),
+  };
+  const guard = createGuard({ clock, store });
+
+  const evaluating = guard.evaluate({ entity: 'e1', observation: { evidence: { positive: 'strong' } } });
+  const forgetting = guard.forget('e1');
+  release();
+  await Promise.all([evaluating, forgetting]);
+
+  assert.equal(inner.size(), 0, 'the evaluation\'s write must not resurrect forgotten state');
+});
+
+test('D76: a store that never answers is bounded, and the evaluation still advises', { timeout: 5000 }, async () => {
+  const clock = fakeClock();
+  const store: StateStore = {
+    get: () => new Promise(() => {}),
+    set: async () => {},
+    delete: async () => {},
+  };
+  const guard = createGuard({ clock, store, storeDeadlineMs: 20 });
+
+  const result = await guard.evaluate({ entity: 'e1' });
+
+  assert.equal(result.decision, 'ALLOW', 'an advisory guard answers even when the store cannot');
+  assert.equal(result.coldStart, true, 'an unread store reads as cold start');
+  assert.equal(result.storeDegraded, true);
+  assert.match(result.trace.join(' '), /store degraded: the read did not land within 20ms/);
+});
+
+test('D76: a state write that misses the deadline is reported, and the loss is real', { timeout: 5000 }, async () => {
+  const clock = fakeClock();
+  const inner = memoryStore();
+  let writes = 0;
+  const store: StateStore = {
+    get: (entity) => inner.get(entity),
+    set: (entity, state) => {
+      writes += 1;
+      return writes === 1 ? new Promise(() => {}) : inner.set(entity, state);
+    },
+    delete: (entity) => inner.delete(entity),
+  };
+  const guard = createGuard({ clock, store, storeDeadlineMs: 20 });
+
+  const result = await guard.evaluate({ entity: 'e1', observation: { evidence: { negative: 'strong' } } });
+
+  assert.equal(result.storeDegraded, true);
+  assert.match(result.trace.join(' '), /state write did not land within 20ms/);
+
+  const next = await guard.evaluate({ entity: 'e1' });
+  assert.equal(next.coldStart, true, 'the lost write really is lost');
+  assert.equal(next.storeDegraded, false, 'a store that answers is not flagged');
+});
+
+test('D76: forget throws when the delete does not land within the deadline', { timeout: 5000 }, async () => {
+  const store: StateStore = {
+    get: async () => undefined,
+    set: async () => {},
+    delete: () => new Promise(() => {}),
+  };
+  const guard = createGuard({ clock: fakeClock(), store, storeDeadlineMs: 20 });
+
+  await assert.rejects(() => guard.forget('e1'), StoreDeadlineError);
+});
+
+test('D76: zero disables the deadline for a deliberately slow store', { timeout: 5000 }, async () => {
+  const clock = fakeClock();
+  const slow: StateStore = {
+    get: (entity) => new Promise((resolve) => setTimeout(() => resolve(undefined), 30)),
+    set: async () => {},
+    delete: async () => {},
+  };
+
+  const bounded = createGuard({ clock, store: slow, storeDeadlineMs: 20 });
+  assert.equal((await bounded.evaluate({ entity: 'e1' })).storeDegraded, true, '30ms misses a 20ms deadline');
+
+  const unbounded = createGuard({ clock, store: slow, storeDeadlineMs: 0 });
+  assert.equal((await unbounded.evaluate({ entity: 'e1' })).storeDegraded, false, 'zero disables the bound');
+});
+
+test('D78: a scope whose evaluations uniformly hard-violate raises an integration warning', async () => {
+  const clock = fakeClock();
+  const guard = createGuard({ clock, invariants: [unissued] });
+
+  let warned: Assessment['integrationWarning'];
+  for (let i = 0; i < 10; i += 1) {
+    const result = await guard.evaluate({
+      entity: `e${i}`,
+      observation: { scope: 'lookup', data: { token: 'never-issued' } },
+    });
+    warned = result.integrationWarning;
+    assert.equal(result.decision, 'RESTRICT', 'the warning must not change the advice');
+  }
+
+  assert.equal(warned?.kind, 'uniform-hard-violation');
+  assert.equal(warned?.scope, 'lookup');
+  assert.equal(warned?.invariant, 'lookup.token-was-issued');
+  assert.equal(warned?.count, 10);
+});
+
+test('D78: one evaluation without the violation resets the count', async () => {
+  const clock = fakeClock();
+  const guard = createGuard({ clock, invariants: [unissued], integrationWarnings: { minConsecutive: 3 } });
+
+  for (let i = 0; i < 2; i += 1) {
+    await guard.evaluate({ entity: 'e1', observation: { scope: 'lookup', data: { token: 'never-issued' } } });
+  }
+  await guard.evaluate({ entity: 'e2', observation: { scope: 'lookup', data: { token: 'issued-a' } } });
+  await guard.evaluate({ entity: 'e1', observation: { scope: 'lookup', data: { token: 'never-issued' } } });
+
+  const result = await guard.evaluate({ entity: 'e1', observation: { scope: 'lookup', data: { token: 'never-issued' } } });
+  assert.equal(result.integrationWarning, undefined, '2 + reset + 2 never reaches 3 consecutive');
+});
+
+test('D78: the warning never changes the advice, and can be turned off', async () => {
+  const clock = fakeClock();
+  const violation = { scope: 'lookup', data: { token: 'never-issued' } };
+  const withWarnings = createGuard({ clock, invariants: [unissued] });
+  const without = createGuard({ clock, invariants: [unissued], integrationWarnings: false });
+
+  for (let i = 0; i < 12; i += 1) {
+    const a = await withWarnings.evaluate({ entity: `e${i}`, observation: violation });
+    const b = await without.evaluate({ entity: `e${i}`, observation: violation });
+    assert.equal(a.decision, b.decision, 'the warning rides the assessment, not the decision');
+    assert.equal(b.integrationWarning, undefined, 'integrationWarnings: false silences it');
+  }
+});
+
+test('D78: the threshold is configurable', async () => {
+  const clock = fakeClock();
+  const guard = createGuard({ clock, invariants: [unissued], integrationWarnings: { minConsecutive: 2 } });
+
+  await guard.evaluate({ entity: 'e1', observation: { scope: 'lookup', data: { token: 'never-issued' } } });
+  const result = await guard.evaluate({ entity: 'e2', observation: { scope: 'lookup', data: { token: 'never-issued' } } });
+
+  assert.equal(result.integrationWarning?.count, 2);
+  assert.match(result.trace.join(' '), /integration warning: 2 consecutive/);
 });

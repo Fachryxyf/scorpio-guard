@@ -20,37 +20,83 @@ signature moved. The rules are therefore narrower than semver's default reading:
 
 ## [0.3.0] - 2026-11-22
 
-The finalization release: no code, no exported name, and no advice for the same input and
-the same stored state changed. The API gate still matches `api/v0.2.json` name for name,
-the shipped calibration cell is re-confirmed against the frozen lab fixtures on every
-push, and a fresh benchmark run sits inside every budget. What changed is the record and
-the site that publishes it (D76).
+The first minor informed by a real integration: a CRM host ran 0.2.0 in front of
+production and staging traffic, journaled 578,365 production evaluations and 5,123
+labelled pentest evaluations, and reported five findings. Two of them were library
+defects measured in the field, two were guidance gaps, and the fifth became the first
+real-traffic calibration this project has. Every behavior change below carries the field
+evidence that motivated it; the numbers are in `docs/v0.3.0/HOST-DATASET.md` and
+`docs/DATASET.md`, and the decisions are D76-D80. The same release finalizes the record
+and the landing page around it (D81).
 
 ### Added
 
+- A store deadline. `storeDeadlineMs` (default 100, `DEFAULT_STORE_DEADLINE_MS`, zero
+  disables) bounds every store operation the guard performs. Past the deadline the
+  evaluation answers without retained state and carries `storeDegraded: true` on the
+  assessment and the event; `forget()` throws `StoreDeadlineError` instead, because an
+  erasure that silently did nothing would lie about the data being gone (D76). Before, a
+  KV outage hung every host request for as long as the transport would retry, measured at
+  about 305 seconds per request on the integration. After, the advice arrives within the
+  deadline and the outage is visible in the event stream.
+- An integration warning. When one scope's evaluations uniformly hard-violate the same
+  invariant, 26 of 26 production logouts and 14 of 14 staging ones on the integration,
+  all silently poisoning legitimate trust, the assessment and event now carry
+  `integrationWarning: { kind: 'uniform-hard-violation', scope, invariant, count }`
+  (D78). Threshold: 10 consecutive, `integrationWarnings: { minConsecutive }` to move,
+  `false` to turn off. One clean evaluation of the scope resets the count. The warning
+  never changes the advice.
+- `npm run calibrate:host`: the policy grid replayed against the first real host
+  journal, with the host's seven invariants reconstructed and validated against the
+  recorded violation sets (5,122 of 5,123 rows agree) and the evidence attribution
+  derived from recorded trust deltas. The shipped policy cell has the lowest decision
+  drift of the nine, and no cell moves the FP/FN counts. The first measured statement
+  that the constants are not where the integration's false positives live.
+- Terminal-transition guidance (D79) and the entity-hash override pattern (D80) in
+  `docs/TESTING.md` and `docs/ROOT-OF-TRUST.md`, from integration issues 01, 04 and 05.
 - `ARCHITECTURE.md` at the repository root: the design essay, the two signal kinds, and
   the recorded integrations moved out of the README, which is now the front door: status,
   install, usage, and a documentation map that links every document, including the three
   no other page linked (`docs/RUNTIME.md`, `docs/SECURITY-REVIEW.md`,
   `docs/CLAIMS-NOTES.md`).
-- D76: the 0.3.x line is the finalization line. It records what a 0.3.x patch may carry,
-  and the rule that a page states a registry version only on the versions page while the
-  rest of the site renders the tree version or states none.
+- D81: the version-facts rule. A page states a registry version only on the versions
+  page, updated in the commit that records the upload; everywhere else the site renders
+  the tree version or states none, and the 0.3.x patch line is the finalization line.
 - `site/decision-files.json` now maps every decision to the files it turned into: D2a and
   D61 to D75 had no entry, so the record page showed them with a blank mapping.
 
 ### Changed
 
+- Evaluations of one entity are serialized (D77). The store contract is `get`/`set`, so
+  two concurrent evaluations of one entity both read the same state and the last writer
+  erased the other's evidence: 5,817 journal rows (1.229%) on the integration fell below
+  their decay-adjusted floor. Before, concurrent evaluations of one entity lost updates
+  silently; after, they queue, different entities still run concurrently, and `forget`
+  waits behind an in-flight evaluation so a delete cannot be resurrected. Advice for the
+  same input and the same stored state is unchanged; what changed is that concurrent
+  evidence can no longer vanish.
+- The bench budget was re-recorded for the first time since 2026-10-24, deliberately and
+  with the reason stated: D76's per-evaluation deadline and D77's per-entity queue cost
+  one timer and roughly ten promises per evaluation, which lands on p95 through GC.
+  Measured on the recording machine, 2,000 iterations per store: sqlite p50 0.30 ms
+  (was 0.22) and p95 4.2 ms (was 1.2); memory p95 0.15 ms (was 0.04); kv p95 0.10 ms
+  (was 0.02). `bench/budget.json` carries the same note. This is the price of two
+  correctness properties measured in the field, not a regression to be chased below the
+  old budget by removing them.
+- `ASSESSMENT_EVENT_SCHEMA` stays 1. `storeDegraded` and `integrationWarning` are additive
+  fields; the schema bumps only when a field changes meaning or disappears.
 - The landing page: the footer and the landing subtitle no longer type a version or claim
   "calibrated against nothing", which was wrong twice over, since the lab calibrations
-  exist and the missing thing is a real population; the infobox npm row renders the tree
-  version instead of a typed one; the versions page rows read as historical records
+  exist and the missing thing is a measured population; the infobox npm row renders the
+  tree version instead of a typed one; the versions page rows read as historical records
   without "what npm install gets today" phrasing.
 - README restructured around install, usage, and the documentation map, with the design
   essay in `ARCHITECTURE.md`; the mechanical bold lead-ins are removed across the corpus
   and the headings use sentence case.
-- `docs/PROJECT_AUDIT.md` moved to `docs/archive/PROJECT-AUDIT.md`: a dated audit of the
-  0.2.0 era, kept as a record rather than presented as current.
+- The docs are organized one folder per version: `docs/v0.1.0/`, `docs/v0.2.0/`, and
+  `docs/v0.3.0/` hold what a version shipped, including the project audit as
+  `docs/v0.2.0/PROJECT_AUDIT.md`; the README tells the present, the folders tell the
+  past, and `docs/README.md` states the rule.
 - `docs/RELEASING.md` lost its "Status as of" narrative; the release facts live in these
   entries and the runbook keeps the operational lessons.
 - ROADMAP milestone cells carry their verdict in one or two lines with a pointer to the
@@ -64,40 +110,49 @@ the site that publishes it (D76).
   built; both have existed since 0.2.0 (D51, D52), and the `./kv` entry point was missing
   from the layout.
 - ROADMAP recorded the atonement cost as 26 observations; the test asserts 25. The claim
-  index paragraph read 77 decisions; there are 78 at the time of that paragraph, 79 now.
-  The MVP exit criteria still said publication was pending.
-- SECURITY.md and SEMVER.md named 0.2.0 as what the registry serves; 0.2.1 has been the
-  default since 2026-10-28.
+  index paragraph read 77 decisions, and the MVP exit criteria still said publication was
+  pending.
+- SEMVER.md named 0.2.0 as what the registry serves; 0.2.1 has been the default since
+  2026-10-28.
 - TESTING.md walked a stranger through building a tarball because "the registry serves a
-  version older than 0.2.0"; it installs the release and builds from source only to test
-  main, and the two-hundred-observation floor is labelled a working assumption rather
-  than a calibrated threshold.
+  version older than the release"; it installs the release and builds from source only to
+  test main, and the two-hundred-observation floor is labelled a working assumption
+  rather than a calibrated threshold.
 - `scripts/bench.mjs`, `scripts/pack-check.mjs`, and the site build spawned npm in a way
   Windows refuses, since npm is `npm.cmd` there, so three gates could not run on the
   machine the maintainer develops on. Bench cleanup also leaked its temp directory on
-  Windows. All fixed behind a platform check that CI's Linux never takes.
+  Windows. All fixed behind a platform check that CI's Linux never takes, and the site
+  build now reads both the TAP and the spec test-summary format.
+- The claim index printed every prose-only decision's title twice, and regenerated with
+  Windows path separators that always read as stale off a Linux commit. Both fixed in
+  `scripts/claim-index.mjs`.
 - PROTOCOL.md used MUST and MAY without declaring them; the RFC 2119 declaration is there
   now.
+
+### Frozen surface
+
+- `api/v0.3.json`, 144 names across four entries: 106 in `.`, 27 in `./collect`, 8 in
+  `./kv`, 3 in `./sqlite`. Four names added, none removed, no kind changes:
+  `DEFAULT_INTEGRATION_WARNING_MIN_CONSECUTIVE` (value), `DEFAULT_STORE_DEADLINE_MS`
+  (value), `IntegrationWarning` (type), `StoreDeadlineError` (both).
 
 ### Calibration and benchmark records
 
 - The shipped calibration cell (half-life 24 h, developing 3, established 7) is confirmed
-  by the frozen fixtures on every push: `examples/lab/fixture.test.ts` replays 1,785
-  frozen rows to the same decisions, and `examples/lab/report.test.ts` asserts the
-  shipped cell is still the best of the nine. A full re-calibration needs a new lab run
-  with Chrome (`npm run lab`, then `npm run calibrate`); none was recorded for this
-  release, which is why no advice moved.
+  two ways: the frozen lab fixtures replay 1,785 rows to the same decisions on every
+  push, and `npm run calibrate:host` replays the first real host journal with the
+  shipped cell at the lowest decision drift of the nine. No threshold moved.
 - Benchmark on the development machine (Windows 10, Node 24.21.0), 2,000 iterations per
-  store, p95 against the doubled budget: memory p95 0.0286 ms (budget 0.0828), sqlite p95
-  0.7987 ms (budget 2.4172), kv p95 0.0441 ms (budget 0.0490). All inside, recorded as
-  measured rather than smoothed.
+  store, p95 against the doubled budget on the merged 0.3.0 code: memory p95 0.0594 ms
+  (budget 1.0000), sqlite p95 0.8743 ms (budget 16.7080), kv p95 0.0548 ms (budget
+  1.0000). All inside, recorded as measured rather than smoothed.
 
 ### Release status
 
-To be appended at publish: the tag `v0.3.0`, the commit, the timestamp, the tarball
-shasum, and the attestation. The versions page's `latest` const and the usage page
-install pin are updated in the commit that records the upload, per D76.
-
+Not yet published. This heading gets its date from the release commit that tags
+`v0.3.0`; the runbook and its preconditions are in `docs/RELEASING.md`. The versions
+page's `latest` const and the usage page install pin are updated in the commit that
+records the upload, per D81.
 ## [0.2.1] - 2026-10-28
 
 Documentation only. No code, no exported name, no threshold, and no advice for the same
