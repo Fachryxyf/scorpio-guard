@@ -70,7 +70,7 @@ ${items}
       <table>
         <tbody>
           <tr><th>${t('Kind', 'Jenis')}</th><td>${t('library', 'library')}</td></tr>
-          <tr><th>npm</th><td><a href="versions.html">0.2.1</a></td></tr>
+          <tr><th>npm</th><td><a href="versions.html">${data.version}</a></td></tr>
           <tr><th>${t('Downloads, last month', 'Unduhan, sebulan lalu')}</th><td><span id="npm-downloads"><a href="https://www.npmjs.com/package/@fachryxyf/scorpio-guard">npm</a></span></td></tr>
           <tr><th>${t('Stage', 'Tahap')}</th><td>${t('published, uncalibrated', 'terbit, belum dikalibrasi')}</td></tr>
           <tr><th>${t('Language', 'Bahasa')}</th><td>TypeScript</td></tr>
