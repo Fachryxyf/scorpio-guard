@@ -2,10 +2,9 @@
 
 ## Status
 
-Uncalibrated against a population, and unaudited. The registry's newest tarball is 0.2.1
-(published 2026-10-28 with a provenance attestation tying it to its commit); 0.3.0, which
-carries the first real integration's fixes (D76-D80), is versioned in this repository and
-waiting on its tag. The first real integration's journal has been replayed against the
+Uncalibrated against a population, and unaudited. The registry's newest tarball is 0.3.0
+(published 2026-11-22 with a provenance attestation tying it to its commit), which carries
+the first real integration's fixes (D76-D80). The first real integration's journal has been replayed against the
 policy grid (`docs/v0.3.0/HOST-DATASET.md`) and moved no constant; that is one host, not
 a population. Do not deploy this library as your only defence for anything that matters.
 

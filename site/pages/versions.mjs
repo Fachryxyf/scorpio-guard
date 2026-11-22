@@ -3,9 +3,7 @@ import { h2, page, t } from "../layout.mjs";
 export function versions(data) {
   // Registry facts, not tree facts: this is the newest version npm has accepted, and it is
   // updated in the release commit that records the upload, never by a version bump alone.
-  const latest = "0.2.1";
-  // A tree fact, stated as one: versioned in the repository, waiting on its tag.
-  const prepared = "0.3.0";
+  const latest = "0.3.0";
   const sections = [
     { id: "now", en: "Where the package is", id_: "Posisi paket" },
     { id: "policy", en: "What a number promises", id_: "Apa arti nomor versi" },
@@ -29,8 +27,8 @@ export function versions(data) {
 
   const body = `
     <p class="lead">${t(
-      "Three versions are on the registry: 0.1.0, 0.2.0, and " + latest + ", a documentation-only patch and the default. A fourth, " + prepared + ", is versioned in the repository and waiting on its tag: it carries the first real integration's feedback (D76-D80) and four added names. This page says what each number promises, what the upgrade moves, and how the freeze is enforced.",
-      "Ada tiga versi di registry: 0.1.0, 0.2.0, dan " + latest + ", patch khusus dokumentasi dan sekarang jadi bawaan. Versi keempat, " + prepared + ", sudah beku di repositori dan menunggu tag: ia membawa umpan balik integrasi nyata pertama (D76-D80) dan empat nama tambahan. Halaman ini menjelaskan arti tiap nomor, apa yang berubah saat naik versi, dan bagaimana pembekuannya ditegakkan.",
+      "Four versions are on the registry: 0.1.0, 0.2.0, 0.2.1, and " + latest + ", the first minor informed by a real integration and the default. This page says what each number promises, what the upgrade moves, and how the freeze is enforced.",
+      "Ada empat versi di registry: 0.1.0, 0.2.0, 0.2.1, dan " + latest + ", minor pertama yang dibentuk integrasi nyata dan sekarang jadi bawaan. Halaman ini menjelaskan arti tiap nomor, apa yang berubah saat naik versi, dan bagaimana pembekuannya ditegakkan.",
     )}</p>
 
     ${h2(1, "now", "Where the package is", "Posisi paket")}
@@ -42,7 +40,7 @@ export function versions(data) {
         <tr><th>0.1.0</th><td>${t("Published on 2026-08-24 and still installable: the way back if 0.2.0 disagrees with your traffic. No attestation, because it was uploaded by hand and tagged two months later.", "Terbit 2026-08-24 dan masih bisa dipasang: jalan kembali kalau 0.2.0 tidak cocok dengan trafik Anda. Tanpa attestation, karena diunggah dengan tangan dan baru diberi tag dua bulan kemudian.")}</td></tr>
         <tr><th>0.2.0</th><td>${t("Published on 2026-10-28, and what <code>npm install</code> gets today. Uploaded by <code>release.yml</code> from the tag <code>v0.2.0</code> on commit <code>0f426b1</code>, so the registry holds a provenance attestation tying the tarball to that commit.", "Terbit 2026-10-28, dan yang didapat <code>npm install</code> hari ini. Diunggah oleh <code>release.yml</code> dari tag <code>v0.2.0</code> pada commit <code>0f426b1</code>, jadi registry menyimpan attestation provenance yang mengikat tarball ke commit itu.")}</td></tr>
         <tr><th>${latest}</th><td>${t("Published on 2026-10-28 as well, and what <code>npm install</code> gets today. Documentation only: no code, no exported name, and no advice change. Uploaded by <code>release.yml</code> from the tag <code>v0.2.1</code> on commit <code>b85294a</code>, shasum <code>361cd94a</code>.", "Juga terbit 2026-10-28, dan yang didapat <code>npm install</code> hari ini. Hanya dokumentasi: tanpa perubahan kode, nama ekspor, atau saran. Diunggah oleh <code>release.yml</code> dari tag <code>v0.2.1</code> pada commit <code>b85294a</code>, shasum <code>361cd94a</code>.")}</td></tr>
-        <tr><th>${prepared}</th><td>${t("Versioned in the repository, not yet on the registry: <code>npm install</code> still gets " + latest + ". It carries the store deadline and <code>storeDegraded</code> (D76), per-entity serialization (D77), the integration warning (D78), the terminal-transition and hash guidance (D79, D80), and the first replay of a real integration journal against the policy grid. Its publish facts land in the release commit that records the upload.", "Versioned di repositori, belum ada di registry: <code>npm install</code> masih mendapat " + latest + ". Ia membawa deadline store dan <code>storeDegraded</code> (D76), serialisasi per entity (D77), integration warning (D78), panduan transisi terminal dan hash (D79, D80), serta replay pertama jurnal integrasi nyata terhadap grid policy. Fakta publikasinya diisi di commit rilis yang merekam upload.")}</td></tr>
+        <tr><th>${latest}</th><td>${t("Published on 2026-11-22, and what <code>npm install</code> gets today. The first minor informed by a real integration: the store deadline and <code>storeDegraded</code> (D76), per-entity serialization (D77), the integration warning (D78), the terminal-transition and hash guidance (D79, D80), and the first replay of a real integration journal against the policy grid. Uploaded by <code>release.yml</code> from the tag <code>v0.3.0</code> on commit <code>b9a1379</code>, shasum <code>ec9c6334</code>.", "Terbit 2026-11-22, dan yang didapat <code>npm install</code> hari ini. Minor pertama yang dibentuk integrasi nyata: deadline store dan <code>storeDegraded</code> (D76), serialisasi per entity (D77), integration warning (D78), panduan transisi terminal dan hash (D79, D80), serta replay pertama jurnal integrasi nyata terhadap grid policy. Diunggah oleh <code>release.yml</code> dari tag <code>v0.3.0</code> pada commit <code>b9a1379</code>, shasum <code>ec9c6334</code>.")}</td></tr>
         <tr><th>${t("Node", "Node")}</th><td>22.13 ${t("or newer. The sqlite entry needs it because it uses <code>node:sqlite</code>.", "atau lebih baru. Entri sqlite memerlukannya karena memakai <code>node:sqlite</code>.")}</td></tr>
       </tbody>
     </table>

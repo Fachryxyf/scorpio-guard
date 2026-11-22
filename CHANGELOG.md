@@ -149,10 +149,12 @@ and the landing page around it (D81).
 
 ### Release status
 
-Not yet published. This heading gets its date from the release commit that tags
-`v0.3.0`; the runbook and its preconditions are in `docs/RELEASING.md`. The versions
-page's `latest` const and the usage page install pin are updated in the commit that
-records the upload, per D81.
+Published on 2026-11-22T02:05:16Z by `.github/workflows/release.yml`, from the tag
+`v0.3.0` on commit `b9a1379`. Tarball shasum
+`ec9c6334fd4da47774111561cac74b1b0ca1baad`, 103 files, 338,276 bytes unpacked, and the
+registry holds a provenance attestation tying the tarball to that commit and run. The
+versions page's `latest` const and the usage page install pin moved in this commit, per
+D81.
 ## [0.2.1] - 2026-10-28
 
 Documentation only. No code, no exported name, no threshold, and no advice for the same
